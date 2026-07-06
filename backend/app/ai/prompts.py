@@ -40,6 +40,69 @@ Complaint text:
 """.strip()
 
 
+INSIGHT_GENERATION_PROMPT = """
+You are Crime OS AI, assisting an Indian police investigating officer.
+Analyze the following raw provider response data and generate actionable investigation insights.
+
+Case Context: {case_context}
+Provider Type: {provider_type}
+Provider Name: {provider_name}
+
+Raw Records ({record_count} rows):
+{records_sample}
+
+Instructions:
+1. Identify suspicious patterns, anomalies, or key facts useful to the investigation.
+2. Highlight correlations between data points (e.g., repeated IPs, clustered timestamps, rapid fund movements).
+3. State the significance of each finding for the case.
+4. Be concise but precise — write 3 to 5 bullet-style insight paragraphs.
+5. Reference specific values from the data (account numbers, IPs, timestamps, etc.) to make insights verifiable.
+6. Do NOT hallucinate values not present in the records.
+
+Write insights as a professional police intelligence analyst would, in clear English.
+""".strip()
+
+
+CASE_SUMMARY_PROMPT = """
+You are Crime OS AI, generating an official case summary for an Indian police investigating officer.
+
+Case Information:
+- Case Number: {case_number}
+- Title: {case_title}
+- Crime Type: {crime_type}
+- Status: {status}
+- Created At: {created_at}
+
+Complaint Summary:
+{complaint_summary}
+
+Extracted Entities:
+{extracted_entities}
+
+Classified Crime + Investigation Path:
+{investigation_path}
+
+Applicable Legal Sections:
+{legal_sections}
+
+Legal Requests Status:
+{legal_requests}
+
+Provider Response Insights:
+{provider_insights}
+
+Audit Trail (last 10 events):
+{recent_audit_events}
+
+Instructions:
+Write a professional, structured case summary suitable for a senior police officer review.
+Include: (1) Case Overview, (2) Key Entities & Evidence, (3) Investigation Actions Taken,
+(4) Legal Sections Applied, (5) Current Status & Next Steps.
+Be factual — use only information provided above. Reference BNS/BNSS/BSA sections by code and number.
+Write in English, 300-500 words.
+""".strip()
+
+
 INVESTIGATION_PATH_PROMPT = """
 You are Crime OS AI, a senior police investigator in India. Your goal is to analyze the following criminal complaint and suggest:
 1. The classified crime type (one of: cyber_fraud, theft, harassment, banking_fraud).

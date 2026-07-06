@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileSearch, Plus, Shield } from "lucide-react";
+import { FileSearch, Loader2, Plus, Search, Shield, X } from "lucide-react";
 
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ApiError, createCase, getCases } from "@/lib/api";
+import { ApiError, createCase, getCases, searchCases } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import type { CaseOut } from "@/lib/types";
 
@@ -32,6 +32,10 @@ export default function CasesPage() {
   const [newTitle, setNewTitle] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<CaseOut[] | null>(null);
+  const [searching, setSearching] = useState(false);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
@@ -52,6 +56,26 @@ export default function CasesPage() {
     } finally {
       setFetching(false);
     }
+  }
+
+  function handleSearch(query: string) {
+    setSearchQuery(query);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    if (!query.trim()) {
+      setSearchResults(null);
+      return;
+    }
+    setSearching(true);
+    searchTimeout.current = setTimeout(async () => {
+      try {
+        const results = await searchCases(query.trim());
+        setSearchResults(results);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 350);
   }
 
   async function handleCreate() {
@@ -141,6 +165,35 @@ export default function CasesPage() {
             </div>
             <FileSearch className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
+          <div className="px-5 pb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="case-search-input"
+                placeholder="Search by case number or title..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-9 pr-9 bg-secondary border-border"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => { setSearchQuery(""); setSearchResults(null); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+              {searching && (
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-primary" />
+              )}
+            </div>
+            {searchResults !== null && (
+              <p className="text-xs text-muted-foreground mt-2">
+                {searchResults.length} result{searchResults.length !== 1 ? "s" : ""} for{" "}
+                <span className="font-mono text-foreground">"{searchQuery}"</span>
+              </p>
+            )}
+          </div>
           <CardContent>
             {fetching ? (
               <div className="flex flex-col gap-3">
@@ -148,28 +201,34 @@ export default function CasesPage() {
                   <Skeleton key={i} className="h-20 w-full rounded-xl" />
                 ))}
               </div>
-            ) : cases.length === 0 ? (
+            ) : (searchResults ?? cases).length === 0 ? (
               <div className="flex flex-col items-center gap-4 rounded-xl bg-muted p-10 text-center grid-bg">
                 <div className="rounded-full bg-primary/10 p-4">
                   <FileSearch className="h-8 w-8 text-primary" />
                 </div>
                 <div>
-                  <p className="font-heading font-semibold">No cases yet</p>
+                  <p className="font-heading font-semibold">
+                    {searchQuery ? "No matching cases" : "No cases yet"}
+                  </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Create your first case to start an investigation
+                    {searchQuery
+                      ? "Try a different search term or case number"
+                      : "Create your first case to start an investigation"}
                   </p>
                 </div>
-                <Button
-                  onClick={() => setDialogOpen(true)}
-                  className="transition-all duration-200 hover:scale-105 hover:glow-primary"
-                >
-                  <Plus className="h-4 w-4" />
-                  New Case
-                </Button>
+                {!searchQuery && (
+                  <Button
+                    onClick={() => setDialogOpen(true)}
+                    className="transition-all duration-200 hover:scale-105 hover:glow-primary"
+                  >
+                    <Plus className="h-4 w-4" />
+                    New Case
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="flex flex-col gap-3">
-                {cases.map((item) => (
+                {(searchResults ?? cases).map((item) => (
                   <button
                     key={item.id}
                     id={`case-row-${item.id}`}

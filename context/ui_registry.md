@@ -83,3 +83,14 @@ Last updated: 2026-07-05
 - Purpose: renders children only for allowed roles (bonus phase)
 - Props: `roles: Role[]`
 
+### AuditTimeline — BUILT (Phase 5, inline in audit page)
+- Path: app/cases/[id]/audit/page.tsx (inline, not a shared component)
+- Purpose: vertical append-only audit event timeline with per-action icons, relative timestamps, click-to-expand detail, latest-event highlight
+- Props: N/A (reads from API directly)
+- Used in: `app/cases/[id]/audit/page.tsx`
+
+### SummaryVersionList — BUILT (Phase 5, inline in summary page)
+- Path: app/cases/[id]/summary/page.tsx (inline, not a shared component)
+- Purpose: sidebar version selector + AI summary prose panel with version badge; supports regenerate with spinner
+- Props: N/A (reads from API directly)
+- Used in: `app/cases/[id]/summary/page.tsx`

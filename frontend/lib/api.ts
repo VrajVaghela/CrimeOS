@@ -12,6 +12,8 @@ import type {
   PathStepOut,
   LegalRequestOut,
   ProviderResponseOut,
+  CaseSummaryOut,
+  AuditEventOut,
 } from "@/lib/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -221,5 +223,29 @@ export async function getRequestResponse(requestId: string): Promise<ProviderRes
   return request<ProviderResponseOut>(`/responses/requests/${requestId}`);
 }
 
+export async function regenerateInsights(responseId: string): Promise<ProviderResponseOut> {
+  return request<ProviderResponseOut>(`/responses/${responseId}/insights`, {
+    method: "POST",
+  });
+}
 
+// Phase 5: Summaries
+export async function getCaseSummaries(caseId: string): Promise<CaseSummaryOut[]> {
+  return request<CaseSummaryOut[]>(`/summaries/cases/${caseId}`);
+}
 
+export async function generateSummary(caseId: string): Promise<CaseSummaryOut> {
+  return request<CaseSummaryOut>(`/summaries/cases/${caseId}/generate`, {
+    method: "POST",
+  });
+}
+
+// Phase 5: Audit timeline
+export async function getAuditEvents(caseId: string): Promise<AuditEventOut[]> {
+  return request<AuditEventOut[]>(`/audit/cases/${caseId}`);
+}
+
+// Phase 5: Case search
+export async function searchCases(q: string): Promise<CaseOut[]> {
+  return request<CaseOut[]>(`/cases/search?q=${encodeURIComponent(q)}`);
+}

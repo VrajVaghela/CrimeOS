@@ -10,13 +10,14 @@ import {
   Download,
   AlertCircle,
   Loader2,
+  RefreshCw,
   Table as TableIcon,
 } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getCaseResponses, ApiError } from "@/lib/api";
+import { getCaseResponses, regenerateInsights, ApiError } from "@/lib/api";
 import type { ProviderResponseOut } from "@/lib/types";
 
 export default function ResponsesPage() {
@@ -27,6 +28,7 @@ export default function ResponsesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedResponseId, setSelectedResponseId] = useState<string | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
 
   useEffect(() => {
     if (caseId) {
@@ -47,6 +49,19 @@ export default function ResponsesPage() {
       setError(e instanceof ApiError ? e.message : "Failed to load responses");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleRegenerateInsights() {
+    if (!selectedResponseId) return;
+    setRegenerating(true);
+    try {
+      const updated = await regenerateInsights(selectedResponseId);
+      setResponses((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Failed to regenerate insights");
+    } finally {
+      setRegenerating(false);
     }
   }
 
@@ -138,6 +153,20 @@ export default function ResponsesPage() {
                         Gemini-generated insights and pattern correlation over provider raw records.
                       </CardDescription>
                     </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleRegenerateInsights}
+                      disabled={regenerating}
+                      className="text-xs h-8 gap-1.5 border-border shrink-0"
+                    >
+                      {regenerating ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-3.5 w-3.5" />
+                      )}
+                      Regenerate
+                    </Button>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm leading-relaxed text-foreground bg-primary/5 border border-primary/20 rounded-lg p-4 font-sans whitespace-pre-wrap">

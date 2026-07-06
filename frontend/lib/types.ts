@@ -138,3 +138,19 @@ export interface ProviderResponseOut {
   ai_insights: string;
 }
 
+export interface CaseSummaryOut {
+  id: string;
+  case_id: string;
+  version: number;
+  content: string;
+  generated_at: string;
+}
+
+export interface AuditEventOut {
+  id: string;
+  case_id: string;
+  user_id: string | null;
+  action: string;
+  detail: Record<string, any>;
+  created_at: string;
+}

@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.exceptions import register_exception_handlers
-from app.routers import auth, cases, ingestion, mock_cctns, mock_provider, paths, requests, responses, summaries
+from app.routers import auth, audit, cases, ingestion, mock_cctns, mock_provider, paths, requests, responses, summaries
 from app.schemas.common import MessageOut
 
 app = FastAPI(title="Crime OS AI API", version="0.1.0")
@@ -30,6 +30,7 @@ app.include_router(paths.router)
 app.include_router(requests.router)
 app.include_router(responses.router)
 app.include_router(summaries.router)
+app.include_router(audit.router)
 app.include_router(mock_provider.router)
 app.include_router(mock_cctns.router)
 

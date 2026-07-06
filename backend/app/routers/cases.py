@@ -1,16 +1,17 @@
 """
-Cases router — Phase 2.
+Cases router — Phase 2 + Phase 5 search.
 
-GET    /cases/dashboard   — dashboard stats (Phase 1, unchanged)
-GET    /cases             — list all cases, newest first
-POST   /cases             — create a new case
-GET    /cases/{case_id}   — get case detail with complaints + entities
+GET    /cases/dashboard        — dashboard stats (Phase 1, unchanged)
+GET    /cases                  — list all cases, newest first
+GET    /cases/search?q=...     — search cases by title / case_number (Phase 5)
+POST   /cases                  — create a new case
+GET    /cases/{case_id}        — get case detail with complaints + entities
 """
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func, select
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
@@ -36,6 +37,24 @@ async def list_cases(
     db: Session = Depends(get_db),
 ) -> list[CaseOut]:
     cases = list(db.scalars(select(Case).order_by(Case.created_at.desc())))
+    return [CaseOut.model_validate(c) for c in cases]
+
+
+@router.get("/search", response_model=list[CaseOut], summary="Search cases by title or case number")
+async def search_cases(
+    q: str = Query(default="", description="Search query (title or case number)"),
+    _: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[CaseOut]:
+    term = f"%{q.strip()}%"
+    cases = list(
+        db.scalars(
+            select(Case)
+            .where(or_(Case.title.ilike(term), Case.case_number.ilike(term)))
+            .order_by(Case.created_at.desc())
+            .limit(20)
+        )
+    )
     return [CaseOut.model_validate(c) for c in cases]
 
 

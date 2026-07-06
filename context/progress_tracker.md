@@ -38,11 +38,11 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] ✅ CHECKPOINT: path step → request → email in demo inbox → mock response
 
 ## Phase 5 — Analytics, Summaries, Audit
-- [ ] analytics_service: parse provider CSV/PDF → insights + highlighted table
-- [ ] summary_service: versioned case summaries + regenerate
-- [ ] Audit timeline on case overview (auto case log)
-- [ ] Case search
-- [ ] ✅ CHECKPOINT: FULL GOLDEN PATH end-to-end, rehearsed
+- [x] analytics_service: parse provider CSV/PDF → Gemini AI insights + highlighted table
+- [x] summary_service: versioned case summaries + regenerate (Gemini-powered)
+- [x] Audit timeline on case overview (auto case log, /audit/cases/{id} endpoint)
+- [x] Case search (/cases/search?q=... + debounced search bar in UI)
+- [x] ✅ CHECKPOINT: FULL GOLDEN PATH end-to-end, rehearsed
 
 ## Phase 6 — Bonuses & Demo Polish
 - [ ] Role-based access (IO / SHO / Legal Advisor views + guards)
