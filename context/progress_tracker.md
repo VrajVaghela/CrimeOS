@@ -30,12 +30,12 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] ✅ CHECKPOINT: fraud complaint → grounded path + correct sections with sources
 
 ## Phase 4 — Automated Legal Requests
-- [ ] Jinja2 LERS-style templates (telecom CDR, bank freeze/KYC, platform)
-- [ ] legal_request_service: template selection + entity fill → draft
-- [ ] Approval + SMTP dispatch + status tracking
-- [ ] Mock provider router + triggered mock response
-- [ ] UI: Requests tab (preview/edit, dispatch, status timeline)
-- [ ] ✅ CHECKPOINT: path step → request → email in demo inbox → mock response
+- [x] Jinja2 LERS-style templates (telecom CDR, bank freeze/KYC, platform)
+- [x] legal_request_service: template selection + entity fill → draft
+- [x] Approval + SMTP dispatch + status tracking
+- [x] Mock provider router + triggered mock response
+- [x] UI: Requests tab (preview/edit, dispatch, status timeline)
+- [x] ✅ CHECKPOINT: path step → request → email in demo inbox → mock response
 
 ## Phase 5 — Analytics, Summaries, Audit
 - [ ] analytics_service: parse provider CSV/PDF → insights + highlighted table

@@ -10,6 +10,8 @@ import type {
   UserOut,
   PathGenerationStatusOut,
   PathStepOut,
+  LegalRequestOut,
+  ProviderResponseOut,
 } from "@/lib/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -161,4 +163,63 @@ export async function updateStepStatus(stepId: string, status: string): Promise<
     body: JSON.stringify({ status }),
   });
 }
+
+// Phase 4: Legal Requests API
+export async function getRequests(caseId: string): Promise<LegalRequestOut[]> {
+  return request<LegalRequestOut[]>(`/requests/cases/${caseId}`);
+}
+
+export async function createRequest(body: {
+  case_id: string;
+  path_step_id?: string | null;
+  provider_name: string;
+  recipient_email: string;
+}): Promise<LegalRequestOut> {
+  return request<LegalRequestOut>("/requests", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getRequest(requestId: string): Promise<LegalRequestOut> {
+  return request<LegalRequestOut>(`/requests/${requestId}`);
+}
+
+export async function updateRequest(
+  requestId: string,
+  body: { generated_body: string; provider_name: string; recipient_email: string }
+): Promise<LegalRequestOut> {
+  return request<LegalRequestOut>(`/requests/${requestId}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function approveRequest(requestId: string): Promise<LegalRequestOut> {
+  return request<LegalRequestOut>(`/requests/${requestId}/approve`, {
+    method: "POST",
+  });
+}
+
+export async function dispatchRequest(requestId: string): Promise<LegalRequestOut> {
+  return request<LegalRequestOut>(`/requests/${requestId}/dispatch`, {
+    method: "POST",
+  });
+}
+
+export async function triggerMockResponse(requestId: string): Promise<ProviderResponseOut> {
+  return request<ProviderResponseOut>(`/mock/provider/respond/${requestId}`, {
+    method: "POST",
+  });
+}
+
+export async function getCaseResponses(caseId: string): Promise<ProviderResponseOut[]> {
+  return request<ProviderResponseOut[]>(`/responses/cases/${caseId}`);
+}
+
+export async function getRequestResponse(requestId: string): Promise<ProviderResponseOut> {
+  return request<ProviderResponseOut>(`/responses/requests/${requestId}`);
+}
+
+
 

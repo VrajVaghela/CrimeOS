@@ -113,3 +113,28 @@ export interface PathGenerationStatusOut {
   case_sections: CaseSectionOut[];
 }
 
+export type RequestStatus = "draft" | "approved" | "dispatched" | "responded";
+export type ProviderType = "telecom" | "bank" | "platform";
+
+export interface LegalRequestOut {
+  id: string;
+  case_id: string;
+  path_step_id: string | null;
+  provider_type: ProviderType;
+  provider_name: string;
+  template_used: string;
+  generated_body: string;
+  recipient_email: string;
+  status: RequestStatus;
+  dispatched_at: string | null;
+}
+
+export interface ProviderResponseOut {
+  id: string;
+  legal_request_id: string;
+  received_at: string;
+  file_path: string | null;
+  parsed_data: { records: Record<string, any>[] };
+  ai_insights: string;
+}
+
