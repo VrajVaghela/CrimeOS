@@ -31,6 +31,7 @@ import {
   triggerMockResponse,
   ApiError,
 } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import type { LegalRequestOut, ProviderType } from "@/lib/types";
 
 const PROVIDER_DEFAULTS = {
@@ -49,6 +50,7 @@ const PROVIDER_DEFAULTS = {
 };
 
 export default function RequestsPage() {
+  const { user } = useAuth();
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -368,42 +370,36 @@ export default function RequestsPage() {
                         className="text-xs h-8 px-3 border-border"
                       >
                         <FileText className="mr-1.5 h-3.5 w-3.5" />
-                        {req.status === "draft" ? "Edit Draft" : "View Template"}
+                        {req.status === "draft" && user?.role === "IO" ? "Edit Draft" : req.status === "draft" ? "View Draft" : "View Template"}
                       </Button>
                     </div>
 
                     <div className="flex items-center gap-2">
                       {req.status === "draft" && (
                         <>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => void handleApprove(req.id)}
-                            disabled={isLoading}
-                            className="text-xs h-8 px-3"
-                          >
-                            {isLoading ? (
-                              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <UserCheck className="mr-1.5 h-3.5 w-3.5" />
-                            )}
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => void handleDispatch(req.id)}
-                            disabled={isLoading}
-                            className="text-xs h-8 px-3 bg-primary"
-                          >
-                            {isLoading ? (
-                              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Send className="mr-1.5 h-3.5 w-3.5" />
-                            )}
-                            Dispatch
-                          </Button>
+                          {user?.role === "SHO" ? (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => void handleApprove(req.id)}
+                              disabled={isLoading}
+                              className="text-xs h-8 px-3 text-accent border-accent/40 hover:bg-accent/10"
+                            >
+                              {isLoading ? (
+                                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <UserCheck className="mr-1.5 h-3.5 w-3.5" />
+                              )}
+                              Approve Request
+                            </Button>
+                          ) : (
+                            <span className="text-xs text-accent font-semibold px-2.5 py-1 bg-accent/15 border border-accent/30 rounded font-mono mr-2">
+                              Awaiting SHO Approval
+                            </span>
+                          )}
                         </>
                       )}
+
 
                       {req.status === "approved" && (
                         <Button
@@ -479,7 +475,7 @@ export default function RequestsPage() {
                   id="edit_provider_name"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  disabled={selectedRequest?.status !== "draft"}
+                  disabled={selectedRequest?.status !== "draft" || user?.role !== "IO"}
                   className="bg-input border-border/40"
                 />
               </div>
@@ -490,7 +486,7 @@ export default function RequestsPage() {
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  disabled={selectedRequest?.status !== "draft"}
+                  disabled={selectedRequest?.status !== "draft" || user?.role !== "IO"}
                   className="bg-input border-border/40"
                 />
               </div>
@@ -502,7 +498,7 @@ export default function RequestsPage() {
                 id="edit_body"
                 value={editBody}
                 onChange={(e) => setEditBody(e.target.value)}
-                disabled={selectedRequest?.status !== "draft"}
+                disabled={selectedRequest?.status !== "draft" || user?.role !== "IO"}
                 rows={12}
                 className="flex w-full rounded-md border border-border/40 bg-input px-3 py-2 text-sm font-mono leading-relaxed placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-80"
               />
@@ -513,7 +509,7 @@ export default function RequestsPage() {
             <Button variant="ghost" onClick={() => setSelectedRequest(null)} className="text-muted-foreground">
               Close
             </Button>
-            {selectedRequest?.status === "draft" && (
+            {selectedRequest?.status === "draft" && user?.role === "IO" && (
               <Button onClick={handleSaveEdit} disabled={savingEdit} className="bg-primary">
                 {savingEdit ? (
                   <>

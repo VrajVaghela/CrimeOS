@@ -131,3 +131,16 @@ Instructions:
 Return ONLY schema-valid JSON matching the requested output.
 """.strip()
 
+
+EVIDENCE_TAGGING_PROMPT = """
+You are Crime OS AI. Analyze the supplied evidence image and generate structured tags/labels.
+Provide:
+1. "description": A concise English summary of what is depicted in the image.
+2. "tags": A list of short keyword tags (e.g., "document", "mobile", "screenshot", "transaction_receipt", "cctv", "weapon", "vehicle").
+3. "confidence": A float from 0.0 to 1.0 indicating overall confidence in analysis.
+4. "flagged_features": Any notable forensic features detected in the image (e.g. visible text, transaction IDs, faces, license plates).
+
+Return ONLY schema-valid JSON matching the requested output.
+""".strip()
+
+

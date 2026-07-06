@@ -1,0 +1,30 @@
+To,
+The Nodal Officer,
+Cyber Crime Investigation Cell,
+Ahmedabad, Gujarat.
+
+Subject: Unauthorized banking transactions and phishing fraud complaint.
+
+Respected Sir/Madam,
+
+I am writing to report a fraudulent activity on my savings bank account at HDFC Bank (Account Number: 50123456789, IFSC: HDFC0000123).
+
+On July 5, 2026, at approximately 11:30 AM, I received an SMS alert stating that my bank password was changed. Within minutes, multiple unauthorized transactions occurred, transferring a total of INR 1,20,000 from my account to the following suspicious beneficiary account:
+
+* Beneficiary Bank: ICICI Bank
+* Account Number: 001122334455
+* Account Holder Name: Rajesh Kumar (suspected mule account)
+* IFSC Code: ICIC0000999
+* Transaction Reference IDs: TXN8877112, TXN8877113
+
+I did not share any OTP, password, or PIN with anyone. It appears that my online banking credentials were hijacked via a phishing link that I mistakenly clicked earlier in the morning, which was disguised as an official HDFC account verification link from sender ID "AD-HDFCBK".
+
+I request you to kindly issue a freeze order on the recipient bank account (ICICI Bank A/c No. 001122334455) to prevent the money from being withdrawn, and trace the IP logins associated with these transactions.
+
+Thank you.
+
+Sincerely,
+Rahul Verma
+Contact Number: +91 95555 44444
+Email Address: rahul.verma@yahoo.com
+Date: July 6, 2026

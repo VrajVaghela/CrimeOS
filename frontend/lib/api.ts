@@ -14,6 +14,7 @@ import type {
   ProviderResponseOut,
   CaseSummaryOut,
   AuditEventOut,
+  EvidenceOut,
 } from "@/lib/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -249,3 +250,50 @@ export async function getAuditEvents(caseId: string): Promise<AuditEventOut[]> {
 export async function searchCases(q: string): Promise<CaseOut[]> {
   return request<CaseOut[]>(`/cases/search?q=${encodeURIComponent(q)}`);
 }
+
+// Phase 6: Evidence Gallery
+export async function getEvidence(caseId: string): Promise<EvidenceOut[]> {
+  return request<EvidenceOut[]>(`/evidence/cases/${caseId}`);
+}
+
+export async function uploadEvidence(caseId: string, file: File): Promise<EvidenceOut> {
+  const form = new FormData();
+  form.append("file", file);
+  return request<EvidenceOut>(`/evidence/cases/${caseId}`, {
+    method: "POST",
+    body: form,
+  });
+}
+
+// Phase 6: CCTNS Sync
+export async function syncCctns(caseId: string): Promise<{
+  case_id: string;
+  cctns_fir_number: string;
+  synchronized_at: string;
+  status: string;
+  message: string;
+}> {
+  return request<{
+    case_id: string;
+    cctns_fir_number: string;
+    synchronized_at: string;
+    status: string;
+    message: string;
+  }>("/mock/cctns/sync", {
+    method: "POST",
+    body: JSON.stringify({ case_id: caseId }),
+  });
+}
+
+// Phase 6: Legal Advisor section reviews
+export async function updateSectionStatus(sectionId: string, status: string): Promise<CaseSectionOut> {
+  return request<CaseSectionOut>(`/paths/sections/${sectionId}/status?status=${encodeURIComponent(status)}`, {
+    method: "PATCH",
+  });
+}
+
+// Phase 6: SHO Pending Requests approvals
+export async function getPendingRequests(): Promise<LegalRequestOut[]> {
+  return request<LegalRequestOut[]>("/requests/pending");
+}
+

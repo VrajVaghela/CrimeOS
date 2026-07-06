@@ -1,11 +1,11 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
-from app.models import User
-from app.schemas.paths import PathGenerationStatusOut, PathStepOut, PathStepUpdate
+from app.dependencies import get_current_user, require_role
+from app.models import User, UserRole
+from app.schemas.paths import PathGenerationStatusOut, PathStepOut, PathStepUpdate, CaseSectionOut
 from app.services import path_service
 
 router = APIRouter(prefix="/paths", tags=["investigation paths"])
@@ -54,3 +54,18 @@ async def update_step(
         return PathStepOut.model_validate(updated_step)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.patch("/sections/{section_id}/status", response_model=CaseSectionOut, summary="Update case section review status")
+async def update_section_status(
+    section_id: uuid.UUID,
+    status: str = Query(..., description="New review status (approved / rejected / pending)"),
+    current_user: User = Depends(require_role(UserRole.LEGAL)),
+    db: Session = Depends(get_db),
+) -> CaseSectionOut:
+    try:
+        updated = path_service.update_section_status(db, section_id, status, current_user.id)
+        return CaseSectionOut.model_validate(updated)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+

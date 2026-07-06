@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
-import { AlertCircle, Crosshair, Gavel, Scale, Sparkles } from "lucide-react";
+import { AlertCircle, Crosshair, Gavel, Scale, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -10,7 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { PathStepper } from "@/components/path-stepper";
 import { AiContentCard } from "@/components/ai-content-card";
-import { getCasePath, generateCasePath, updateStepStatus, ApiError } from "@/lib/api";
+import { getCasePath, generateCasePath, updateStepStatus, updateSectionStatus, ApiError } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import type { CaseSectionOut, InvestigationPathOut, StepStatus } from "@/lib/types";
 
 export default function PathPage() {
@@ -118,6 +119,9 @@ export default function PathPage() {
     }
   };
 
+  const { user } = useAuth();
+  const [updatingSectionId, setUpdatingSectionId] = useState<string | null>(null);
+
   const handleStatusChange = async (stepId: string, newStatus: StepStatus) => {
     if (!path) return;
     try {
@@ -131,6 +135,19 @@ export default function PathPage() {
       setError(e instanceof ApiError ? e.message : "Failed to update step status");
     }
   };
+
+  const handleSectionStatusChange = async (sectionId: string, newStatus: string) => {
+    setUpdatingSectionId(sectionId);
+    try {
+      const updated = await updateSectionStatus(sectionId, newStatus);
+      setCaseSections((prev) => prev.map((s) => (s.id === sectionId ? updated : s)));
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Failed to review legal section");
+    } finally {
+      setUpdatingSectionId(null);
+    }
+  };
+
 
   if (loading && status === "not_started") {
     return (
@@ -328,6 +345,56 @@ export default function PathPage() {
                       </span>
                       {sec.ai_reasoning}
                     </div>
+
+                    {/* Status Badge */}
+                    <div className="flex items-center justify-between border-t border-border/30 pt-3 mt-3">
+                      <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-wider">
+                        Review status:
+                      </span>
+                      {sec.status === "approved" && (
+                        <Badge className="bg-success/15 border border-success/30 text-success text-[10px] font-semibold px-2 py-0.5 rounded">
+                          Verified Charge
+                        </Badge>
+                      )}
+                      {sec.status === "rejected" && (
+                        <Badge className="bg-destructive/15 border border-destructive/30 text-destructive text-[10px] font-semibold px-2 py-0.5 rounded">
+                          Flagged / Inapplicable
+                        </Badge>
+                      )}
+                      {sec.status === "pending" && (
+                        <Badge className="bg-accent/15 border border-accent/30 text-accent text-[10px] font-semibold px-2 py-0.5 rounded">
+                          Awaiting Audit
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Legal Advisor Action Buttons */}
+                    {user?.role === "LEGAL" && (
+                      <div className="flex items-center gap-2 border-t border-border/30 pt-3 mt-3 w-full justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={updatingSectionId === sec.id}
+                          onClick={() => void handleSectionStatusChange(sec.id, "rejected")}
+                          className="text-[10px] h-7 px-2.5 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 border border-transparent"
+                        >
+                          Flag Inapplicable
+                        </Button>
+                        <Button
+                          size="sm"
+                          disabled={updatingSectionId === sec.id}
+                          onClick={() => void handleSectionStatusChange(sec.id, "approved")}
+                          className="text-[10px] h-7 px-2.5 bg-success hover:glow-success text-success-foreground border-0"
+                        >
+                          {updatingSectionId === sec.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                          ) : (
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                          )}
+                          Verify Citation
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </AiContentCard>
               );

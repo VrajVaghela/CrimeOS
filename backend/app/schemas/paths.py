@@ -18,9 +18,11 @@ class CaseSectionOut(BaseModel):
     legal_section_id: uuid.UUID
     ai_reasoning: str
     confidence: float
+    status: str
     legal_section: LegalSectionOut
 
     model_config = {"from_attributes": True}
+
 
 class PathStepOut(BaseModel):
     id: uuid.UUID

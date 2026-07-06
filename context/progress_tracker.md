@@ -45,11 +45,11 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] ✅ CHECKPOINT: FULL GOLDEN PATH end-to-end, rehearsed
 
 ## Phase 6 — Bonuses & Demo Polish
-- [ ] Role-based access (IO / SHO / Legal Advisor views + guards)
-- [ ] Mock CCTNS/eGujcop API + "Sync to CCTNS" button
-- [ ] Evidence image upload + AI tagging
-- [ ] Polish: loading/empty states, second seeded case, DEMO_SCRIPT.md
-- [ ] Deliverable docs: architecture diagram, SOP-grounding note, sample datasets in data/
+- [x] Role-based access (IO / SHO / Legal Advisor views + guards)
+- [x] Mock CCTNS/eGujcop API + "Sync to CCTNS" button
+- [x] Evidence image upload + AI tagging
+- [x] Polish: loading/empty states, second seeded case, DEMO_SCRIPT.md
+- [x] Deliverable docs: architecture diagram, SOP-grounding note, sample datasets in data/
 - [ ] ✅ CHECKPOINT: 5-min demo rehearsed twice from fresh seed
 
 

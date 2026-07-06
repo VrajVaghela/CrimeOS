@@ -3,12 +3,22 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
-from app.models import User
+from app.dependencies import get_current_user, require_role
+from app.models import User, UserRole
 from app.schemas.requests import LegalRequestCreateIn, LegalRequestUpdateIn, LegalRequestOut
 from app.services import legal_request_service
 
 router = APIRouter(prefix="/requests", tags=["legal requests"])
+
+
+@router.get("/pending", response_model=list[LegalRequestOut], summary="Get all pending draft requests for SHO approval")
+async def get_pending_requests(
+    _: User = Depends(require_role(UserRole.SHO)),
+    db: Session = Depends(get_db),
+) -> list[LegalRequestOut]:
+    requests = legal_request_service.get_pending_requests(db)
+    return [LegalRequestOut.model_validate(r) for r in requests]
+
 
 
 @router.post("", response_model=LegalRequestOut, summary="Create a legal request draft")
@@ -69,11 +79,12 @@ async def update_request(
 @router.post("/{request_id}/approve", response_model=LegalRequestOut, summary="Approve a legal request")
 async def approve_request(
     request_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(UserRole.SHO)),
     db: Session = Depends(get_db),
 ) -> LegalRequestOut:
     request = legal_request_service.approve_request(db, request_id, current_user)
     return LegalRequestOut.model_validate(request)
+
 
 
 @router.post("/{request_id}/dispatch", response_model=LegalRequestOut, summary="Dispatch a legal request via email")

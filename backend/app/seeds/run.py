@@ -85,6 +85,7 @@ def seed_users() -> dict[str, User]:
 
 
 def main() -> None:
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     with SessionLocal() as db:
         if not db.scalar(select(User).where(User.username == "io")):
@@ -101,6 +102,17 @@ def main() -> None:
             db.add(case)
             db.flush()
             record(db, case_id=case.id, user_id=users["io"].id, action="case.seeded", detail={"source": "phase_1_seed"})
+
+            case2 = Case(
+                case_number="ERH26-CYB-0002",
+                title="Social media harassment and identity theft",
+                status="open",
+                crime_type="harassment",
+                created_by=users["io"].id,
+            )
+            db.add(case2)
+            db.flush()
+            record(db, case_id=case2.id, user_id=users["io"].id, action="case.seeded", detail={"source": "phase_6_seed"})
 
         if not db.scalar(select(LegalSection).limit(1)):
             db.add_all(

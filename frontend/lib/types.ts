@@ -83,8 +83,10 @@ export interface CaseSectionOut {
   legal_section_id: string;
   ai_reasoning: string;
   confidence: number;
+  status: string;
   legal_section: LegalSectionOut;
 }
+
 
 export interface PathStepOut {
   id: string;
@@ -154,3 +156,17 @@ export interface AuditEventOut {
   detail: Record<string, any>;
   created_at: string;
 }
+
+export interface EvidenceOut {
+  id: string;
+  case_id: string;
+  file_path: string;
+  ai_tags: {
+    description: string;
+    tags: string[];
+    confidence: number;
+    flagged_features: string[];
+  };
+  uploaded_at: string;
+}
+

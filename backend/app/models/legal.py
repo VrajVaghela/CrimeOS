@@ -24,5 +24,7 @@ class CaseSection(UuidPkMixin, Base):
     legal_section_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("legal_sections.id"), nullable=False)
     ai_reasoning: Mapped[str] = mapped_column(Text, nullable=False)
     confidence: Mapped[float] = mapped_column(Float, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="pending", server_default="pending", nullable=False)
 
     legal_section = relationship("LegalSection")
+

@@ -78,10 +78,11 @@ Last updated: 2026-07-05
 - Props: `entity: ExtractedEntityOut`, `onChange: (entityId, value) => Promise<void>`
 - Used in: `app/cases/[id]/ingestion/page.tsx`
 
-### RoleGuard — PLANNED
+### RoleGuard — BUILT (Phase 6)
 - Path: components/role-guard.tsx
-- Purpose: renders children only for allowed roles (bonus phase)
-- Props: `roles: Role[]`
+- Purpose: renders children only for allowed user roles (e.g. IO, SHO, LEGAL) with optional custom fallback
+- Props: `allowedRoles: UserRole[]`, `fallback?: React.ReactNode`, `children: React.ReactNode`
+- Used in: `app/dashboard/page.tsx`
 
 ### AuditTimeline — BUILT (Phase 5, inline in audit page)
 - Path: app/cases/[id]/audit/page.tsx (inline, not a shared component)

@@ -382,3 +382,36 @@ def update_step_status(
     db.commit()
     db.refresh(step)
     return step
+
+
+def update_section_status(
+    db: Session,
+    section_id: uuid.UUID,
+    status: str,
+    user_id: uuid.UUID
+) -> CaseSection:
+    """
+    Update suggested BNS/BNSS/BSA section review status and write an audit event.
+    """
+    sec = db.get(CaseSection, section_id)
+    if not sec:
+        raise ValueError("Case section not found")
+        
+    old_status = sec.status
+    sec.status = status
+    
+    audit_service.record(
+        db,
+        case_id=sec.case_id,
+        user_id=user_id,
+        action="section_reviewed",
+        detail={
+            "section_id": str(section_id),
+            "old_status": old_status,
+            "new_status": status
+        }
+    )
+    db.commit()
+    db.refresh(sec)
+    return sec
+

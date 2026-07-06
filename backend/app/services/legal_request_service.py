@@ -101,6 +101,13 @@ def get_requests_by_case(db: Session, case_id: uuid.UUID) -> list[LegalRequest]:
     ))
 
 
+def get_pending_requests(db: Session) -> list[LegalRequest]:
+    return list(db.scalars(
+        select(LegalRequest).where(LegalRequest.status == RequestStatus.DRAFT).order_by(LegalRequest.dispatched_at.desc())
+    ))
+
+
+
 def create_request_draft(
     db: Session,
     case_id: uuid.UUID,
@@ -227,11 +234,15 @@ def update_request_draft(
 
 
 def approve_request(db: Session, request_id: uuid.UUID, current_user: User) -> LegalRequest:
+    from app.models.enums import UserRole
+    if current_user.role != UserRole.SHO:
+        raise AppError("Only an SHO can approve legal requests")
     request = get_request(db, request_id)
     if request.status != RequestStatus.DRAFT:
         raise AppError("Only drafts can be approved")
         
     request.status = RequestStatus.APPROVED
+
     
     # Audit Event
     audit_service.record(

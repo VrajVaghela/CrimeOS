@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Clock, Play, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CitationDialog } from "@/components/citation-dialog";
+import { useAuth } from "@/lib/auth-context";
 import type { PathStepOut, StepStatus } from "@/lib/types";
 
 interface PathStepperProps {
@@ -28,6 +29,7 @@ const STATUS_CLASSES = {
 
 export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps) {
   const router = useRouter();
+  const { user } = useAuth();
 
   // Sort steps by step_order just in case
   const sortedSteps = [...steps].sort((a, b) => a.step_order - b.step_order);
@@ -65,17 +67,23 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
 
                 {/* Status Selector dropdown */}
                 <div className="flex-shrink-0">
-                  <select
-                    value={step.status}
-                    onChange={(e) => void onStatusChange(step.id, e.target.value as StepStatus)}
-                    className="h-8 rounded bg-input border border-border px-2 text-xs font-mono text-foreground focus-visible:ring-1 focus-visible:ring-primary w-32 cursor-pointer"
-                    id={`select-status-${step.id}`}
-                  >
-                    <option value="pending">PENDING</option>
-                    <option value="in_progress">IN PROGRESS</option>
-                    <option value="done">DONE</option>
-                    <option value="skipped">SKIPPED</option>
-                  </select>
+                  {user?.role === "IO" ? (
+                    <select
+                      value={step.status}
+                      onChange={(e) => void onStatusChange(step.id, e.target.value as StepStatus)}
+                      className="h-8 rounded bg-input border border-border px-2 text-xs font-mono text-foreground focus-visible:ring-1 focus-visible:ring-primary w-32 cursor-pointer"
+                      id={`select-status-${step.id}`}
+                    >
+                      <option value="pending">PENDING</option>
+                      <option value="in_progress">IN PROGRESS</option>
+                      <option value="done">DONE</option>
+                      <option value="skipped">SKIPPED</option>
+                    </select>
+                  ) : (
+                    <span className="font-mono text-xs uppercase px-2 py-1 rounded bg-secondary border border-border text-muted-foreground">
+                      {step.status}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -87,7 +95,7 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
                 />
 
                 {/* Action button for money moment */}
-                {step.suggested_action_type && (
+                {step.suggested_action_type && user?.role === "IO" && (
                   <Button
                     onClick={() =>
                       router.push(
