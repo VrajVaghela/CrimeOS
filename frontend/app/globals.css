@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 223 39% 7%;
+    --foreground: 0 0% 100%;
+    --card: 223 26% 14%;
+    --card-foreground: 0 0% 100%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 223 26% 18%;
+    --secondary-foreground: 0 0% 100%;
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --accent: 38 92% 55%;
+    --accent-foreground: 26 83% 14%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --muted: 223 26% 12%;
+    --muted-foreground: 215 20% 65%;
+    --border: 0 0% 100% / 0.1;
+    --input: 223 26% 18%;
+    --ring: 217 91% 60%;
+    --radius: 0.75rem;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer utilities {
+  .glow-primary {
+    box-shadow: 0 0 20px -4px hsl(217 91% 60% / 0.5);
+  }
+
+  .glow-success {
+    box-shadow: 0 0 16px -4px hsl(160 84% 39% / 0.5);
+  }
+
+  .glow-destructive {
+    box-shadow: 0 0 16px -4px hsl(0 84% 60% / 0.5);
+  }
+
+  .glass {
+    background: hsl(223 26% 14% / 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(0 0% 100% / 0.1);
+  }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(0 0% 100% / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(0 0% 100% / 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
