@@ -41,30 +41,24 @@ Last updated: 2026-07-05
 
 **Pattern notes:** Status badges must stay token-driven and uppercase with `font-mono`; do not introduce raw color classes for statuses.
 
-### AiContentCard — PLANNED
+### AiContentCard — BUILT (Phase 3)
 - Path: components/ai-content-card.tsx
-- Purpose: wrapper marking AI-generated content (amber border, "AI-suggested" badge, optional citation trigger)
-- Props: `children`, `citation?: { title, text }`
+- Purpose: wrapper marking AI-generated content with glowing left border and Sparkles badge
+- Props: `children: React.ReactNode`, `title?: string`
+- Used in: `app/cases/[id]/path/page.tsx`
 
-### CitationPopover — PLANNED
-- Path: components/citation-popover.tsx
-- Purpose: shows SOP chunk / legal section source text on click
-- Props: `title: string`, `text: string`
+### CitationDialog — BUILT (Phase 3)
+- Path: components/citation-dialog.tsx
+- Purpose: shows SOP chunk grounding text inside a modal dialog upon clicking the citation trigger button
+- Props: `title: string`, `sourceText: string`, `triggerLabel?: string`
+- Used in: `components/path-stepper.tsx`
 
-### EntityReviewField — PLANNED
-- Path: components/entity-review-field.tsx
-- Purpose: editable extracted-entity input with confidence chip + low-confidence amber ring
-- Props: `entity: ExtractedEntity`, `onChange`
-
-### CaseTimeline — PLANNED
-- Path: components/case-timeline.tsx
-- Purpose: audit-trail vertical timeline
-- Props: `events: AuditEvent[]`
-
-### PathStepper — PLANNED
+### PathStepper — BUILT (Phase 3)
 - Path: components/path-stepper.tsx
-- Purpose: investigation-path stepper with status controls + inline action button
-- Props: `steps: PathStep[]`, `onStatusChange`, `onAction`
+- Purpose: vertical investigation path stepper displaying steps, status selectors, citations, and action triggers
+- Props: `steps: PathStepOut[]`, `caseId: string`, `onStatusChange: (stepId: string, status: StepStatus) => Promise<void>`
+- Used in: `app/cases/[id]/path/page.tsx`
+
 
 ### FileUploadZone — BUILT (Phase 2)
 - Path: components/file-upload-zone.tsx

@@ -23,11 +23,11 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] ✅ CHECKPOINT: Gujarati PDF, Hindi audio, handwritten image → correct entities
 
 ## Phase 3 — Investigation Paths & Legal Sections
-- [ ] rag_service: pgvector retrieval over SOP chunks + legal section match
-- [ ] path_service: crime classification + steps w/ SOP citations + BNS/BNSS/BSA suggestions
-- [ ] Persistence: paths, steps, case_sections
-- [ ] UI: Path tab (stepper, citation popovers, legal sections panel)
-- [ ] ✅ CHECKPOINT: fraud complaint → grounded path + correct sections with sources
+- [x] rag_service: pgvector retrieval over SOP chunks + legal section match
+- [x] path_service: crime classification + steps w/ SOP citations + BNS/BNSS/BSA suggestions
+- [x] Persistence: paths, steps, case_sections
+- [x] UI: Path tab (stepper, citation popovers, legal sections panel)
+- [x] ✅ CHECKPOINT: fraud complaint → grounded path + correct sections with sources
 
 ## Phase 4 — Automated Legal Requests
 - [ ] Jinja2 LERS-style templates (telecom CDR, bank freeze/KYC, platform)

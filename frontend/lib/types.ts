@@ -63,3 +63,53 @@ export interface IngestionStatusOut {
 export interface CaseDetailOut extends CaseOut {
   complaints: ComplaintOut[];
 }
+
+// Phase 3: Path types
+
+export type StepStatus = "pending" | "in_progress" | "done" | "skipped";
+export type LegalCode = "BNS" | "BNSS" | "BSA";
+
+export interface LegalSectionOut {
+  id: string;
+  code: LegalCode;
+  section_number: string;
+  title: string;
+  text: string;
+}
+
+export interface CaseSectionOut {
+  id: string;
+  case_id: string;
+  legal_section_id: string;
+  ai_reasoning: string;
+  confidence: number;
+  legal_section: LegalSectionOut;
+}
+
+export interface PathStepOut {
+  id: string;
+  path_id: string;
+  step_order: number;
+  title: string;
+  description: string;
+  sop_citation: string;
+  status: StepStatus;
+  suggested_action_type: string | null;
+}
+
+export interface InvestigationPathOut {
+  id: string;
+  case_id: string;
+  generated_at: string;
+  model_used: string;
+  steps: PathStepOut[];
+}
+
+export interface PathGenerationStatusOut {
+  case_id: string;
+  status: "processing" | "done" | "failed" | "not_started";
+  message: string;
+  path: InvestigationPathOut | null;
+  case_sections: CaseSectionOut[];
+}
+

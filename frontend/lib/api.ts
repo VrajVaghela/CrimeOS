@@ -8,6 +8,8 @@ import type {
   IngestionStatusOut,
   TokenResponse,
   UserOut,
+  PathGenerationStatusOut,
+  PathStepOut,
 } from "@/lib/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -140,3 +142,23 @@ export async function updateEntity(
     }
   );
 }
+
+// Phase 3: Investigation paths
+
+export async function getCasePath(caseId: string): Promise<PathGenerationStatusOut> {
+  return request<PathGenerationStatusOut>(`/paths/cases/${caseId}`);
+}
+
+export async function generateCasePath(caseId: string): Promise<PathGenerationStatusOut> {
+  return request<PathGenerationStatusOut>(`/paths/cases/${caseId}/generate`, {
+    method: "POST",
+  });
+}
+
+export async function updateStepStatus(stepId: string, status: string): Promise<PathStepOut> {
+  return request<PathStepOut>(`/paths/steps/${stepId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
