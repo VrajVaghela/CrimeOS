@@ -11,9 +11,9 @@ interface AiContentCardProps {
 
 export function AiContentCard({ children, title = "AI-Suggested" }: AiContentCardProps) {
   return (
-    <div className="relative rounded-xl border border-primary/20 bg-card p-5 shadow-sm overflow-hidden transition-all duration-200">
+    <div className="relative rounded-xl border border-primary/20 bg-card p-5 overflow-hidden transition-all duration-200 hover:border-primary/40 hover:glow-primary hover:-translate-y-0.5">
       {/* Sparkly left glow border */}
-      <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-gradient-to-b from-primary via-primary/50 to-primary/20 glow-primary" />
+      <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-gradient-to-b from-primary via-primary/50 to-primary/20" />
       
       <div className="pl-2">
         <div className="flex items-center gap-1.5 mb-3">

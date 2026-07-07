@@ -156,8 +156,8 @@ export default function AuditPage() {
                   {/* Timeline node */}
                   <div
                     className={[
-                      "absolute left-2.5 top-1 h-5 w-5 rounded-full border-2 border-background flex items-center justify-center z-10",
-                      idx === 0 ? "bg-primary glow-primary" : "bg-card",
+                      "absolute left-2.5 top-1 h-5 w-5 rounded-full border-2 border-background flex items-center justify-center z-10 transition-all duration-300",
+                      idx === 0 ? "bg-primary glow-primary animate-glow-pulse" : "bg-card",
                     ].join(" ")}
                   >
                     <Icon className={`h-2.5 w-2.5 ${config.color}`} />

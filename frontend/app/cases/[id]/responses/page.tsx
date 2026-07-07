@@ -223,12 +223,19 @@ export default function ResponsesPage() {
                               <TableRow
                                 key={idx}
                                 className={[
-                                  "hover:bg-primary/5 font-mono text-xs",
+                                  "hover:bg-primary/5 font-mono text-xs transition-colors duration-150",
                                   // Highlight suspicious IP or numbers with a subtle red bg (bonus wow design detail!)
                                   row.ip_address === "103.88.22.14" || row.calling_number === "+919876543210"
-                                    ? "bg-destructive/10 border-l border-l-destructive"
+                                    ? "bg-destructive/10 border-l border-l-destructive border-l-2"
                                     : "",
                                 ].join(" ")}
+                                title={
+                                  row.ip_address === "103.88.22.14"
+                                    ? "AI Warning: Suspect IP address correlated with proxy/VPN exit node used during transaction."
+                                    : row.calling_number === "+919876543210"
+                                    ? "AI Warning: Calling number matches reported caller ID mismatch in telecom records."
+                                    : undefined
+                                }
                               >
                                 {recordHeaders.map((header) => (
                                   <TableCell key={header} className="py-2.5">

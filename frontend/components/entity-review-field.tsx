@@ -50,7 +50,7 @@ export function EntityReviewField({ entity, onChange }: EntityReviewFieldProps) 
     <div
       className={[
         "rounded-lg border bg-secondary p-3 transition-all duration-200",
-        isLowConfidence ? "border-accent/50 ring-1 ring-accent/30" : "border-border",
+        isLowConfidence ? "border-accent/80 ring-2 ring-accent/25 shadow-[0_0_12px_rgba(245,158,11,0.2)]" : "border-border",
       ].join(" ")}
     >
       <div className="flex items-start justify-between gap-2 mb-2">

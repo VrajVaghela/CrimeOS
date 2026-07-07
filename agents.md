@@ -32,3 +32,10 @@ Before ANY implementation work, read the context files in this exact order:
 
 ## Definition of Done (per feature)
 Code works end-to-end from the UI → checkbox updated in `progress_tracker.md` → new components logged in `ui_registry.md` → seeds updated if the feature needs demo data.
+
+## Design Context (Impeccable Visual System)
+All frontend work must align with the visual and strategic rules defined in:
+1. [PRODUCT.md](file:///E:/vraj/Projects/erakshak/PRODUCT.md) — register (product), target users, anti-references, and strategic design principles.
+2. [DESIGN.md](file:///E:/vraj/Projects/erakshak/DESIGN.md) — visual system, typography, Glow-on-Demand elevation, Tactical Command components, and Do's and Don'ts.
+3. [.impeccable/design.json](file:///E:/vraj/Projects/erakshak/.impeccable/design.json) — token metadata and component HTML/CSS previews.
+

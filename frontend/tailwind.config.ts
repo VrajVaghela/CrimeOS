@@ -45,9 +45,9 @@ const config: Config = {
         xl: "var(--radius)",
       },
       fontFamily: {
-        heading: ["Space Grotesk", "Noto Sans Devanagari", "Noto Sans Gujarati", "sans-serif"],
-        sans: ["Inter", "Noto Sans Devanagari", "Noto Sans Gujarati", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        heading: ["var(--font-space-grotesk)", "var(--font-noto-devanagari)", "var(--font-noto-gujarati)", "sans-serif"],
+        sans: ["var(--font-inter)", "var(--font-noto-devanagari)", "var(--font-noto-gujarati)", "sans-serif"],
+        mono: ["var(--font-jetbrains-mono)", "monospace"],
       },
       keyframes: {
         "fade-up": {

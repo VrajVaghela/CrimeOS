@@ -289,7 +289,7 @@ export default function PathPage() {
       </div>
 
       {/* Legal Sections Sidebar (Right 1 column) */}
-      <div className="space-y-6">
+      <div className="space-y-6 lg:sticky lg:top-6 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto pr-1 pb-6">
         <div className="border-b pb-4 border-border/40">
           <h2 className="font-heading text-xl font-bold flex items-center gap-2">
             <Scale className="h-5 w-5 text-primary" />

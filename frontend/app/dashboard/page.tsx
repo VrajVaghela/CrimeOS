@@ -329,13 +329,13 @@ function StatCard({
   value: number;
 }) {
   return (
-    <Card className="glass animate-fade-up p-5">
+    <Card className="glass animate-fade-up p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:glow-primary cursor-default">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm text-muted-foreground">{label}</p>
           <p className="font-mono text-3xl font-bold mt-1">{value}</p>
         </div>
-        <Icon className="h-8 w-8 text-primary opacity-80" />
+        <Icon className="h-8 w-8 text-primary opacity-80 transition-transform duration-300 group-hover:scale-110" />
       </div>
     </Card>
   );

@@ -52,4 +52,14 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] Deliverable docs: architecture diagram, SOP-grounding note, sample datasets in data/
 - [ ] ✅ CHECKPOINT: 5-min demo rehearsed twice from fresh seed
 
+## Phase 7 — Frontend Design Refinement & Impeccable Polish
+- [x] Typography Pass: Space Grotesk layout, letter-spacing check, Indic fallbacks
+- [x] Glow-on-Demand & Glass Integration: hover glows, glass overlays, shadow cleanup
+- [x] Contrast & Color Review: WCAG AA contrast check, <=10% primary blue budget
+- [x] Interactive Pulse & Timeline Motion: pulse badges/steppers, refined connectors
+- [x] Ingestion View Amber Alerts: Warning Amber borders on low-confidence entities
+- [x] Impeccable Detect Audit: run `npx impeccable detect` and fix anti-patterns
+- [x] ✅ CHECKPOINT: Golden Path demo showing high-contrast, glow-elevated command surfaces
+
+
 

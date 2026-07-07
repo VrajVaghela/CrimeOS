@@ -21,10 +21,10 @@ const STATUS_ICONS = {
 };
 
 const STATUS_CLASSES = {
-  pending: "border-border text-muted-foreground bg-secondary/50",
-  in_progress: "border-primary text-primary bg-primary/10 animate-pulse glow-primary",
-  done: "border-success text-success bg-success/15 glow-success",
-  skipped: "border-muted-foreground/30 text-muted-foreground bg-secondary/35",
+  pending: "border-border text-muted-foreground bg-background",
+  in_progress: "border-primary text-primary bg-background animate-glow-pulse glow-primary",
+  done: "border-success text-success bg-background glow-success",
+  skipped: "border-muted-foreground/30 text-muted-foreground bg-background",
 };
 
 export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps) {
@@ -35,18 +35,33 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
   const sortedSteps = [...steps].sort((a, b) => a.step_order - b.step_order);
 
   return (
-    <div className="relative pl-6 border-l border-border/50 ml-4 space-y-8">
+    <div className="relative ml-4 space-y-8">
       {sortedSteps.map((step, idx) => {
         const Icon = STATUS_ICONS[step.status] || Clock;
         const statusClass = STATUS_CLASSES[step.status] || STATUS_CLASSES.pending;
         const isLast = idx === sortedSteps.length - 1;
 
+        // Determine connector line color based on step status
+        let connectorColor = "bg-border/40";
+        if (step.status === "done") {
+          connectorColor = "bg-success/60";
+        } else if (step.status === "in_progress") {
+          connectorColor = "bg-primary/60";
+        }
+
         return (
-          <div key={step.id} className="relative group">
+          <div key={step.id} className="relative pl-12 group">
+            {/* Connector Line to next node */}
+            {!isLast && (
+              <div
+                className={`absolute left-[15px] top-9 bottom-[-32px] w-[2px] transition-all duration-500 ${connectorColor}`}
+              />
+            )}
+
             {/* Step status node indicator */}
             <span
               className={[
-                "absolute -left-[38px] top-1 flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs transition-all duration-300 font-mono",
+                "absolute left-0 top-1 flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs transition-all duration-300 font-mono z-10",
                 statusClass,
               ].join(" ")}
             >

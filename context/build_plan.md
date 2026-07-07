@@ -61,6 +61,17 @@ Priority order:
 
 **Checkpoint:** 5-minute demo rehearsed twice from a fresh seeded DB.
 
+## Phase 7 — Frontend Design Refinement & Impeccable Polish
+Goal: Polish the frontend visually using the Impeccable design system guidelines, resolving any slop and achieving a premium cyber-command console look.
+1. **Typography Pass**: Align display typography with Space Grotesk and verify display letter-spacing is >= -0.04em. Set Inter for body and Noto Sans for Indic script fallback.
+2. **Glow-on-Demand & Glass Integration**: Implement utility glass overlays and hover-based primary glows on stat cards, steppers, and action buttons. Remove standard gray drop shadows.
+3. **Contrast & Color Review**: Audit all slate/amber text on midnight backgrounds to ensure WCAG AA compliance. Lock primary blue usage to <=10% of surface area.
+4. **Interactive Pulse & Timeline Motion**: Add pulse animations on active statuses, processing banners, and live stepper nodes. Refined vertical stepper connector transitions.
+5. **Ingestion View Amber Alerts**: Wire Warning Amber borders to low-confidence (<70%) entity extraction fields in the Case Creation Wizard.
+6. **Impeccable Detect Audit**: Run `npx impeccable detect` on frontend components and fix any flagged anti-patterns (no diagonal striped backdrops, no double-border metrics).
+
+**Checkpoint:** Complete visual run-through of the Golden Path demo showing high-contrast, glow-elevated command surfaces without UI slop.
+
 ---
 
 ## Cut List (if time runs out, cut in this order)
@@ -70,3 +81,4 @@ Priority order:
 4. CCTNS mock bonus
 5. Editable entity review (make read-only)
 NEVER cut: golden path, SOP citations in UI, audit timeline.
+
