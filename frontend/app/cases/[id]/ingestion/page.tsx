@@ -8,6 +8,8 @@ import {
   Globe,
   Languages,
   Sparkles,
+  Upload,
+  FileText,
 } from "lucide-react";
 
 import { EntityReviewField } from "@/components/entity-review-field";
@@ -54,7 +56,6 @@ export default function IngestionPage() {
     try {
       const data = await getCase(caseId as string);
       setCaseData(data);
-      // If there's already a complaint, load it
       if (data.complaints.length > 0) {
         const latest = data.complaints[data.complaints.length - 1];
         setComplaint(latest);
@@ -68,14 +69,12 @@ export default function IngestionPage() {
     void loadCase();
   }, [loadCase]);
 
-  // Polling for complaint processing completion
   const startPolling = useCallback(
     (complaintId: string) => {
       if (pollRef.current) clearInterval(pollRef.current);
       pollRef.current = setInterval(async () => {
         try {
           const data = await getComplaint(caseId as string, complaintId);
-          // If entities have appeared (or translated_text is populated), done
           if (data.translated_text || data.entities.length > 0) {
             clearInterval(pollRef.current!);
             setProcessing(false);
@@ -119,7 +118,6 @@ export default function IngestionPage() {
     async (entityId: string, newValue: string) => {
       if (!complaint) return;
       await updateEntity(caseId as string, complaint.id, entityId, newValue);
-      // Optimistically update local state
       setComplaint((prev) =>
         prev
           ? {
@@ -135,21 +133,24 @@ export default function IngestionPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 animate-fade-up">
       {/* Step header */}
-      <div className="animate-fade-up">
-        <h2 className="font-heading text-xl font-bold">
-          Complaint Ingestion{" "}
-          <span className="text-muted-foreground font-normal text-base">/ शिकायत अपलोड</span>
+      <div>
+        <h2 className="font-heading text-xl font-bold flex items-center gap-2">
+          <div className="rounded-lg bg-gradient-to-br from-info to-violet p-1.5">
+            <FileText className="h-5 w-5 text-white" />
+          </div>
+          Complaint Ingestion
+          <span className="text-muted-foreground font-normal text-base font-sans">/ शिकायत अपलोड</span>
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
           Upload the complaint file — PDF, handwritten image, or audio recording in Gujarati, Hindi,
           or English. AI will transcribe, translate, and extract key entities.
         </p>
       </div>
 
       {error ? (
-        <Alert variant="destructive" className="animate-fade-up">
+        <Alert variant="destructive" className="animate-fade-down">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
@@ -157,16 +158,15 @@ export default function IngestionPage() {
       ) : null}
 
       {processing && processingStarted ? (
-        <ProcessingCard
-          label="Analyzing complaint with Gemini AI…"
-          startedAt={processingStarted}
-        />
+        <ProcessingCard label="Analyzing complaint with Gemini AI…" startedAt={processingStarted} />
       ) : complaint ? null : (
-        /* Upload zone — only shown when no complaint yet and not processing */
-        <Card className="animate-fade-up">
+        <Card hover className="animate-fade-up delay-100 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-info via-violet to-primary" />
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="h-4 w-4 text-primary" />
+              <div className="rounded-lg bg-gradient-to-br from-info/20 to-violet/20 p-1.5">
+                <Upload className="h-4 w-4 text-info" />
+              </div>
               Upload Complaint File
             </CardTitle>
           </CardHeader>
@@ -176,47 +176,41 @@ export default function IngestionPage() {
         </Card>
       )}
 
-      {complaint ? (
-        <div className="flex flex-col gap-6 animate-fade-up">
+      {complaint && (
+        <div className="flex flex-col gap-6">
           {/* Success banner */}
-          <Alert className="border-success/50 bg-success/10 text-success-foreground">
-            <CheckCircle2 className="h-4 w-4 text-success" />
+          <Alert variant="success" className="animate-fade-down">
+            <CheckCircle2 className="h-4 w-4" />
             <AlertTitle className="text-success">Complaint analyzed</AlertTitle>
             <AlertDescription className="text-muted-foreground">
               AI has transcribed, translated, and extracted entities. Review and correct below.
             </AlertDescription>
           </Alert>
 
-          {/* Meta row */}
-          <div className="flex flex-wrap gap-2">
+          {/* Meta badges */}
+          <div className="flex flex-wrap gap-2 animate-fade-up delay-100">
             <Badge variant="outline" className="gap-1.5 font-mono text-xs">
               <Globe className="h-3 w-3" />
               {SOURCE_LABELS[complaint.source_type] ?? complaint.source_type}
             </Badge>
             <Badge variant="outline" className="gap-1.5 text-xs">
               <Languages className="h-3 w-3" />
-              Detected:{" "}
-              {LANGUAGE_LABELS[complaint.detected_language ?? ""] ??
-                complaint.detected_language ??
-                "Unknown"}
+              Detected: {LANGUAGE_LABELS[complaint.detected_language ?? ""] ?? complaint.detected_language ?? "Unknown"}
             </Badge>
-            <Badge
-              variant="outline"
-              className="gap-1.5 text-xs border-primary/40 text-primary"
-            >
+            <Badge variant="info" className="gap-1.5 text-xs">
               <Sparkles className="h-3 w-3" />
               AI-generated via Gemini
             </Badge>
           </div>
 
           {/* Side-by-side: original vs translated */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <Card className="border-l-2 border-l-muted">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 animate-fade-up delay-200">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
+                <CardTitle className="text-sm flex items-center gap-2 text-muted-foreground">
                   <span className="h-2 w-2 rounded-full bg-muted-foreground" />
-                  Original Text{" "}
-                  <span className="text-xs font-mono text-muted-foreground">
+                  Original Text
+                  <span className="text-xs font-mono text-muted-foreground ml-1">
                     ({complaint.detected_language?.toUpperCase() ?? "—"})
                   </span>
                 </CardTitle>
@@ -228,20 +222,20 @@ export default function IngestionPage() {
                   </p>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    {[90, 75, 80, 60, 70].map((w) => (
-                      <Skeleton key={w} className="h-3 rounded-full" style={{ width: `${w}%` }} />
+                    {[90, 75, 80, 60, 70].map((w, i) => (
+                      <Skeleton key={i} className="h-3 rounded-full" style={{ width: `${w}%` }} />
                     ))}
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            <Card className="border-l-2 border-l-primary/40 glow-primary">
+            <Card accent="primary" className="border-info/40">
               <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2 text-primary">
+                <CardTitle className="text-sm flex items-center gap-2 text-info">
                   <Sparkles className="h-3.5 w-3.5" />
                   English Translation
-                  <Badge className="bg-primary/20 text-primary border-primary/30 text-xs px-1.5 py-0 ml-1" variant="outline">
+                  <Badge variant="info" className="text-[10px] px-1.5 py-0 ml-1">
                     AI-suggested
                   </Badge>
                 </CardTitle>
@@ -253,8 +247,8 @@ export default function IngestionPage() {
                   </p>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    {[85, 70, 90, 55, 75].map((w) => (
-                      <Skeleton key={w} className="h-3 rounded-full" style={{ width: `${w}%` }} />
+                    {[85, 70, 90, 55, 75].map((w, i) => (
+                      <Skeleton key={i} className="h-3 rounded-full" style={{ width: `${w}%` }} />
                     ))}
                   </div>
                 )}
@@ -262,26 +256,28 @@ export default function IngestionPage() {
             </Card>
           </div>
 
-          <Separator />
+          <Separator label="Extracted Entities" />
 
           {/* Extracted entities */}
-          <div>
+          <div className="animate-fade-up delay-300">
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <h3 className="font-heading font-semibold">
-                Extracted Entities
-              </h3>
-              <Badge className="bg-primary/20 text-primary border-primary/30 text-xs" variant="outline">
+              <div className="rounded-lg bg-violet/15 p-1.5">
+                <Sparkles className="h-4 w-4 text-violet" />
+              </div>
+              <h3 className="font-heading font-semibold">Review & Correct Entities</h3>
+              <Badge variant="info" className="text-xs">
                 AI-suggested
               </Badge>
-              <span className="text-xs text-muted-foreground ml-auto">
-                Click any field to edit · Amber = low confidence
+              <span className="text-xs text-muted-foreground ml-auto hidden sm:inline">
+                Click any field to edit · Amber border = low confidence
               </span>
             </div>
 
             {complaint.entities.length === 0 ? (
-              <div className="rounded-xl border bg-muted p-6 text-sm text-muted-foreground text-center">
-                No entities extracted. The AI may still be processing — refresh in a moment.
+              <div className="rounded-xl border border-dashed border-border/40 bg-muted/30 p-8 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No entities extracted. The AI may still be processing — refresh in a moment.
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -298,16 +294,17 @@ export default function IngestionPage() {
 
           {/* Re-upload option */}
           <Separator />
-          <details className="text-sm text-muted-foreground">
-            <summary className="cursor-pointer hover:text-foreground transition-colors">
+          <details className="group text-sm">
+            <summary className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors font-medium flex items-center gap-2">
+              <Upload className="h-4 w-4 group-open:rotate-180 transition-transform" />
               Upload a different file
             </summary>
-            <div className="mt-4">
+            <div className="mt-4 animate-fade-down">
               <FileUploadZone onUpload={handleUpload} disabled={processing} />
             </div>
           </details>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

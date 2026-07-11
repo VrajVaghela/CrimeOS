@@ -22,7 +22,8 @@ export function ProcessingCard({ label, startedAt }: ProcessingCardProps) {
   }, [startedAt]);
 
   return (
-    <div className="glass rounded-xl p-6 flex flex-col gap-4 animate-fade-up">
+    <div className="glass rounded-xl p-6 flex flex-col gap-4 animate-fade-up relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-info via-violet to-primary" />
       <div className="flex items-center gap-3">
         <div className="relative">
           <div className="rounded-full bg-primary/10 p-2">

@@ -1,24 +1,27 @@
-import type { Metadata } from "next";
-import { Inter, Space_Grotesk, JetBrains_Mono, Noto_Sans_Devanagari, Noto_Sans_Gujarati } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans, Outfit, IBM_Plex_Mono, Noto_Sans_Devanagari, Noto_Sans_Gujarati } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
 
-const inter = Inter({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-heading",
   display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const spaceGrotesk = Space_Grotesk({
+const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  variable: "--font-body",
   display: "swap",
+  weight: ["300", "400", "500", "600"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
+  variable: "--font-mono",
   display: "swap",
+  weight: ["400", "500", "600"],
 });
 
 const notoDevanagari = Noto_Sans_Devanagari({
@@ -40,9 +43,18 @@ export const metadata: Metadata = {
   description: "Agentic AI platform for intelligence-led police investigations",
 };
 
+export const viewport: Viewport = {
+  themeColor: "#0B0F19",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} ${notoDevanagari.variable} ${notoGujarati.variable}`}>
+    <html
+      lang="en"
+      className={`dark ${plusJakartaSans.variable} ${outfit.variable} ${ibmPlexMono.variable} ${notoDevanagari.variable} ${notoGujarati.variable}`}
+    >
       <body>
         <AuthProvider>{children}</AuthProvider>
       </body>

@@ -8,20 +8,28 @@ import {
   Send,
   CheckCircle,
   FileText,
-  Clock,
   Loader2,
   AlertCircle,
   Sparkles,
   ArrowRight,
   UserCheck,
+  X,
+  Plus,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/status-badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   getRequests,
   createRequest,
@@ -35,18 +43,9 @@ import { useAuth } from "@/lib/auth-context";
 import type { LegalRequestOut, ProviderType } from "@/lib/types";
 
 const PROVIDER_DEFAULTS = {
-  telecom: {
-    name: "Bharti Airtel",
-    email: "nodal.officer@airtel.com",
-  },
-  bank: {
-    name: "State Bank of India",
-    email: "nodal.sbi@sbi.co.in",
-  },
-  platform: {
-    name: "Instagram (Meta Inc.)",
-    email: "law-enforcement@instagram.com",
-  },
+  telecom: { name: "Bharti Airtel", email: "nodal.officer@airtel.com" },
+  bank: { name: "State Bank of India", email: "nodal.sbi@sbi.co.in" },
+  platform: { name: "Instagram (Meta Inc.)", email: "law-enforcement@instagram.com" },
 };
 
 export default function RequestsPage() {
@@ -59,30 +58,23 @@ export default function RequestsPage() {
   const stepIdParam = searchParams.get("step_id");
   const providerTypeParam = searchParams.get("provider_type") as ProviderType | null;
 
-  // Requests state
   const [requests, setRequests] = useState<LegalRequestOut[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Form states
   const [creating, setCreating] = useState(false);
   const [providerName, setProviderName] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
 
-  // Edit / Preview Dialog state
   const [selectedRequest, setSelectedRequest] = useState<LegalRequestOut | null>(null);
   const [editBody, setEditBody] = useState("");
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
-
-  // Mutation loading states
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    if (caseId) {
-      void loadRequests();
-    }
+    if (caseId) void loadRequests();
   }, [caseId]);
 
   useEffect(() => {
@@ -108,7 +100,6 @@ export default function RequestsPage() {
   async function handleCreateDraft(e: React.FormEvent) {
     e.preventDefault();
     if (!providerName || !recipientEmail) return;
-
     setCreating(true);
     setError(null);
     try {
@@ -118,7 +109,6 @@ export default function RequestsPage() {
         provider_name: providerName,
         recipient_email: recipientEmail,
       });
-      // Clear query params and reload
       router.replace(`/cases/${caseId}/requests`);
       setProviderName("");
       setRecipientEmail("");
@@ -183,9 +173,7 @@ export default function RequestsPage() {
     setActionLoading(reqId);
     try {
       await triggerMockResponse(reqId);
-      // Reload everything to get updated request status
       await loadRequests();
-      // Redirect to responses
       router.push(`/cases/${caseId}/responses`);
     } catch (e) {
       alert(e instanceof ApiError ? e.message : "Failed to trigger response");
@@ -195,13 +183,14 @@ export default function RequestsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Draft Creator Form (Visible if redirected from stepper) */}
+    <div className="space-y-6 animate-fade-up">
+      {/* Draft Creator Form */}
       {stepIdParam && providerTypeParam && (
-        <Card className="glass border-primary/40 glow-primary">
+        <Card hover className="animate-fade-down relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-info to-accent" />
           <CardHeader className="pb-3">
             <CardTitle className="font-heading text-lg font-bold flex items-center gap-2 text-primary">
-              <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+              <Sparkles className="h-5 w-5 text-primary" />
               Generate {providerTypeParam.toUpperCase()} Request Draft
             </CardTitle>
             <CardDescription className="text-muted-foreground text-xs">
@@ -218,7 +207,6 @@ export default function RequestsPage() {
                     value={providerName}
                     onChange={(e) => setProviderName(e.target.value)}
                     placeholder="e.g. Bharti Airtel, HDFC Bank, Telegram Inc."
-                    className="bg-input border-border/40 focus:ring-primary"
                     required
                   />
                 </div>
@@ -229,106 +217,116 @@ export default function RequestsPage() {
                     type="email"
                     value={recipientEmail}
                     onChange={(e) => setRecipientEmail(e.target.value)}
-                    placeholder="e.g. nodal@airtel.com, legal@sbi.co.in"
-                    className="bg-input border-border/40 focus:ring-primary"
+                    placeholder="e.g. nodal@airtel.com"
                     required
                   />
                 </div>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                * Note: In demo mode, emails will be routed to your demo inbox setting (
-                <span className="font-mono text-primary">vrajv83@gmail.com</span>
-                ) to preserve system sandboxing, while displaying target provider details in logs.
+                * In demo mode, emails route to{" "}
+                <span className="font-mono text-primary">vrajv83@gmail.com</span> to preserve sandboxing,
+                while displaying target provider details in logs.
               </p>
             </CardContent>
-            <div className="flex justify-end gap-2 pt-0">
+            <CardFooter className="border-t border-border/30 pt-4 flex justify-end gap-2">
               <Button
                 type="button"
                 variant="ghost"
                 onClick={() => router.replace(`/cases/${caseId}/requests`)}
-                className="text-muted-foreground"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={creating} className="bg-primary hover:scale-105 transition-all">
-                {creating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Draft...
-                  </>
-                ) : (
-                  <>
-                    <FileText className="mr-2 h-4 w-4" />
-                    Generate Draft
-                  </>
-                )}
+              <Button type="submit" disabled={creating} loading={creating}>
+                {!creating && <FileText className="h-4 w-4" />}
+                Generate Draft
               </Button>
-            </div>
+            </CardFooter>
           </form>
         </Card>
       )}
 
-      {/* Main Content */}
       {loading ? (
-        <div className="space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary mt-12" />
-          <p className="text-center text-sm text-muted-foreground">Loading legal requests...</p>
+        <div className="flex flex-col items-center gap-3 py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading legal requests...</p>
         </div>
       ) : error ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-destructive/20 bg-destructive/10 p-8 text-center">
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-destructive/30 bg-destructive/10 p-8 text-center animate-fade-down">
           <AlertCircle className="h-10 w-10 text-destructive" />
           <div>
             <h3 className="font-heading text-lg font-semibold text-destructive">Error Loading Data</h3>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
           </div>
-          <Button onClick={loadRequests} variant="secondary" className="border-destructive/30 hover:bg-destructive/10">
+          <Button onClick={loadRequests} variant="secondary">
             Retry
           </Button>
         </div>
-      ) : requests.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border p-16 text-center grid-bg">
-          <div className="rounded-full bg-primary/10 p-4">
+      ) : requests.length === 0 && !stepIdParam ? (
+        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
+          <div className="rounded-full bg-primary/10 p-4 border border-primary/20">
             <FileSearch className="h-8 w-8 text-primary" />
           </div>
-          <div>
+          <div className="max-w-sm space-y-1">
             <h3 className="font-heading font-semibold text-lg">No Legal Requests Generated</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-              Use the <span className="text-primary font-medium">Investigation Path</span> tab to trigger automatic LERS request drafting for this case.
+            <p className="text-sm text-muted-foreground">
+              Use the <span className="text-primary font-medium">Investigation Path</span> tab to trigger
+              automatic LERS request drafting for this case.
             </p>
           </div>
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <h2 className="font-heading text-xl font-bold flex items-center gap-2">
               <Mail className="h-5 w-5 text-primary" />
-              Legal Requests Timeline ({requests.length})
+              Legal Requests Timeline
+              {requests.length > 0 && (
+                <span className="text-sm font-mono text-muted-foreground font-normal">
+                  ({requests.length})
+                </span>
+              )}
             </h2>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            {requests.map((req) => {
+            {requests.map((req, idx) => {
               const isLoading = actionLoading === req.id;
-
               return (
-                <Card key={req.id} className="border border-border/80 bg-card/60 relative overflow-hidden transition-all duration-200 hover:border-primary/20">
-                  {/* Subtle side glow for active/important statuses */}
+                <Card
+                  key={req.id}
+                  hover
+                  className={[
+                    "relative overflow-hidden",
+                    req.status === "dispatched" ? "border-primary/30" : "",
+                    req.status === "responded" ? "border-success/30" : "",
+                    "animate-fade-up",
+                  ].join(" ")}
+                  style={{ animationDelay: `${idx * 60}ms` }}
+                >
+                  {/* Status indicator bar */}
                   {req.status === "dispatched" && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary animate-pulse" />
+                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary animate-pulse-glow" />
                   )}
                   {req.status === "responded" && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-success" />
+                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-success" />
                   )}
 
                   <CardHeader className="pb-3 flex flex-row items-start justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-mono text-xs text-muted-foreground uppercase px-2 py-0.5 rounded bg-secondary">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className={[
+                          "font-mono text-[10px] uppercase px-2 py-0.5 rounded border font-semibold",
+                          req.provider_type === "telecom"
+                            ? "bg-info/15 text-info border-info/30"
+                            : req.provider_type === "bank"
+                              ? "bg-success/15 text-success border-success/30"
+                              : "bg-violet/15 text-violet border-violet/30"
+                        ].join(" ")}>
                           {req.provider_type}
                         </span>
                         <StatusBadge status={req.status} />
                       </div>
-                      <CardTitle className="font-heading text-lg font-bold">
+                      <CardTitle className="font-heading text-base font-bold">
                         Request to {req.provider_name}
                       </CardTitle>
                       <CardDescription className="font-mono text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
@@ -338,22 +336,20 @@ export default function RequestsPage() {
                   </CardHeader>
 
                   <CardContent className="pb-4">
-                    {/* Status timeline details */}
-                    <div className="bg-background/40 border border-border/30 rounded-lg p-3 space-y-2 text-xs font-mono">
+                    <div className="bg-background/40 border border-border/40 rounded-lg p-3 space-y-2 text-xs font-mono">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Template:</span>
                         <span>{req.template_used}</span>
                       </div>
                       {req.dispatched_at && (
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Dispatched At:</span>
+                          <span className="text-muted-foreground">Dispatched:</span>
                           <span>
                             {new Date(req.dispatched_at).toLocaleString("en-IN", {
                               day: "numeric",
                               month: "short",
                               hour: "2-digit",
                               minute: "2-digit",
-                              hour12: true,
                             })}
                           </span>
                         </div>
@@ -361,15 +357,14 @@ export default function RequestsPage() {
                     </div>
                   </CardContent>
 
-                  <div className="flex justify-between border-t border-border/30 pt-4 bg-muted/20">
+                  <CardFooter className="bg-muted/10">
                     <div className="flex items-center gap-2">
                       <Button
-                        variant="secondary"
+                        variant="outline"
                         size="sm"
                         onClick={() => openEditDialog(req)}
-                        className="text-xs h-8 px-3 border-border"
                       >
-                        <FileText className="mr-1.5 h-3.5 w-3.5" />
+                        <FileText className="h-3.5 w-3.5" />
                         {req.status === "draft" && user?.role === "IO" ? "Edit Draft" : req.status === "draft" ? "View Draft" : "View Template"}
                       </Button>
                     </div>
@@ -380,55 +375,44 @@ export default function RequestsPage() {
                           {user?.role === "SHO" ? (
                             <Button
                               size="sm"
-                              variant="secondary"
+                              variant="outline"
                               onClick={() => void handleApprove(req.id)}
                               disabled={isLoading}
-                              className="text-xs h-8 px-3 text-accent border-accent/40 hover:bg-accent/10"
+                              loading={isLoading}
+                              className="text-accent border-accent/40 hover:bg-accent/10"
                             >
-                              {isLoading ? (
-                                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <UserCheck className="mr-1.5 h-3.5 w-3.5" />
-                              )}
-                              Approve Request
+                              {!isLoading && <UserCheck className="h-3.5 w-3.5" />}
+                              Approve
                             </Button>
                           ) : (
-                            <span className="text-xs text-accent font-semibold px-2.5 py-1 bg-accent/15 border border-accent/30 rounded font-mono mr-2">
-                              Awaiting SHO Approval
+                            <span className="text-xs text-accent font-semibold px-2.5 py-1 bg-accent/15 border border-accent/30 rounded font-mono">
+                              Awaiting SHO
                             </span>
                           )}
                         </>
                       )}
-
 
                       {req.status === "approved" && (
                         <Button
                           size="sm"
                           onClick={() => void handleDispatch(req.id)}
                           disabled={isLoading}
-                          className="text-xs h-8 px-3 bg-primary"
+                          loading={isLoading}
                         >
-                          {isLoading ? (
-                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Send className="mr-1.5 h-3.5 w-3.5" />
-                          )}
-                          Dispatch Request
+                          {!isLoading && <Send className="h-3.5 w-3.5" />}
+                          Dispatch
                         </Button>
                       )}
 
                       {req.status === "dispatched" && (
                         <Button
                           size="sm"
+                          variant="success"
                           onClick={() => void handleTriggerMockResponse(req.id)}
                           disabled={isLoading}
-                          className="text-xs h-8 px-3 bg-success hover:scale-105 transition-all glow-success border-0"
+                          loading={isLoading}
                         >
-                          {isLoading ? (
-                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Sparkles className="mr-1.5 h-3.5 w-3.5 animate-pulse" />
-                          )}
+                          {!isLoading && <Sparkles className="h-3.5 w-3.5" />}
                           Trigger Mock Response
                         </Button>
                       )}
@@ -438,15 +422,15 @@ export default function RequestsPage() {
                           size="sm"
                           variant="ghost"
                           onClick={() => router.push(`/cases/${caseId}/responses`)}
-                          className="text-xs h-8 px-3 text-success hover:text-success hover:bg-success/15 gap-1"
+                          className="text-success hover:text-success hover:bg-success/10 gap-1"
                         >
                           <CheckCircle className="h-3.5 w-3.5" />
-                          Response Received
-                          <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                          Received
+                          <ArrowRight className="h-3.5 w-3.5" />
                         </Button>
                       )}
                     </div>
-                  </div>
+                  </CardFooter>
                 </Card>
               );
             })}
@@ -456,7 +440,7 @@ export default function RequestsPage() {
 
       {/* Preview / Edit Dialog */}
       <Dialog open={selectedRequest !== null} onOpenChange={(open) => !open && setSelectedRequest(null)}>
-        <DialogContent className="glass max-w-2xl text-foreground">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-heading text-lg font-bold flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
@@ -476,7 +460,6 @@ export default function RequestsPage() {
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   disabled={selectedRequest?.status !== "draft" || user?.role !== "IO"}
-                  className="bg-input border-border/40"
                 />
               </div>
               <div className="space-y-1.5">
@@ -487,7 +470,6 @@ export default function RequestsPage() {
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
                   disabled={selectedRequest?.status !== "draft" || user?.role !== "IO"}
-                  className="bg-input border-border/40"
                 />
               </div>
             </div>
@@ -500,25 +482,18 @@ export default function RequestsPage() {
                 onChange={(e) => setEditBody(e.target.value)}
                 disabled={selectedRequest?.status !== "draft" || user?.role !== "IO"}
                 rows={12}
-                className="flex w-full rounded-md border border-border/40 bg-input px-3 py-2 text-sm font-mono leading-relaxed placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-80"
+                className="flex w-full rounded-lg border border-border/60 bg-input px-3 py-2 text-sm font-mono leading-relaxed placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-80 transition-all"
               />
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setSelectedRequest(null)} className="text-muted-foreground">
+            <Button variant="ghost" onClick={() => setSelectedRequest(null)}>
               Close
             </Button>
             {selectedRequest?.status === "draft" && user?.role === "IO" && (
-              <Button onClick={handleSaveEdit} disabled={savingEdit} className="bg-primary">
-                {savingEdit ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving Changes...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
+              <Button onClick={handleSaveEdit} disabled={savingEdit} loading={savingEdit}>
+                Save Changes
               </Button>
             )}
           </DialogFooter>

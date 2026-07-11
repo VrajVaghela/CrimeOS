@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
-import { AlertCircle, Crosshair, Gavel, Scale, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, Crosshair, Gavel, Scale, Sparkles, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -36,7 +36,6 @@ export default function PathPage() {
     };
   }, [caseId]);
 
-  // Monitor processing status to manage intervals
   useEffect(() => {
     if (status === "processing") {
       startPolling();
@@ -61,14 +60,10 @@ export default function PathPage() {
   }
 
   function startPolling() {
-    stopPolling(); // clear any existing
-
-    // 1. Fetch status every 2 seconds
+    stopPolling();
     pollIntervalRef.current = setInterval(() => {
       void pollStatus();
     }, 2000);
-
-    // 2. Increment elapsed time timer every second
     setElapsedTime(0);
     timerIntervalRef.current = setInterval(() => {
       setElapsedTime((prev) => prev + 1);
@@ -100,7 +95,6 @@ export default function PathPage() {
       }
     } catch (e) {
       console.error("Error polling path status:", e);
-      // We don't abort on one error, just log and keep polling
     }
   }
 
@@ -126,7 +120,6 @@ export default function PathPage() {
     if (!path) return;
     try {
       const updatedStep = await updateStepStatus(stepId, newStatus);
-      // Update local state
       setPath({
         ...path,
         steps: path.steps.map((s) => (s.id === stepId ? updatedStep : s)),
@@ -148,28 +141,28 @@ export default function PathPage() {
     }
   };
 
-
   if (loading && status === "not_started") {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-60 w-full rounded-xl" />
+        <Skeleton className="h-10 w-56" />
+        <Skeleton className="h-64 w-full rounded-xl" />
       </div>
     );
   }
 
-  // State 1: Awaiting trigger (Not Started)
+  // Not Started
   if (status === "not_started") {
     return (
-      <div className="flex flex-col items-center gap-5 rounded-xl bg-card border border-border p-16 text-center grid-bg">
-        <div className="rounded-full bg-primary/10 p-4 border border-primary/20">
-          <Crosshair className="h-8 w-8 text-primary glow-primary" />
+      <div className="flex flex-col items-center gap-6 rounded-xl bg-card border border-violet/20 p-12 text-center animate-fade-up relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet via-primary to-violet/30" />
+        <div className="rounded-full bg-gradient-to-br from-violet/20 to-primary/20 p-4 border border-violet/20">
+          <Crosshair className="h-8 w-8 text-violet" />
         </div>
-        <div className="max-w-md">
+        <div className="max-w-md space-y-2">
           <h2 className="font-heading text-xl font-bold text-foreground">
             Generate Investigation Path
           </h2>
-          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             Analyze the complaint materials using Crime OS RAG. System will automatically match
             Standard Operating Procedures (SOPs), suggest BNS/BNSS/BSA legal sections, and lay out the steps.
           </p>
@@ -180,24 +173,21 @@ export default function PathPage() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <Button
-          onClick={handleGenerate}
-          className="bg-primary text-primary-foreground font-semibold px-6 py-2 rounded-lg hover:scale-105 glow-primary transition-all duration-200"
-          id="btn-generate-path"
-        >
+        <Button onClick={handleGenerate} size="lg" id="btn-generate-path">
           Analyze & Generate Path
         </Button>
       </div>
     );
   }
 
-  // State 2: Background processing
+  // Processing
   if (status === "processing") {
     return (
-      <div className="flex flex-col items-center justify-center gap-5 rounded-xl bg-card border border-border p-16 text-center grid-bg">
+      <div className="flex flex-col items-center justify-center gap-5 rounded-xl bg-card border border-violet/20 p-12 text-center animate-fade-up relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet via-info to-violet/30" />
         <div className="relative flex items-center justify-center">
-          <div className="h-12 w-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
-          <Sparkles className="absolute h-5 w-5 text-primary animate-pulse" />
+          <div className="h-14 w-14 rounded-full border-4 border-violet/30 border-t-violet animate-spin" />
+          <Sparkles className="absolute h-6 w-6 text-violet animate-pulse" />
         </div>
         <div className="max-w-md space-y-1">
           <h2 className="font-heading text-lg font-semibold text-foreground">
@@ -207,10 +197,10 @@ export default function PathPage() {
             Retrieving SOPs, analyzing entities, and aligning BNS sections.
           </p>
           <p className="font-mono text-xs text-primary mt-2">
-            Elapsed time: {elapsedTime}s
+            Elapsed: {elapsedTime}s
           </p>
         </div>
-        <div className="w-full max-w-sm space-y-2 mt-4">
+        <div className="w-full max-w-sm space-y-2 mt-2">
           <Skeleton className="h-3 w-full" />
           <Skeleton className="h-3 w-5/6 mx-auto" />
           <Skeleton className="h-3 w-2/3 mx-auto" />
@@ -219,42 +209,40 @@ export default function PathPage() {
     );
   }
 
-  // State 3: Error/Failed
+  // Failed
   if (status === "failed") {
     return (
-      <div className="flex flex-col items-center gap-5 rounded-xl bg-card border border-destructive/20 p-16 text-center grid-bg">
+      <div className="flex flex-col items-center gap-5 rounded-xl bg-card border border-destructive/20 p-12 text-center animate-fade-up">
         <div className="rounded-full bg-destructive/10 p-4 border border-destructive/20">
-          <AlertCircle className="h-8 w-8 text-destructive glow-destructive" />
+          <AlertCircle className="h-8 w-8 text-destructive" />
         </div>
-        <div className="max-w-md">
+        <div className="max-w-md space-y-1">
           <h2 className="font-heading text-lg font-bold text-destructive">
             Generation Failed
           </h2>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground">
             {message || "An unexpected error occurred during path suggestion."}
           </p>
         </div>
-        <Button
-          onClick={handleGenerate}
-          variant="secondary"
-          className="border border-primary/60 text-foreground hover:bg-primary/10 font-semibold px-6 py-2 rounded-lg"
-          id="btn-retry-path"
-        >
+        <Button onClick={handleGenerate} variant="secondary" id="btn-retry-path">
+          <RefreshCw className="h-4 w-4" />
           Regenerate Path
         </Button>
       </div>
     );
   }
 
-  // State 4: Complete/Done
+  // Complete/Done
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      {/* Steps panel (Left 2 columns) */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start animate-fade-up">
+      {/* Steps panel */}
       <div className="lg:col-span-2 space-y-6">
-        <div className="flex items-center justify-between border-b pb-4 mb-2 border-border/40">
+        <div className="flex items-center justify-between border-b border-violet/30 pb-4">
           <div>
             <h2 className="font-heading text-xl font-bold flex items-center gap-2">
-              <Crosshair className="h-5 w-5 text-primary" />
+              <div className="rounded-lg bg-violet/15 p-1.5">
+                <Crosshair className="h-5 w-5 text-violet" />
+              </div>
               Investigation Blueprint
             </h2>
             <p className="text-xs text-muted-foreground mt-1">
@@ -262,12 +250,12 @@ export default function PathPage() {
             </p>
           </div>
           <Button
-            variant="secondary"
+            variant="outline"
             size="sm"
             onClick={handleGenerate}
-            className="border border-primary/40 text-xs font-semibold px-3 h-8 rounded hover:bg-primary/10"
             id="btn-regenerate"
           >
+            <RefreshCw className="h-3.5 w-3.5" />
             Regenerate
           </Button>
         </div>
@@ -280,19 +268,17 @@ export default function PathPage() {
         )}
 
         {path && (
-          <PathStepper
-            steps={path.steps}
-            caseId={caseId}
-            onStatusChange={handleStatusChange}
-          />
+          <PathStepper steps={path.steps} caseId={caseId} onStatusChange={handleStatusChange} />
         )}
       </div>
 
-      {/* Legal Sections Sidebar (Right 1 column) */}
-      <div className="space-y-6 lg:sticky lg:top-6 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto pr-1 pb-6">
-        <div className="border-b pb-4 border-border/40">
+      {/* Legal Sections Sidebar */}
+      <div className="space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto pr-1 pb-6">
+        <div className="border-b border-violet/30 pb-4">
           <h2 className="font-heading text-xl font-bold flex items-center gap-2">
-            <Scale className="h-5 w-5 text-primary" />
+            <div className="rounded-lg bg-violet/15 p-1.5">
+              <Scale className="h-5 w-5 text-violet" />
+            </div>
             Legal Grounding
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
@@ -302,8 +288,8 @@ export default function PathPage() {
 
         <div className="space-y-4">
           {caseSections.length === 0 ? (
-            <div className="text-center p-8 bg-muted rounded-xl border border-dashed border-border text-muted-foreground">
-              <p className="text-sm">No legal sections suggested for this crime classification.</p>
+            <div className="text-center p-8 bg-muted/30 rounded-xl border border-dashed border-border/40">
+              <p className="text-sm text-muted-foreground">No legal sections suggested for this crime classification.</p>
             </div>
           ) : (
             caseSections.map((sec) => {
@@ -312,71 +298,60 @@ export default function PathPage() {
                 <AiContentCard key={sec.id} title="AI-Suggested Section">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-2">
-                      <div>
+                      <div className="min-w-0">
                         <span className="font-heading font-semibold text-sm text-foreground block">
                           {sec.legal_section.code} Section {sec.legal_section.section_number}
                         </span>
-                        <span className="text-xs text-muted-foreground block">
+                        <span className="text-xs text-muted-foreground block truncate">
                           {sec.legal_section.title}
                         </span>
                       </div>
                       <Badge
-                        className={[
-                          "text-[10px] font-mono font-semibold uppercase tracking-wider rounded px-1.5 py-0.5",
-                          highConfidence
-                            ? "bg-success/15 text-success border border-success/30"
-                            : "bg-accent/15 text-accent border border-accent/30",
-                        ].join(" ")}
-                        variant="outline"
+                        variant={highConfidence ? "success" : "warning"}
+                        className="text-[10px] font-mono font-semibold uppercase shrink-0"
                       >
                         {Math.round(sec.confidence * 100)}% Conf
                       </Badge>
                     </div>
 
-                    {/* Section raw code text */}
-                    <div className="rounded bg-muted p-3 text-[11px] font-mono leading-relaxed text-muted-foreground border border-border max-h-24 overflow-y-auto scrollbar-none">
+                    {/* Section code text */}
+                    <div className="rounded-lg bg-muted p-3 text-[11px] font-mono leading-relaxed text-muted-foreground border border-border/60 max-h-24 overflow-y-auto scrollbar-none">
                       {sec.legal_section.text}
                     </div>
 
-                    {/* AI Reasoning explanation */}
-                    <div className="text-xs text-foreground bg-primary/5 p-2.5 rounded border border-primary/10">
+                    {/* AI Reasoning */}
+                    <div className="text-xs text-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
                       <span className="font-bold text-[10px] text-primary block uppercase tracking-wider mb-1">
                         Application Reasoning
                       </span>
                       {sec.ai_reasoning}
                     </div>
 
-                    {/* Status Badge */}
-                    <div className="flex items-center justify-between border-t border-border/30 pt-3 mt-3">
+                    {/* Status */}
+                    <div className="flex items-center justify-between border-t border-border/30 pt-3">
                       <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-wider">
                         Review status:
                       </span>
                       {sec.status === "approved" && (
-                        <Badge className="bg-success/15 border border-success/30 text-success text-[10px] font-semibold px-2 py-0.5 rounded">
-                          Verified Charge
-                        </Badge>
+                        <Badge variant="success">Verified Charge</Badge>
                       )}
                       {sec.status === "rejected" && (
-                        <Badge className="bg-destructive/15 border border-destructive/30 text-destructive text-[10px] font-semibold px-2 py-0.5 rounded">
-                          Flagged / Inapplicable
-                        </Badge>
+                        <Badge variant="destructive">Flagged / Inapplicable</Badge>
                       )}
                       {sec.status === "pending" && (
-                        <Badge className="bg-accent/15 border border-accent/30 text-accent text-[10px] font-semibold px-2 py-0.5 rounded">
-                          Awaiting Audit
-                        </Badge>
+                        <Badge variant="warning" dot pulse>Awaiting Audit</Badge>
                       )}
                     </div>
 
-                    {/* Legal Advisor Action Buttons */}
+                    {/* Legal Advisor Actions */}
                     {user?.role === "LEGAL" && (
-                      <div className="flex items-center gap-2 border-t border-border/30 pt-3 mt-3 w-full justify-end">
+                      <div className="flex items-center gap-2 border-t border-border/30 pt-3 w-full justify-end">
                         <Button
                           variant="ghost"
                           size="sm"
                           disabled={updatingSectionId === sec.id}
                           onClick={() => void handleSectionStatusChange(sec.id, "rejected")}
-                          className="text-[10px] h-7 px-2.5 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 border border-transparent"
+                          className="text-xs h-7 px-2.5 text-destructive hover:bg-destructive/10"
                         >
                           Flag Inapplicable
                         </Button>
@@ -384,13 +359,11 @@ export default function PathPage() {
                           size="sm"
                           disabled={updatingSectionId === sec.id}
                           onClick={() => void handleSectionStatusChange(sec.id, "approved")}
-                          className="text-[10px] h-7 px-2.5 bg-success hover:glow-success text-success-foreground border-0"
+                          loading={updatingSectionId === sec.id}
+                          variant="success"
+                          className="text-xs h-7 px-2.5"
                         >
-                          {updatingSectionId === sec.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                          ) : (
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                          )}
+                          {updatingSectionId !== sec.id && <CheckCircle2 className="h-3 w-3" />}
                           Verify Citation
                         </Button>
                       </div>

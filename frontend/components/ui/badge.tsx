@@ -8,10 +8,14 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground",
-        secondary: "bg-secondary text-secondary-foreground border",
-        outline: "border border-current bg-transparent",
-        destructive: "bg-destructive text-destructive-foreground",
+        default: "bg-primary/15 text-primary border border-primary/30",
+        secondary: "bg-secondary text-secondary-foreground border border-border/40",
+        outline: "border border-border bg-transparent text-muted-foreground",
+        destructive: "bg-destructive/15 text-destructive border border-destructive/30",
+        success: "bg-success/15 text-success border border-success/30",
+        warning: "bg-accent/15 text-accent border border-accent/30",
+        info: "bg-primary/10 text-primary border border-primary/20",
+        solid: "bg-primary text-primary-foreground border border-primary",
       },
     },
     defaultVariants: {
@@ -22,8 +26,25 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {}
-
-export function Badge({ className, variant, ...props }: BadgeProps) {
-  return <span className={cn(badgeVariants({ variant }), className)} {...props} />;
+    VariantProps<typeof badgeVariants> {
+  dot?: boolean;
+  pulse?: boolean;
 }
+
+function Badge({ className, variant, dot, pulse, children, ...props }: BadgeProps) {
+  return (
+    <span className={cn(badgeVariants({ variant }), className)} {...props}>
+      {dot && (
+        <span className="relative mr-1.5 flex h-2 w-2">
+          {pulse && (
+            <span className="absolute inline-flex h-full w-full animate-ping-slow rounded-full bg-current opacity-75" />
+          )}
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
+        </span>
+      )}
+      {children}
+    </span>
+  );
+}
+
+export { Badge, badgeVariants };

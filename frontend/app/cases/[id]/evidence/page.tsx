@@ -11,6 +11,7 @@ import {
   Tag,
   ShieldAlert,
   Calendar,
+  Image as ImageIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -32,9 +33,7 @@ export default function EvidencePage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (caseId) {
-      void loadEvidence();
-    }
+    if (caseId) void loadEvidence();
   }, [caseId]);
 
   async function loadEvidence() {
@@ -73,9 +72,9 @@ export default function EvidencePage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between gap-4">
+    <div className="space-y-6 animate-fade-up">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h2 className="font-heading text-lg font-bold flex items-center gap-2">
             <Camera className="h-5 w-5 text-primary" />
@@ -98,97 +97,94 @@ export default function EvidencePage() {
           <Button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="gap-1.5 glow-primary hover:scale-105 transition-all duration-200"
+            loading={uploading}
             id="upload-evidence-btn"
           >
-            {uploading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Analyzing Image...
-              </>
-            ) : (
-              <>
-                <Upload className="h-4 w-4" />
-                Upload Image Evidence
-              </>
-            )}
+            {!uploading && <Upload className="h-4 w-4" />}
+            {uploading ? "Analyzing Image..." : "Upload Image Evidence"}
           </Button>
         </div>
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <div className="animate-fade-down rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive flex items-center gap-3">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
       )}
 
-      {/* Main Grid */}
       {loading ? (
-        <div className="py-16 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="text-sm text-muted-foreground mt-2">Loading evidence list...</p>
+        <div className="flex flex-col items-center gap-3 py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading evidence list...</p>
         </div>
       ) : evidenceList.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border p-16 text-center grid-bg">
+        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
           <div className="rounded-full bg-primary/10 p-4 border border-primary/20">
-            <Camera className="h-8 w-8 text-primary glow-primary" />
+            <Camera className="h-8 w-8 text-primary" />
           </div>
-          <div>
+          <div className="max-w-sm space-y-1">
             <h3 className="font-heading font-semibold text-lg">No Evidence Uploaded</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+            <p className="text-sm text-muted-foreground">
               Upload photographs, CCTV screenshots, or transaction receipt images to invoke Gemini Vision auto-tagging.
             </p>
           </div>
           <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
+            <ImageIcon className="h-4 w-4" />
             Select File
           </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {evidenceList.map((ev) => {
+          {evidenceList.map((ev, idx) => {
             const highConfidence = ev.ai_tags.confidence >= 0.85;
             return (
-              <Card key={ev.id} className="glass border-border/80 overflow-hidden relative group transition-all duration-300 hover:border-primary/40 hover:-translate-y-1">
+              <Card
+                key={ev.id}
+                hover
+                className="overflow-hidden animate-fade-up"
+                style={{ animationDelay: `${idx * 80}ms` }}
+              >
                 {/* Image panel */}
-                <div className="h-56 w-full relative bg-black/40 border-b border-border/40 overflow-hidden flex items-center justify-center">
+                <div className="h-56 w-full relative bg-black/40 border-b border-border/40 overflow-hidden flex items-center justify-center group">
                   <img
                     src={`${API_URL}/${ev.file_path}`}
                     alt={ev.ai_tags.description || "Evidence material"}
-                    className="max-h-full max-w-full object-contain"
+                    className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute top-3 right-3 flex items-center gap-2">
                     <Badge
-                      className={[
-                        "text-[10px] font-mono font-semibold uppercase tracking-wider rounded-full px-2 py-0.5",
-                        highConfidence
-                          ? "bg-success/15 text-success border border-success/30"
-                          : "bg-accent/15 text-accent border border-accent/30",
-                      ].join(" ")}
-                      variant="outline"
+                      variant={highConfidence ? "success" : "warning"}
+                      className="text-[10px] font-mono font-semibold uppercase"
                     >
                       {Math.round(ev.ai_tags.confidence * 100)}% Conf
                     </Badge>
                   </div>
                 </div>
 
-                {/* AI Tags / Analysis Details */}
-                <CardHeader className="pb-3 border-l-2 border-primary">
-                  <CardTitle className="font-heading text-sm font-bold flex items-center gap-2 text-primary">
-                    <Sparkles className="h-4 w-4 animate-pulse" />
-                    AI Forensic Identification
-                  </CardTitle>
-                  <CardDescription className="text-xs text-foreground mt-1 leading-relaxed">
-                    {ev.ai_tags.description}
-                  </CardDescription>
+                {/* AI Tags */}
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="font-heading text-sm font-bold flex items-center gap-2 text-violet">
+                        <div className="rounded-full bg-violet/15 p-1">
+                          <Sparkles className="h-4 w-4 text-violet" />
+                        </div>
+                        AI Forensic Identification
+                      </CardTitle>
+                      <CardDescription className="text-xs text-foreground mt-1 leading-relaxed">
+                        {ev.ai_tags.description}
+                      </CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
 
                 <CardContent className="space-y-4 pt-0">
-                  {/* Tag List */}
+                  {/* Tags */}
                   <div className="flex flex-wrap gap-1.5 items-center">
-                    <Tag className="h-3 w-3 text-muted-foreground mr-1" />
+                    <Tag className="h-3 w-3 text-muted-foreground mr-1 shrink-0" />
                     {ev.ai_tags.tags.map((t) => (
-                      <Badge key={t} variant="secondary" className="text-[10px] uppercase font-mono tracking-wide px-2 py-0.5">
+                      <Badge key={t} variant="secondary" className="text-[10px] uppercase font-mono">
                         {t}
                       </Badge>
                     ))}
@@ -201,18 +197,17 @@ export default function EvidencePage() {
                         <ShieldAlert className="h-3.5 w-3.5" /> Flagged Forensic Features
                       </span>
                       <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
-                        {ev.ai_tags.flagged_features.map((feat, idx) => (
-                          <li key={idx}>{feat}</li>
+                        {ev.ai_tags.flagged_features.map((feat, i) => (
+                          <li key={i}>{feat}</li>
                         ))}
                       </ul>
                     </div>
                   )}
 
                   {/* Timestamp */}
-                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono pt-1">
+                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono pt-1 border-t border-border/30">
                     <Calendar className="h-3.5 w-3.5" />
-                    Uploaded At:{" "}
-                    {new Date(ev.uploaded_at).toLocaleString("en-IN", {
+                    Uploaded: {new Date(ev.uploaded_at).toLocaleString("en-IN", {
                       dateStyle: "medium",
                       timeStyle: "short",
                     })}

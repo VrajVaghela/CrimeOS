@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { getCaseResponses, regenerateInsights, ApiError } from "@/lib/api";
 import type { ProviderResponseOut } from "@/lib/types";
 
@@ -31,9 +32,7 @@ export default function ResponsesPage() {
   const [regenerating, setRegenerating] = useState(false);
 
   useEffect(() => {
-    if (caseId) {
-      void loadResponses();
-    }
+    if (caseId) void loadResponses();
   }, [caseId]);
 
   async function loadResponses() {
@@ -42,9 +41,7 @@ export default function ResponsesPage() {
     try {
       const data = await getCaseResponses(caseId);
       setResponses(data);
-      if (data.length > 0) {
-        setSelectedResponseId(data[0].id);
-      }
+      if (data.length > 0) setSelectedResponseId(data[0].id);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Failed to load responses");
     } finally {
@@ -70,31 +67,29 @@ export default function ResponsesPage() {
   const recordHeaders = records.length > 0 ? Object.keys(records[0]) : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-up">
       {loading ? (
-        <div className="space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary mt-12" />
-          <p className="text-center text-sm text-muted-foreground">Loading provider responses...</p>
+        <div className="flex flex-col items-center gap-3 py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading provider responses...</p>
         </div>
       ) : error ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-destructive/20 bg-destructive/10 p-8 text-center">
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-destructive/30 bg-destructive/10 p-8 text-center animate-fade-down">
           <AlertCircle className="h-10 w-10 text-destructive" />
           <div>
             <h3 className="font-heading text-lg font-semibold text-destructive">Error Loading Data</h3>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
           </div>
-          <Button onClick={loadResponses} variant="secondary" className="border-destructive/30 hover:bg-destructive/10">
-            Retry
-          </Button>
+          <Button onClick={loadResponses} variant="secondary">Retry</Button>
         </div>
       ) : responses.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border p-16 text-center grid-bg">
-          <div className="rounded-full bg-primary/10 p-4">
+        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
+          <div className="rounded-full bg-primary/10 p-4 border border-primary/20">
             <Activity className="h-8 w-8 text-primary" />
           </div>
-          <div>
+          <div className="max-w-sm space-y-1">
             <h3 className="font-heading font-semibold text-lg">No Provider Responses Received Yet</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+            <p className="text-sm text-muted-foreground">
               Dispatch a legal request to a telecom or bank, then click{" "}
               <span className="text-success font-medium">Trigger Mock Response</span> to simulate the provider sending back data.
             </p>
@@ -104,8 +99,12 @@ export default function ResponsesPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar selector */}
           <div className="lg:col-span-1 space-y-3">
-            <h3 className="font-heading text-sm font-bold text-muted-foreground uppercase tracking-wider px-1">
+            <h3 className="font-heading text-xs font-bold text-muted-foreground uppercase tracking-wider px-1 flex items-center gap-2">
+              <FileText className="h-3.5 w-3.5" />
               Response Files
+              <Badge variant="secondary" className="ml-auto font-mono text-xs">
+                {responses.length}
+              </Badge>
             </h3>
             <div className="flex flex-col gap-2">
               {responses.map((res, index) => {
@@ -116,16 +115,18 @@ export default function ResponsesPage() {
                     onClick={() => setSelectedResponseId(res.id)}
                     className={[
                       "w-full text-left rounded-xl p-4 border transition-all text-xs font-mono flex flex-col gap-1.5",
+                      "animate-fade-up",
                       isSelected
-                        ? "bg-primary/10 border-primary text-foreground glow-primary"
-                        : "bg-card/50 border-border text-muted-foreground hover:bg-secondary hover:text-foreground",
+                        ? "bg-primary/10 border-primary text-foreground"
+                        : "bg-card/50 border-border/60 text-muted-foreground hover:bg-secondary hover:text-foreground",
                     ].join(" ")}
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <div className="flex items-center gap-1.5 font-heading text-sm font-bold text-foreground">
                       <FileText className="h-4 w-4 text-primary" />
                       Response #{index + 1}
                     </div>
-                    <div>File: {res.file_path?.split("/").pop()}</div>
+                    <div className="truncate">File: {res.file_path?.split("/").pop()}</div>
                     <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                       <Clock className="h-3 w-3" />
                       {new Date(res.received_at).toLocaleDateString("en-IN")}
@@ -141,12 +142,14 @@ export default function ResponsesPage() {
             {selectedResponse && (
               <>
                 {/* AI Insights Card */}
-                <Card className="glass border-primary/30 relative overflow-hidden">
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+                <Card className="relative overflow-hidden animate-fade-up border-info/30">
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-info via-primary to-info/30" />
                   <CardHeader className="pb-3 flex flex-row items-center justify-between gap-4">
                     <div>
-                      <CardTitle className="font-heading text-base font-bold flex items-center gap-2 text-primary">
-                        <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                      <CardTitle className="font-heading text-base font-bold flex items-center gap-2 text-info">
+                        <div className="rounded-lg bg-info/15 p-1.5">
+                          <Sparkles className="h-4 w-4 text-info" />
+                        </div>
                         AI Analysis & Insights
                       </CardTitle>
                       <CardDescription className="text-xs text-muted-foreground">
@@ -154,29 +157,25 @@ export default function ResponsesPage() {
                       </CardDescription>
                     </div>
                     <Button
-                      variant="secondary"
+                      variant="outline"
                       size="sm"
                       onClick={handleRegenerateInsights}
                       disabled={regenerating}
-                      className="text-xs h-8 gap-1.5 border-border shrink-0"
+                      loading={regenerating}
                     >
-                      {regenerating ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <RefreshCw className="h-3.5 w-3.5" />
-                      )}
+                      {!regenerating && <RefreshCw className="h-3.5 w-3.5" />}
                       Regenerate
                     </Button>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm leading-relaxed text-foreground bg-primary/5 border border-primary/20 rounded-lg p-4 font-sans whitespace-pre-wrap">
+                    <div className="text-sm leading-relaxed text-foreground bg-primary/5 border border-primary/20 rounded-lg p-4 font-sans whitespace-pre-wrap">
                       {selectedResponse.ai_insights}
-                    </p>
+                    </div>
                   </CardContent>
                 </Card>
 
                 {/* Parsed Data Table */}
-                <Card className="border-border">
+                <Card className="animate-fade-up delay-200">
                   <CardHeader className="pb-3 flex flex-row items-center justify-between gap-4">
                     <div>
                       <CardTitle className="font-heading text-base font-bold flex items-center gap-2">
@@ -188,13 +187,13 @@ export default function ResponsesPage() {
                       </CardDescription>
                     </div>
                     {selectedResponse.file_path && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        asChild
-                        className="text-xs h-8 gap-1.5 border-border"
-                      >
-                        <a href={`http://localhost:8000/${selectedResponse.file_path}`} download target="_blank" rel="noreferrer">
+                      <Button variant="outline" size="sm" asChild>
+                        <a
+                          href={`http://localhost:8000/${selectedResponse.file_path}`}
+                          download
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           <Download className="h-3.5 w-3.5" />
                           Download CSV
                         </a>
@@ -207,43 +206,48 @@ export default function ResponsesPage() {
                         No rows found in this response file.
                       </p>
                     ) : (
-                      <div className="rounded-md border border-border/80 overflow-x-auto">
+                      <div className="rounded-lg border border-border/60 overflow-x-auto">
                         <Table>
                           <TableHeader>
                             <TableRow className="bg-muted/50 hover:bg-muted/50">
                               {recordHeaders.map((header) => (
-                                <TableHead key={header} className="font-mono text-xs uppercase text-muted-foreground font-semibold">
-                                  {header.replace("_", " ")}
+                                <TableHead
+                                  key={header}
+                                  className="font-mono text-xs uppercase text-muted-foreground font-semibold"
+                                >
+                                  {header.replace(/_/g, " ")}
                                 </TableHead>
                               ))}
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {records.map((row, idx) => (
-                              <TableRow
-                                key={idx}
-                                className={[
-                                  "hover:bg-primary/5 font-mono text-xs transition-colors duration-150",
-                                  // Highlight suspicious IP or numbers with a subtle red bg (bonus wow design detail!)
-                                  row.ip_address === "103.88.22.14" || row.calling_number === "+919876543210"
-                                    ? "bg-destructive/10 border-l border-l-destructive border-l-2"
-                                    : "",
-                                ].join(" ")}
-                                title={
-                                  row.ip_address === "103.88.22.14"
-                                    ? "AI Warning: Suspect IP address correlated with proxy/VPN exit node used during transaction."
-                                    : row.calling_number === "+919876543210"
-                                    ? "AI Warning: Calling number matches reported caller ID mismatch in telecom records."
-                                    : undefined
-                                }
-                              >
-                                {recordHeaders.map((header) => (
-                                  <TableCell key={header} className="py-2.5">
-                                    {String(row[header] ?? "")}
-                                  </TableCell>
-                                ))}
-                              </TableRow>
-                            ))}
+                            {records.map((row, idx) => {
+                              const isSuspicious =
+                                row.ip_address === "103.88.22.14" ||
+                                row.calling_number === "+919876543210";
+                              return (
+                                <TableRow
+                                  key={idx}
+                                  className={[
+                                    "hover:bg-primary/5 font-mono text-xs transition-colors duration-150",
+                                    isSuspicious ? "bg-destructive/5 border-l-2 border-l-destructive" : "",
+                                  ].join(" ")}
+                                  title={
+                                    row.ip_address === "103.88.22.14"
+                                      ? "AI Warning: Suspect IP correlated with proxy/VPN exit node."
+                                      : row.calling_number === "+919876543210"
+                                        ? "AI Warning: Calling number matches reported caller ID mismatch."
+                                        : undefined
+                                  }
+                                >
+                                  {recordHeaders.map((header) => (
+                                    <TableCell key={header} className="py-2.5">
+                                      {String(row[header] ?? "")}
+                                    </TableCell>
+                                  ))}
+                                </TableRow>
+                              );
+                            })}
                           </TableBody>
                         </Table>
                       </div>

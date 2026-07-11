@@ -19,13 +19,11 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { getAuditEvents, ApiError } from "@/lib/api";
 import type { AuditEventOut } from "@/lib/types";
 
-const ACTION_CONFIG: Record<
-  string,
-  { icon: React.ElementType; color: string; label: string }
-> = {
+const ACTION_CONFIG: Record<string, { icon: React.ElementType; color: string; label: string }> = {
   case_created: { icon: Plus, color: "text-primary", label: "Case Created" },
   complaint_ingested: { icon: FileText, color: "text-accent", label: "Complaint Ingested" },
   extraction_complete: { icon: Search, color: "text-accent", label: "Entities Extracted" },
@@ -47,6 +45,14 @@ function getActionConfig(action: string) {
       label: action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
     }
   );
+}
+
+function getActionColor(action: string): string {
+  if (["case_created", "request_dispatched", "insights_regenerated", "summary_generated", "path_generated"].includes(action)) return "bg-primary";
+  if (["complaint_ingested", "extraction_complete"].includes(action)) return "bg-info";
+  if (["step_status_changed", "request_approved", "response_received"].includes(action)) return "bg-success";
+  if (["request_created"].includes(action)) return "bg-accent";
+  return "bg-muted";
 }
 
 function formatRelativeTime(dateStr: string): string {
@@ -72,9 +78,7 @@ export default function AuditPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (caseId) {
-      void loadEvents();
-    }
+    if (caseId) void loadEvents();
   }, [caseId]);
 
   async function loadEvents() {
@@ -91,9 +95,9 @@ export default function AuditPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-up">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h2 className="font-heading text-lg font-bold flex items-center gap-2">
             <Network className="h-5 w-5 text-primary" />
@@ -104,11 +108,10 @@ export default function AuditPage() {
           </p>
         </div>
         <Button
-          variant="secondary"
+          variant="outline"
           size="sm"
           onClick={loadEvents}
           disabled={loading}
-          className="gap-2 border-border"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           Refresh
@@ -116,7 +119,7 @@ export default function AuditPage() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <div className="animate-fade-down rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive flex items-center gap-3">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -128,13 +131,13 @@ export default function AuditPage() {
           <p className="text-sm text-muted-foreground">Loading audit events...</p>
         </div>
       ) : events.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border p-16 text-center grid-bg">
-          <div className="rounded-full bg-primary/10 p-4">
+        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
+          <div className="rounded-full bg-primary/10 p-4 border border-primary/20">
             <Network className="h-8 w-8 text-primary" />
           </div>
-          <div>
+          <div className="max-w-sm space-y-1">
             <h3 className="font-heading font-semibold text-lg">No Audit Events Yet</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+            <p className="text-sm text-muted-foreground">
               Every action taken on this case will appear here automatically.
             </p>
           </div>
@@ -142,7 +145,7 @@ export default function AuditPage() {
       ) : (
         <div className="relative">
           {/* Timeline vertical line */}
-          <div className="absolute left-5 top-0 bottom-0 w-px bg-border" />
+          <div className="absolute left-5 top-0 bottom-0 w-px bg-border/60" />
 
           <div className="flex flex-col gap-0">
             {[...events].reverse().map((event, idx) => {
@@ -152,12 +155,16 @@ export default function AuditPage() {
               const detailKeys = Object.keys(event.detail);
 
               return (
-                <div key={event.id} className="relative flex gap-4 pb-6 pl-12">
-                  {/* Timeline node */}
+                <div
+                  key={event.id}
+                  className="relative flex gap-4 pb-6 pl-12 animate-fade-up"
+                  style={{ animationDelay: `${idx * 40}ms` }}
+                >
+                  {/* Timeline node — color-coded by action type */}
                   <div
                     className={[
                       "absolute left-2.5 top-1 h-5 w-5 rounded-full border-2 border-background flex items-center justify-center z-10 transition-all duration-300",
-                      idx === 0 ? "bg-primary glow-primary animate-glow-pulse" : "bg-card",
+                      idx === 0 ? getActionColor(event.action) + " shadow-[0_0_0_4px] shadow-primary/20" : "bg-card",
                     ].join(" ")}
                   >
                     <Icon className={`h-2.5 w-2.5 ${config.color}`} />
@@ -169,7 +176,7 @@ export default function AuditPage() {
                       "flex-1 rounded-xl border p-4 transition-all cursor-pointer",
                       idx === 0
                         ? "bg-primary/5 border-primary/30"
-                        : "bg-card border-border hover:border-primary/30 hover:bg-primary/5",
+                        : "bg-card border-border/60 hover:border-primary/30 hover:bg-primary/5",
                     ].join(" ")}
                     onClick={() => setExpandedId(isExpanded ? null : event.id)}
                   >
@@ -180,14 +187,14 @@ export default function AuditPage() {
                           {config.label}
                         </span>
                         {idx === 0 && (
-                          <span className="text-[10px] font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
+                          <Badge variant="info" className="text-[10px] font-mono shrink-0">
                             LATEST
-                          </span>
+                          </Badge>
                         )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
                         {event.user_id && <User className="h-3 w-3" />}
-                        <span className="font-mono">{formatRelativeTime(event.created_at)}</span>
+                        <span className="font-mono whitespace-nowrap">{formatRelativeTime(event.created_at)}</span>
                       </div>
                     </div>
 
@@ -202,11 +209,11 @@ export default function AuditPage() {
                     {detailKeys.length > 0 && (
                       <div
                         className={[
-                          "overflow-hidden transition-all",
+                          "overflow-hidden transition-all duration-300",
                           isExpanded ? "max-h-96 mt-3" : "max-h-0",
                         ].join(" ")}
                       >
-                        <div className="bg-muted/50 border border-border rounded-lg p-3 space-y-1">
+                        <div className="bg-muted/50 border border-border/60 rounded-lg p-3 space-y-1">
                           <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2">
                             Event Detail
                           </p>
@@ -225,7 +232,7 @@ export default function AuditPage() {
                     )}
 
                     {detailKeys.length > 0 && !isExpanded && (
-                      <p className="text-[10px] text-muted-foreground mt-2">
+                      <p className="text-[10px] text-muted-foreground mt-2 hover:text-primary transition-colors">
                         Click to expand event detail →
                       </p>
                     )}
@@ -237,13 +244,12 @@ export default function AuditPage() {
 
           {/* Timeline footer */}
           <div className="flex items-center gap-2 pl-12 mt-2">
-            <div className="h-3 w-3 rounded-full bg-muted border border-border" />
+            <div className="h-3 w-3 rounded-full bg-muted border border-border/60" />
             <p className="text-xs text-muted-foreground font-mono">Case opened</p>
           </div>
         </div>
       )}
 
-      {/* Event count footer */}
       {events.length > 0 && (
         <p className="text-xs text-muted-foreground text-center font-mono">
           {events.length} event{events.length !== 1 ? "s" : ""} recorded · Append-only audit log

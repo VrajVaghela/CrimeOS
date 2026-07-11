@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import {
   Radar,
   Sparkles,
-  RefreshCw,
   Clock,
   FileText,
   AlertCircle,
@@ -30,9 +29,7 @@ export default function SummaryPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (caseId) {
-      void loadSummaries();
-    }
+    if (caseId) void loadSummaries();
   }, [caseId]);
 
   async function loadSummaries() {
@@ -66,9 +63,9 @@ export default function SummaryPage() {
   const selected = summaries.find((s) => s.id === selectedId);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-up">
       {/* Header row */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h2 className="font-heading text-lg font-bold flex items-center gap-2">
             <Radar className="h-5 w-5 text-primary" />
@@ -81,24 +78,15 @@ export default function SummaryPage() {
         <Button
           onClick={handleGenerate}
           disabled={generating}
-          className="gap-2 glow-primary"
+          loading={generating}
         >
-          {generating ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4" />
-              Generate New Summary
-            </>
-          )}
+          {!generating && <Sparkles className="h-4 w-4" />}
+          Generate New Summary
         </Button>
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <div className="animate-fade-down rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive flex items-center gap-3">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -110,22 +98,21 @@ export default function SummaryPage() {
           <p className="text-sm text-muted-foreground">Loading summaries...</p>
         </div>
       ) : summaries.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border p-16 text-center grid-bg">
-          <div className="rounded-full bg-primary/10 p-4">
+        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
+          <div className="rounded-full bg-primary/10 p-4 border border-primary/20">
             <Radar className="h-8 w-8 text-primary" />
           </div>
-          <div>
+          <div className="max-w-sm space-y-1">
             <h3 className="font-heading font-semibold text-lg">No Summary Generated Yet</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-              Click{" "}
-              <span className="text-primary font-medium">Generate New Summary</span> to create an
+            <p className="text-sm text-muted-foreground">
+              Click <span className="text-primary font-medium">Generate New Summary</span> to create an
               AI-powered case summary with full citation and audit trail.
             </p>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Version selector sidebar */}
+          {/* Version sidebar */}
           <div className="lg:col-span-1 space-y-3">
             <h3 className="font-heading text-xs font-bold text-muted-foreground uppercase tracking-wider px-1 flex items-center gap-2">
               <History className="h-3.5 w-3.5" />
@@ -135,7 +122,7 @@ export default function SummaryPage() {
               </Badge>
             </h3>
             <div className="flex flex-col gap-2">
-              {summaries.map((s) => {
+              {summaries.map((s, idx) => {
                 const isSelected = s.id === selectedId;
                 return (
                   <button
@@ -143,10 +130,12 @@ export default function SummaryPage() {
                     onClick={() => setSelectedId(s.id)}
                     className={[
                       "w-full text-left rounded-xl p-4 border transition-all text-xs font-mono flex flex-col gap-1.5",
+                      "animate-fade-up",
                       isSelected
-                        ? "bg-primary/10 border-primary text-foreground glow-primary"
-                        : "bg-card/50 border-border text-muted-foreground hover:bg-secondary hover:text-foreground",
+                        ? "bg-primary/10 border-primary text-foreground"
+                        : "bg-card/50 border-border/60 text-muted-foreground hover:bg-secondary hover:text-foreground",
                     ].join(" ")}
+                    style={{ animationDelay: `${idx * 50}ms` }}
                   >
                     <div className="flex items-center gap-1.5 font-heading text-sm font-bold text-foreground">
                       <FileText className="h-4 w-4 text-primary" />
@@ -165,16 +154,18 @@ export default function SummaryPage() {
             </div>
           </div>
 
-          {/* Summary content panel */}
+          {/* Summary content */}
           <div className="lg:col-span-3">
             {selected && (
-              <Card className="glass border-primary/30 relative overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+              <Card className="relative overflow-hidden animate-fade-up delay-200 border-violet/30">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet via-primary to-violet/30" />
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <CardTitle className="font-heading text-base font-bold flex items-center gap-2 text-primary">
-                        <Sparkles className="h-4 w-4 animate-pulse" />
+                      <CardTitle className="font-heading text-base font-bold flex items-center gap-2 text-violet">
+                        <div className="rounded-lg bg-violet/15 p-1.5">
+                          <Sparkles className="h-4 w-4 text-violet" />
+                        </div>
                         AI Case Summary — Version {selected.version}
                       </CardTitle>
                       <CardDescription className="text-xs text-muted-foreground mt-1">
@@ -185,7 +176,7 @@ export default function SummaryPage() {
                         })}
                       </CardDescription>
                     </div>
-                    <Badge className="font-mono text-xs bg-primary/20 text-primary border border-primary/30 rounded-full">
+                    <Badge variant="info" className="font-mono text-xs rounded-full">
                       v{selected.version}
                     </Badge>
                   </div>
