@@ -5,7 +5,8 @@ from sqlalchemy import select
 
 from app.ai.gemini_client import embed
 from app.database import Base, SessionLocal, engine
-from app.models import Case, LegalCode, LegalSection, SopChunk, SopDocument, User, UserRole
+import uuid
+from app.models import Case, LegalCode, LegalSection, SopChunk, SopDocument, User, UserRole, CopilotMessage, AiCitation
 from app.services.audit_service import record
 from app.services.security import hash_password
 
@@ -131,6 +132,122 @@ def main() -> None:
                     vectors = [deterministic_embedding(chunk) for chunk in chunks]
                 for chunk, vector in zip(chunks, vectors, strict=True):
                     db.add(SopChunk(sop_document_id=doc.id, chunk_text=f"{title}: {chunk}", embedding=vector))
+
+        # Seed copilot messages & citations for Case 1
+        case = db.scalar(select(Case).where(Case.case_number == "ERH26-CYB-0001"))
+        user_io = db.scalar(select(User).where(User.username == "io"))
+        if case and user_io:
+            # 1. Next Action
+            user_msg_1 = CopilotMessage(
+                case_id=case.id,
+                user_id=user_io.id,
+                role="user",
+                message="What is the next best action for this case?",
+            )
+            db.add(user_msg_1)
+            db.flush()
+
+            sop_chunk_cyber = db.scalar(
+                select(SopChunk)
+                .join(SopDocument)
+                .where(SopDocument.crime_type == "cyber_fraud")
+                .limit(1)
+            )
+
+            cit_1 = AiCitation(
+                case_id=case.id,
+                output_type="copilot_message",
+                output_id=uuid.uuid4(),  # placeholder
+                source_type="sop_chunk",
+                source_id=str(sop_chunk_cyber.id) if sop_chunk_cyber else "mock_sop_chunk",
+                excerpt="Preserve digital evidence, request bank freeze/KYC, and obtain CDR",
+                locator="Cyber Financial Fraud SOP Section 2",
+                confidence=0.95
+            )
+            db.add(cit_1)
+            db.flush()
+
+            assistant_msg_1 = CopilotMessage(
+                case_id=case.id,
+                user_id=None,
+                role="assistant",
+                message="Based on the **Cyber Financial Fraud SOP**, the recommended next action is to preserve all digital evidence, submit a bank freeze/KYC request to the beneficiary bank, and obtain Call Detail Records (CDR) for all suspect phone numbers.",
+                cited_source_ids=[str(cit_1.id)]
+            )
+            db.add(assistant_msg_1)
+            db.flush()
+            cit_1.output_id = assistant_msg_1.id
+            db.flush()
+
+            # 2. Missing Facts
+            user_msg_2 = CopilotMessage(
+                case_id=case.id,
+                user_id=user_io.id,
+                role="user",
+                message="What facts or information are currently missing or unverified?",
+            )
+            db.add(user_msg_2)
+            db.flush()
+
+            cit_2 = AiCitation(
+                case_id=case.id,
+                output_type="copilot_message",
+                output_id=uuid.uuid4(),  # placeholder
+                source_type="complaint",
+                source_id="complaint_text",
+                excerpt="No complaint text ingested yet",
+                locator="Complaint Intake form",
+                confidence=0.9
+            )
+            db.add(cit_2)
+            db.flush()
+
+            assistant_msg_2 = CopilotMessage(
+                case_id=case.id,
+                user_id=None,
+                role="assistant",
+                message="Currently, the complaint text has not been fully processed or translation is pending. We need the original complaint file to extract key victim details, transaction IDs, suspect UPI handles, and exact timestamps of the fraud.",
+                cited_source_ids=[str(cit_2.id)]
+            )
+            db.add(assistant_msg_2)
+            db.flush()
+            cit_2.output_id = assistant_msg_2.id
+            db.flush()
+
+            # 3. Evidence Explanation
+            user_msg_3 = CopilotMessage(
+                case_id=case.id,
+                user_id=user_io.id,
+                role="user",
+                message="Can you explain the evidence in this case?",
+            )
+            db.add(user_msg_3)
+            db.flush()
+
+            cit_3 = AiCitation(
+                case_id=case.id,
+                output_type="copilot_message",
+                output_id=uuid.uuid4(),  # placeholder
+                source_type="audit_event",
+                source_id="case_created",
+                excerpt="case.seeded",
+                locator="Audit logs",
+                confidence=0.85
+            )
+            db.add(cit_3)
+            db.flush()
+
+            assistant_msg_3 = CopilotMessage(
+                case_id=case.id,
+                user_id=None,
+                role="assistant",
+                message="This case has just been registered. No physical or digital evidence files (like screenshots or PDFs) have been uploaded to the evidence gallery yet. Please upload relevant transaction receipts or screenshots under the Evidence tab to help verify the suspect records.",
+                cited_source_ids=[str(cit_3.id)]
+            )
+            db.add(assistant_msg_3)
+            db.flush()
+            cit_3.output_id = assistant_msg_3.id
+            db.flush()
 
         db.commit()
 

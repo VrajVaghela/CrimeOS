@@ -20,6 +20,7 @@ from app.routers import (
     evidence,
     command_center,
     entities,
+    copilot,
 )
 from app.schemas.common import MessageOut
 
@@ -50,6 +51,7 @@ app.include_router(mock_cctns.router)
 app.include_router(evidence.router)
 app.include_router(command_center.router)
 app.include_router(entities.router)
+app.include_router(copilot.router)
 
 
 

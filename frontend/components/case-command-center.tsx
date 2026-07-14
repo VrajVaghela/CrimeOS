@@ -43,6 +43,7 @@ import type {
   RelatedCaseOut,
 } from "@/lib/types";
 import { EntityPivotPanel } from "@/components/entity-pivot-panel";
+import { CopilotPanel } from "@/components/copilot-panel";
 
 interface CaseCommandCenterProps {
   caseId: string;
@@ -309,6 +310,9 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
               )}
             </CardContent>
           </Card>
+
+          {/* Case Intelligence Copilot */}
+          <CopilotPanel caseId={caseId} />
         </div>
 
         {/* Right Column (1/3 width on desktop) */}

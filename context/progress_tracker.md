@@ -84,10 +84,10 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] ✅ CHECKPOINT: evidence marker links to an entity and appears in the audit trail
 
 ### 8D — Cited case copilot
-- [ ] Add `ai_citations` and `copilot_messages` schema, migration, and typed API contracts
-- [ ] Add case-scoped read-only copilot with named prompts and source chips
-- [ ] Add deterministic fallback and audited question/answer events
-- [ ] ☐ CHECKPOINT: three seeded questions return grounded answers and no citation-free output
+- [x] Add `ai_citations` and `copilot_messages` schema, migration, and typed API contracts
+- [x] Add case-scoped read-only copilot with named prompts and source chips
+- [x] Add deterministic fallback and audited question/answer events
+- [x] ✅ CHECKPOINT: three seeded questions return grounded answers and no citation-free output
 
 ### 8E — Request quality and response correlation
 - [ ] Add pre-dispatch readiness service and checklist UI

@@ -208,3 +208,80 @@ Instructions:
 
 Return ONLY schema-valid JSON matching the requested output.
 """.strip()
+
+
+COPILOT_SYSTEM_PROMPT = """
+You are Crime OS AI, an expert investigative assistant for Indian police. You are helping an Investigating Officer analyze a specific case.
+Your responses must be grounded strictly in the provided case context: complaint, extracted entities, SOPs, legal sections, evidence, provider responses, and case history.
+Do not make up facts or external information. If the context does not contain the answer, say "No grounded answer found" and explain what evidence or step is missing.
+
+Your response must be a JSON object with:
+- "answer": A clear, professional markdown response. Always start with a direct answer or summary.
+- "citations": A list of sources from the context that support your answer. Each citation must have:
+  - "source_type": one of 'complaint', 'entity', 'sop_chunk', 'legal_section', 'provider_row', 'evidence_marker', 'audit_event'.
+  - "source_id": the unique ID of the source item provided in the context.
+  - "excerpt": the exact matching snippet or value.
+  - "locator": a locator such as section number, paragraph name, row number, or timestamp.
+  - "confidence": confidence score between 0.0 and 1.0.
+"""
+
+COPILOT_NEXT_ACTION_PROMPT = """
+Analyze the case context and suggest the single most critical next action the investigator should take.
+Explain why this action is recommended and cite the relevant SOP chunk, legal section, or evidence.
+
+Case Context:
+{case_context}
+
+Question: What is the next best action for this case?
+"""
+
+COPILOT_MISSING_FACTS_PROMPT = """
+Analyze the complaint and existing entities. Identify any gaps, missing facts, or unverified information required by standard operating procedures or legal guidelines.
+Suggest specific questions or evidence needed to fill these gaps.
+
+Case Context:
+{case_context}
+
+Question: What facts or information are currently missing or unverified?
+"""
+
+COPILOT_EVIDENCE_EXPLANATION_PROMPT = """
+Explain the significance of the uploaded evidence files and markers in this case. How do they support the investigation path or prove the elements of the crime?
+Cite specific evidence markers, transcripts, or tags.
+
+Case Context:
+{case_context}
+
+Question: Can you explain the evidence in this case?
+"""
+
+COPILOT_LEGAL_BASIS_PROMPT = """
+Explain the legal basis for the investigation. Detail why the suggested BNS/BNSS/BSA sections apply to the case based on the complaint text and extracted evidence.
+Cite the legal section text and complaint facts.
+
+Case Context:
+{case_context}
+
+Question: What is the legal basis for the applied sections?
+"""
+
+COPILOT_RESPONSE_EXPLANATION_PROMPT = """
+Analyze the provider responses received so far (telecom CDRs, bank statements, etc.). Explain any flagged transactions, suspicious call patterns, or connections to case entities.
+Cite specific rows or values from the provider data.
+
+Case Context:
+{case_context}
+
+Question: What do the provider responses reveal?
+"""
+
+COPILOT_GENERIC_PROMPT = """
+Answer the user's question about the case. Be clear, precise, and professional.
+Ground your response strictly in the provided case context.
+
+Case Context:
+{case_context}
+
+User's Question: {question}
+"""
+

@@ -140,11 +140,11 @@ Last updated: 2026-07-05
 ## Planned Phase 8 components
 These entries define the intended reusable surfaces. Mark them BUILT and add concrete usage after implementation; do not create duplicates with different names.
 
-### CopilotPanel
+### CopilotPanel — BUILT (Phase 8D)
 - Path: components/copilot-panel.tsx
 - Purpose: case-scoped read-only assistant with grounded answers, source chips, fallback state, and audited prompts
-- Props: `caseId: string`, `messages: CopilotMessageOut[]`, `onAsk: (question: string) => Promise<void>`
-- Used in: `CaseCommandCenter`, case detail pages
+- Props: `caseId: string`
+- Used in: `CaseCommandCenter`
 
 ### RequestReadinessChecklist
 - Path: components/request-readiness-checklist.tsx

@@ -14,8 +14,10 @@ from app.models.response import ProviderResponse
 from app.models.sop import SopChunk, SopDocument
 from app.models.summary import CaseSummary
 from app.models.user import User
+from app.models.copilot import AiCitation, CopilotMessage
 
 __all__ = [
+    "AiCitation",
     "AuditEvent",
     "Case",
     "CaseEntity",
@@ -23,6 +25,7 @@ __all__ = [
     "CaseSummary",
     "CaseWorkflowState",
     "Complaint",
+    "CopilotMessage",
     "EntityRelationship",
     "EvidenceFile",
     "EvidenceMarker",

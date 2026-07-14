@@ -264,3 +264,29 @@ export interface CommandCenterOut {
 }
 
 
+// Phase 8D: Copilot types
+export interface AiCitationOut {
+  id: string;
+  output_type: string;
+  output_id: string;
+  source_type: string;
+  source_id: string;
+  excerpt: string | null;
+  locator: string | null;
+  confidence: number | null;
+  created_at: string;
+}
+
+export interface CopilotMessageOut {
+  id: string;
+  case_id: string;
+  user_id: string | null;
+  role: "user" | "assistant";
+  message: string;
+  cited_source_ids: string[];
+  citations: AiCitationOut[];
+  created_at: string;
+}
+
+
+

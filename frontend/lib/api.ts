@@ -17,6 +17,7 @@ import type {
   EvidenceOut,
   CaseSectionOut,
   CommandCenterOut,
+  CopilotMessageOut,
 } from "@/lib/types";
 
 
@@ -383,6 +384,19 @@ export async function promoteEvidenceMarker(
     method: "POST",
   });
 }
+
+
+export async function getCopilotChat(caseId: string): Promise<CopilotMessageOut[]> {
+  return request<CopilotMessageOut[]>(`/copilot/cases/${caseId}/chat`);
+}
+
+export async function askCopilot(caseId: string, question: string): Promise<CopilotMessageOut> {
+  return request<CopilotMessageOut>(`/copilot/cases/${caseId}/chat`, {
+    method: "POST",
+    body: JSON.stringify({ question }),
+  });
+}
+
 
 
 
