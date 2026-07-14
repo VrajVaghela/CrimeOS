@@ -102,56 +102,36 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      {/* Glass Header */}
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-surface-alt/80 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-alt/60">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono mb-0.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-breathe" />
-              Crime OS AI command dashboard
-            </div>
-            <h1 className="font-heading text-2xl font-bold md:text-3xl flex items-center gap-3 flex-wrap">
-              Investigation Workspace
-              {user.role === "SHO" && (
-                <span className="text-[10px] bg-accent/15 border border-accent/30 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider font-mono font-normal">
-                  <Shield className="h-3 w-3 inline mr-1" />
-                  SHO Command Mode
-                </span>
-              )}
-              {user.role === "LEGAL" && (
-                <span className="text-[10px] bg-violet/15 border border-violet/30 text-violet px-2 py-0.5 rounded-full uppercase tracking-wider font-mono font-normal flex items-center gap-1">
-                  <Scale className="h-3 w-3" /> Legal Advisory Mode
-                </span>
-              )}
-            </h1>
-            <p className="text-xs text-muted-foreground mt-1">
-              Logged in as{" "}
-              <span className="text-foreground font-semibold">{user.full_name}</span>{" "}
-              <span className="font-mono text-info text-[10px]">({user.role})</span>
-            </p>
+    <main className="min-h-screen bg-background p-6">
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono mb-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-success animate-breathe" />
+            Crime OS AI command dashboard
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {user.role === "IO" && (
-              <Button onClick={() => router.push("/cases")} className="hidden sm:inline-flex bg-gradient-to-r from-primary to-info hover:from-primary/90 hover:to-info/90">
-                <Plus className="h-4 w-4" />
-                Cases
-              </Button>
+          <h1 className="font-heading text-2xl font-bold md:text-3xl flex items-center gap-3 flex-wrap">
+            Investigation Workspace
+            {user.role === "SHO" && (
+              <span className="text-[10px] bg-accent/15 border border-accent/30 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider font-mono font-normal">
+                <Shield className="h-3 w-3 inline mr-1" />
+                SHO Command Mode
+              </span>
             )}
-            {user.role !== "IO" && (
-              <Button variant="outline" size="sm" onClick={() => router.push("/cases")}>
-                View Case Queue
-              </Button>
+            {user.role === "LEGAL" && (
+              <span className="text-[10px] bg-violet/15 border border-violet/30 text-violet px-2 py-0.5 rounded-full uppercase tracking-wider font-mono font-normal flex items-center gap-1">
+                <Scale className="h-3 w-3" /> Legal Advisory Mode
+              </span>
             )}
-            <Button variant="ghost" size="sm" onClick={() => { signOut(); router.push("/login"); }} className="text-muted-foreground">
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sign out</span>
-            </Button>
-          </div>
+          </h1>
+          <p className="text-xs text-muted-foreground mt-1">
+            Logged in as{" "}
+            <span className="text-foreground font-semibold">{user.full_name}</span>{" "}
+            <span className="font-mono text-info text-[10px]">({user.role})</span>
+          </p>
         </div>
-      </header>
+      </div>
 
-      <section className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6">
+      <section className="flex flex-col gap-6">
         {error ? (
           <div className="animate-fade-down rounded-xl border border-rose/30 bg-rose/10 p-5 text-sm text-rose flex items-center gap-3">
             <AlertCircle className="h-4 w-4 shrink-0" />

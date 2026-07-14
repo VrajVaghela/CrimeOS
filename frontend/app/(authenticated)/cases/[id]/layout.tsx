@@ -112,7 +112,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
   return (
     <main className="min-h-screen bg-background">
       {/* Glass Header */}
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-surface-alt/80 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-alt/60">
+      <header className="sticky top-[68px] z-20 border-b border-border/60 bg-[#0f0f0f]/80 backdrop-blur-xl supports-[backdrop-filter]:bg-[#0f0f0f]/60">
         <div className="mx-auto max-w-7xl px-6 pt-4 pb-0">
           <div className="flex items-center gap-3 mb-3">
             <Button variant="ghost" size="sm" onClick={() => router.push("/cases")} className="gap-1.5 text-muted-foreground hover:text-foreground">

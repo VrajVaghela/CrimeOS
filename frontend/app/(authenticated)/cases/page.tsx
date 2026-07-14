@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FileSearch, Loader2, Plus, Search, Shield, X, ArrowLeft, FolderOpen } from "lucide-react";
 
 import { StatusBadge } from "@/components/status-badge";
@@ -26,6 +26,7 @@ const CASE_COLORS = ["border-l-primary", "border-l-info", "border-l-violet"] as 
 
 export default function CasesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading } = useAuth();
   const [cases, setCases] = useState<CaseOut[]>([]);
   const [fetching, setFetching] = useState(true);
@@ -46,8 +47,26 @@ export default function CasesPage() {
 
   useEffect(() => {
     if (!user) return;
+    const q = searchParams.get("q");
+    if (q) {
+      setSearchQuery(q);
+      setSearching(true);
+      void (async () => {
+        try {
+          const results = await searchCases(q.trim());
+          setSearchResults(results);
+        } catch {
+          setSearchResults([]);
+        } finally {
+          setSearching(false);
+        }
+      })();
+    } else {
+      setSearchQuery("");
+      setSearchResults(null);
+    }
     void load();
-  }, [user]);
+  }, [user, searchParams]);
 
   async function load() {
     setFetching(true);
@@ -113,34 +132,31 @@ export default function CasesPage() {
   const displayCases = searchResults ?? cases;
 
   return (
-    <main className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-surface-alt/80 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-alt/60">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono mb-0.5">
-              <Shield className="h-3 w-3 text-primary" />
-              Crime OS AI · Case Registry
-            </div>
-            <h1 className="font-heading text-2xl font-bold md:text-3xl flex items-center gap-3">
-              Cases
-              <span className="text-muted-foreground text-lg font-normal font-sans">/ शिकायतें</span>
-            </h1>
+    <main className="min-h-screen bg-background p-6">
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono mb-1">
+            <Shield className="h-3 w-3 text-primary" />
+            Crime OS AI · Case Registry
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard")} className="hidden sm:flex">
-              <ArrowLeft className="h-4 w-4" />
-              Dashboard
-            </Button>
-            <Button onClick={() => setDialogOpen(true)} className="bg-gradient-to-r from-primary to-info hover:from-primary/90 hover:to-info/90">
-              <Plus className="h-4 w-4" />
-              New Case
-              <span className="text-primary-foreground/70 text-xs hidden sm:inline ml-1">/ नई शिकायत</span>
-            </Button>
-          </div>
+          <h1 className="font-heading text-2xl font-bold md:text-3xl flex items-center gap-3">
+            Cases
+            <span className="text-muted-foreground text-lg font-normal font-sans">/ शिकायतें</span>
+          </h1>
         </div>
-      </header>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            onClick={() => setDialogOpen(true)}
+            className="bg-[#dc0000] hover:bg-[#c00000] text-white rounded-squircle-sm hover:scale-105 hover:glow-primary transition-all duration-130"
+          >
+            <Plus className="h-4 w-4" />
+            New Case
+            <span className="text-primary-foreground/70 text-xs hidden sm:inline ml-1">/ नई शिकायत</span>
+          </Button>
+        </div>
+      </div>
 
-      <section className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6">
+      <section className="flex flex-col gap-6">
         {error ? (
           <div role="alert" className="animate-fade-down rounded-xl border border-rose/30 bg-rose/10 p-4 text-sm text-rose flex items-center gap-3">
             <span className="h-1.5 w-1.5 rounded-full bg-rose shrink-0" />
