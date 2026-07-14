@@ -102,5 +102,14 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed
 - [x] ✅ CHECKPOINT: golden path plus one Phase 8 intelligence moment completes in under 7 minutes
 
+## Phase 9 — Ferrari Design System Overhaul
+- [x] Phase 9A — Global Styles & Core Tokens Setup (CSS variables, tailwind.config mapping, backgrounds, layout fonts)
+- [ ] Phase 9B — Navigation Sidebar & Command Topbar (sidebar, topbar, active/hover navigation styles)
+- [ ] Phase 9C — Case Workspace Hero & Signal Cards (case hero layout, 4-column signals, confidence indicators)
+- [ ] Phase 9D — Workspace Panels & Steppers (stepper links, entity grid rows, SVG timeline charts)
+- [ ] Phase 9E — Summary, Dialogs & Micro-interactions (warm surface card, glass overlays, toast notification transitions)
+- [ ] Phase 9F — Integration & Verification (contrast validation, responsive breakpoints, golden path verification)
+- [ ] ✅ CHECKPOINT: Full design overhauled to Ferrari command center look, all functions verified.
+
 
 

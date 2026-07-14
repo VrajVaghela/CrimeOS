@@ -13,9 +13,7 @@ product
 An agentic AI platform for intelligence-led police investigations (cyber and conventional crime). Assists officers across the full lifecycle: multilingual complaint ingestion, SOP-grounded investigation path suggestion, automated legal request drafting, response analytics, and auto-generated case logs and summaries. Optimized for a flawless 5-minute hackathon demo.
 
 ## Brand Personality
-- High-tech, secure, trustworthy
-- Cyber-command/threat-intelligence aesthetic (dark-mode-first, Midnight/Slate background, Electric Blue accents, Emerald Green status indicators, Amber attention markers)
-- Professional, authoritative, highly efficient
+- Ferrari-inspired command center aesthetic (deep carbon-black backgrounds, warm off-white text, Ferrari Red as the single high-signal accent, Emerald Green status indicators, Warning Amber attention markers, and Electric Blue info/citations)
 
 ## Anti-references
 - Legacy government search forms or cluttered database portals
@@ -23,11 +21,12 @@ An agentic AI platform for intelligence-led police investigations (cyber and con
 - Weak/flat visual hierarchies with low-contrast gray text
 
 ## Design Principles
-- **Futuristic Interface, Simple Interactions**: High-tech command center look combined with a single clear primary action on every screen to prevent cognitive overload.
-- **AI Transparency & Grounding**: Every AI-suggested section gets a Sparkle badge, electric-blue left border glow, and visible inline/popover citations of the source SOP/legal text.
-- **Instant Status Awareness**: Semantic status colors (Electric Blue for active, Emerald for done, Amber for processing) and interactive elements that feel alive with subtle hover animations and pulses.
+- **Futuristic Interface, Simple Interactions**: High-tech command center look combining deep carbon-black surfaces with Ferrari Red high-signal accents (used at most twice per screen).
+- **AI Transparency & Grounding**: Every AI-suggested section gets a Sparkle badge, electric-blue (`--info`) left border/glow, and visible inline/popover citations of the source SOP/legal text.
+- **Instant Status Awareness**: Semantic status colors (Ferrari Red for active/current action, Emerald Green for done/completed, Warning Amber for review/attention) with subtle micro-animations and pulses.
 
 ## Accessibility & Inclusion
-- High contrast body text (white/tinted light text on dark midnight backgrounds) satisfying WCAG AA standards.
+- High contrast body text (warm off-white `#fffaf0` on carbon-black `#0b0b0b` background) satisfying WCAG AA standards.
 - Bilingual labels (Hindi/Gujarati helper text) for key navigations and primary actions.
 - Accessible UI components built using Radix primitives.
+- Support for `prefers-reduced-motion` settings.

@@ -124,9 +124,62 @@ Goal: make the completed golden path feel like one adaptive, evidence-grounded i
 3. Run keyboard, contrast, reduced-motion, responsive, loading, empty, and failure-state checks.
 4. Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed.
 
-**Checkpoint:** The full golden path plus one adaptive-path, evidence, copilot, and explainable-response moment completes in under 7 minutes without manual DB edits.
 
 ---
+
+## Phase 9 — Ferrari Design System Migration
+Goal: Overhaul the design & UI of the application to match the Ferrari Cyber-Command Console aesthetics.
+
+### Phase 9A — Global Styles & Core Tokens Setup
+1. Define custom properties in `globals.css` base layer (`--bg`, `--surface`, `--surface-warm`, `--fg`, `--fg-2`, `--muted`, `--accent`, `--border`, `--border-soft`, etc.).
+2. Map tailwind base variables to corresponding HSL values in `globals.css` `:root` class.
+3. Configure `tailwind.config.ts` to extend border radius squircle definitions (`squircle` 12px, `squircle-sm` 8px).
+4. Set up the dot grid background on `body` and red radial glow atop the workspace layout in CSS.
+5. Define Ferrari Sans and SF Mono in font variables within Next.js root layout.
+
+**Checkpoint:** App layout shows correct deep carbon-black backgrounds, off-white text, and borders.
+
+### Phase 9B — Navigation Sidebar & Command Topbar
+1. Restructure the sidebar panel (fixed 248px width, narrows to 214px at 1080px).
+2. Format brand lockup with glass shield brand mark and red accent border.
+3. Apply Ferrari Red active highlight for sidebar navigation links, keeping standard links muted off-white.
+4. Position breadcrumb navigation, full case search bar (max width 280px, red focus ring on active), and square icon buttons in topbar (68px).
+
+**Checkpoint:** Sidebar and topbar match the layouts and interactions with proper active/hover indicators.
+
+### Phase 9C — Case Workspace Hero & Signal Cards
+1. Style Case Hero: 2-column squircle layout (`1.3fr 0.7fr` collapsing at 1080px). Wrap the AI summary inside a left-bordered info blue block.
+2. Restructure 4 Signal Cards in a grid (`repeat(4, 1fr)`). Add viewport entry count-up animations for metric values.
+3. Implement confidence badges with conditional coloring (green for >=85%, yellow for 70-84%, amber border on input for <70%).
+
+**Checkpoint:** Ingestion details, case confidence metrics, and confidence badges render with accurate layout proportions and colors.
+
+### Phase 9D — Workspace Panels & Steppers
+1. Apply Squircle (`12px`) radii to all panels, case-hero cards, and summary cards.
+2. Format entity list rows into 3-column grid layouts.
+3. Update investigation path stepper: completed/active steps connected by red-to-blue gradient lines, current step having glass bg with red accent border, and info blue citation buttons.
+4. Update SVG timeline charts with red-to-blue horizontal gradient stroke lines and gradient graph fill underneath.
+5. Apply vertical red-to-blue gradient to active timeline connector vertical lines.
+
+**Checkpoint:** Stepper, entity layout, timelines, and SVG charts render with red-to-blue gradient accents.
+
+### Phase 9E — Summary, Dialogs & Micro-interactions
+1. Apply warm surface bg (`#23130f`), blue AI icon, and red primary CTA button on summary cards.
+2. Refactor toast notification element, sliding entity review sheet, and citation modal dialog. Use `.glass` panel over a darkened blurred backdrop.
+3. Apply button transitions (130ms duration, scale-105 on hover, red glow).
+4. Implement prefers-reduced-motion media query block.
+
+**Checkpoint:** Dialogs open correctly, toast messages auto-dismiss, and animations run smoothly.
+
+### Phase 9F — Integration & Verification
+1. Verify contrast ratio compliance (all texts pass WCAG AA).
+2. Audit responsive layout breakpoints (1080px, 760px, 420px, 360px) to ensure no headline overflows or visual glitches.
+3. Run the golden path end-to-end to ensure all features function perfectly under the new design tokens.
+
+**Checkpoint:** The full golden path works end-to-end with high-quality visual polish.
+
+---
+
 
 ## Cut List (if time runs out, cut in this order)
 For Phase 8, cut in this order:

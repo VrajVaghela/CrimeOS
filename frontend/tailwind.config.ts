@@ -59,6 +59,8 @@ const config: Config = {
       borderRadius: {
         lg: "var(--radius)",
         xl: "var(--radius)",
+        squircle: "12px",
+        "squircle-sm": "8px",
       },
       fontFamily: {
         heading: ["var(--font-heading)", "var(--font-noto-devanagari)", "var(--font-noto-gujarati)", "sans-serif"],

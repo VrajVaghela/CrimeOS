@@ -1,97 +1,150 @@
-# UI Tokens — Crime OS AI
+# UI Tokens — Crime OS AI (Ferrari Edition)
 
-Theme intent: **high-tech, secure, trustworthy — cyber-command aesthetic**. Dark-mode-first UI (standard for cyber/security tech) with high-contrast glowing accents, grid/node motifs, and glassmorphism on cards. The app must feel like a modern threat-intelligence platform, not a legacy government form. Defined as CSS variables in `globals.css` consumed by Tailwind/shadcn — components must reference tokens, never raw hex.
+Theme intent: **high-tech, secure, trustworthy — Ferrari cyber-command aesthetic**. Dark-mode-first UI with carbon-black backgrounds, warm off-white text, and Ferrari Red as the single high-signal accent. Defined as CSS custom properties on `:root` in `globals.css` consumed by Tailwind and shadcn components.
 
-## Colors (dark is the default `:root`, HSL, shadcn variable convention)
+## Root Tokens (CSS Custom Properties)
+
 ```css
 :root {
-  /* Deep Midnight Blue #0B0F19 */
-  --background: 223 39% 7%;
-  --foreground: 0 0% 100%;            /* white primary text */
+  /* Backgrounds */
+  --bg: #0b0b0b;                  /* Carbon Black */
+  --surface: #171717;             /* Card/Panel surface */
+  --surface-warm: #23130f;        /* Summary Card, warm accents */
 
-  /* Dark Slate surface #1A1F2C */
-  --card: 223 26% 14%;
-  --card-foreground: 0 0% 100%;
+  /* Text */
+  --fg: #fffaf0;                  /* Warm off-white primary text */
+  --fg-2: #e8dcc8;                /* Warm off-white secondary text */
+  --muted: #a89f91;               /* Labels, metadata, placeholders */
 
-  /* Electric Blue #3B82F6 — primary buttons, active states, links */
-  --primary: 217 91% 60%;
-  --primary-foreground: 0 0% 100%;
+  /* Accent colors */
+  --meta: #ffd200;                /* Yellow metadata highlights */
+  --accent: #dc0000;              /* Ferrari Red primary accent */
+  --accent-on: #ffffff;
+  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+  --accent-active: color-mix(in oklab, var(--accent), black 14%);
 
-  --secondary: 223 26% 18%;            /* raised slate for secondary buttons/rows */
-  --secondary-foreground: 0 0% 100%;
+  /* Semantic colors */
+  --success: #0f9d58;             /* Green - completed/high confidence */
+  --warn: #ffd200;                /* Yellow - pending review/attention */
+  --danger: #ff3b30;              /* Red - error/threat alerts */
+  --info: #2d7ee9;                /* Info Blue - AI content, citations */
+  --info-on: #ffffff;
 
-  /* Emerald Green #10B981 — secure/done/success indicators, charts */
-  --success: 160 84% 39%;
-  --success-foreground: 0 0% 100%;
+  /* Borders */
+  --border: #342a24;              /* Strong border, hover states */
+  --border-soft: #241f1b;         /* Default soft border */
 
-  /* Amber — pending/attention/AI-generated markers (kept from domain needs) */
-  --accent: 38 92% 55%;
-  --accent-foreground: 26 83% 14%;
+  /* Font stacks */
+  --font-display: "Ferrari Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Ferrari Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, Menlo, monospace;
 
-  /* Alert Red #EF4444 — threats, rejections, failures. Use sparingly. */
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
+  /* Type scale */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 19px;
+  --text-xl: 26px;
+  --text-2xl: 40px;
+  --text-3xl: 62px;
+  --text-4xl: 88px;
 
-  --muted: 223 26% 12%;
-  --muted-foreground: 215 20% 65%;     /* Slate Gray #94A3B8 — subtitles, body-secondary */
+  /* Line heights */
+  --leading-body: 1.5;
+  --leading-tight: 0.98;
 
-  --border: 0 0% 100% / 0.1;           /* subtle white borders rgba(255,255,255,0.1) */
-  --input: 223 26% 18%;
-  --ring: 217 91% 60%;
-  --radius: 0.75rem;                    /* 12px cards; 8px (rounded-lg) for buttons/inputs */
+  /* Letter spacing */
+  --tracking-display: -0.03em;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 9999px;
+  --radius-squircle: 12px;
+  --radius-squircle-sm: 8px;
+
+  /* Elevation */
+  --elev-flat: none;
+  --elev-ring: 0 0 0 1px var(--border);
+  --elev-raised: 0 26px 80px rgba(0, 0, 0, 0.48);
+  --focus-ring: 0 0 0 4px rgba(220, 0, 0, 0.30);
+
+  /* Glass effects */
+  --glass-bg: color-mix(in oklch, var(--surface) 55%, transparent);
+  --glass-border: color-mix(in oklch, var(--accent) 30%, transparent);
+
+  /* Gradients */
+  --gradient-accent-info-v: linear-gradient(180deg, var(--accent) 0%, var(--info) 100%); /* Vertical red-to-blue */
+  --gradient-accent-info-h: linear-gradient(90deg, var(--accent) 0%, var(--info) 100%);  /* Horizontal red-to-blue */
+  --gradient-graph-fill: linear-gradient(180deg, color-mix(in oklab, var(--accent) 15%, transparent) 0%, color-mix(in oklab, var(--info) 2%, transparent) 100%);
+
+  /* Motion */
+  --motion-fast: 130ms;
+  --motion-base: 220ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
 }
 ```
-Light mode: NOT supported. The app is dark-only — remove the theme toggle; `.dark` class is permanently on `<html>`.
 
-## Glow & Glass primitives (define as Tailwind utilities in globals.css)
+## Mapping for Tailwind/shadcn components (HSL equivalents for tailwind config)
+
+To support tailwind base, the following variables will be defined in HSL format for tailwind extending:
+
 ```css
-.glow-primary   { box-shadow: 0 0 20px -4px hsl(217 91% 60% / 0.5); }   /* hover on primary buttons/cards */
-.glow-success   { box-shadow: 0 0 16px -4px hsl(160 84% 39% / 0.5); }
-.glow-destructive { box-shadow: 0 0 16px -4px hsl(0 84% 60% / 0.5); }   /* threat visualizations only */
-.glass          { background: hsl(223 26% 14% / 0.7); backdrop-filter: blur(12px);
-                  border: 1px solid hsl(0 0% 100% / 0.1); }              /* sticky headers, overlay cards */
-.grid-bg        { background-image: linear-gradient(hsl(0 0% 100% / 0.04) 1px, transparent 1px),
-                  linear-gradient(90deg, hsl(0 0% 100% / 0.04) 1px, transparent 1px);
-                  background-size: 40px 40px; }                          /* hero/section backdrops */
+:root {
+  --background: 0 0% 4%;        /* #0b0b0b */
+  --foreground: 40 100% 97%;    /* #fffaf0 */
+  --card: 0 0% 9%;              /* #171717 */
+  --card-foreground: 40 100% 97%;
+  --primary: 0 100% 43%;        /* #dc0000 Ferrari Red */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 9%;         /* Card surface */
+  --secondary-foreground: 38 39% 85%; /* #e8dcc8 */
+  --success: 151 83% 34%;       /* #0f9d58 */
+  --accent: 0 100% 43%;         /* Same as primary */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 3 100% 60%;    /* #ff3b30 */
+  --muted: 24 15% 12%;          /* Soft border bg */
+  --muted-foreground: 36 12% 61%; /* #a89f91 */
+  --border: 24 18% 17%;         /* #342a24 */
+  --input: 24 15% 12%;
+  --ring: 0 100% 43%;
+  --info: 214 82% 54%;          /* #2d7ee9 Info Blue */
+  --warn: 49 100% 50%;          /* #ffd200 */
+}
 ```
 
-## Semantic status colors (badges, timelines, steppers)
-| Status | Token |
-|---|---|
-| draft / pending | `muted` bg, `muted-foreground` text |
-| processing / awaiting response | `accent` (amber) + pulse animation |
-| dispatched / in_progress | `primary` (electric blue) |
-| done / responded / approved / secure | `success` (emerald) |
-| failed / rejected / threat | `destructive` (red, sparingly) |
-| AI-generated content marker | `primary` left-border glow + sparkle icon |
+## Glow & Glass Primitives
 
-## Typography
-- **Headings:** `Space Grotesk` (700/800) via `next/font` — tech-forward geometric sans.
-- **Body:** `Inter` (400/500).
-- **Code/Data:** `JetBrains Mono` — case numbers, phone numbers, account numbers, section codes, log output.
-- **Indic scripts:** keep `Noto Sans Devanagari` + `Noto Sans Gujarati` in the fallback chain of BOTH heading and body fonts — Gujarati/Hindi must never render as tofu.
-- Scale (Tailwind classes only):
-  - `text-3xl md:text-4xl font-bold font-heading` — page/hero titles (Space Grotesk)
-  - `text-lg font-semibold font-heading` — card/section titles
-  - `text-sm` — body default (dense, data-heavy app); secondary copy `text-muted-foreground`
-  - `text-xs text-muted-foreground` — metadata, timestamps, confidence scores
-  - `font-mono text-sm` — all identifiers and numeric data
+```css
+.glow-primary {
+  box-shadow: 0 0 20px -4px rgba(220, 0, 0, 0.3);
+}
+.glow-success {
+  box-shadow: 0 0 16px -4px rgba(15, 157, 88, 0.4);
+}
+.glow-destructive {
+  box-shadow: 0 0 16px -4px rgba(255, 59, 48, 0.4);
+}
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+```
 
-## Spacing & Layout
-- Base unit 4px. Allowed gaps: `gap-2 / gap-4 / gap-6`; page padding `p-6`; card padding `p-5`.
-- Max content width `max-w-7xl mx-auto`; sidebar nav fixed `w-64` on dark slate with border-r.
-- Radius: cards `rounded-xl` (12px), buttons/inputs `rounded-lg` (8px), badges/avatars `rounded-full`. Nothing else.
-- Elevation: cards use the 1px white/10 border + `.glass` where overlapping; glows replace drop shadows — no gray box-shadows.
+## Typography Rules
 
-## Iconography
-- **lucide-react only**, line-based, `h-4 w-4` (inline) / `h-6 w-6` (feature cards).
-- Key motif icons: `Shield`, `ShieldCheck`, `Lock`, `Server`, `Network`, `Radar`, `Crosshair`, `Activity`, `FileSearch`, `Sparkles` (AI marker).
-
-## Phase 8 tokens and usage
-- Workflow stages use one semantic token each: `info` for ingest, `violet` for investigation, `accent` for requests, `success` for responses/verified, and `primary` for the current action.
-- `next-best-action` surfaces use `bg-primary/10`, a 1px token border, and a single primary button. Do not use a large metric-card treatment.
-- Provenance/source chips use `muted` surfaces and `muted-foreground` text by default; source type may add a semantic icon but must not rely on color alone.
-- Entity confidence uses `success` at >=85%, `accent` from 70–84%, and `destructive` below 70%; always include the numeric percentage and a text label.
-- `grid-bg` is allowed only inside graph, map, evidence, or measurement viewports. Command-center page backgrounds stay plain midnight or tokenized surface backgrounds.
-- Copilot output uses `AiContentCard` styling and must include a visible citation list before the answer is considered complete.
-- Do not add a new color, radius, shadow, font size, or spacing value in a component without first adding a named token here.
+- **Display Headings:** Ferrari Sans, size `--text-3xl` or `--text-4xl`, letter spacing `--tracking-display`, line height `--leading-tight`.
+- **UI Labels/Headers:** Ferrari Sans, uppercase with letter-spacing `0.06em` to `0.13em`.
+- **Identifiers / Numbers:** SF Mono, monospace.
