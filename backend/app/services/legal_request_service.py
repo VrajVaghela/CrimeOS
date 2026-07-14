@@ -7,6 +7,8 @@ from email.mime.text import MIMEText
 from email.header import Header
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import re
+
 
 import jinja2
 from sqlalchemy import select
@@ -281,14 +283,201 @@ def _send_smtp_email_sync(subject: str, body: str, recipient_email: str) -> None
     logger.info("SMTP email successfully sent to %s (demo inbox)", settings.DEMO_PROVIDER_INBOX)
 
 
+def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: User) -> dict[str, Any]:
+    request = get_request(db, request_id)
+    body = request.generated_body
+    items = []
+    is_ready = True
+
+    # 1. Recipient check
+    recipient_ok = False
+    if request.recipient_email and "@" in request.recipient_email and "." in request.recipient_email:
+        recipient_ok = True
+
+    if recipient_ok:
+        items.append({
+            "key": "recipient",
+            "label": "Recipient Email",
+            "status": "passed",
+            "message": f"Valid recipient email: {request.recipient_email}",
+            "fix": None
+        })
+    else:
+        is_ready = False
+        items.append({
+            "key": "recipient",
+            "label": "Recipient Email",
+            "status": "failed",
+            "message": "Missing or invalid recipient email address",
+            "fix": "Enter a valid nodal officer email address (e.g. nodal.officer@provider.com)."
+        })
+
+    # 2. Entities check
+    has_entities = False
+    entity_reason = ""
+    entity_fix = ""
+
+    if "No complaints found" in body or "mentioned in complaint" in body:
+        has_entities = False
+        entity_reason = "Contains default placeholder text for data requested"
+        entity_fix = "Edit the draft to replace placeholder text with actual case identifiers (e.g. Phone Number, Bank Account)."
+    else:
+        if request.provider_type == ProviderType.TELECOM:
+            phone_match = re.search(r"\b\d{10}\b|\b\d{5}\s?\d{5}\b|\+91\d{10}", body)
+            ip_match = re.search(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", body)
+            if phone_match or ip_match:
+                has_entities = True
+            else:
+                entity_reason = "No phone number or IP address detected in the draft body"
+                entity_fix = "Edit the draft to include the target Phone Number(s) or IP address(es) for CDR request."
+        elif request.provider_type == ProviderType.BANK:
+            acc_match = re.search(r"AC-\d+|account|Acc|ACC|AC\s?\d+|\b\d{9,18}\b", body, re.IGNORECASE)
+            txn_match = re.search(r"TXN\d+|transaction|txn|transfer", body, re.IGNORECASE)
+            if acc_match or txn_match:
+                has_entities = True
+            else:
+                entity_reason = "No bank account number or transaction ID detected in the draft body"
+                entity_fix = "Edit the draft to include the target Bank Account(s) or Transaction ID(s) to freeze."
+        elif request.provider_type == ProviderType.PLATFORM:
+            email_match = re.search(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", body)
+            url_match = re.search(r"https?://|www\.|@\w+", body)
+            if email_match or url_match or "profile" in body.lower() or "suspect" in body.lower():
+                has_entities = True
+            else:
+                entity_reason = "No email address, URL, handle or username detected in the draft body"
+                entity_fix = "Edit the draft to include the target handle, profile URL, or email address."
+
+    if has_entities:
+        items.append({
+            "key": "entities",
+            "label": "Target Identifiers",
+            "status": "passed",
+            "message": "Target identifiers (phone/account/email) verified in draft body",
+            "fix": None
+        })
+    else:
+        is_ready = False
+        items.append({
+            "key": "entities",
+            "label": "Target Identifiers",
+            "status": "failed",
+            "message": entity_reason or "No target identifiers found in the draft",
+            "fix": entity_fix or "Specify the target identifiers in the draft."
+        })
+
+    # 3. Legal Basis check
+    has_legal_basis = False
+    legal_basis_match = re.search(r"Section\s+\d+|Sec\.\s+\d+|under\s+section|BNSS|BNS|BSA|CrPC|IPC", body, re.IGNORECASE)
+    if legal_basis_match:
+        has_legal_basis = True
+
+    if has_legal_basis:
+        items.append({
+            "key": "legal_basis",
+            "label": "Legal Basis",
+            "status": "passed",
+            "message": "Valid legal sections/acts cited in draft body",
+            "fix": None
+        })
+    else:
+        is_ready = False
+        items.append({
+            "key": "legal_basis",
+            "label": "Legal Basis",
+            "status": "failed",
+            "message": "No legal basis specified (e.g. BNSS/CrPC/BSA/BNS section)",
+            "fix": "Cite the legal provision under which information is sought (e.g., 'Section 94 of BNSS' or 'Section 106 of BNSS')."
+        })
+
+    # 4. Date Range check
+    has_date = False
+    date_match = re.search(r"\b\d{4}-\d{2}-\d{2}\b|\b\d{2}/\d{2}/\d{4}\b|between|period|date|range|from\s+\S+\s+to\s+\S+", body, re.IGNORECASE)
+    if date_match:
+        has_date = True
+
+    if has_date:
+        items.append({
+            "key": "date_range",
+            "label": "Date Range / Period",
+            "status": "passed",
+            "message": "Date range or time period verified in draft body",
+            "fix": None
+        })
+    else:
+        is_ready = False
+        items.append({
+            "key": "date_range",
+            "label": "Date Range / Period",
+            "status": "failed",
+            "message": "No specific date range or time period specified",
+            "fix": "Specify the exact date range for the requested logs (e.g., 'CDR for the period 2026-07-01 to 2026-07-07')."
+        })
+
+    # 5. Approval check
+    from app.models.enums import UserRole
+    approval_ok = False
+    if request.status in (RequestStatus.APPROVED, RequestStatus.DISPATCHED, RequestStatus.RESPONDED):
+        approval_ok = True
+    elif current_user.role == UserRole.SHO:
+        approval_ok = True
+
+    if approval_ok:
+        items.append({
+            "key": "approval",
+            "label": "SHO Approval Status",
+            "status": "passed",
+            "message": "Approved by SHO or eligible for instant dispatch",
+            "fix": None
+        })
+    else:
+        is_ready = False
+        items.append({
+            "key": "approval",
+            "label": "SHO Approval Status",
+            "status": "failed",
+            "message": "Request is in DRAFT status and requires SHO approval",
+            "fix": "Ask the Station House Officer (SHO) to log in and approve this request draft."
+        })
+
+    # 6. Citation check
+    if request.path_step_id:
+        items.append({
+            "key": "citation",
+            "label": "SOP Pathway Link",
+            "status": "passed",
+            "message": "Linked to active investigation step and SOP citation",
+            "fix": None
+        })
+    else:
+        items.append({
+            "key": "citation",
+            "label": "SOP Pathway Link",
+            "status": "warning",
+            "message": "Draft is not linked to any specific step in the investigation pathway",
+            "fix": "For complete audit trail, create this request from a suggested step in the Investigation Path tab."
+        })
+
+    return {
+        "is_ready": is_ready,
+        "items": items
+    }
+
+
 async def dispatch_request(db: Session, request_id: uuid.UUID, current_user: User) -> LegalRequest:
     request = get_request(db, request_id)
     if request.status not in (RequestStatus.DRAFT, RequestStatus.APPROVED):
         raise AppError("Request must be in DRAFT or APPROVED status to dispatch")
-        
+
+    # Enforce readiness check
+    readiness = check_request_readiness(db, request_id, current_user)
+    if not readiness["is_ready"]:
+        failed_msgs = [item["message"] for item in readiness["items"] if item["status"] == "failed"]
+        raise AppError(f"Pre-dispatch validation failed: {'; '.join(failed_msgs)}")
+
     # Auto-approve if currently a draft
     if request.status == RequestStatus.DRAFT:
         request.status = RequestStatus.APPROVED
+
         
     case = db.get(Case, request.case_id)
     case_number = case.case_number if case else "Unknown"

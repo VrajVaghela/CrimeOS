@@ -18,8 +18,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { getCaseResponses, regenerateInsights, ApiError } from "@/lib/api";
-import type { ProviderResponseOut } from "@/lib/types";
+import { getCaseResponses, regenerateInsights, getResponseCorrelations, promoteResponseRow, ApiError } from "@/lib/api";
+import { ResponseCorrelationPanel } from "@/components/response-correlation-panel";
+import type { ProviderResponseOut, ResponseCorrelationOut } from "@/lib/types";
+
 
 export default function ResponsesPage() {
   const params = useParams();
@@ -30,10 +32,18 @@ export default function ResponsesPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedResponseId, setSelectedResponseId] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
+  const [correlations, setCorrelations] = useState<ResponseCorrelationOut[]>([]);
+  const [loadingCorrelations, setLoadingCorrelations] = useState(false);
 
   useEffect(() => {
     if (caseId) void loadResponses();
   }, [caseId]);
+
+  useEffect(() => {
+    if (selectedResponseId) {
+      void loadCorrelations(selectedResponseId);
+    }
+  }, [selectedResponseId]);
 
   async function loadResponses() {
     setLoading(true);
@@ -49,6 +59,18 @@ export default function ResponsesPage() {
     }
   }
 
+  async function loadCorrelations(responseId: string) {
+    setLoadingCorrelations(true);
+    try {
+      const data = await getResponseCorrelations(responseId);
+      setCorrelations(data);
+    } catch (e) {
+      console.error("Failed to load correlations", e);
+    } finally {
+      setLoadingCorrelations(false);
+    }
+  }
+
   async function handleRegenerateInsights() {
     if (!selectedResponseId) return;
     setRegenerating(true);
@@ -61,6 +83,13 @@ export default function ResponsesPage() {
       setRegenerating(false);
     }
   }
+
+  async function handlePromoteRow(rowIndex: number) {
+    if (!selectedResponseId) return;
+    await promoteResponseRow(selectedResponseId, rowIndex);
+    await loadCorrelations(selectedResponseId);
+  }
+
 
   const selectedResponse = responses.find((r) => r.id === selectedResponseId);
   const records = selectedResponse?.parsed_data?.records || [];
@@ -174,16 +203,16 @@ export default function ResponsesPage() {
                   </CardContent>
                 </Card>
 
-                {/* Parsed Data Table */}
+                {/* Parsed Data Table with AI Correlations */}
                 <Card className="animate-fade-up delay-200">
                   <CardHeader className="pb-3 flex flex-row items-center justify-between gap-4">
                     <div>
                       <CardTitle className="font-heading text-base font-bold flex items-center gap-2">
                         <TableIcon className="h-4 w-4 text-primary" />
-                        Parsed Response Records
+                        Response Correlations & Evidence Linker
                       </CardTitle>
                       <CardDescription className="text-xs text-muted-foreground">
-                        Tabular extraction of CSV data received from provider.
+                        Explains flagged records and links them to case entities and path steps. Promote rows to add to Case Diary.
                       </CardDescription>
                     </div>
                     {selectedResponse.file_path && (
@@ -201,59 +230,20 @@ export default function ResponsesPage() {
                     )}
                   </CardHeader>
                   <CardContent>
-                    {records.length === 0 ? (
-                      <p className="text-sm text-muted-foreground py-6 text-center">
-                        No rows found in this response file.
-                      </p>
-                    ) : (
-                      <div className="rounded-lg border border-border/60 overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="bg-muted/50 hover:bg-muted/50">
-                              {recordHeaders.map((header) => (
-                                <TableHead
-                                  key={header}
-                                  className="font-mono text-xs uppercase text-muted-foreground font-semibold"
-                                >
-                                  {header.replace(/_/g, " ")}
-                                </TableHead>
-                              ))}
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {records.map((row, idx) => {
-                              const isSuspicious =
-                                row.ip_address === "103.88.22.14" ||
-                                row.calling_number === "+919876543210";
-                              return (
-                                <TableRow
-                                  key={idx}
-                                  className={[
-                                    "hover:bg-primary/5 font-mono text-xs transition-colors duration-150",
-                                    isSuspicious ? "bg-destructive/5 border-l-2 border-l-destructive" : "",
-                                  ].join(" ")}
-                                  title={
-                                    row.ip_address === "103.88.22.14"
-                                      ? "AI Warning: Suspect IP correlated with proxy/VPN exit node."
-                                      : row.calling_number === "+919876543210"
-                                        ? "AI Warning: Calling number matches reported caller ID mismatch."
-                                        : undefined
-                                  }
-                                >
-                                  {recordHeaders.map((header) => (
-                                    <TableCell key={header} className="py-2.5">
-                                      {String(row[header] ?? "")}
-                                    </TableCell>
-                                  ))}
-                                </TableRow>
-                              );
-                            })}
-                          </TableBody>
-                        </Table>
+                    {loadingCorrelations ? (
+                      <div className="flex flex-col items-center justify-center py-12 gap-2 text-muted-foreground text-xs font-mono">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        Running correlation engine...
                       </div>
+                    ) : (
+                      <ResponseCorrelationPanel
+                        correlations={correlations}
+                        onPromote={handlePromoteRow}
+                      />
                     )}
                   </CardContent>
                 </Card>
+
               </>
             )}
           </div>

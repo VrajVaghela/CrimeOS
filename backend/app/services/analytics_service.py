@@ -311,3 +311,195 @@ def generate_mock_response(db: Session, request_id: uuid.UUID) -> ProviderRespon
     db.commit()
     db.refresh(response_record)
     return response_record
+
+
+def get_response_correlations(db: Session, response_id: uuid.UUID) -> list[dict[str, Any]]:
+    response = db.get(ProviderResponse, response_id)
+    if not response:
+        raise NotFoundError("Provider response not found")
+
+    request = db.get(LegalRequest, response.legal_request_id)
+    if not request:
+        raise NotFoundError("Legal request not found")
+
+    case_id = request.case_id
+
+    # Get case entities
+    from app.models.case_entity import CaseEntity
+    case_entities = list(db.scalars(
+        select(CaseEntity).where(CaseEntity.case_id == case_id)
+    ))
+
+    # Get active path steps
+    from app.models import InvestigationPath, PathStep
+    active_path = db.scalar(
+        select(InvestigationPath)
+        .where(InvestigationPath.case_id == case_id, InvestigationPath.is_active == True)
+    )
+    path_steps = []
+    if active_path:
+        path_steps = list(db.scalars(
+            select(PathStep).where(PathStep.path_id == active_path.id)
+        ))
+
+    records = response.parsed_data.get("records", [])
+    correlations = []
+
+    # Get existing promoted citations for this response
+    from app.models.copilot import AiCitation
+    promoted_citations = list(db.scalars(
+        select(AiCitation)
+        .where(AiCitation.case_id == case_id, AiCitation.source_type == "provider_response_row")
+    ))
+    promoted_source_ids = {c.source_id for c in promoted_citations}
+
+    for idx, row in enumerate(records):
+        matched_entity = None
+        reason = "Awaiting verification"
+        confidence = 0.5
+        linked_step = None
+
+        row_str_values = {str(val).strip().lower() for val in row.values()}
+
+        for ent in case_entities:
+            val = ent.canonical_value.strip().lower()
+            disp = ent.display_value.strip().lower()
+            if val in row_str_values or disp in row_str_values or any(val in r_val for r_val in row_str_values):
+                matched_entity = ent
+                confidence = max(confidence, ent.confidence or 0.8)
+                break
+
+        step_keywords = []
+        if request.provider_type == ProviderType.TELECOM:
+            step_keywords = ["cdr", "call", "phone", "telecom", "subscriber"]
+        elif request.provider_type == ProviderType.BANK:
+            step_keywords = ["bank", "transaction", "freeze", "funds", "account"]
+        elif request.provider_type == ProviderType.PLATFORM:
+            step_keywords = ["platform", "email", "suspect", "ip", "url", "handle"]
+
+        for step in path_steps:
+            step_text = (step.title + " " + step.description).lower()
+            if any(kw in step_text for kw in step_keywords):
+                linked_step = step
+                break
+        if not linked_step and path_steps:
+            if request.path_step_id:
+                linked_step = db.get(PathStep, request.path_step_id)
+            else:
+                linked_step = path_steps[0]
+
+        row_id = f"{response_id}:{idx}"
+        is_promoted = row_id in promoted_source_ids
+
+        if matched_entity:
+            reason = f"Correlated with Case Entity '{matched_entity.display_value}' ({matched_entity.entity_type})"
+            if request.provider_type == ProviderType.TELECOM:
+                if "calling_number" in row and str(row["calling_number"]) == matched_entity.canonical_value:
+                    reason = f"Outgoing call initiated from target phone {matched_entity.display_value}"
+                    confidence = 0.95
+                elif "called_number" in row and str(row["called_number"]) == matched_entity.canonical_value:
+                    reason = f"Incoming call received from target phone {matched_entity.display_value}"
+                    confidence = 0.95
+            elif request.provider_type == ProviderType.BANK:
+                if "destination_account" in row and str(row["destination_account"]) == matched_entity.canonical_value:
+                    reason = f"Funds transfer sent to flagged account {matched_entity.display_value}"
+                    confidence = 0.98
+                elif "source_account" in row and str(row["source_account"]) == matched_entity.canonical_value:
+                    reason = f"Funds received from suspect source account {matched_entity.display_value}"
+                    confidence = 0.98
+            elif request.provider_type == ProviderType.PLATFORM:
+                if "ip_address" in row and str(row["ip_address"]) == matched_entity.canonical_value:
+                    reason = f"Platform access IP matches suspect IP address {matched_entity.display_value}"
+                    confidence = 0.95
+        else:
+            if request.provider_type == ProviderType.TELECOM:
+                reason = "Call detail record row under investigation"
+            elif request.provider_type == ProviderType.BANK:
+                reason = "Financial transaction row under investigation"
+            else:
+                reason = "Platform access log row under investigation"
+            confidence = 0.7
+
+        correlations.append({
+            "id": row_id,
+            "response_id": response_id,
+            "row_index": idx,
+            "source_row": row,
+            "matched_entity_id": matched_entity.id if matched_entity else None,
+            "matched_entity_value": matched_entity.display_value if matched_entity else None,
+            "reason": reason,
+            "confidence": confidence,
+            "linked_path_step_id": linked_step.id if linked_step else None,
+            "linked_path_step_title": linked_step.title if linked_step else "General Investigation",
+            "is_promoted": is_promoted
+        })
+
+    return correlations
+
+
+def promote_correlation_to_diary(
+    db: Session,
+    response_id: uuid.UUID,
+    row_index: int,
+    current_user: User
+) -> dict[str, Any]:
+    response = db.get(ProviderResponse, response_id)
+    if not response:
+        raise NotFoundError("Provider response not found")
+
+    request = db.get(LegalRequest, response.legal_request_id)
+    if not request:
+        raise NotFoundError("Legal request not found")
+
+    records = response.parsed_data.get("records", [])
+    if row_index < 0 or row_index >= len(records):
+        raise AppError("Invalid row index")
+
+    row = records[row_index]
+    row_id = f"{response_id}:{row_index}"
+
+    from app.models.copilot import AiCitation
+    existing = db.scalar(
+        select(AiCitation)
+        .where(AiCitation.case_id == request.case_id, AiCitation.source_type == "provider_response_row", AiCitation.source_id == row_id)
+    )
+    if existing:
+        return {"message": "Already promoted", "citation_id": str(existing.id)}
+
+    correlations = get_response_correlations(db, response_id)
+    corr = correlations[row_index]
+
+    from app.services import provenance_service
+    excerpt = f"Promoted Record: {json.dumps(row)}. Correlation: {corr['reason']}"
+    locator = f"{request.provider_name} ({request.provider_type.value.upper()}) Response Row #{row_index + 1}"
+
+    citation = provenance_service.create_citation(
+        db=db,
+        case_id=request.case_id,
+        output_type="case_diary",
+        output_id=request.case_id,
+        source_type="provider_response_row",
+        source_id=row_id,
+        excerpt=excerpt,
+        locator=locator,
+        confidence=corr["confidence"]
+    )
+
+    audit_service.record(
+        db,
+        case_id=request.case_id,
+        user_id=current_user.id,
+        action="response_row_promoted",
+        detail={
+            "response_id": str(response_id),
+            "row_index": row_index,
+            "provider_name": request.provider_name,
+            "provider_type": request.provider_type.value,
+            "citation_id": str(citation.id),
+            "reason": corr["reason"]
+        }
+    )
+
+    db.commit()
+    return {"message": "Successfully promoted", "citation_id": str(citation.id)}
+

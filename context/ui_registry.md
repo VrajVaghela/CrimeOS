@@ -146,14 +146,15 @@ These entries define the intended reusable surfaces. Mark them BUILT and add con
 - Props: `caseId: string`
 - Used in: `CaseCommandCenter`
 
-### RequestReadinessChecklist
+### RequestReadinessChecklist — BUILT (Phase 8E)
 - Path: components/request-readiness-checklist.tsx
 - Purpose: pre-dispatch validation checklist with missing-data links and approval state
-- Props: `readiness: RequestReadinessOut`, `onResolve: (item) => void`
+- Props: `readiness: RequestReadinessOut`, `onEditClick?: () => void`, `onRoleApprovalClick?: () => void`
 - Used in: `app/cases/[id]/requests/page.tsx`
 
-### ResponseCorrelationPanel
+### ResponseCorrelationPanel — BUILT (Phase 8E)
 - Path: components/response-correlation-panel.tsx
 - Purpose: explains flagged provider rows and links them to entities, evidence, and investigation steps
-- Props: `correlations: ResponseCorrelationOut[]`, `onPromote: (correlationId) => Promise<void>`
+- Props: `correlations: ResponseCorrelationOut[]`, `onPromote: (rowIndex: number) => Promise<void>`
 - Used in: `app/cases/[id]/responses/page.tsx`
+

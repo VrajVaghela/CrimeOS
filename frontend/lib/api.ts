@@ -397,6 +397,26 @@ export async function askCopilot(caseId: string, question: string): Promise<Copi
   });
 }
 
+import type { RequestReadinessOut, ResponseCorrelationOut } from "@/lib/types";
+
+export async function getRequestReadiness(requestId: string): Promise<RequestReadinessOut> {
+  return request<RequestReadinessOut>(`/requests/${requestId}/readiness`);
+}
+
+export async function getResponseCorrelations(responseId: string): Promise<ResponseCorrelationOut[]> {
+  return request<ResponseCorrelationOut[]>(`/responses/${responseId}/correlations`);
+}
+
+export async function promoteResponseRow(
+  responseId: string,
+  rowIndex: number
+): Promise<{ message: string; citation_id: string }> {
+  return request<{ message: string; citation_id: string }>(`/responses/${responseId}/promote/${rowIndex}`, {
+    method: "POST",
+  });
+}
+
+
 
 
 

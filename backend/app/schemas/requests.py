@@ -27,3 +27,17 @@ class LegalRequestOut(BaseModel):
     dispatched_at: datetime | None
 
     model_config = {"from_attributes": True}
+
+
+class ReadinessItem(BaseModel):
+    key: str
+    label: str
+    status: str  # "passed", "failed", "warning"
+    message: str
+    fix: str | None = None
+
+
+class RequestReadinessOut(BaseModel):
+    is_ready: bool
+    items: list[ReadinessItem]
+

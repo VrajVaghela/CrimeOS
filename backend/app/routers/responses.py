@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import User
-from app.schemas.responses import ProviderResponseOut
+from app.schemas.responses import ProviderResponseOut, ResponseCorrelationOut
 from app.services import analytics_service
+
 
 router = APIRouter(prefix="/responses", tags=["provider responses"])
 
@@ -52,3 +53,32 @@ async def regenerate_insights(
 ) -> ProviderResponseOut:
     response = analytics_service.regenerate_insights(db, response_id)
     return ProviderResponseOut.model_validate(response)
+
+
+@router.get(
+    "/{response_id}/correlations",
+    response_model=list[ResponseCorrelationOut],
+    summary="Get explainable response correlations for a response",
+)
+async def get_response_correlations(
+    response_id: uuid.UUID,
+    _: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[ResponseCorrelationOut]:
+    correlations = analytics_service.get_response_correlations(db, response_id)
+    return [ResponseCorrelationOut.model_validate(c) for c in correlations]
+
+
+@router.post(
+    "/{response_id}/promote/{row_index}",
+    summary="Promote a response correlation row to case diary/summary",
+)
+async def promote_response_row(
+    response_id: uuid.UUID,
+    row_index: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    res = analytics_service.promote_correlation_to_diary(db, response_id, row_index, current_user)
+    return res
+

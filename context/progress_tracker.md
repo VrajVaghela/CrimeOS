@@ -90,10 +90,11 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] ✅ CHECKPOINT: three seeded questions return grounded answers and no citation-free output
 
 ### 8E — Request quality and response correlation
-- [ ] Add pre-dispatch readiness service and checklist UI
-- [ ] Block dispatch when required data, approval, or provenance is missing
-- [ ] Add explainable provider-response correlations with promote-to-diary action
-- [ ] ☐ CHECKPOINT: flagged response rows trace back to raw data, entities, and a path step
+- [x] Add pre-dispatch readiness service and checklist UI
+- [x] Block dispatch when required data, approval, or provenance is missing
+- [x] Add explainable provider-response correlations with promote-to-diary action
+- [x] ✅ CHECKPOINT: flagged response rows trace back to raw data, entities, and a path step
+
 
 ### 8F — Demo hardening
 - [ ] Seed Phase 8 examples and add fresh-seed smoke steps

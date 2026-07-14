@@ -288,5 +288,33 @@ export interface CopilotMessageOut {
   created_at: string;
 }
 
+export interface ReadinessItem {
+  key: string;
+  label: string;
+  status: "passed" | "failed" | "warning";
+  message: string;
+  fix: string | null;
+}
+
+export interface RequestReadinessOut {
+  is_ready: boolean;
+  items: ReadinessItem[];
+}
+
+export interface ResponseCorrelationOut {
+  id: string;
+  response_id: string;
+  row_index: number;
+  source_row: Record<string, any>;
+  matched_entity_id: string | null;
+  matched_entity_value: string | null;
+  reason: string;
+  confidence: number;
+  linked_path_step_id: string | null;
+  linked_path_step_title: string;
+  is_promoted: boolean;
+}
+
+
 
 

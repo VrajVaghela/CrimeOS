@@ -37,10 +37,13 @@ import {
   approveRequest,
   dispatchRequest,
   triggerMockResponse,
+  getRequestReadiness,
   ApiError,
 } from "@/lib/api";
+import { RequestReadinessChecklist } from "@/components/request-readiness-checklist";
 import { useAuth } from "@/lib/auth-context";
-import type { LegalRequestOut, ProviderType } from "@/lib/types";
+import type { LegalRequestOut, ProviderType, RequestReadinessOut } from "@/lib/types";
+
 
 const PROVIDER_DEFAULTS = {
   telecom: { name: "Bharti Airtel", email: "nodal.officer@airtel.com" },
@@ -72,6 +75,7 @@ export default function RequestsPage() {
   const [editEmail, setEditEmail] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [readinessMap, setReadinessMap] = useState<Record<string, RequestReadinessOut>>({});
 
   useEffect(() => {
     if (caseId) void loadRequests();
@@ -90,12 +94,28 @@ export default function RequestsPage() {
     try {
       const data = await getRequests(caseId);
       setRequests(data);
+
+      const readinessData: Record<string, RequestReadinessOut> = {};
+      await Promise.all(
+        data
+          .filter((r) => r.status === "draft" || r.status === "approved")
+          .map(async (r) => {
+            try {
+              const read = await getRequestReadiness(r.id);
+              readinessData[r.id] = read;
+            } catch (err) {
+              console.error("Failed to load readiness for request", r.id, err);
+            }
+          })
+      );
+      setReadinessMap(readinessData);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Failed to load requests");
     } finally {
       setLoading(false);
     }
   }
+
 
   async function handleCreateDraft(e: React.FormEvent) {
     e.preventDefault();
@@ -138,6 +158,7 @@ export default function RequestsPage() {
       });
       setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
       setSelectedRequest(null);
+      await loadRequests();
     } catch (e) {
       alert(e instanceof ApiError ? e.message : "Failed to update draft");
     } finally {
@@ -150,6 +171,7 @@ export default function RequestsPage() {
     try {
       const updated = await approveRequest(reqId);
       setRequests((prev) => prev.map((r) => (r.id === reqId ? updated : r)));
+      await loadRequests();
     } catch (e) {
       alert(e instanceof ApiError ? e.message : "Failed to approve request");
     } finally {
@@ -162,12 +184,14 @@ export default function RequestsPage() {
     try {
       const updated = await dispatchRequest(reqId);
       setRequests((prev) => prev.map((r) => (r.id === reqId ? updated : r)));
+      await loadRequests();
     } catch (e) {
       alert(e instanceof ApiError ? e.message : "Failed to dispatch request");
     } finally {
       setActionLoading(null);
     }
   }
+
 
   async function handleTriggerMockResponse(reqId: string) {
     setActionLoading(reqId);
@@ -336,22 +360,34 @@ export default function RequestsPage() {
                   </CardHeader>
 
                   <CardContent className="pb-4">
-                    <div className="bg-background/40 border border-border/40 rounded-lg p-3 space-y-2 text-xs font-mono">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Template:</span>
-                        <span>{req.template_used}</span>
-                      </div>
-                      {req.dispatched_at && (
+                    <div className="space-y-4">
+                      <div className="bg-background/40 border border-border/40 rounded-lg p-3 space-y-2 text-xs font-mono">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Dispatched:</span>
-                          <span>
-                            {new Date(req.dispatched_at).toLocaleString("en-IN", {
-                              day: "numeric",
-                              month: "short",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
+                          <span className="text-muted-foreground">Template:</span>
+                          <span>{req.template_used}</span>
+                        </div>
+                        {req.dispatched_at && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Dispatched:</span>
+                            <span>
+                              {new Date(req.dispatched_at).toLocaleString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {readinessMap[req.id] && (
+                        <div className="border-t border-border/40 pt-4">
+                          <RequestReadinessChecklist
+                            readiness={readinessMap[req.id]}
+                            onEditClick={() => openEditDialog(req)}
+                            onRoleApprovalClick={() => void handleApprove(req.id)}
+                          />
                         </div>
                       )}
                     </div>
@@ -377,7 +413,7 @@ export default function RequestsPage() {
                               size="sm"
                               variant="outline"
                               onClick={() => void handleApprove(req.id)}
-                              disabled={isLoading}
+                              disabled={isLoading || (readinessMap[req.id] && readinessMap[req.id].items.some(it => it.key !== "approval" && it.status === "failed"))}
                               loading={isLoading}
                               className="text-accent border-accent/40 hover:bg-accent/10"
                             >
@@ -396,13 +432,14 @@ export default function RequestsPage() {
                         <Button
                           size="sm"
                           onClick={() => void handleDispatch(req.id)}
-                          disabled={isLoading}
+                          disabled={isLoading || readinessMap[req.id]?.is_ready === false}
                           loading={isLoading}
                         >
                           {!isLoading && <Send className="h-3.5 w-3.5" />}
                           Dispatch
                         </Button>
                       )}
+
 
                       {req.status === "dispatched" && (
                         <Button
