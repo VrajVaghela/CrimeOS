@@ -96,50 +96,49 @@ Last updated: 2026-07-05
 - Props: N/A (reads from API directly)
 - Used in: `app/cases/[id]/summary/page.tsx`
 
-## Planned Phase 8 components
-These entries define the intended reusable surfaces. Mark them BUILT and add concrete usage after implementation; do not create duplicates with different names.
-
-### CaseCommandCenter
+### CaseCommandCenter — BUILT (Phase 8A)
 - Path: components/case-command-center.tsx
 - Purpose: case overview projection showing workflow spine, blockers, next-best action, key entities, active requests, latest insight, and recent activity
-- Props: `caseId: string`, `workflow: CaseWorkflowStateOut`, `caseData: CaseDetailOut`
+- Props: `caseId: string`
 - Used in: `app/cases/[id]/page.tsx`
 
-### WorkflowSpine
+### WorkflowSpine — BUILT (Phase 8A)
 - Path: components/workflow-spine.tsx
 - Purpose: compact Ingest → Verify → Investigate → Request → Analyze → Summarize progress indicator with accessible stage labels
-- Props: `stages: WorkflowStageOut[]`, `currentStage: WorkflowStage`, `onStageSelect?: (stage) => void`
+- Props: `stages: WorkflowStageOut[]`, `currentStage: string`, `onStageSelect?: (stage) => void`
 - Used in: `CaseCommandCenter`
 
-### NextBestAction
+### NextBestAction — BUILT (Phase 8A)
 - Path: components/next-best-action.tsx
 - Purpose: single prioritized action with blocker explanation and direct route/mutation callback
-- Props: `action: NextActionOut`, `onAction: () => void`, `disabled?: boolean`
+- Props: `actionType: string | null`, `actionLabel: string | null`, `blockerCodes: string[]`, `onAction: (actionType: string) => void`, `disabled?: boolean`
 - Used in: `CaseCommandCenter`
 
-### SourceChip
+### SourceChip — BUILT (Phase 8B)
 - Path: components/source-chip.tsx
 - Purpose: compact provenance link showing source type, label, locator, and confidence
-- Props: `source: AiCitationOut`, `onOpen?: () => void`
-- Used in: AI content, copilot, response correlations, summary
+- Props: `sourceType: string`, `sourceLabel: string`, `locator?: string`, `confidence?: number`
+- Used in: AI content cards, entity pivots
 
-### PathRevisionList
+### PathRevisionList — BUILT (Phase 8B)
 - Path: components/path-revision-list.tsx
 - Purpose: active and superseded adaptive investigation-path revisions with trigger and change explanation
-- Props: `revisions: InvestigationPathRevisionOut[]`, `activeRevisionId: string`
+- Props: `revisions: InvestigationPathOut[]`, `activeRevisionId: string | null`, `onSelectRevision: (revision: InvestigationPathOut) => void`, `selectedRevisionId: string | null`
 - Used in: `app/cases/[id]/path/page.tsx`
 
-### EntityPivotPanel
+### EntityPivotPanel — BUILT (Phase 8B)
 - Path: components/entity-pivot-panel.tsx
 - Purpose: grouped case entities with confidence, source links, related cases, and evidence/request pivots
-- Props: `entities: CaseEntityOut[]`, `relationships: EntityRelationshipOut[]`, `onSelect: (entityId) => void`
-- Used in: `CaseCommandCenter`, `app/cases/[id]/evidence/page.tsx`
-
-### EvidenceReviewWorkspace
+- Props: `entities: CaseEntityOut[]`, `relationships: EntityRelationshipOut[]`, `relatedCases: RelatedCaseOut[]`, `onSync: () => Promise<void>`
+- Used in: `CaseCommandCenter`, `app/cases/[id]/page.tsx`
+### EvidenceReviewWorkspace — BUILT (Phase 8C)
 - Path: components/evidence-review-workspace.tsx
 - Purpose: original media/transcript/translation review with timestamp markers and explicit add-to-case actions
-- Props: `evidence: EvidenceOut`, `markers: EvidenceMarkerOut[]`, `onLink: (markerId, entityId) => Promise<void>`
+- Props: `evidence: EvidenceOut`, `onRefresh: () => void`
 - Used in: `app/cases/[id]/evidence/page.tsx`
+
+## Planned Phase 8 components
+These entries define the intended reusable surfaces. Mark them BUILT and add concrete usage after implementation; do not create duplicates with different names.
 
 ### CopilotPanel
 - Path: components/copilot-panel.tsx

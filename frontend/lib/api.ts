@@ -16,7 +16,9 @@ import type {
   AuditEventOut,
   EvidenceOut,
   CaseSectionOut,
+  CommandCenterOut,
 } from "@/lib/types";
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "crime_os_token";
@@ -297,4 +299,90 @@ export async function updateSectionStatus(sectionId: string, status: string): Pr
 export async function getPendingRequests(): Promise<LegalRequestOut[]> {
   return request<LegalRequestOut[]>("/requests/pending");
 }
+
+export async function getCommandCenter(caseId: string): Promise<CommandCenterOut> {
+  return request<CommandCenterOut>(`/command_center/${caseId}`);
+}
+
+// Phase 8B: Path Revisions and Case Entity Intelligence APIs
+import type {
+  CaseEntityOut,
+  EntityRelationshipOut,
+  RelatedCaseOut,
+  InvestigationPathOut,
+} from "@/lib/types";
+
+export async function getPathRevisions(caseId: string): Promise<InvestigationPathOut[]> {
+  return request<InvestigationPathOut[]>(`/paths/cases/${caseId}/revisions`);
+}
+
+export async function triggerPathRevision(
+  caseId: string,
+  body: { trigger_type: string; change_reason: string }
+): Promise<InvestigationPathOut> {
+  return request<InvestigationPathOut>(`/paths/cases/${caseId}/revision`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getCaseEntities(caseId: string): Promise<CaseEntityOut[]> {
+  return request<CaseEntityOut[]>(`/entities/cases/${caseId}`);
+}
+
+export async function getEntityRelationships(caseId: string): Promise<EntityRelationshipOut[]> {
+  return request<EntityRelationshipOut[]>(`/entities/cases/${caseId}/relationships`);
+}
+
+export async function getRelatedCases(caseId: string): Promise<RelatedCaseOut[]> {
+  return request<RelatedCaseOut[]>(`/entities/cases/${caseId}/related-cases`);
+}
+
+export async function syncEntities(caseId: string): Promise<CaseEntityOut[]> {
+  return request<CaseEntityOut[]>(`/entities/cases/${caseId}/sync`, {
+    method: "POST",
+  });
+}
+
+// Phase 8C: Evidence Markers, Links, and Promotion APIs
+import type { EvidenceMarkerOut } from "@/lib/types";
+
+export async function createEvidenceMarker(
+  evidenceId: string,
+  body: {
+    marker_type: string;
+    start_ms?: number | null;
+    end_ms?: number | null;
+    transcript_text?: string | null;
+    linked_entity_ids?: string[];
+  }
+): Promise<EvidenceMarkerOut> {
+  return request<EvidenceMarkerOut>(`/evidence/${evidenceId}/markers`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function linkEvidenceMarkerToEntity(
+  markerId: string,
+  entityId: string
+): Promise<EvidenceMarkerOut> {
+  return request<EvidenceMarkerOut>(`/evidence/markers/${markerId}/link?entity_id=${entityId}`, {
+    method: "POST",
+  });
+}
+
+export async function promoteEvidenceMarker(
+  markerId: string,
+  note?: string
+): Promise<EvidenceMarkerOut> {
+  const url = note
+    ? `/evidence/markers/${markerId}/promote?note=${encodeURIComponent(note)}`
+    : `/evidence/markers/${markerId}/promote`;
+  return request<EvidenceMarkerOut>(url, {
+    method: "POST",
+  });
+}
+
+
 

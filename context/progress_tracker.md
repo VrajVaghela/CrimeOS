@@ -63,24 +63,25 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 
 ## Phase 8 — Investigation Intelligence & Command Center
 ### 8A — Design and workflow foundation
-- [ ] Resolve font/token drift and remove non-AI side-stripe usage
-- [ ] Add `case_workflow_state` schema, migration, service, router, and typed API contract
-- [ ] Build Case Command Center with workflow spine, blockers, next-best action, and recent activity
-- [ ] Group case navigation into Work / Evidence / Record without breaking deep links
-- [ ] ☐ CHECKPOINT: seeded case opens with a truthful workflow state and one obvious next action
+- [x] Resolve font/token drift and remove non-AI side-stripe usage
+- [x] Add `case_workflow_state` schema, migration, service, router, and typed API contract
+- [x] Build Case Command Center with workflow spine, blockers, next-best action, and recent activity
+- [x] Group case navigation into Work / Evidence / Record without breaking deep links
+- [x] ✅ CHECKPOINT: seeded case opens with a truthful workflow state and one obvious next action
+
 
 ### 8B — Adaptive paths and entity intelligence
-- [ ] Add append-only investigation path revisions and visible change explanations
-- [ ] Normalize case entities and preserve raw mentions/confidence
-- [ ] Add entity relationships and grouped entity pivot panel
-- [ ] Add cautious possible-match related-case search with source disclosure
-- [ ] ☐ CHECKPOINT: provider response creates a cited path revision and entity pivot
+- [x] Add append-only investigation path revisions and visible change explanations
+- [x] Normalize case entities and preserve raw mentions/confidence
+- [x] Add entity relationships and grouped entity pivot panel
+- [x] Add cautious possible-match related-case search with source disclosure
+- [x] ✅ CHECKPOINT: provider response creates a cited path revision and entity pivot
 
 ### 8C — Evidence workspace
-- [ ] Add evidence markers, transcript segments, timestamps, and entity links
-- [ ] Add original/translation review surface and explicit “add to case” actions
-- [ ] Add audit events for evidence links and promoted facts
-- [ ] ☐ CHECKPOINT: evidence marker links to an entity and appears in the audit trail
+- [x] Add evidence markers, transcript segments, timestamps, and entity links
+- [x] Add original/translation review surface and explicit “add to case” actions
+- [x] Add audit events for evidence links and promoted facts
+- [x] ✅ CHECKPOINT: evidence marker links to an entity and appears in the audit trail
 
 ### 8D — Cited case copilot
 - [ ] Add `ai_citations` and `copilot_messages` schema, migration, and typed API contracts

@@ -142,6 +142,10 @@ def process_complaint(complaint_id: uuid.UUID, user_id: uuid.UUID) -> None:
             # Entity extraction (flushes but does not commit)
             extraction_service.extract_entities(db, complaint_id=complaint_id)
 
+            # Sync case entities and build initial relationships
+            from app.services import entity_service
+            entity_service.sync_case_entities(db, case_id=complaint.case_id)
+
             audit_service.record(
                 db,
                 case_id=complaint.case_id,

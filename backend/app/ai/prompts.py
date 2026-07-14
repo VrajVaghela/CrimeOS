@@ -143,4 +143,68 @@ Provide:
 Return ONLY schema-valid JSON matching the requested output.
 """.strip()
 
+INVESTIGATION_PATH_REVISION_PROMPT = """
+You are Crime OS AI, a senior police investigator in India.
+You are updating the active investigation path for a case because of a new event.
 
+Case Title: {case_title}
+Complaint Text: {complaint_text}
+Current Extracted & Verified Entities: {extracted_entities}
+
+We are revising the investigation path due to the following trigger:
+Trigger Type: {trigger_type}
+Reason / Details of the trigger: {change_reason}
+
+Here is the previous investigation path version:
+{previous_path_steps}
+
+Grounded Standard Operating Procedure (SOP) Chunks:
+{sop_chunks}
+
+Available Legal Sections in Database (Code, Section Number, Title, text):
+{legal_sections}
+
+Instructions:
+1. Re-evaluate the crime classification and steps. You should adapt the steps based on the new trigger details (e.g. if telecom response is received, add steps for analyzing the numbers or tracing the IP addresses).
+2. Explain what changed from the previous path version and why in a concise summary (returned in change_explanation).
+3. Formulate the revised sequence of steps. For each step, provide a title, description, SOP citation, and suggested_action_type ('telecom', 'bank', 'platform', or null).
+4. Provide the applicable legal sections (BNS/BNSS/BSA) and why they are applicable.
+ 
+Return ONLY schema-valid JSON matching the requested output.
+""".strip()
+
+
+AUDIO_EVIDENCE_PROMPT = """
+You are Crime OS AI. Analyze the supplied evidence audio file and perform forensic analysis.
+Instructions:
+1. Transcribe the audio content verbatim. The audio might be in Hindi, Gujarati, or English.
+2. If the audio is in Hindi or Gujarati, provide the original transcript in that script, and also provide a clear, accurate English translation.
+3. Provide a summary description of the audio (who is speaking, tone, keywords, context).
+4. Generate relevant tags (e.g. "confession", "threat_call", "call_recording", "voice_note").
+5. Return a confidence score between 0.0 and 1.0.
+
+Return ONLY schema-valid JSON matching the requested output.
+""".strip()
+
+VIDEO_EVIDENCE_PROMPT = """
+You are Crime OS AI. Analyze the supplied evidence video file and perform forensic analysis.
+Instructions:
+1. Transcribe any audio content verbatim. The audio might be in Hindi, Gujarati, or English.
+2. If the audio is in Hindi or Gujarati, provide the original transcript in that script, and also provide a clear, accurate English translation.
+3. Provide a summary description of the video events and audio (activities, setting, participants).
+4. Generate relevant tags (e.g. "cctv", "confrontation", "theft_recording", "incident_footage").
+5. Return a confidence score between 0.0 and 1.0.
+
+Return ONLY schema-valid JSON matching the requested output.
+""".strip()
+
+DOCUMENT_EVIDENCE_PROMPT = """
+You are Crime OS AI. Analyze the supplied document (PDF or Text) and extract relevant forensic information.
+Instructions:
+1. Extract or OCR the content of the document. If it is in Hindi or Gujarati, provide the original text and its English translation.
+2. Provide a summary description of the document purpose and key details.
+3. Generate relevant tags (e.g. "bank_statement", "chat_log", "threat_letter", "receipt").
+4. Return a confidence score between 0.0 and 1.0.
+
+Return ONLY schema-valid JSON matching the requested output.
+""".strip()

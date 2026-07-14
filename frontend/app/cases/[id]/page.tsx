@@ -1,15 +1,11 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useParams } from "next/navigation";
+import { CaseCommandCenter } from "@/components/case-command-center";
 
 export default function CaseIndexPage() {
   const { id } = useParams();
-  const router = useRouter();
+  const caseId = id as string;
 
-  useEffect(() => {
-    router.replace(`/cases/${id as string}/ingestion`);
-  }, [id, router]);
-
-  return null;
+  return <CaseCommandCenter caseId={caseId} />;
 }

@@ -212,8 +212,9 @@ export default function CasesPage() {
                     key={item.id}
                     id={`case-row-${item.id}`}
                     onClick={() => router.push(`/cases/${item.id}`)}
-                    className={`w-full text-left flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:border-primary/40 hover:glow-primary hover:-translate-y-0.5 md:flex-row md:items-center md:justify-between animate-fade-up border-l-2 ${CASE_COLORS[idx % CASE_COLORS.length]}`}
+                    className="w-full text-left flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:border-primary/40 hover:glow-primary hover:-translate-y-0.5 md:flex-row md:items-center md:justify-between animate-fade-up"
                     style={{ animationDelay: `${idx * 60}ms` }}
+
                   >
                     <div className="min-w-0 flex-1">
                       <p className="font-mono text-sm text-primary">{item.case_number}</p>

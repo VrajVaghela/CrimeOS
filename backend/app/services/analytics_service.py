@@ -296,6 +296,18 @@ def generate_mock_response(db: Session, request_id: uuid.UUID) -> ProviderRespon
         },
     )
 
+    try:
+        from app.services import path_revision_service
+        path_revision_service.generate_path_revision(
+            db=db,
+            case_id=request.case_id,
+            user_id=None,
+            trigger_type="provider_response",
+            change_reason=f"Received parsed {request.provider_type.value.upper()} response from {request.provider_name} with {len(records)} records."
+        )
+    except Exception as pr_exc:
+        logger.error("Failed to automatically generate path revision on provider response: %s", pr_exc, exc_info=True)
+
     db.commit()
     db.refresh(response_record)
     return response_record

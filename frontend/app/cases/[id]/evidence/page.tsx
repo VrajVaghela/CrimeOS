@@ -12,6 +12,10 @@ import {
   ShieldAlert,
   Calendar,
   Image as ImageIcon,
+  Volume2,
+  Video,
+  FileText,
+  ChevronLeft,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,14 +23,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { getEvidence, uploadEvidence, ApiError } from "@/lib/api";
 import type { EvidenceOut } from "@/lib/types";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { EvidenceReviewWorkspace } from "@/components/evidence-review-workspace";
 
 export default function EvidencePage() {
   const params = useParams();
   const caseId = params.id as string;
 
   const [evidenceList, setEvidenceList] = useState<EvidenceOut[]>([]);
+  const [selectedEvidence, setSelectedEvidence] = useState<EvidenceOut | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +46,11 @@ export default function EvidencePage() {
     try {
       const data = await getEvidence(caseId);
       setEvidenceList(data);
+      // If an item was selected, update its data in case markers changed
+      if (selectedEvidence) {
+        const updated = data.find((e) => e.id === selectedEvidence.id);
+        if (updated) setSelectedEvidence(updated);
+      }
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Failed to load evidence files");
     } finally {
@@ -53,8 +62,16 @@ export default function EvidencePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setError("Only image evidence (JPG, PNG) is supported for automated AI forensic tagging.");
+    // Validate allowed mime types: images, audio, video, documents
+    const isImage = file.type.startsWith("image/");
+    const isAudio = file.type.startsWith("audio/");
+    const isVideo = file.type.startsWith("video/");
+    const isDoc = file.type === "application/pdf" || file.type.startsWith("text/") || file.name.endsWith(".txt") || file.name.endsWith(".pdf");
+
+    if (!isImage && !isAudio && !isVideo && !isDoc) {
+      setError(
+        "Supported file formats for AI forensic analysis are images (PNG/JPG), audio (MP3/WAV), video (MP4), and documents (PDF/TXT)."
+      );
       return;
     }
 
@@ -63,6 +80,8 @@ export default function EvidencePage() {
     try {
       const uploaded = await uploadEvidence(caseId, file);
       setEvidenceList((prev) => [uploaded, ...prev]);
+      setSelectedEvidence(uploaded); // Auto-open uploaded file in workspace
+      toastSuccess(file.name);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Evidence upload failed");
     } finally {
@@ -71,6 +90,61 @@ export default function EvidencePage() {
     }
   };
 
+  const toastSuccess = (name: string) => {
+    // Simple custom log/notification representation
+    console.log(`Success: uploaded and analyzed ${name}`);
+  };
+
+  const getFileTypeBadge = (type: string | null) => {
+    switch (type) {
+      case "image":
+        return <Badge className="bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono text-[10px]">IMAGE</Badge>;
+      case "audio":
+        return <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-[10px]">AUDIO</Badge>;
+      case "video":
+        return <Badge className="bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono text-[10px]">VIDEO</Badge>;
+      case "document":
+        return <Badge className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono text-[10px]">DOCUMENT</Badge>;
+      default:
+        return <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono text-[10px]">MEDIA</Badge>;
+    }
+  };
+
+  const getFileThumbIcon = (type: string | null) => {
+    switch (type) {
+      case "audio":
+        return <Volume2 className="h-10 w-10 text-emerald-400" />;
+      case "video":
+        return <Video className="h-10 w-10 text-purple-400" />;
+      case "document":
+        return <FileText className="h-10 w-10 text-indigo-400" />;
+      default:
+        return <FileText className="h-10 w-10 text-amber-400" />;
+    }
+  };
+
+  if (selectedEvidence) {
+    return (
+      <div className="space-y-4 animate-fade-up">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setSelectedEvidence(null)}
+          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+        >
+          <ChevronLeft className="h-4 w-4" /> Back to Evidence Gallery / गैलरी पर वापस जाएं
+        </Button>
+
+        <EvidenceReviewWorkspace
+          evidence={selectedEvidence}
+          onRefresh={() => {
+            void loadEvidence();
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-up">
       {/* Header */}
@@ -78,10 +152,10 @@ export default function EvidencePage() {
         <div>
           <h2 className="font-heading text-lg font-bold flex items-center gap-2">
             <Camera className="h-5 w-5 text-primary" />
-            Evidence Material Gallery
+            Evidence Material Workspace / साक्ष्य सामग्री कार्यक्षेत्र
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Upload incident images and documents to automatically tag and analyze forensic features via Gemini Vision.
+            Upload images, voice recordings, videos, or documents to automatically extract transcripts, tags, and link facts.
           </p>
         </div>
 
@@ -90,7 +164,7 @@ export default function EvidencePage() {
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept="image/*"
+            accept="image/*,audio/*,video/*,application/pdf,text/plain"
             className="hidden"
             id="evidence-file-input"
           />
@@ -101,7 +175,7 @@ export default function EvidencePage() {
             id="upload-evidence-btn"
           >
             {!uploading && <Upload className="h-4 w-4" />}
-            {uploading ? "Analyzing Image..." : "Upload Image Evidence"}
+            {uploading ? "Analyzing File via Gemini..." : "Upload Evidence File / फ़ाइल अपलोड करें"}
           </Button>
         </div>
       </div>
@@ -116,7 +190,7 @@ export default function EvidencePage() {
       {loading ? (
         <div className="flex flex-col items-center gap-3 py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading evidence list...</p>
+          <p className="text-sm text-muted-foreground">Loading evidence workspace...</p>
         </div>
       ) : evidenceList.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
@@ -124,93 +198,103 @@ export default function EvidencePage() {
             <Camera className="h-8 w-8 text-primary" />
           </div>
           <div className="max-w-sm space-y-1">
-            <h3 className="font-heading font-semibold text-lg">No Evidence Uploaded</h3>
+            <h3 className="font-heading font-semibold text-lg">No Evidence Processed</h3>
             <p className="text-sm text-muted-foreground">
-              Upload photographs, CCTV screenshots, or transaction receipt images to invoke Gemini Vision auto-tagging.
+              Upload photographs, call recordings, cctv snippets, or statement text files to perform forensic verification.
             </p>
           </div>
           <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
-            <ImageIcon className="h-4 w-4" />
-            Select File
+            <Upload className="h-4 w-4" />
+            Select Evidence File
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {evidenceList.map((ev, idx) => {
             const highConfidence = ev.ai_tags.confidence >= 0.85;
+            const isImage = ev.file_type === "image";
+
             return (
               <Card
                 key={ev.id}
                 hover
-                className="overflow-hidden animate-fade-up"
-                style={{ animationDelay: `${idx * 80}ms` }}
+                className="overflow-hidden cursor-pointer transition-all hover:scale-[1.01] flex flex-col justify-between"
+                onClick={() => setSelectedEvidence(ev)}
+                style={{ animationDelay: `${idx * 50}ms` }}
               >
-                {/* Image panel */}
-                <div className="h-56 w-full relative bg-black/40 border-b border-border/40 overflow-hidden flex items-center justify-center group">
-                  <img
-                    src={`${API_URL}/${ev.file_path}`}
-                    alt={ev.ai_tags.description || "Evidence material"}
-                    className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute top-3 right-3 flex items-center gap-2">
-                    <Badge
-                      variant={highConfidence ? "success" : "warning"}
-                      className="text-[10px] font-mono font-semibold uppercase"
-                    >
-                      {Math.round(ev.ai_tags.confidence * 100)}% Conf
-                    </Badge>
-                  </div>
-                </div>
+                <div>
+                  {/* Thumb Preview Panel */}
+                  <div className="h-48 w-full relative bg-slate-950/80 border-b border-border/40 overflow-hidden flex items-center justify-center group">
+                    {isImage ? (
+                      <img
+                        src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${ev.file_path}`}
+                        alt={ev.ai_tags.description || "Evidence material"}
+                        className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        {getFileThumbIcon(ev.file_type)}
+                        <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[200px]">
+                          {ev.file_path.split("/").pop()}
+                        </span>
+                      </div>
+                    )}
 
-                {/* AI Tags */}
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
+                    <div className="absolute top-3 left-3">
+                      {getFileTypeBadge(ev.file_type)}
+                    </div>
+
+                    <div className="absolute top-3 right-3 flex items-center gap-2">
+                      <Badge
+                        variant={highConfidence ? "success" : "warning"}
+                        className="text-[9px] font-mono font-semibold uppercase px-1.5"
+                      >
+                        {Math.round(ev.ai_tags.confidence * 100)}% Conf
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Info Header */}
+                  <CardHeader className="pb-3 pt-4">
+                    <div className="min-w-0">
                       <CardTitle className="font-heading text-sm font-bold flex items-center gap-2 text-violet">
-                        <div className="rounded-full bg-violet/15 p-1">
-                          <Sparkles className="h-4 w-4 text-violet" />
+                        <div className="rounded-full bg-violet/15 p-1 shrink-0">
+                          <Sparkles className="h-3.5 w-3.5 text-violet" />
                         </div>
-                        AI Forensic Identification
+                        <span className="truncate">AI Forensic Insights</span>
                       </CardTitle>
-                      <CardDescription className="text-xs text-foreground mt-1 leading-relaxed">
+                      <CardDescription className="text-xs text-foreground mt-1.5 line-clamp-3 leading-relaxed">
                         {ev.ai_tags.description}
                       </CardDescription>
                     </div>
-                  </div>
-                </CardHeader>
+                  </CardHeader>
+                </div>
 
                 <CardContent className="space-y-4 pt-0">
                   {/* Tags */}
-                  <div className="flex flex-wrap gap-1.5 items-center">
-                    <Tag className="h-3 w-3 text-muted-foreground mr-1 shrink-0" />
-                    {ev.ai_tags.tags.map((t) => (
-                      <Badge key={t} variant="secondary" className="text-[10px] uppercase font-mono">
+                  <div className="flex flex-wrap gap-1 items-center">
+                    <Tag className="h-3 w-3 text-muted-foreground shrink-0 mr-1" />
+                    {ev.ai_tags.tags.slice(0, 3).map((t) => (
+                      <Badge key={t} variant="secondary" className="text-[9px] uppercase font-mono">
                         {t}
                       </Badge>
                     ))}
+                    {ev.ai_tags.tags.length > 3 && (
+                      <span className="text-[9px] font-mono text-muted-foreground">+{ev.ai_tags.tags.length - 3}</span>
+                    )}
                   </div>
 
-                  {/* Flagged Features */}
-                  {ev.ai_tags.flagged_features && ev.ai_tags.flagged_features.length > 0 && (
-                    <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 space-y-1.5">
-                      <span className="font-bold text-[10px] text-destructive flex items-center gap-1 uppercase tracking-wider">
-                        <ShieldAlert className="h-3.5 w-3.5" /> Flagged Forensic Features
-                      </span>
-                      <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
-                        {ev.ai_tags.flagged_features.map((feat, i) => (
-                          <li key={i}>{feat}</li>
-                        ))}
-                      </ul>
+                  {/* Markers count */}
+                  {ev.markers && ev.markers.length > 0 && (
+                    <div className="text-[10px] font-bold text-sky-400 font-mono">
+                      {ev.markers.length} pinned fact markers on this file
                     </div>
                   )}
 
                   {/* Timestamp */}
-                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono pt-1 border-t border-border/30">
-                    <Calendar className="h-3.5 w-3.5" />
-                    Uploaded: {new Date(ev.uploaded_at).toLocaleString("en-IN", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })}
+                  <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-mono pt-1.5 border-t border-border/30">
+                    <Calendar className="h-3 w-3" />
+                    Uploaded: {new Date(ev.uploaded_at).toLocaleDateString("en-IN")}
                   </div>
                 </CardContent>
               </Card>

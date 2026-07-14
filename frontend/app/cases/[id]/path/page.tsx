@@ -10,9 +10,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { PathStepper } from "@/components/path-stepper";
 import { AiContentCard } from "@/components/ai-content-card";
-import { getCasePath, generateCasePath, updateStepStatus, updateSectionStatus, ApiError } from "@/lib/api";
+import { getCasePath, generateCasePath, updateStepStatus, updateSectionStatus, getPathRevisions, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import type { CaseSectionOut, InvestigationPathOut, StepStatus } from "@/lib/types";
+import { PathRevisionList } from "@/components/path-revision-list";
 
 export default function PathPage() {
   const params = useParams();
@@ -22,6 +23,8 @@ export default function PathPage() {
   const [status, setStatus] = useState<"processing" | "done" | "failed" | "not_started">("not_started");
   const [message, setMessage] = useState("");
   const [path, setPath] = useState<InvestigationPathOut | null>(null);
+  const [revisions, setRevisions] = useState<InvestigationPathOut[]>([]);
+  const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null);
   const [caseSections, setCaseSections] = useState<CaseSectionOut[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -52,6 +55,11 @@ export default function PathPage() {
       setMessage(res.message);
       setPath(res.path);
       setCaseSections(res.case_sections);
+      if (res.status === "done" && res.path) {
+        setSelectedRevisionId((prev) => prev || res.path?.id || null);
+        const revs = await getPathRevisions(caseId);
+        setRevisions(revs);
+      }
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Failed to load path status");
     } finally {
@@ -89,6 +97,11 @@ export default function PathPage() {
       if (res.status === "done") {
         setPath(res.path);
         setCaseSections(res.case_sections);
+        if (res.path) {
+          setSelectedRevisionId(res.path.id);
+          const revs = await getPathRevisions(caseId);
+          setRevisions(revs);
+        }
         stopPolling();
       } else if (res.status === "failed") {
         stopPolling();
@@ -117,13 +130,27 @@ export default function PathPage() {
   const [updatingSectionId, setUpdatingSectionId] = useState<string | null>(null);
 
   const handleStatusChange = async (stepId: string, newStatus: StepStatus) => {
-    if (!path) return;
+    const currentPath = revisions.find((r) => r.id === selectedRevisionId) || path;
+    if (!currentPath) return;
     try {
       const updatedStep = await updateStepStatus(stepId, newStatus);
-      setPath({
-        ...path,
-        steps: path.steps.map((s) => (s.id === stepId ? updatedStep : s)),
-      });
+      if (path && path.id === currentPath.id) {
+        setPath({
+          ...path,
+          steps: path.steps.map((s) => (s.id === stepId ? updatedStep : s)),
+        });
+      }
+      setRevisions((prev) =>
+        prev.map((rev) => {
+          if (rev.id === currentPath.id) {
+            return {
+              ...rev,
+              steps: rev.steps.map((s) => (s.id === stepId ? updatedStep : s)),
+            };
+          }
+          return rev;
+        })
+      );
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Failed to update step status");
     }
@@ -233,6 +260,8 @@ export default function PathPage() {
   }
 
   // Complete/Done
+  const currentPath = revisions.find((r) => r.id === selectedRevisionId) || path;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start animate-fade-up">
       {/* Steps panel */}
@@ -246,7 +275,7 @@ export default function PathPage() {
               Investigation Blueprint
             </h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Model: <span className="font-mono text-primary">{path?.model_used}</span> · Grounded in seeded police SOPs
+              Model: <span className="font-mono text-primary">{currentPath?.model_used || path?.model_used}</span> · Grounded in seeded police SOPs
             </p>
           </div>
           <Button
@@ -267,13 +296,25 @@ export default function PathPage() {
           </Alert>
         )}
 
-        {path && (
-          <PathStepper steps={path.steps} caseId={caseId} onStatusChange={handleStatusChange} />
+        {currentPath && (
+          <PathStepper steps={currentPath.steps} caseId={caseId} onStatusChange={handleStatusChange} />
         )}
       </div>
 
       {/* Legal Sections Sidebar */}
       <div className="space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto pr-1 pb-6">
+        {/* Revision History */}
+        {revisions.length > 0 && (
+          <div className="border border-border/60 bg-card rounded-xl p-4 space-y-3">
+            <PathRevisionList
+              revisions={revisions}
+              activeRevisionId={path?.id || null}
+              selectedRevisionId={selectedRevisionId}
+              onSelectRevision={(rev) => setSelectedRevisionId(rev.id)}
+            />
+          </div>
+        )}
+
         <div className="border-b border-violet/30 pb-4">
           <h2 className="font-heading text-xl font-bold flex items-center gap-2">
             <div className="rounded-lg bg-violet/15 p-1.5">

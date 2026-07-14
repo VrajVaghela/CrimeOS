@@ -102,6 +102,11 @@ export interface PathStepOut {
 export interface InvestigationPathOut {
   id: string;
   case_id: string;
+  parent_path_id: string | null;
+  revision_number: number;
+  trigger_type: string;
+  change_reason: string | null;
+  is_active: boolean;
   generated_at: string;
   model_used: string;
   steps: PathStepOut[];
@@ -113,6 +118,41 @@ export interface PathGenerationStatusOut {
   message: string;
   path: InvestigationPathOut | null;
   case_sections: CaseSectionOut[];
+}
+
+export interface CaseEntityOut {
+  id: string;
+  case_id: string;
+  entity_type: string;
+  canonical_value: string;
+  display_value: string;
+  confidence: number;
+  first_seen_at: string;
+  last_seen_at: string;
+}
+
+export interface EntityRelationshipOut {
+  id: string;
+  case_id: string;
+  source_entity_id: string;
+  target_entity_id: string;
+  relationship_type: string;
+  confidence: number;
+  evidence_ref: Record<string, any>;
+}
+
+export interface RelatedCaseMatch {
+  entity_type: string;
+  value: string;
+  confidence: number;
+}
+
+export interface RelatedCaseOut {
+  case_id: string;
+  case_number: string;
+  title: string;
+  status: string;
+  matches: RelatedCaseMatch[];
 }
 
 export type RequestStatus = "draft" | "approved" | "dispatched" | "responded";
@@ -157,16 +197,70 @@ export interface AuditEventOut {
   created_at: string;
 }
 
+export interface EvidenceMarkerOut {
+  id: string;
+  evidence_file_id: string;
+  marker_type: string;
+  start_ms: number | null;
+  end_ms: number | null;
+  transcript_text: string | null;
+  linked_entity_ids: string[];
+  created_at: string;
+}
+
 export interface EvidenceOut {
   id: string;
   case_id: string;
   file_path: string;
+  file_type: string | null;
+  transcript: string | null;
+  translation: string | null;
   ai_tags: {
     description: string;
     tags: string[];
     confidence: number;
-    flagged_features: string[];
+    flagged_features?: string[];
   };
   uploaded_at: string;
+  markers: EvidenceMarkerOut[];
 }
+
+export interface WorkflowStageOut {
+  stage: string;
+  label: string;
+  label_hi: string;
+  status: "pending" | "in_progress" | "done" | "skipped";
+  is_completed: boolean;
+}
+
+export interface RecentActivityOut {
+  id: string;
+  action: string;
+  timestamp: string;
+  actor_name: string | null;
+  detail: Record<string, any> | null;
+}
+
+export interface CaseWorkflowStateOut {
+  case_id: string;
+  current_stage: string;
+  blocker_codes: string[];
+  next_action_type: string | null;
+  next_action_label: string | null;
+  updated_at: string;
+  stages: WorkflowStageOut[];
+  completion_percentage: number;
+  recent_activity: RecentActivityOut[];
+}
+
+export interface CommandCenterOut {
+  case_id: string;
+  case_number: string;
+  title: string;
+  status: string;
+  crime_type: string | null;
+  created_at: string;
+  workflow: CaseWorkflowStateOut;
+}
+
 

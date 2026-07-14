@@ -286,7 +286,6 @@ export default function DashboardPage() {
               </div>
             ) : (
               dashboard?.active_cases.map((item, idx) => {
-                const colorClass = idx % 3 === 0 ? "border-l-primary" : idx % 3 === 1 ? "border-l-info" : "border-l-violet";
                 return (
                   <button
                     key={item.id}
@@ -295,8 +294,9 @@ export default function DashboardPage() {
                       else if (user.role === "SHO") router.push(`/cases/${item.id}/summary`);
                       else router.push(`/cases/${item.id}`);
                     }}
-                    className={`w-full text-left flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:border-primary/40 hover:glow-primary hover:-translate-y-0.5 md:flex-row md:items-center md:justify-between animate-fade-up border-l-2 ${colorClass}`}
+                    className="w-full text-left flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:border-primary/40 hover:glow-primary hover:-translate-y-0.5 md:flex-row md:items-center md:justify-between animate-fade-up"
                     style={{ animationDelay: `${idx * 80}ms` }}
+
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">

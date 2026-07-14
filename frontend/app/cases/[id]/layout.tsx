@@ -36,14 +36,16 @@ import { useAuth } from "@/lib/auth-context";
 import type { CaseDetailOut } from "@/lib/types";
 
 const TABS = [
-  { label: "Ingestion", href: "ingestion", icon: Search, color: "text-info border-info" },
-  { label: "Investigation", href: "path", icon: Crosshair, color: "text-violet border-violet" },
-  { label: "Requests", href: "requests", icon: Mail, color: "text-accent border-accent" },
-  { label: "Responses", href: "responses", icon: Activity, color: "text-success border-success" },
-  { label: "Evidence", href: "evidence", icon: Camera, color: "text-primary border-primary" },
-  { label: "Summary", href: "summary", icon: Radar, color: "text-info border-info" },
-  { label: "Audit", href: "audit", icon: Network, color: "text-rose border-rose" },
+  { label: "Overview", href: "", icon: Shield, color: "text-primary border-primary", group: "Overview" },
+  { label: "Ingestion", href: "ingestion", icon: Search, color: "text-info border-info", group: "Work" },
+  { label: "Investigation", href: "path", icon: Crosshair, color: "text-violet border-violet", group: "Work" },
+  { label: "Requests", href: "requests", icon: Mail, color: "text-accent border-accent", group: "Work" },
+  { label: "Responses", href: "responses", icon: Activity, color: "text-success border-success", group: "Work" },
+  { label: "Evidence", href: "evidence", icon: Camera, color: "text-primary border-primary", group: "Evidence" },
+  { label: "Summary", href: "summary", icon: Radar, color: "text-info border-info", group: "Record" },
+  { label: "Audit", href: "audit", icon: Network, color: "text-rose border-rose", group: "Record" },
 ] as const;
+
 
 export default function CaseLayout({ children }: { children: React.ReactNode }) {
   const params = useParams();
@@ -92,8 +94,9 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
     }
   }
 
-  const activeTab = TABS.find((t) => pathname.endsWith(t.href))?.href ?? "ingestion";
+  const activeTab = TABS.find((t) => t.href !== "" && pathname.includes(`/${t.href}`))?.href ?? "";
   const activeTabMeta = TABS.find((t) => t.href === activeTab);
+
 
   const syncPayload = caseData ? {
     cctns_header: { state: "Gujarat", district: "Ahmedabad City", police_station: "Cyber Crime PS", timestamp: new Date().toISOString() },
@@ -162,30 +165,96 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
           ) : null}
 
           {/* Tabs with distinct colors */}
-          <nav className="flex gap-1 overflow-x-auto pb-1 scrollbar-none" aria-label="Case sections">
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.href;
-              return (
-                <Link
-                  key={tab.href}
-                  href={`/cases/${caseId}/${tab.href}`}
-                  id={`tab-${tab.href}`}
-                  className={`group relative flex shrink-0 items-center gap-1.5 rounded-t-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? "bg-card text-foreground border-t border-l border-r border-border/60"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                  }`}
-                >
-                  <Icon className={`h-4 w-4 transition-colors duration-200 ${isActive ? tab.color.split(" ")[0] : "text-muted-foreground group-hover:text-foreground"}`} />
-                  {tab.label}
-                  {isActive && (
-                    <span className={["absolute bottom-0 left-2 right-2 h-0.5 rounded-full", tab.color.split(" ")[1]].join(" ")} />
-                  )}
-                </Link>
-              );
-            })}
+          <nav className="flex items-center gap-4 overflow-x-auto pb-1.5 scrollbar-none text-xs font-mono select-none" aria-label="Case sections">
+            <Link
+              href={`/cases/${caseId}`}
+              id="tab-overview"
+              className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all duration-200 ${
+                activeTab === ""
+                  ? "bg-primary/15 text-primary border border-primary/30"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+              }`}
+            >
+              <Shield className="h-3.5 w-3.5" />
+              Overview
+            </Link>
+
+            <div className="h-4 w-[1px] bg-border/40 shrink-0" />
+
+            <div className="flex items-center gap-1 shrink-0">
+              <span className="text-[10px] text-muted-foreground/60 uppercase font-semibold mr-1.5">Work:</span>
+              {TABS.filter((t) => t.group === "Work").map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.href;
+                return (
+                  <Link
+                    key={tab.href}
+                    href={`/cases/${caseId}/${tab.href}`}
+                    id={`tab-${tab.href}`}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/30"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span className="text-xs font-medium">{tab.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="h-4 w-[1px] bg-border/40 shrink-0" />
+
+            <div className="flex items-center gap-1 shrink-0">
+              <span className="text-[10px] text-muted-foreground/60 uppercase font-semibold mr-1.5">Evidence:</span>
+              {TABS.filter((t) => t.group === "Evidence").map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.href;
+                return (
+                  <Link
+                    key={tab.href}
+                    href={`/cases/${caseId}/${tab.href}`}
+                    id={`tab-${tab.href}`}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/30"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span className="text-xs font-medium">{tab.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="h-4 w-[1px] bg-border/40 shrink-0" />
+
+            <div className="flex items-center gap-1 shrink-0">
+              <span className="text-[10px] text-muted-foreground/60 uppercase font-semibold mr-1.5">Record:</span>
+              {TABS.filter((t) => t.group === "Record").map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.href;
+                return (
+                  <Link
+                    key={tab.href}
+                    href={`/cases/${caseId}/${tab.href}`}
+                    id={`tab-${tab.href}`}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/30"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span className="text-xs font-medium">{tab.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </nav>
+
         </div>
       </header>
 
