@@ -127,12 +127,12 @@ export function EntityPivotPanel({
                     <div
                       key={ent.id}
                       onClick={() => setSelectedEntityId(ent.id)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between ${
+                      className={`p-3 rounded-squircle-sm border cursor-pointer transition-all flex items-center justify-between ${
                         isSelected
-                          ? "border-primary bg-primary/10"
+                          ? "border-primary bg-primary/10 glow-primary"
                           : isLowConfidence
-                          ? "border-amber-500/50 bg-amber-500/5 hover:bg-amber-500/10"
-                          : "border-border bg-slate-900/60 hover:bg-slate-800/80"
+                          ? "border-warn/40 bg-warn/5 hover:bg-warn/10 text-warn"
+                          : "border-border bg-secondary/60 hover:bg-secondary/90 text-foreground"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 pr-2">
@@ -145,17 +145,17 @@ export function EntityPivotPanel({
                         {isLowConfidence && (
                           <span title="Low Confidence / कम आत्मविश्वास">
                             <ShieldAlert
-                              className="h-3.5 w-3.5 text-amber-500 animate-pulse"
+                              className="h-3.5 w-3.5 text-warn animate-pulse"
                             />
                           </span>
                         )}
                         <span
-                          className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                          className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-squircle-sm ${
                             ent.confidence >= 0.85
-                              ? "bg-emerald-500/10 text-emerald-400"
+                              ? "bg-success/10 text-success"
                               : ent.confidence >= 0.7
-                              ? "bg-amber-500/10 text-amber-400"
-                              : "bg-rose-500/10 text-rose-400"
+                              ? "bg-warn/10 text-warn"
+                              : "bg-warn/25 text-warn font-semibold"
                           }`}
                         >
                           {Math.round(ent.confidence * 100)}%

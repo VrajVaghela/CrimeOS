@@ -51,6 +51,10 @@ const config: Config = {
           DEFAULT: "hsl(var(--rose))",
           foreground: "hsl(var(--rose-foreground))",
         },
+        warn: {
+          DEFAULT: "hsl(var(--warn))",
+          foreground: "hsl(var(--warn-foreground))",
+        },
         surface: {
           alt: "hsl(var(--surface-alt))",
           elevated: "hsl(var(--surface-elevated))",
