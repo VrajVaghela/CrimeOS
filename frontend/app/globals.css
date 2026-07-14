@@ -206,6 +206,44 @@
 }
 
 @layer utilities {
+  /* ── Ferrari button transition ── */
+  .btn-ferrari {
+    transition: transform var(--motion-fast) var(--ease-standard),
+                background var(--motion-fast) var(--ease-standard),
+                box-shadow var(--motion-fast) var(--ease-standard);
+  }
+  .btn-ferrari:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px -4px rgba(220, 0, 0, 0.45);
+  }
+  .btn-ferrari:active {
+    transform: scale(0.98);
+  }
+
+  /* ── Squircle panel card ── */
+  .panel-card {
+    border-radius: var(--radius-squircle);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: border-color var(--motion-base) var(--ease-standard);
+  }
+  .panel-card:hover {
+    border-color: color-mix(in oklab, var(--accent) 25%, var(--border));
+  }
+  .panel-card-warm {
+    border-radius: var(--radius-squircle);
+    border: 1px solid var(--border);
+    background: var(--surface-warm);
+  }
+
+  /* ── SVG timeline chart gradient utilities ── */
+  .chart-line-gradient {
+    stroke: url(#gradient-accent-info-h);
+  }
+  .chart-fill-gradient {
+    fill: url(#gradient-graph-fill);
+  }
+
   /* ── Glow utilities ── */
   .glow-primary {
     box-shadow: 0 0 20px -4px rgba(220, 0, 0, 0.3);

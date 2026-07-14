@@ -144,8 +144,11 @@ export default function AuditPage() {
         </div>
       ) : (
         <div className="relative">
-          {/* Timeline vertical line */}
-          <div className="absolute left-5 top-0 bottom-0 w-px bg-border/60" />
+          {/* Timeline vertical line — red-to-blue gradient */}
+          <div
+            className="absolute left-5 top-0 bottom-0 w-px"
+            style={{ background: "var(--gradient-accent-info-v)" }}
+          />
 
           <div className="flex flex-col gap-0">
             {[...events].reverse().map((event, idx) => {
@@ -173,10 +176,10 @@ export default function AuditPage() {
                   {/* Event card */}
                   <div
                     className={[
-                      "flex-1 rounded-xl border p-4 transition-all cursor-pointer",
+                      "flex-1 rounded-[12px] border p-4 transition-all cursor-pointer",
                       idx === 0
-                        ? "bg-primary/5 border-primary/30"
-                        : "bg-card border-border/60 hover:border-primary/30 hover:bg-primary/5",
+                        ? "bg-primary/5 border-primary/40 glow-primary"
+                        : "bg-[#171717] border-border hover:border-primary/30 hover:bg-primary/5",
                     ].join(" ")}
                     onClick={() => setExpandedId(isExpanded ? null : event.id)}
                   >

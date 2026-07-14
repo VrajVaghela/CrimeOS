@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Clock, Play, SkipForward } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CitationDialog } from "@/components/citation-dialog";
 import { useAuth } from "@/lib/auth-context";
@@ -13,18 +13,12 @@ interface PathStepperProps {
   onStatusChange: (stepId: string, status: StepStatus) => Promise<void>;
 }
 
-const STATUS_ICONS = {
-  pending: Clock,
-  in_progress: Play,
-  done: Check,
-  skipped: SkipForward,
-};
 
 const STATUS_CLASSES = {
-  pending: "border-border text-muted-foreground bg-background",
-  in_progress: "border-primary text-primary bg-background animate-glow-pulse glow-primary",
-  done: "border-success text-success bg-background glow-success",
-  skipped: "border-muted-foreground/30 text-muted-foreground bg-background",
+  pending: "border-border text-muted-foreground bg-[#171717]",
+  in_progress: "border-primary text-primary bg-[#1a0a0a] animate-glow-pulse glow-primary",
+  done: "border-success text-success bg-[#0a170f] glow-success",
+  skipped: "border-muted-foreground/30 text-muted-foreground bg-[#171717]",
 };
 
 export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps) {
@@ -37,24 +31,24 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
   return (
     <div className="relative ml-4 space-y-8">
       {sortedSteps.map((step, idx) => {
-        const Icon = STATUS_ICONS[step.status] || Clock;
         const statusClass = STATUS_CLASSES[step.status] || STATUS_CLASSES.pending;
         const isLast = idx === sortedSteps.length - 1;
-
-        // Determine connector line color based on step status
-        let connectorColor = "bg-border/40";
-        if (step.status === "done") {
-          connectorColor = "bg-success/60";
-        } else if (step.status === "in_progress") {
-          connectorColor = "bg-primary/60";
-        }
+        const isActive = step.status === "in_progress";
+        const isDone = step.status === "done";
 
         return (
           <div key={step.id} className="relative pl-12 group">
-            {/* Connector Line to next node */}
+            {/* Connector Line — red-to-blue gradient for done/active, muted for pending */}
             {!isLast && (
               <div
-                className={`absolute left-[15px] top-9 bottom-[-32px] w-[2px] transition-all duration-500 ${connectorColor}`}
+                className="absolute left-[15px] top-9 bottom-[-32px] w-[2px] transition-all duration-500"
+                style={{
+                  background: isDone
+                    ? "var(--gradient-accent-info-v)"
+                    : isActive
+                    ? "linear-gradient(180deg, #dc0000 0%, #dc000066 100%)"
+                    : "hsl(0 0% 100% / 0.12)",
+                }}
               />
             )}
 
@@ -65,15 +59,27 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
                 statusClass,
               ].join(" ")}
             >
-              {step.status === "done" ? <Check className="h-4 w-4" /> : step.step_order}
+              {isDone ? <Check className="h-4 w-4" /> : step.step_order}
             </span>
 
-            {/* Step Card */}
-            <div className="rounded-xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30">
+            {/* Step Card — glass bg + red accent border for active step */}
+            <div
+              className={[
+                "rounded-[12px] border p-5 transition-all duration-220",
+                isActive
+                  ? "glass border-primary/60 glow-primary"
+                  : isDone
+                  ? "bg-[#0a170f] border-success/30"
+                  : "bg-[#171717] border-border hover:border-primary/30",
+              ].join(" ")}
+            >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div className="space-y-1">
                   <h3 className="font-heading text-base font-semibold text-foreground flex items-center gap-2">
                     {step.title}
+                    {isActive && (
+                      <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    )}
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {step.description}
@@ -86,7 +92,7 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
                     <select
                       value={step.status}
                       onChange={(e) => void onStatusChange(step.id, e.target.value as StepStatus)}
-                      className="h-8 rounded bg-input border border-border px-2 text-xs font-mono text-foreground focus-visible:ring-1 focus-visible:ring-primary w-32 cursor-pointer"
+                      className="h-8 rounded-[8px] bg-input border border-border px-2 text-xs font-mono text-foreground focus-visible:ring-1 focus-visible:ring-primary w-32 cursor-pointer"
                       id={`select-status-${step.id}`}
                     >
                       <option value="pending">PENDING</option>
@@ -95,7 +101,7 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
                       <option value="skipped">SKIPPED</option>
                     </select>
                   ) : (
-                    <span className="font-mono text-xs uppercase px-2 py-1 rounded bg-secondary border border-border text-muted-foreground">
+                    <span className="font-mono text-xs uppercase px-2 py-1 rounded-[8px] bg-secondary border border-border text-muted-foreground">
                       {step.status}
                     </span>
                   )}
@@ -104,6 +110,7 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
 
               {/* Citations and actions row */}
               <div className="mt-4 flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-border/30">
+                {/* Info blue citation button */}
                 <CitationDialog
                   title={`SOP Grounding for: ${step.title}`}
                   sourceText={step.sop_citation}
@@ -117,7 +124,7 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
                         `/cases/${caseId}/requests?step_id=${step.id}&provider_type=${step.suggested_action_type}`
                       )
                     }
-                    className="bg-primary text-primary-foreground font-medium text-xs h-8 px-3 rounded hover:scale-105 glow-primary transition-all duration-200 flex items-center gap-1.5"
+                    className="bg-primary text-primary-foreground font-medium text-xs h-8 px-3 rounded-[8px] hover:scale-105 hover:bg-[color-mix(in_oklab,#dc0000,black_8%)] glow-primary transition-all duration-[130ms] flex items-center gap-1.5"
                     id={`btn-action-${step.id}`}
                   >
                     <span>Generate {step.suggested_action_type.toUpperCase()} Request</span>

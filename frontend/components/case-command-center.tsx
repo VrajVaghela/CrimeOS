@@ -332,7 +332,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
       {/* Restructured 4 Signal Cards in a Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 min-[1080px]:grid-cols-4 gap-4">
         {/* Card 1: Case Confidence */}
-        <Card className="border border-border/40 bg-card hover:glow-primary hover:border-primary/40 transition-all duration-200 rounded-squircle-sm p-4">
+        <Card className="border border-border/40 bg-[#171717] hover:glow-primary hover:border-primary/40 transition-all duration-[130ms] rounded-[12px] p-4">
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
@@ -364,7 +364,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
         </Card>
 
         {/* Card 2: Extracted Details */}
-        <Card className="border border-border/40 bg-card hover:glow-primary hover:border-primary/40 transition-all duration-200 rounded-squircle-sm p-4">
+        <Card className="border border-border/40 bg-[#171717] hover:glow-primary hover:border-primary/40 transition-all duration-[130ms] rounded-[12px] p-4">
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
@@ -384,7 +384,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
         </Card>
 
         {/* Card 3: Dispatched Requests */}
-        <Card className="border border-border/40 bg-card hover:glow-primary hover:border-primary/40 transition-all duration-200 rounded-squircle-sm p-4">
+        <Card className="border border-border/40 bg-[#171717] hover:glow-primary hover:border-primary/40 transition-all duration-[130ms] rounded-[12px] p-4">
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
@@ -405,7 +405,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
         </Card>
 
         {/* Card 4: Timeline Progress */}
-        <Card className="border border-border/40 bg-card hover:glow-primary hover:border-primary/40 transition-all duration-200 rounded-squircle-sm p-4">
+        <Card className="border border-border/40 bg-[#171717] hover:glow-primary hover:border-primary/40 transition-all duration-[130ms] rounded-[12px] p-4">
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">

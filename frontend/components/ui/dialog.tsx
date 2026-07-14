@@ -49,9 +49,9 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+      {/* Darkened blurred backdrop per Phase 9E spec */}
       <div
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity animate-fade-in"
+        className="fixed inset-0 bg-[#0b0b0b]/85 backdrop-blur-xl transition-opacity animate-fade-in"
         onClick={() => onOpenChange(false)}
       />
       {/* Container */}
@@ -70,7 +70,7 @@ export function DialogContent({
   return (
     <div
       className={cn(
-        "relative mx-auto w-full max-w-lg rounded-xl border border-border/60 bg-card p-6 shadow-2xl",
+        "relative mx-auto w-full max-w-lg rounded-[12px] border border-border/60 bg-[#171717]/90 backdrop-blur-xl p-6 shadow-2xl",
         "animate-scale-in",
         className,
       )}

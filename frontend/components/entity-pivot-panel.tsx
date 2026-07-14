@@ -118,7 +118,7 @@ export function EntityPivotPanel({
               <span className="text-[11px] font-bold font-mono text-muted-foreground uppercase tracking-wider block">
                 {type.replace("_", " ")}s ({list.length})
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {list.map((ent) => {
                   const isSelected = ent.id === selectedEntityId;
                   const isLowConfidence = ent.confidence < 0.7;
@@ -177,7 +177,7 @@ export function EntityPivotPanel({
       </div>
 
       {/* Selected Entity Intelligence panel */}
-      <div className="lg:col-span-1 border border-border rounded-xl bg-slate-950/80 p-4 space-y-4 min-h-[300px]">
+      <div className="lg:col-span-1 border border-border rounded-[12px] bg-[#0f0f0f] p-4 space-y-4 min-h-[300px]">
         {selectedEntity ? (
           <>
             <div className="space-y-1 pb-3 border-b border-border">

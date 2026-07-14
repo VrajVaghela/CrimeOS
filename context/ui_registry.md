@@ -156,5 +156,42 @@ These entries define the intended reusable surfaces. Mark them BUILT and add con
 - Path: components/response-correlation-panel.tsx
 - Purpose: explains flagged provider rows and links them to entities, evidence, and investigation steps
 - Props: `correlations: ResponseCorrelationOut[]`, `onPromote: (rowIndex: number) => Promise<void>`
-- Used in: `app/cases/[id]/responses/page.tsx`
+- Used in: `app/cases/[id]/requests/page.tsx`
 
+## Phase 9 — Ferrari Design Upgrades (not new components, updated existing)
+
+### PathStepper — UPGRADED (Phase 9D)
+- Connector lines now use `var(--gradient-accent-info-v)` (red→blue) for done steps
+- Active step card uses `.glass` with `border-primary/60 glow-primary`  
+- Step cards use `rounded-[12px]` squircle radius
+- Citation button uses info-blue style
+
+### CitationDialog — UPGRADED (Phase 9D/9E)
+- Trigger uses info-blue border/text
+- Dialog content uses `.glass-strong` panel with `rounded-[12px]`
+- Content block uses info-blue left border
+
+### SummaryPage — UPGRADED (Phase 9E)
+- Summary card uses `var(--surface-warm)` (#23130f) background
+- Blue AI icon header with rounded-[8px] container
+- Red primary CTA button with scale-105 hover + glow
+- Info-blue left-bordered content block
+
+### Dialog (UI) — UPGRADED (Phase 9E)
+- Backdrop: `bg-[#0b0b0b]/85 backdrop-blur-xl`
+- Content: `bg-[#171717]/90 backdrop-blur-xl rounded-[12px]`
+
+### Button (UI) — UPGRADED (Phase 9E)
+- Base transition: `duration-[130ms]` (130ms per Ferrari spec)
+- Default/destructive/success variants: `hover:scale-105` (previously scale-[1.02])
+
+### AuditPage — UPGRADED (Phase 9D)
+- Timeline vertical line: `var(--gradient-accent-info-v)` red→blue gradient
+- Event cards: `rounded-[12px]` squircle; latest card gets `glow-primary`
+
+### CaseCommandCenter Signal Cards — UPGRADED (Phase 9D)
+- All 4 signal cards: `rounded-[12px]` squircle, `bg-[#171717]`, `duration-[130ms]`
+
+### Root Layout SVG Defs — ADDED (Phase 9F)
+- Global `<svg>` element with `linearGradient` defs for gradient IDs:
+  `#gradient-accent-info-h`, `#gradient-accent-info-v`, `#gradient-graph-fill`

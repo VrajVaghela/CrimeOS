@@ -35,7 +35,26 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`dark ${notoDevanagari.variable} ${notoGujarati.variable}`}
     >
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {/* Hidden SVG defs for gradient IDs reused by chart components (Phase 9D/9F) */}
+          <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
+            <defs>
+              <linearGradient id="gradient-accent-info-h" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#dc0000" />
+                <stop offset="100%" stopColor="#2d7ee9" />
+              </linearGradient>
+              <linearGradient id="gradient-accent-info-v" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#dc0000" />
+                <stop offset="100%" stopColor="#2d7ee9" />
+              </linearGradient>
+              <linearGradient id="gradient-graph-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#dc0000" stopOpacity="0.15" />
+                <stop offset="100%" stopColor="#2d7ee9" stopOpacity="0.02" />
+              </linearGradient>
+            </defs>
+          </svg>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

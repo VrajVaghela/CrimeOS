@@ -107,8 +107,18 @@ const config: Config = {
           "100%": { backgroundPosition: "200% 0" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 12px -2px hsl(217 91% 60% / 0.4)" },
-          "50%": { boxShadow: "0 0 28px 2px hsl(217 91% 60% / 0.7)" },
+          "0%, 100%": { boxShadow: "0 0 12px -2px hsl(0 100% 43% / 0.4)" },
+          "50%": { boxShadow: "0 0 28px 2px hsl(0 100% 43% / 0.7)" },
+        },
+        "glow-pulse": {
+          "0%, 100%": {
+            boxShadow: "0 0 12px -2px hsl(0 100% 43% / 0.4)",
+            borderColor: "hsl(0 100% 43% / 0.5)",
+          },
+          "50%": {
+            boxShadow: "0 0 24px 2px hsl(0 100% 43% / 0.8)",
+            borderColor: "hsl(0 100% 43% / 1)",
+          },
         },
         breathe: {
           "0%, 100%": { transform: "scale(1)" },
@@ -135,6 +145,7 @@ const config: Config = {
         "slide-in-right": "slide-in-right 300ms ease-out both",
         "shimmer": "shimmer 2s ease-in-out infinite",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         "breathe": "breathe 2s ease-in-out infinite",
         "data-flow": "data-flow 3s linear infinite",
         "spin-slow": "spin-slow 3s linear infinite",

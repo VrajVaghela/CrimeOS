@@ -75,18 +75,24 @@ export default function SummaryPage() {
             AI-generated case summaries with full version history
           </p>
         </div>
+        {/* Red primary CTA button per Phase 9E spec */}
         <Button
           onClick={handleGenerate}
           disabled={generating}
-          loading={generating}
+          className="bg-primary text-primary-foreground font-medium text-sm h-9 px-4 rounded-[8px] hover:scale-105 hover:bg-[color-mix(in_oklab,#dc0000,black_8%)] glow-primary transition-all duration-[130ms] flex items-center gap-2"
+          id="btn-generate-summary"
         >
-          {!generating && <Sparkles className="h-4 w-4" />}
-          Generate New Summary
+          {generating ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
+          {generating ? "Generating..." : "Generate New Summary"}
         </Button>
       </div>
 
       {error && (
-        <div className="animate-fade-down rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive flex items-center gap-3">
+        <div className="animate-fade-down rounded-[12px] border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive flex items-center gap-3">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -98,7 +104,7 @@ export default function SummaryPage() {
           <p className="text-sm text-muted-foreground">Loading summaries...</p>
         </div>
       ) : summaries.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
+        <div className="flex flex-col items-center gap-4 rounded-[12px] bg-[#171717] border border-border p-12 text-center">
           <div className="rounded-full bg-primary/10 p-4 border border-primary/20">
             <Radar className="h-8 w-8 text-primary" />
           </div>
@@ -129,11 +135,11 @@ export default function SummaryPage() {
                     key={s.id}
                     onClick={() => setSelectedId(s.id)}
                     className={[
-                      "w-full text-left rounded-xl p-4 border transition-all text-xs font-mono flex flex-col gap-1.5",
+                      "w-full text-left rounded-[12px] p-4 border transition-all text-xs font-mono flex flex-col gap-1.5",
                       "animate-fade-up",
                       isSelected
-                        ? "bg-primary/10 border-primary text-foreground"
-                        : "bg-card/50 border-border/60 text-muted-foreground hover:bg-secondary hover:text-foreground",
+                        ? "bg-primary/10 border-primary text-foreground glow-primary"
+                        : "bg-[#171717] border-border text-muted-foreground hover:bg-[#1f1f1f] hover:text-foreground hover:border-primary/30",
                     ].join(" ")}
                     style={{ animationDelay: `${idx * 50}ms` }}
                   >
@@ -154,41 +160,49 @@ export default function SummaryPage() {
             </div>
           </div>
 
-          {/* Summary content */}
+          {/* Summary content — warm surface card per Phase 9E spec */}
           <div className="lg:col-span-3">
             {selected && (
-              <Card className="relative overflow-hidden animate-fade-up delay-200 border-violet/30">
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet via-primary to-violet/30" />
-                <CardHeader className="pb-3">
+              <div
+                className="relative overflow-hidden rounded-[12px] border border-[#2d7ee9]/20 animate-fade-up delay-200"
+                style={{ background: "var(--surface-warm)" }}
+              >
+                {/* Top accent line */}
+                <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "var(--gradient-accent-info-h)" }} />
+
+                <div className="p-6 pb-3">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <CardTitle className="font-heading text-base font-bold flex items-center gap-2 text-violet">
-                        <div className="rounded-lg bg-violet/15 p-1.5">
-                          <Sparkles className="h-4 w-4 text-violet" />
+                      <div className="font-heading text-base font-bold flex items-center gap-2.5">
+                        {/* Blue AI icon per Phase 9E spec */}
+                        <div className="rounded-[8px] bg-[#2d7ee9]/15 border border-[#2d7ee9]/30 p-1.5 flex items-center justify-center">
+                          <Sparkles className="h-4 w-4 text-[#2d7ee9]" />
                         </div>
                         AI Case Summary — Version {selected.version}
-                      </CardTitle>
-                      <CardDescription className="text-xs text-muted-foreground mt-1">
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 font-mono">
                         Generated by Gemini at{" "}
                         {new Date(selected.generated_at).toLocaleString("en-IN", {
                           dateStyle: "long",
                           timeStyle: "short",
                         })}
-                      </CardDescription>
+                      </p>
                     </div>
-                    <Badge variant="info" className="font-mono text-xs rounded-full">
+                    <Badge variant="info" className="font-mono text-xs rounded-full shrink-0">
                       v{selected.version}
                     </Badge>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-5">
+                </div>
+
+                <div className="px-6 pb-6">
+                  {/* Info-blue left-bordered content block */}
+                  <div className="bg-[#0f0f0f]/60 border border-border rounded-[8px] p-5 border-l-2 border-l-[#2d7ee9]">
                     <pre className="text-sm leading-relaxed text-foreground font-sans whitespace-pre-wrap">
                       {selected.content}
                     </pre>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>
