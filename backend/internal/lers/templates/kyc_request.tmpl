@@ -1,0 +1,42 @@
+
+{{/* ILLUSTRATIVE HACKATHON TEMPLATE ONLY — NOT LEGAL ADVICE */}}
+{{/* Template: KYC_REQUEST — Requests KYC documents from a bank or provider */}}
+
+[LEGAL ENFORCEMENT AGENCY LETTERHEAD]
+Date: {{.DateIssued.Format "02 January 2006"}}
+
+Subject: Request for KYC Documents Pursuant to {{.LegalBasis}}
+
+To,
+The Nodal Officer
+{{.ProviderName}}
+{{.NodalOfficerEmail}}
+
+Dear Sir/Madam,
+
+This is to request information under {{.LegalBasis}} in relation to Case No. {{.CaseNumber}} registered at {{.PoliceStation}}.
+
+We request the following information for the entities listed below:
+{{range .RequestedEntities}}- {{.EntityType}}: {{.Value}}
+{{end}}
+
+For each of the above, please provide:
+1. Full KYC documents (POI, POA) on record
+2. Recent photograph
+3. Any other identification documents submitted
+4. Contact details on record
+
+The response must be provided on or before {{.ResponseDeadline.Format "02 January 2006"}}.
+
+Please acknowledge receipt of this request within 24 hours.
+
+For any clarifications, contact:
+{{.IssuingOfficerName}}
+{{.IssuingOfficerDesignation}}
+
+Request Reference: {{.RequestNumber}}
+
+Yours faithfully,
+[Signature]
+{{.IssuingOfficerName}}
+{{.IssuingOfficerDesignation}}

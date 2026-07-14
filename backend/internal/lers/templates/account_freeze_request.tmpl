@@ -1,0 +1,42 @@
+
+{{/* ILLUSTRATIVE HACKATHON TEMPLATE ONLY — NOT LEGAL ADVICE */}}
+{{/* Template: ACCOUNT_FREEZE_REQUEST — Requests account freeze from a bank */}}
+
+[LEGAL ENFORCEMENT AGENCY LETTERHEAD]
+Date: {{.DateIssued.Format "02 January 2006"}}
+
+Subject: Request for Account Freeze Pursuant to {{.LegalBasis}}
+
+To,
+The Nodal Officer
+{{.ProviderName}}
+{{.NodalOfficerEmail}}
+
+Dear Sir/Madam,
+
+This is to request action under {{.LegalBasis}} in relation to Case No. {{.CaseNumber}} registered at {{.PoliceStation}}.
+
+We request you to immediately freeze the following accounts/entities:
+{{range .RequestedEntities}}- {{.EntityType}}: {{.Value}}
+{{end}}
+
+Additionally, please provide:
+1. Current balance in the accounts
+2. Transaction history for the past 90 days
+3. KYC details of the account holders
+4. Details of any linked accounts/UPI mandates
+
+The freeze must remain in effect until further notice. The supporting documents/information must be provided on or before {{.ResponseDeadline.Format "02 January 2006"}}.
+
+Please acknowledge receipt of this request within 24 hours and confirm the freeze action.
+
+For any clarifications, contact:
+{{.IssuingOfficerName}}
+{{.IssuingOfficerDesignation}}
+
+Request Reference: {{.RequestNumber}}
+
+Yours faithfully,
+[Signature]
+{{.IssuingOfficerName}}
+{{.IssuingOfficerDesignation}}
