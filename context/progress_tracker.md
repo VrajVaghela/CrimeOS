@@ -97,10 +97,10 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 
 
 ### 8F — Demo hardening
-- [ ] Seed Phase 8 examples and add fresh-seed smoke steps
-- [ ] Verify keyboard, contrast, reduced-motion, responsive, loading, empty, and failure states
-- [ ] Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed
-- [ ] ☐ CHECKPOINT: golden path plus one Phase 8 intelligence moment completes in under 7 minutes
+- [x] Seed Phase 8 examples and add fresh-seed smoke steps
+- [x] Verify keyboard, contrast, reduced-motion, responsive, loading, empty, and failure states
+- [x] Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed
+- [x] ✅ CHECKPOINT: golden path plus one Phase 8 intelligence moment completes in under 7 minutes
 
 
 

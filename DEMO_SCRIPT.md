@@ -101,3 +101,39 @@ This drops the tables, regenerates schema migrations, seeds standard SOP/BNS dat
 ### 📝 Part 8: Case Summary & Case Logs
 1. **Case Summary**: Under the **Summary** tab, view the markdown-rendered case summary. Click **Regenerate Summary** to incorporate the newly added evidence files and CCTNS sync logs.
 2. **Audit Trails**: Go to the **Audit** tab to verify that every ingestion, status change, request approval, evidence upload, and CCTNS synchronization has been logged in the append-only tamper-proof timeline.
+
+---
+
+### 🧠 Part 9: Investigation Intelligence & Case Command Center (Phase 8 Showcase)
+To show the advanced analytical and adaptive capabilities of Crime OS AI, navigate to the pre-seeded Case 2:
+1. **Case Selection**: On the main dashboard, select **"ERH26-CYB-0002: Social media harassment and identity theft"**.
+2. **Unified Case Command Center**:
+   * Observe the **Workflow Spine** spanning from *Ingest* to *Summarize*, showing completion states.
+   * View the **Next Best Action** card prompting `"Generate Case Summary / मामले का सारांश बनाएं"`.
+   * Review the **Key Entities** panel showing normalized suspect records (Phone, Email, Person) with color-coded confidence ratings.
+3. **Adaptive Path Revision History**:
+   * Click on the **Investigation Path** tab.
+   * Under the stepper, view the **Path Revision List** showing two iterations:
+     * **Revision 1 (Superseded)**: Triggered by the *complaint*, containing 2 initial steps.
+     * **Revision 2 (Active)**: Triggered by a *provider response*, adding a 3rd step to analyze phone records. Note the *Change Reason* explaining why the path evolved.
+4. **Pre-dispatch Request Readiness Checklist**:
+   * Click on the **Requests** tab.
+   * Note the two requests: one `RESPONDED` platform request and one `DRAFT` telecom request.
+   * Click on the `DRAFT` Airtel telecom request. Note the **Request Readiness Checklist** panel blocking dispatch with red crosses because of a missing recipient email, unverified identifiers, and missing legal basis in the draft body.
+5. **Explainable Provider Response Correlation**:
+   * Click on the **Responses** tab.
+   * Open the **Meta Platforms Inc.** response log.
+   * Observe the **Response Correlation Panel** highlighting the registration row. Note the AI explanation showing how the registration details directly map back to verified Case Entities (phone `9876543210` and email `culprit@harass.com`).
+   * Click the **Promote to Case Diary** button on the row to log this correlation into the permanent case timeline.
+6. **Evidence Marker Review Workspace**:
+   * Click on the **Evidence** tab.
+   * Locate the chat screenshot card and click **Review**.
+   * Note the original Gujarati transcript next to the English translation.
+   * Observe the **Evidence Marker** bounding box linking the transcript segment `"You won't be spared tonight"` to `@fake_profile_123` with a verification badge.
+7. **Case-Scoped Cited Copilot**:
+   * Return to the **Overview** (Command Center) tab.
+   * In the **Case Copilot Panel** on the right, read the pre-seeded conversation log:
+     * *IO Question*: `"What did Meta's response reveal about the suspect profile?"`
+     * *AI Answer*: Shows the registered email/phone and IP address highlighted in a glowing electric-blue card.
+     * *Provenance*: Under the answer, click the **Source Chip** linking directly to the Meta Platforms response record to show strict citation grounding.
+
