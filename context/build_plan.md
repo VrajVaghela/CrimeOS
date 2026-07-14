@@ -74,11 +74,72 @@ Goal: Polish the frontend visually using the Impeccable design system guidelines
 
 ---
 
-## Cut List (if time runs out, cut in this order)
-1. Version diff view (keep version list)
-2. Case search
-3. Evidence tagging bonus
-4. CCTNS mock bonus
-5. Editable entity review (make read-only)
-NEVER cut: golden path, SOP citations in UI, audit timeline.
+## Phase 8 — Investigation Intelligence & Command Center
+Goal: make the completed golden path feel like one adaptive, evidence-grounded investigation workspace. Do not add real integrations, mobile apps, new infrastructure, or autonomous dispatch.
 
+### Phase 8A — Design and workflow foundation
+1. Resolve visual drift: Space Grotesk/Inter/JetBrains Mono, token-only values, no non-AI side stripes, no browser alerts, restrained grid/glow usage.
+2. Add `case_workflow_state` and a derived command-center service that returns current stage, blockers, next action, completion percentage, and recent activity.
+3. Replace the case overview with a Case Command Center: workflow spine, next-best-action panel, case health, key entities, active requests, latest response insight, and latest audit event.
+4. Group case navigation into Work / Evidence / Record while retaining deep-linkable routes.
+
+**Checkpoint:** A seeded case opens on one screen with an obvious next action and a truthful workflow state; every action still deep-links to the existing golden-path tabs.
+
+### Phase 8B — Adaptive paths and entity intelligence
+1. Add append-only path revisions with trigger type, parent revision, change reason, active revision, and superseded state.
+2. Re-run path suggestion after verified entities, new evidence, or provider responses; show what changed and why with SOP/legal citations.
+3. Normalize extracted entities into `case_entities`; retain raw mentions and confidence.
+4. Add `entity_relationships` and a case-scoped entity graph/pivot panel for people, phones, accounts, IPs, locations, requests, and evidence.
+5. Add related-case search only when a matching value and source are visible; never imply identity from a weak match.
+
+**Checkpoint:** Adding a provider response creates a new visible path revision and links a suspicious entity to its source row, evidence, and recommended next step.
+
+### Phase 8C — Evidence workspace
+1. Extend evidence beyond image cards to source markers, transcript segments, timestamps, and linked entities.
+2. Show original media/transcript alongside translation where available.
+3. Add “add to case” actions that create an audit event and attach a source marker to the case diary/path.
+4. Keep unsupported media behavior explicit; do not pretend a file was analyzed when fallback processing failed.
+
+**Checkpoint:** An officer can open one evidence item, inspect the relevant transcript/source segment, link it to an entity, and see the action in the audit trail.
+
+### Phase 8D — Cited case copilot
+1. Add `copilot_messages` and `ai_citations`; all answers are case-scoped and read-only by default.
+2. Add named prompts in `prompts.py` for next action, missing facts, evidence explanation, legal basis explanation, and response explanation.
+3. Return source chips for complaint text, extracted entities, SOP chunks, legal sections, provider rows, evidence markers, and audit events.
+4. Add deterministic fallback answers and log every question/answer as an audit event.
+
+**Checkpoint:** The copilot answers three seeded questions with visible citations, never invents a source, and cannot dispatch or mutate a request from chat.
+
+### Phase 8E — Request quality and response correlation
+1. Add a pre-dispatch readiness service and UI checklist for entities, legal basis, date range, approval, recipient, and citation.
+2. Block dispatch when required data is missing; show the exact fix and preserve the draft.
+3. Return explainable response correlations: source row, matched entity, reason, confidence, and linked path step.
+4. Add “promote to case diary/summary” actions with audit events and source citations.
+
+**Checkpoint:** A request cannot be dispatched with missing required data, and every flagged provider insight can be traced back to raw data and a case entity.
+
+### Phase 8F — Demo hardening
+1. Seed the new command-center, entity, path-revision, evidence-marker, citation, and copilot examples.
+2. Add the golden-path smoke script steps for command-center navigation and fresh-seed reset.
+3. Run keyboard, contrast, reduced-motion, responsive, loading, empty, and failure-state checks.
+4. Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed.
+
+**Checkpoint:** The full golden path plus one adaptive-path, evidence, copilot, and explainable-response moment completes in under 7 minutes without manual DB edits.
+
+---
+
+## Cut List (if time runs out, cut in this order)
+For Phase 8, cut in this order:
+1. Related-case matching
+2. Entity graph visualization (keep grouped entity pivots)
+3. Transcript/media timestamp polish
+4. Copilot follow-up question history (keep cited one-shot answers)
+5. Response-to-summary promotion shortcuts
+
+For the existing MVP, cut in this order:
+6. Version diff view (keep version list)
+7. Case search
+8. Evidence tagging bonus
+9. CCTNS mock bonus
+10. Editable entity review (make read-only)
+NEVER cut: golden path, SOP citations in UI, audit timeline.

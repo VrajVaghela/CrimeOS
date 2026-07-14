@@ -86,3 +86,12 @@ Light mode: NOT supported. The app is dark-only — remove the theme toggle; `.d
 ## Iconography
 - **lucide-react only**, line-based, `h-4 w-4` (inline) / `h-6 w-6` (feature cards).
 - Key motif icons: `Shield`, `ShieldCheck`, `Lock`, `Server`, `Network`, `Radar`, `Crosshair`, `Activity`, `FileSearch`, `Sparkles` (AI marker).
+
+## Phase 8 tokens and usage
+- Workflow stages use one semantic token each: `info` for ingest, `violet` for investigation, `accent` for requests, `success` for responses/verified, and `primary` for the current action.
+- `next-best-action` surfaces use `bg-primary/10`, a 1px token border, and a single primary button. Do not use a large metric-card treatment.
+- Provenance/source chips use `muted` surfaces and `muted-foreground` text by default; source type may add a semantic icon but must not rely on color alone.
+- Entity confidence uses `success` at >=85%, `accent` from 70–84%, and `destructive` below 70%; always include the numeric percentage and a text label.
+- `grid-bg` is allowed only inside graph, map, evidence, or measurement viewports. Command-center page backgrounds stay plain midnight or tokenized surface backgrounds.
+- Copilot output uses `AiContentCard` styling and must include a visible citation list before the answer is considered complete.
+- Do not add a new color, radius, shadow, font size, or spacing value in a component without first adding a named token here.

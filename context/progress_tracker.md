@@ -61,5 +61,44 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] Impeccable Detect Audit: run `npx impeccable detect` and fix anti-patterns
 - [x] ✅ CHECKPOINT: Golden Path demo showing high-contrast, glow-elevated command surfaces
 
+## Phase 8 — Investigation Intelligence & Command Center
+### 8A — Design and workflow foundation
+- [ ] Resolve font/token drift and remove non-AI side-stripe usage
+- [ ] Add `case_workflow_state` schema, migration, service, router, and typed API contract
+- [ ] Build Case Command Center with workflow spine, blockers, next-best action, and recent activity
+- [ ] Group case navigation into Work / Evidence / Record without breaking deep links
+- [ ] ☐ CHECKPOINT: seeded case opens with a truthful workflow state and one obvious next action
+
+### 8B — Adaptive paths and entity intelligence
+- [ ] Add append-only investigation path revisions and visible change explanations
+- [ ] Normalize case entities and preserve raw mentions/confidence
+- [ ] Add entity relationships and grouped entity pivot panel
+- [ ] Add cautious possible-match related-case search with source disclosure
+- [ ] ☐ CHECKPOINT: provider response creates a cited path revision and entity pivot
+
+### 8C — Evidence workspace
+- [ ] Add evidence markers, transcript segments, timestamps, and entity links
+- [ ] Add original/translation review surface and explicit “add to case” actions
+- [ ] Add audit events for evidence links and promoted facts
+- [ ] ☐ CHECKPOINT: evidence marker links to an entity and appears in the audit trail
+
+### 8D — Cited case copilot
+- [ ] Add `ai_citations` and `copilot_messages` schema, migration, and typed API contracts
+- [ ] Add case-scoped read-only copilot with named prompts and source chips
+- [ ] Add deterministic fallback and audited question/answer events
+- [ ] ☐ CHECKPOINT: three seeded questions return grounded answers and no citation-free output
+
+### 8E — Request quality and response correlation
+- [ ] Add pre-dispatch readiness service and checklist UI
+- [ ] Block dispatch when required data, approval, or provenance is missing
+- [ ] Add explainable provider-response correlations with promote-to-diary action
+- [ ] ☐ CHECKPOINT: flagged response rows trace back to raw data, entities, and a path step
+
+### 8F — Demo hardening
+- [ ] Seed Phase 8 examples and add fresh-seed smoke steps
+- [ ] Verify keyboard, contrast, reduced-motion, responsive, loading, empty, and failure states
+- [ ] Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed
+- [ ] ☐ CHECKPOINT: golden path plus one Phase 8 intelligence moment completes in under 7 minutes
+
 
 

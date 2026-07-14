@@ -3,11 +3,16 @@
 Audience: **non-technical police officers** (explicit evaluation criterion) — but the presentation is a **dark, high-tech cyber-command aesthetic** (see `ui_tokens.md`). The tension resolves as: futuristic looks, dead-simple interactions. One obvious action per screen, plain language, statuses visible at a glance — wrapped in glass, glow, and grid motifs that make judges feel they're looking at a real threat-intelligence platform.
 
 ## Global Principles
+
 1. One primary action per screen, rendered as the single `primary` (electric blue) button. Everything else is `secondary`/`ghost`/outline.
 2. **AI content is always labeled and sourced.** Anything Gemini generated gets: electric-blue left border with subtle glow, `Sparkles` icon + "AI-suggested" badge, and (where applicable) a citation popover showing the SOP/legal-section text it came from. Judges must never wonder "is this hardcoded?"
 3. No blank screens ever: every list has an empty state (icon + CTA on grid-bg), every async view has skeletons, every failure shows a retry alert.
 4. Bilingual labels where cheap: key nav/actions show Hindi under English (`New Complaint / नई शिकायत`). Do not build full i18n.
 5. Dark mode ONLY — no theme toggle. Verify contrast: amber and slate-gray text on midnight backgrounds must pass at `text-sm`.
+
+### Phase 8 product surfaces
+- The case overview is a command center, not a dashboard of decorative metrics. It must expose one next-best action and the current workflow stage above secondary information.
+- Workflows are progressive: show the next decision first, then expose evidence, citations, history, and advanced pivots on demand.
 
 ## Components
 ### Cards
@@ -53,3 +58,42 @@ Audience: **non-technical police officers** (explicit evaluation criterion) — 
 - Scroll reveal ONLY on marketing/landing surfaces (if a landing page is built) — app screens render instantly, no scroll-gating of data.
 - Keyboard: forms submit on Enter; dialogs trap focus (shadcn default is fine).
 - Respect `prefers-reduced-motion`: disable pulses/lifts, keep opacity fades.
+
+## Phase 8 interaction rules
+
+### Case Command Center
+- The first viewport shows case identity, workflow spine, one next-best action, blockers, and the latest meaningful event.
+- Workflow stage labels use plain English with optional Hindi helper text; internal status codes stay in `font-mono` metadata.
+- A blocker must name the missing action and link directly to the surface that resolves it.
+- Do not show more than four competing actions in the first viewport. Secondary actions belong in a menu or the relevant tab.
+
+### Adaptive Path Revision
+- A revised path shows its trigger, generated time, active/superseded state, and a concise “what changed” explanation.
+- Never visually merge two path revisions. Officers must be able to tell which steps were active at each point in time.
+- AI-suggested branches require citations and confidence; officer-selected branches require an audit event.
+
+### Entity Intelligence
+- Show canonical value and raw source value together when they differ.
+- Every entity pivot shows source count, confidence, and links to complaint/evidence/provider rows.
+- Related-case matches must be labeled “possible match” until the officer confirms them.
+- Graph view is optional; grouped entity pivots are the fallback for small screens and low data density.
+
+### Evidence Workspace
+- Keep original media, transcript/translation, source timestamp, and linked case entities in one review context.
+- “Add to case” is always explicit and creates an audit event.
+- AI tags are suggestions, not facts; show confidence and source media reference.
+
+### Cited Case Copilot
+- The copilot is case-scoped, read-only by default, and never replaces an existing approval or dispatch action.
+- Every answer begins with a short answer/fact section and ends with visible sources.
+- If the sources do not support an answer, say “No grounded answer found” and suggest the next evidence to collect.
+- Suggested actions use buttons that call existing typed API mutations; chat text alone cannot mutate state.
+
+### Request Readiness
+- Before dispatch, show a compact checklist with pass/fail labels and direct links to missing data.
+- Dispatch remains disabled until required checks pass and the role approval state is valid.
+- Preserve edited draft content when validation fails.
+
+### Surface hygiene
+- Do not use decorative grid/pattern backgrounds across the whole application; restrict them to graph, map, evidence, or measurement surfaces.
+- Do not use `border-left`/`border-right` greater than 1px for general case cards, alerts, or list rows. AI-content borders are the only exception and must use the shared `AiContentCard` pattern.

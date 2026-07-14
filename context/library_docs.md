@@ -40,5 +40,13 @@ How the AI must use each key library. When actual API syntax is uncertain, fetch
 - `lib/api.ts`: base URL from `NEXT_PUBLIC_API_URL`; attaches JWT from localStorage; throws `ApiError` on non-2xx.
 - Polling helper `usePolling(fn, intervalMs, stopWhen)` for processing states.
 
+## Phase 8 implementation constraints
+- Do not add a graph database or graph UI dependency. Start with PostgreSQL relationship rows and a grouped entity pivot; render a lightweight graph only if the existing frontend stack can support it without new infrastructure.
+- The case copilot uses the existing `generate_json()` / `generate_text()` helpers through `gemini_client.py`; it must not import the Gemini SDK directly.
+- Copilot retrieval is case-scoped: assemble complaint text, normalized entities, SOP/legal citations, provider records, evidence markers, and audit events before calling Gemini.
+- Provenance is returned as typed Pydantic/TypeScript data and persisted in `ai_citations`; source chips must link to an actual stored source or say that no grounded answer was found.
+- Request readiness is deterministic validation in a service; Gemini may explain a missing legal basis but may not decide that a required field is valid.
+- Use native HTML media/audio elements and existing shadcn primitives for evidence review before considering any new media library.
+
 ## Tesseract / faster-whisper (fallbacks only)
 - Do NOT wire these in Phase 2. Stub interface `fallback_ocr(path)` / `fallback_asr(path)` raising `NotImplementedError` — implement only if Gemini quota becomes a real problem.

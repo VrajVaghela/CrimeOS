@@ -95,3 +95,66 @@ Last updated: 2026-07-05
 - Purpose: sidebar version selector + AI summary prose panel with version badge; supports regenerate with spinner
 - Props: N/A (reads from API directly)
 - Used in: `app/cases/[id]/summary/page.tsx`
+
+## Planned Phase 8 components
+These entries define the intended reusable surfaces. Mark them BUILT and add concrete usage after implementation; do not create duplicates with different names.
+
+### CaseCommandCenter
+- Path: components/case-command-center.tsx
+- Purpose: case overview projection showing workflow spine, blockers, next-best action, key entities, active requests, latest insight, and recent activity
+- Props: `caseId: string`, `workflow: CaseWorkflowStateOut`, `caseData: CaseDetailOut`
+- Used in: `app/cases/[id]/page.tsx`
+
+### WorkflowSpine
+- Path: components/workflow-spine.tsx
+- Purpose: compact Ingest → Verify → Investigate → Request → Analyze → Summarize progress indicator with accessible stage labels
+- Props: `stages: WorkflowStageOut[]`, `currentStage: WorkflowStage`, `onStageSelect?: (stage) => void`
+- Used in: `CaseCommandCenter`
+
+### NextBestAction
+- Path: components/next-best-action.tsx
+- Purpose: single prioritized action with blocker explanation and direct route/mutation callback
+- Props: `action: NextActionOut`, `onAction: () => void`, `disabled?: boolean`
+- Used in: `CaseCommandCenter`
+
+### SourceChip
+- Path: components/source-chip.tsx
+- Purpose: compact provenance link showing source type, label, locator, and confidence
+- Props: `source: AiCitationOut`, `onOpen?: () => void`
+- Used in: AI content, copilot, response correlations, summary
+
+### PathRevisionList
+- Path: components/path-revision-list.tsx
+- Purpose: active and superseded adaptive investigation-path revisions with trigger and change explanation
+- Props: `revisions: InvestigationPathRevisionOut[]`, `activeRevisionId: string`
+- Used in: `app/cases/[id]/path/page.tsx`
+
+### EntityPivotPanel
+- Path: components/entity-pivot-panel.tsx
+- Purpose: grouped case entities with confidence, source links, related cases, and evidence/request pivots
+- Props: `entities: CaseEntityOut[]`, `relationships: EntityRelationshipOut[]`, `onSelect: (entityId) => void`
+- Used in: `CaseCommandCenter`, `app/cases/[id]/evidence/page.tsx`
+
+### EvidenceReviewWorkspace
+- Path: components/evidence-review-workspace.tsx
+- Purpose: original media/transcript/translation review with timestamp markers and explicit add-to-case actions
+- Props: `evidence: EvidenceOut`, `markers: EvidenceMarkerOut[]`, `onLink: (markerId, entityId) => Promise<void>`
+- Used in: `app/cases/[id]/evidence/page.tsx`
+
+### CopilotPanel
+- Path: components/copilot-panel.tsx
+- Purpose: case-scoped read-only assistant with grounded answers, source chips, fallback state, and audited prompts
+- Props: `caseId: string`, `messages: CopilotMessageOut[]`, `onAsk: (question: string) => Promise<void>`
+- Used in: `CaseCommandCenter`, case detail pages
+
+### RequestReadinessChecklist
+- Path: components/request-readiness-checklist.tsx
+- Purpose: pre-dispatch validation checklist with missing-data links and approval state
+- Props: `readiness: RequestReadinessOut`, `onResolve: (item) => void`
+- Used in: `app/cases/[id]/requests/page.tsx`
+
+### ResponseCorrelationPanel
+- Path: components/response-correlation-panel.tsx
+- Purpose: explains flagged provider rows and links them to entities, evidence, and investigation steps
+- Props: `correlations: ResponseCorrelationOut[]`, `onPromote: (correlationId) => Promise<void>`
+- Used in: `app/cases/[id]/responses/page.tsx`

@@ -10,18 +10,55 @@ graph LR
         BE --> ORM[SQLAlchemy ORM]
         BE --> GC[Gemini Client]
         BE --> SMTP[SMTP Client]
+        BE --> INT[Case Intelligence Services]
     end
     
     ORM <--> DB[(PostgreSQL 16 + pgvector)]
     GC <--> |Multimodal API| GEMINI[[Google Gemini API]]
     SMTP --> |Legal Letter| SMTP_SERVER[[Mail Server / SMTP Nodal]]
     BE <--> |Mock Calls| MOCKS{Mock Systems Router}
+
+    INT --> DB
+    INT --> GC
     
     subgraph MOCK_SYSTEMS [Internal mock endpoints]
         MOCKS <--> CCTNS[CCTNS Sync Endpoint]
         MOCKS <--> BANK[Bank Freeze Response]
         MOCKS <--> TEL[Telecom CDR Response]
     end
+```
+
+## Phase 8 Intelligence Loop
+```mermaid
+sequenceDiagram
+    autonumber
+    actor IO as Investigating Officer
+    participant FE as Case Command Center
+    participant BE as FastAPI Backend
+    participant DB as PostgreSQL
+    participant AI as Gemini API
+
+    IO->>FE: Open case
+    FE->>BE: GET /cases/{id}/command-center
+    BE->>DB: Project workflow, blockers, entities, requests, responses, audit
+    DB-->>BE: Current case state and sources
+    BE-->>FE: Next-best action + workflow spine + citations
+
+    IO->>FE: Verify entity or add evidence marker
+    FE->>BE: POST /cases/{id}/entities or /evidence/markers
+    BE->>DB: Save normalized entity/link and audit event
+    BE->>AI: Re-evaluate path with case-scoped sources
+    AI-->>BE: New cited path revision
+    BE->>DB: Save append-only path revision and ai_citations
+    BE-->>FE: Show what changed and why
+
+    IO->>FE: Ask case copilot question
+    FE->>BE: POST /cases/{id}/copilot/messages
+    BE->>DB: Retrieve only this case's sources
+    BE->>AI: Generate cited answer or use deterministic fallback
+    AI-->>BE: Answer + source identifiers
+    BE->>DB: Save copilot message, citations, and audit event
+    BE-->>FE: Answer with visible source chips
 ```
 
 ---

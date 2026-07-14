@@ -38,6 +38,18 @@ This exact flow must never break. Everything else is secondary:
 - Audit trail + summary version history
 - **Bonus (build if golden path is solid):** role-based access (IO/SHO/Legal Advisor), mock CCTNS/eGujcop API, evidence image upload with AI tagging
 
+## NEXT PRODUCT LAYER (Phase 8 — build only after the MVP checkpoint)
+These features turn the completed golden path into a coherent investigation workspace. They remain localhost/demo-safe, use the existing FastAPI + PostgreSQL + pgvector stack, and do not introduce new external integrations.
+
+- Unified Case Command Center with a visible workflow spine and one next-best action
+- Adaptive investigation paths with revision history, branches, blockers, and change explanations
+- Case entity intelligence: normalized people, phones, accounts, IPs, locations, evidence, and related-case pivots
+- Evidence workspace with transcript/media review, source timestamps, entity links, and “add to case” actions
+- Case-scoped investigation copilot with source citations, deterministic fallback, and audit logging
+- Pre-dispatch legal quality gate that validates required entities, legal basis, date ranges, approvals, and recipient data
+- Explainable provider-response correlations that connect flagged rows back to entities, evidence, and path steps
+- Structured case diary views that assemble facts, actions, decisions, and citations without replacing the append-only audit trail
+
 ## STRICTLY OUT OF SCOPE (do not build, do not discuss building)
 - Real LERS integration, real CCTNS/eGujcop integration (mock only)
 - Real dispatch to actual telecoms/banks (demo mailboxes only)
@@ -52,3 +64,5 @@ This exact flow must never break. Everything else is secondary:
 - The golden path must run end-to-end on localhost with **zero manual DB fiddling**.
 - Every AI output shows **its source** (SOP citation, legal section text) — judges reward grounded AI over magic.
 - Seed data exists so the app never looks empty.
+- New AI features must clearly distinguish officer-entered facts, extracted facts, and AI suggestions.
+- No AI feature may silently perform an external action; dispatch and synchronization remain explicit officer actions with role checks.
