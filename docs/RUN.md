@@ -69,6 +69,8 @@ Optional:
 - `MONGO_DB_NAME`, default `crimeos_digitalfootprint`
 - `PORT`, default `8080`
 - `UPLOAD_DEST_DIR`, default `uploads`
+- `OSINT_POLL_INTERVAL_SECONDS`, default `5`
+- `OSINT_WORKER_CONCURRENCY`, default `4`
 
 ## 3. Run Backend
 

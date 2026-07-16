@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useEntities } from "../hooks/useEntities";
 import { EntityReviewTable } from "../components/EntityReviewTable";
 import { CaseNav } from "../components/CaseNav";
+import { OsintPanel } from "../components/osint/OsintPanel";
 
 export default function IntakeReview() {
   const { caseId } = useParams<{ caseId: string }>();
@@ -22,6 +23,7 @@ export default function IntakeReview() {
 
   // Compute summary counts
   const safeEntities = entities || [];
+  const confirmedEntity = safeEntities.find((e) => e.status === "CONFIRMED");
   const confirmedCount = safeEntities.filter((e) => e.status === "CONFIRMED").length;
   const pendingCount = safeEntities.filter((e) => e.status === "EXTRACTED").length;
   const rejectedCount = safeEntities.filter((e) => e.status === "REJECTED").length;
@@ -91,11 +93,16 @@ export default function IntakeReview() {
           No entities extracted yet — paste complaint text above
         </div>
       ) : (
-        <EntityReviewTable
-          entities={entities}
-          onConfirm={confirm}
-          onReject={reject}
-        />
+        <>
+          <EntityReviewTable
+            entities={entities}
+            onConfirm={confirm}
+            onReject={reject}
+          />
+          {confirmedEntity && (
+            <OsintPanel caseId={caseId!} entityId={confirmedEntity.id} />
+          )}
+        </>
       )}
     </div>
   );

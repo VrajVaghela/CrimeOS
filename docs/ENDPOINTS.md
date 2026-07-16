@@ -16,6 +16,7 @@ All current backend routes are mounted under `/api/v1` in `backend/cmd/server/ma
 | --- | --- | --- | --- |
 | `POST` | `/api/v1/cases/{caseId}/entities/extract` | Extract digital entities from complaint text. | Intake review |
 | `GET` | `/api/v1/cases/{caseId}/entities` | List case entities, optionally filtered by `status` or `type`. | Intake review, LERS form |
+| `GET` | `/api/v1/cases/{caseId}/osint/{entityId}` | Fetch the latest OSINT enrichment for a confirmed entity. | Intake review OSINT panel |
 | `PATCH` | `/api/v1/entities/{entityId}` | Confirm or reject an extracted entity. | Intake review |
 
 ### Extract Entities Request

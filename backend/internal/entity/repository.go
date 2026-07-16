@@ -145,6 +145,50 @@ func joinWithAnd(parts []string) string {
 	return result
 }
 
+func (r *Repository) GetByCaseTypeNormalizedValue(ctx context.Context, caseID uuid.UUID, entityType, normalizedValue string) (*model.DigitalEntity, error) {
+	var e model.DigitalEntity
+	var offset pgtype.Range[int32]
+	err := r.pool.QueryRow(ctx, `
+		SELECT id, case_id, complaint_ref_id, entity_type, raw_value, normalized_value,
+		       source_text_offset, confidence_score, status, extracted_by, created_at, updated_at
+		FROM digital_entities
+		WHERE case_id = $1 AND entity_type = $2 AND normalized_value = $3
+	`, caseID, entityType, normalizedValue).Scan(
+		&e.ID, &e.CaseID, &e.ComplaintRefID, &e.EntityType, &e.RawValue, &e.NormalizedValue,
+		&offset, &e.ConfidenceScore, &e.Status, &e.ExtractedBy, &e.CreatedAt, &e.UpdatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("get entity by case/type/normalized: %w", err)
+	}
+	if offset.Valid {
+		e.SourceTextOffset = [2]int{int(offset.Lower), int(offset.Upper)}
+	}
+	return &e, nil
+}
+
+func (r *Repository) CreateOrGetExtractedEntity(ctx context.Context, caseID uuid.UUID, entityType, rawValue, normalizedValue, extractedBy string, confidenceScore float64) (*model.DigitalEntity, error) {
+	var e model.DigitalEntity
+	var offset pgtype.Range[int32]
+	err := r.pool.QueryRow(ctx, `
+		INSERT INTO digital_entities (
+			case_id, complaint_ref_id, entity_type, raw_value, normalized_value,
+			source_text_offset, confidence_score, status, extracted_by
+		) VALUES ($1, NULL, $2, $3, $4, NULL, $5, 'EXTRACTED', $6)
+		ON CONFLICT (case_id, entity_type, normalized_value) DO UPDATE
+			SET updated_at = NOW()
+		RETURNING id, case_id, complaint_ref_id, entity_type, raw_value, normalized_value,
+		       source_text_offset, confidence_score, status, extracted_by, created_at, updated_at
+	`, caseID, entityType, rawValue, normalizedValue, confidenceScore, extractedBy).Scan(
+		&e.ID, &e.CaseID, &e.ComplaintRefID, &e.EntityType, &e.RawValue, &e.NormalizedValue,
+		&offset, &e.ConfidenceScore, &e.Status, &e.ExtractedBy, &e.CreatedAt, &e.UpdatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("create or get extracted entity: %w", err)
+	}
+	if offset.Valid {
+		e.SourceTextOffset = [2]int{int(offset.Lower), int(offset.Upper)}
+	}
+	return &e, nil
+}
+
 func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (*model.DigitalEntity, error) {
 	var e model.DigitalEntity
 	var offset pgtype.Range[int32]

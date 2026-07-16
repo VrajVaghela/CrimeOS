@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -7,14 +6,16 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 
-	"crimeos/digitalfootprint/internal/audit"
 	"crimeos/digitalfootprint/internal/analytics"
+	"crimeos/digitalfootprint/internal/audit"
 	"crimeos/digitalfootprint/internal/caselog"
+	"crimeos/digitalfootprint/internal/cases"
 	"crimeos/digitalfootprint/internal/db"
 	"crimeos/digitalfootprint/internal/dispatch"
 	"crimeos/digitalfootprint/internal/entity"
@@ -22,7 +23,17 @@ import (
 	"crimeos/digitalfootprint/internal/lers"
 	"crimeos/digitalfootprint/internal/middleware"
 	"crimeos/digitalfootprint/internal/model"
+	"crimeos/digitalfootprint/internal/osint"
 )
+
+func parseEnvInt(name string, defaultValue int) int {
+	if value := os.Getenv(name); value != "" {
+		if parsed, err := strconv.Atoi(value); err == nil && parsed > 0 {
+			return parsed
+		}
+	}
+	return defaultValue
+}
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
@@ -73,7 +84,10 @@ func main() {
 	entityRepo := entity.NewRepository(pgPool)
 	entitySvc := entity.NewService(entityRepo)
 	auditRepo := audit.NewRepository(pgPool)
+	osintRepo := osint.NewRepository(pgPool)
 	caseLogPublisher := caselog.NewPostgresPublisher(pgPool)
+	casesRepo := cases.NewRepository(pgPool)
+	casesHandler := handler.NewCasesHandler(casesRepo)
 
 	// LERS engine, repo, service, handler
 	lersEngine, err := lers.NewEngine()
@@ -103,10 +117,16 @@ func main() {
 	intelFlagsHandler := handler.NewIntelligenceFlagsHandler(analyticsPgRepo)
 	recordQueryHandler := handler.NewRecordQueryHandler(analyticsPgRepo)
 
+	// API homepage and case routes
+	r.Get("/api/v1", http.HandlerFunc(casesHandler.ApiHome))
+	r.Method(http.MethodPost, "/api/v1/cases", http.HandlerFunc(casesHandler.CreateCase))
+	r.Get("/api/v1/cases/{caseId}", http.HandlerFunc(casesHandler.GetCase))
+
 	// Entity routes
 	r.Method(http.MethodPost, "/api/v1/cases/{caseId}/entities/extract", middleware.AuditWrap(auditRepo, "ENTITIES_EXTRACTED", "digital_entities")(handler.ExtractEntities(entitySvc, auditRepo)))
 	r.Get("/api/v1/cases/{caseId}/entities", handler.ListEntities(entityRepo))
-	r.Method(http.MethodPatch, "/api/v1/entities/{entityId}", middleware.AuditWrap(auditRepo, "ENTITY_STATUS_UPDATED", "digital_entities")(handler.UpdateEntityStatus(entityRepo, auditRepo)))
+	r.Get("/api/v1/cases/{caseId}/osint/{entityId}", handler.GetEntityOsintResult(osintRepo))
+	r.Method(http.MethodPatch, "/api/v1/entities/{entityId}", middleware.AuditWrap(auditRepo, "ENTITY_STATUS_UPDATED", "digital_entities")(handler.UpdateEntityStatus(entityRepo, auditRepo, osintRepo)))
 
 	// Legal request routes
 	r.Get("/api/v1/service-providers", lersHandler.ListProviders)
@@ -143,6 +163,9 @@ func main() {
 	go dispatch.RunWorker(workerCtx, dispatchQueue, lersRepo, dispatchRepo)
 	go dispatch.RunOverdueSweeper(workerCtx, lersRepo, dispatchRepo, 5*time.Minute)
 	go analytics.RunParseWorker(workerCtx, parseQueue, analyticsMongoRepo, analyticsPgRepo, lersRepo, caseLogPublisher)
+	osintPollSeconds := parseEnvInt("OSINT_POLL_INTERVAL_SECONDS", 5)
+	osintWorkerConcurrency := parseEnvInt("OSINT_WORKER_CONCURRENCY", 4)
+	go osint.RunWorker(workerCtx, osintRepo, mongoClient.Database(cfg.MongoDBName), time.Duration(osintPollSeconds)*time.Second, osintWorkerConcurrency)
 	slog.Info("started background workers")
 
 	go func() {
@@ -167,4 +190,3 @@ func main() {
 	}
 	slog.Info("server stopped")
 }
-

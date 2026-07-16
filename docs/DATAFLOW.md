@@ -22,6 +22,11 @@ sequenceDiagram
   O->>FE: Confirm entities
   FE->>API: PATCH /entities/:entityId
   API->>PG: Update entity status
+  API->>W: Enqueue OSINT scan for confirmed entity
+  W->>PG: Create pending osint_scans entry
+  W->>W: Process pending OSINT scans
+  W->>PG: Persist breach and profile intelligence
+  W->>M: Save raw OSINT snapshot for debugging
 
   O->>FE: Draft legal request
   FE->>API: POST /cases/:caseId/legal-requests
@@ -62,10 +67,11 @@ Processing:
 - `internal/entity` extracts digital artifacts and normalizes them.
 - Results are stored as `digital_entities` with `EXTRACTED` status.
 - Officer review changes status to `CONFIRMED` or `REJECTED`.
+- Confirmed entities enqueue OSINT enrichment jobs for social/breach intelligence.
 
 Output:
 
-- Confirmed entities become eligible for LERS request creation.
+- Confirmed entities become eligible for LERS request creation and OSINT enrichment.
 
 ## LERS Request Creation
 

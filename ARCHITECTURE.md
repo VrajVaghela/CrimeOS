@@ -392,3 +392,13 @@ Resp 200:{ "entries": [ ... ] }
 { "error": { "code": "VALIDATION_ERROR", "message": "human readable", "details": {} } }
 ```
 **Status code conventions:** `200` read/update ok · `201` created · `202` accepted/async · `400` validation · `401` unauth · `403` forbidden · `404` not found · `409` conflict (e.g., duplicate request_number) · `422` semantic validation (e.g., entity not CONFIRMED) · `500` internal.
+
+## OSINT & Breach Intelligence
+
+The OSINT module enriches confirmed digital entities with simulated open-source profile and breach exposure intelligence.
+
+| Internal Package | Responsibility |
+|---|---|
+| `internal/osint` | Enqueues confirmed entities for enrichment, executes mock social/breach scans, and aggregates results for frontend analysis |
+
+A dedicated OSINT worker now runs alongside the existing dispatch, overdue sweeper, and analytics parse workers. It polls for pending scans, claims them safely, performs deterministic mock Sherlock/Holehe/breach enumeration, and writes the results back into PostgreSQL and MongoDB. All OSINT/breach data is currently simulated for demo purposes.

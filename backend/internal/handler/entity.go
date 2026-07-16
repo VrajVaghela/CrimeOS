@@ -3,6 +3,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -11,6 +12,7 @@ import (
 	"crimeos/digitalfootprint/internal/audit"
 	"crimeos/digitalfootprint/internal/entity"
 	"crimeos/digitalfootprint/internal/middleware"
+	"crimeos/digitalfootprint/internal/osint"
 )
 
 type ExtractEntitiesRequest struct {
@@ -76,7 +78,7 @@ func ListEntities(repo *entity.Repository) http.HandlerFunc {
 	}
 }
 
-func UpdateEntityStatus(repo *entity.Repository, auditRepo *audit.Repository) http.HandlerFunc {
+func UpdateEntityStatus(repo *entity.Repository, auditRepo *audit.Repository, osintRepo *osint.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		entityIDStr := chi.URLParam(r, "entityId")
 		entityID, err := uuid.Parse(entityIDStr)
@@ -118,6 +120,13 @@ func UpdateEntityStatus(repo *entity.Repository, auditRepo *audit.Repository) ht
 		actorID := r.Context().Value(middleware.ActorIDKey).(string)
 		ipAddress := r.RemoteAddr
 		_ = auditRepo.Record(r.Context(), actorID, "ENTITY_STATUS_UPDATED", "digital_entities", &entityID, before, after, ipAddress)
+
+		if req.Status == "CONFIRMED" {
+			// OSINT trigger point: enrichment enqueued asynchronously on entity confirmation
+			if err := osint.EnqueueScanForEntity(r.Context(), osintRepo, after.ID, after.CaseID, after.EntityType, after.NormalizedValue); err != nil {
+				slog.Error("failed to enqueue OSINT scan", "entity_id", after.ID, "error", err)
+			}
+		}
 
 		_ = json.NewEncoder(w).Encode(map[string]any{"entity": after})
 	}
