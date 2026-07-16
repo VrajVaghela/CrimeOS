@@ -1,0 +1,101 @@
+# ==============================================================================
+# Video Incident Analyzer — Docker Compose Orchestration
+# ==============================================================================
+# Orchestrates: FastAPI app, Celery worker, PostgreSQL, Redis, and React frontend.
+# All secrets are loaded from .env via env_file — no hardcoded values.
+# ==============================================================================
+
+services:
+  # --------------------------------------------------------------------------
+  # PostgreSQL 16 — Primary data store for video cases and ledger entries
+  # --------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    env_file: .env
+    environment:
+      POSTGRES_DB: video_analyzer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d video_analyzer"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # --------------------------------------------------------------------------
+  # Redis 7 — Celery broker and result backend
+  # --------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  # --------------------------------------------------------------------------
+  # FastAPI Application — Core API server
+  # --------------------------------------------------------------------------
+  fastapi-app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - upload_temp:/tmp/video-uploads
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # --------------------------------------------------------------------------
+  # Celery Worker — Background video analysis task processing
+  # --------------------------------------------------------------------------
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - upload_temp:/tmp/video-uploads
+    restart: unless-stopped
+    command: celery -A tasks worker --loglevel=info --concurrency=2
+
+  # --------------------------------------------------------------------------
+  # React Frontend — Investigation dashboard served via Vite
+  # --------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    depends_on:
+      - fastapi-app
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  upload_temp:
+    driver: local
