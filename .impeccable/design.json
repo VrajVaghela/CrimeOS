@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-07T19:29:49Z",
+  "title": "Design System: Crime OS AI",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Electric Command Blue", "canonical": "oklch(60.15% 0.203 252)", "tonalRamp": ["#061a3c", "#0f2f6f", "#1845a2", "#2962cf", "#3b82f6", "#6ea2f8", "#a2c3fa", "#d6e5fd"] },
+      "background": { "role": "neutral", "displayName": "Midnight Canvas", "canonical": "oklch(14.05% 0.024 235)", "tonalRamp": ["#020407", "#05090f", "#080c14", "#0b0f19", "#161d2d", "#28344e", "#4b5b7f", "#8092ba"] },
+      "card": { "role": "neutral", "displayName": "Command Card", "canonical": "oklch(20.45% 0.022 235)", "tonalRamp": ["#07080b", "#0d0f14", "#13161d", "#1a1f2c", "#2b3246", "#444e6c", "#6a769d", "#9aadc7"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Space Grotesk", "purpose": "Main page titles and command deck headings." },
+      "body": { "displayName": "Body Inter", "purpose": "Form fields, list text, and general prose." }
+    },
+    "shadows": [
+      { "name": "glow-primary", "value": "0 0 20px -4px rgba(59, 130, 246, 0.5)", "purpose": "Primary active element/hover feedback." }
+    ],
+    "motion": [
+      { "name": "fade-up", "value": "fade-up 300ms ease-out both", "purpose": "Card entrance animation." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Standard action button with responsive scale and primary command glow on hover.",
+      "html": "<button class=\"ds-btn-primary\">CONFIRM COMPLAINT</button>",
+      "css": ".ds-btn-primary { background-color: #3b82f6; color: #ffffff; padding: 10px 16px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 500; border: none; border-radius: 8px; transition: all 0.2s ease-out; cursor: pointer; } .ds-btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 20px -4px rgba(59, 130, 246, 0.5); background-color: #1d4ed8; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Outline button for non-primary options.",
+      "html": "<button class=\"ds-btn-secondary\">CANCEL ACTION</button>",
+      "css": ".ds-btn-secondary { background-color: transparent; color: #ffffff; padding: 10px 16px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 500; border: 1px solid rgba(59, 130, 246, 0.6); border-radius: 8px; transition: all 0.2s ease-out; cursor: pointer; } .ds-btn-secondary:hover { background-color: rgba(59, 130, 246, 0.1); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Cyber-Command Console",
+    "overview": "Crime OS AI is styled as a state-of-the-art threat intelligence console rather than a traditional government database form. It balances high-tech cyber-command aesthetics with immediate, low-friction task interfaces.",
+    "keyCharacteristics": [
+      "Dark-Mode-First Environment: Deploys a deep navy/slate canvas (#0B0F19)",
+      "AI Transparency & Grounding: Partition AI suggestions visually",
+      "Command Density: High density layout"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "The primary Electric Command Blue is used on <=10% of any screen.", "section": "colors" },
+      { "name": "The Glow-on-Demand Rule", "body": "Surfaces are flat by default. Glow effects appear only on hover/active states or AI items.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do wrap every AI recommendation or prediction in an AiContentCard with an explicit Sparkle badge.",
+      "Do format all dates, account details, and numeric markers in JetBrains Mono."
+    ],
+    "donts": [
+      "Don't use side-stripe borders on non-AI cards.",
+      "Don't use gradient text.",
+      "Don't use warm, sand-colored, or beige backgrounds."
+    ]
+  }
+}
