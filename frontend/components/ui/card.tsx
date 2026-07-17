@@ -11,24 +11,24 @@ const Card = React.forwardRef<
 >(({ className, accent = "none", hover = false, ...props }, ref) => {
   const accentBorder =
     accent === "primary"
-      ? "border-l-2 border-l-primary"
+      ? "border-primary/30 bg-primary/[0.03]"
       : accent === "success"
-        ? "border-l-2 border-l-success"
+        ? "border-success/30 bg-success/[0.03]"
         : accent === "warning"
-          ? "border-l-2 border-l-accent"
+          ? "border-warn/30 bg-warn/[0.03]"
           : accent === "destructive"
-            ? "border-l-2 border-l-destructive"
+            ? "border-destructive/30 bg-destructive/[0.03]"
             : "";
 
   const hoverClasses = hover
-    ? "transition-all duration-200 hover:border-primary/30 hover:-translate-y-0.5"
+    ? "transition-colors duration-200 hover:border-border"
     : "";
 
   return (
     <div
       ref={ref}
       className={cn(
-        "rounded-xl border bg-card p-5 text-card-foreground border-border/80",
+        "rounded-squircle border bg-card p-5 text-card-foreground border-border/80",
         accentBorder,
         hoverClasses,
         className,

@@ -17,7 +17,6 @@ import {
   Radar,
   Network,
   Search,
-  Sparkles,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +33,7 @@ import {
 import { ApiError, getCase, syncCctns } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import type { CaseDetailOut } from "@/lib/types";
+import { CopilotLauncher } from "@/components/copilot-drawer";
 
 const TABS = [
   { label: "Overview", href: "", icon: Shield, color: "text-primary border-primary", group: "Overview" },
@@ -110,10 +110,10 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      {/* Glass Header */}
-      <header className="sticky top-[68px] z-20 border-b border-border/60 bg-[#0f0f0f]/80 backdrop-blur-xl supports-[backdrop-filter]:bg-[#0f0f0f]/60">
-        <div className="mx-auto max-w-7xl px-6 pt-4 pb-0">
+    <main className="min-h-screen min-w-0 bg-background">
+      {/* Case header stays in document flow so it scrolls away with the workspace. */}
+      <header className="border-b border-border/60 bg-toolbar">
+        <div className="mx-auto w-full max-w-7xl px-4 pt-4 pb-0 sm:px-6">
           <div className="flex items-center gap-3 mb-3">
             <Button variant="ghost" size="sm" onClick={() => router.push("/cases")} className="gap-1.5 text-muted-foreground hover:text-foreground">
               <ArrowLeft className="h-4 w-4" />
@@ -129,7 +129,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
           ) : error ? (
             <p className="text-sm text-rose pb-4">{error}</p>
           ) : caseData ? (
-            <div className="flex items-start justify-between gap-4 pb-3">
+            <div className="flex flex-col items-stretch gap-4 pb-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   {activeTabMeta && (
@@ -141,21 +141,21 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                   <span className="font-mono text-sm text-primary">{caseData.case_number}</span>
                   <StatusBadge status={caseData.status} />
                 </div>
-                <h1 className="font-heading text-xl font-bold md:text-2xl truncate">{caseData.title}</h1>
+                <h1 className="break-words font-heading text-xl font-bold leading-tight md:text-2xl">{caseData.title}</h1>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {caseData.crime_type ?? "Awaiting classification"}
                   <span className="font-mono mx-1.5">·</span>
                   {new Date(caseData.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                 </p>
               </div>
-              <div className="shrink-0">
+              <div className="shrink-0 sm:pt-1">
                 {caseData.status !== "synced" ? (
-                  <Button onClick={() => setSyncDialogOpen(true)} size="sm" className="bg-gradient-to-r from-primary to-info hover:from-primary/90 hover:to-info/90" id="sync-cctns-btn">
+                  <Button onClick={() => setSyncDialogOpen(true)} size="sm" className="w-full sm:w-auto" id="sync-cctns-btn">
                     <Globe className="h-4 w-4" />
                     Sync to CCTNS
                   </Button>
                 ) : (
-                  <div className="flex items-center gap-1.5 bg-success/15 border border-success/30 rounded-lg px-3 py-1.5 text-xs text-success font-mono">
+                  <div className="flex items-center gap-1.5 rounded-squircle-sm border border-success/30 bg-success/15 px-3 py-1.5 font-mono text-xs text-success">
                     <CheckCircle2 className="h-4 w-4 text-success" />
                     CCTNS Synced
                   </div>
@@ -258,7 +258,9 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
         </div>
       </header>
 
-      <section className="mx-auto max-w-7xl px-6 py-6">{children}</section>
+      <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">{children}</section>
+
+      <CopilotLauncher caseId={caseId} />
 
       <Dialog open={syncDialogOpen} onOpenChange={setSyncDialogOpen}>
         <DialogContent className="sm:max-w-2xl">
@@ -285,7 +287,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setSyncDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSync} disabled={syncing} loading={syncing} className="bg-gradient-to-r from-primary to-info">Confirm Sync & Push</Button>
+            <Button onClick={handleSync} disabled={syncing} loading={syncing}>Confirm Sync & Push</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

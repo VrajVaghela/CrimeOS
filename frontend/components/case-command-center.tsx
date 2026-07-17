@@ -39,7 +39,6 @@ import type {
   CaseSummaryOut,
 } from "@/lib/types";
 import { EntityPivotPanel } from "@/components/entity-pivot-panel";
-import { CopilotPanel } from "@/components/copilot-panel";
 
 function AnimatedMetric({ value, suffix = "" }: { value: number; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -227,8 +226,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
       </div>
 
       {/* Case Workspace Hero Card - 2-column squircle layout collapses at 1080px */}
-      <Card className="border border-border/60 bg-card/65 backdrop-blur-md rounded-squircle p-6 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-info to-primary/40" />
+      <Card className="border border-border/60 bg-card rounded-squircle p-6">
         <div className="grid grid-cols-1 min-[1080px]:grid-cols-[1.3fr_0.7fr] gap-6">
           {/* Left Column: 1.3fr */}
           <div className="space-y-4">
@@ -263,7 +261,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                 <Sparkles className="h-3 w-3 text-info" />
                 AI Incident Executive Summary / कार्यकारी सारांश
               </span>
-              <div className="border-l-4 border-info bg-info/5 p-4 rounded-r-squircle-sm text-xs leading-relaxed text-foreground/90 font-sans">
+              <div className="border border-info/30 bg-info/[0.04] p-4 rounded-squircle-sm text-xs leading-relaxed text-foreground/90 font-sans">
                 {summaries.length > 0
                   ? summaries[0].content
                   : "AI Executive Summary is not generated yet. Run the case analyzer or update details to generate the initial summary."}
@@ -320,7 +318,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
               </div>
               <div className="w-full bg-secondary/80 rounded-full h-1.5 overflow-hidden">
                 <div
-                  className="bg-primary h-full rounded-full transition-all duration-500 glow-primary"
+                  className="bg-primary h-full rounded-full transition-[width] duration-500"
                   style={{ width: `${workflow.completion_percentage}%` }}
                 />
               </div>
@@ -332,7 +330,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
       {/* Restructured 4 Signal Cards in a Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 min-[1080px]:grid-cols-4 gap-4">
         {/* Card 1: Case Confidence */}
-        <Card className="border border-border/40 bg-[#171717] hover:glow-primary hover:border-primary/40 transition-all duration-[130ms] rounded-[12px] p-4">
+        <Card className="border border-border/60 bg-card hover:border-border transition-colors duration-150 rounded-squircle p-4">
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
@@ -364,7 +362,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
         </Card>
 
         {/* Card 2: Extracted Details */}
-        <Card className="border border-border/40 bg-[#171717] hover:glow-primary hover:border-primary/40 transition-all duration-[130ms] rounded-[12px] p-4">
+        <Card className="border border-border/60 bg-card hover:border-border transition-colors duration-150 rounded-squircle p-4">
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
@@ -384,7 +382,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
         </Card>
 
         {/* Card 3: Dispatched Requests */}
-        <Card className="border border-border/40 bg-[#171717] hover:glow-primary hover:border-primary/40 transition-all duration-[130ms] rounded-[12px] p-4">
+        <Card className="border border-border/60 bg-card hover:border-border transition-colors duration-150 rounded-squircle p-4">
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
@@ -405,7 +403,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
         </Card>
 
         {/* Card 4: Timeline Progress */}
-        <Card className="border border-border/40 bg-[#171717] hover:glow-primary hover:border-primary/40 transition-all duration-[130ms] rounded-[12px] p-4">
+        <Card className="border border-border/60 bg-card hover:border-border transition-colors duration-150 rounded-squircle p-4">
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
@@ -426,7 +424,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
       </div>
 
       {/* Workflow Spine Indicator */}
-      <Card className="border border-border/40 bg-card/50 backdrop-blur-md">
+      <Card className="border border-border/60 bg-card">
         <CardContent className="pt-6">
           <WorkflowSpine stages={workflow.stages} currentStage={workflow.current_stage} />
         </CardContent>
@@ -537,8 +535,6 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
             </CardContent>
           </Card>
 
-          {/* Case Intelligence Copilot */}
-          <CopilotPanel caseId={caseId} />
         </div>
 
         {/* Right Column (1/3 width on desktop) */}

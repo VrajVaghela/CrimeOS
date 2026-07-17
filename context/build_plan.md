@@ -180,6 +180,100 @@ Goal: Overhaul the design & UI of the application to match the Ferrari Cyber-Com
 
 ---
 
+## Phase 10 — Selective Upstream Feature Integration
+
+Goal: bring the useful features from `origin/main`,
+`origin/crimeos/digitalfootprint`, and `origin/crimeos/videoAnalyzer` into
+`vraj` while preserving every current feature, route, design token, and golden
+path behavior. This phase is a selective port, not a wholesale multi-project
+merge.
+
+### Phase 10.0 — Protected baseline and merge preparation
+1. Record the current `vraj` commit and dirty-worktree file list.
+2. Commit or safely stash the current uncommitted Ferrari/shell work before any
+   Git merge; never reset or checkout away current work.
+3. Refresh remote refs and verify the source commits: `origin/main` timeline
+   (`cfaf939`/`0d06aca`), digital footprint (`dc33884`), and video analyzer
+   (`a6f6c29`).
+4. Create a temporary integration branch from `vraj` for conflict resolution;
+   keep `vraj` itself recoverable until all checkpoints pass.
+
+**Checkpoint:** Current `vraj` UI and backend changes are recoverable, and the
+working tree is clean before merge operations begin.
+
+### Phase 10A — Timeline Agent and CCTV pinning (`origin/main`)
+1. Merge only the compatible timeline history with `--no-commit` first.
+2. Resolve route/layout conflicts in favor of the current authenticated App
+   Router and Ferrari shell; adapt the upstream timeline page into
+   `app/(authenticated)/cases/[id]/timeline/page.tsx`.
+3. Add the timeline model, migration, schemas, service, router registration,
+   typed API functions, and prompt constants while reusing existing evidence,
+   audit, Gemini, and upload abstractions.
+4. Add seed data and explicit UI states for synthesized events, CCTV analysis,
+   officer notes, unsupported images, and Gemini fallback output.
+5. Verify timeline events distinguish AI-generated events from officer notes,
+   expose source references/confidence, and append audit entries.
+
+**Checkpoint:** A seeded case opens the timeline, synthesizes events once,
+accepts an officer note, and pins a CCTV frame without breaking the existing
+case tabs or golden path.
+
+### Phase 10B — Digital-footprint/OSINT enrichment (`origin/crimeos/digitalfootprint`)
+1. Extract the feature contract from the Go branch: entity-scoped scan status,
+   social-profile results, breach exposure, risk summary, discovered pivots, and
+   exportable dossier data.
+2. Implement native SQLAlchemy models/migration, Pydantic schemas, service, and
+   router under the existing FastAPI app. Keep scans deterministic/demo-safe;
+   do not introduce live Sherlock/Holehe/HaveIBeenPwned calls or new workers.
+3. Attach results to `case_entities` and `ai_citations` with source labels,
+   confidence, and an explicit unconfirmed status for discovered pivots.
+4. Add typed `lib/api.ts` functions and a token-driven Ferrari
+   `OsintEnrichmentPanel`/risk summary surface in the entity/case workspace.
+5. Add seeded LOW/HIGH-risk examples, loading/error/not-found states, and audit
+   events for scan creation, completion, failure, and dossier export.
+
+**Checkpoint:** An officer can open a confirmed case entity, see a deterministic
+OSINT risk summary with social/breach sources, and distinguish confirmed data
+from unconfirmed pivots; the golden path remains unchanged.
+
+### Phase 10C — Video evidence analysis (`origin/crimeos/videoAnalyzer`)
+1. Extract the feature contract from the video branch: upload validation,
+   progress polling, incident summary, risk level, timestamped timeline rows,
+   and click-to-seek playback.
+2. Implement it as an evidence workflow for an existing case using
+   `EvidenceFile`, existing upload storage, FastAPI `BackgroundTasks`, and the
+   existing Gemini gateway. Do not add Celery, Redis, Mongo, a second case
+   table, or a second frontend application.
+3. Persist timestamped events and provenance in the existing timeline/evidence
+   aggregates; make video processing fallback deterministic when Gemini is
+   unavailable.
+4. Add typed API polling/report functions and a responsive Ferrari
+   `VideoEvidenceWorkspace` that reuses existing evidence/timeline patterns and
+   native HTML media controls.
+5. Add safe upload limits/signature validation, partial/failure states, audit
+   events, and a seeded short demo clip or fixture reference that does not
+   require external services.
+
+**Checkpoint:** An officer uploads a supported video to an existing case,
+observes progress, opens the report, clicks a timeline event to seek the video,
+and sees the action/source in the audit trail.
+
+### Phase 10D — Integration verification and handoff
+1. Run the existing frontend build/lint and backend import/smoke checks after
+   each feature, not only at the end.
+2. Run a fresh-seed golden-path rehearsal: complaint → path → cited legal
+   request → provider response → analytics → summary → audit.
+3. Run one intelligence rehearsal covering timeline/CCTV plus one OSINT or video
+   moment, with keyboard, responsive, reduced-motion, loading, and failure-state
+   checks.
+4. Review every changed route for provenance, explicit officer actions, role
+   checks, and no raw `fetch()` outside `lib/api.ts`.
+5. Update `progress_tracker.md`, `ui_registry.md`, seed notes, and the smoke
+   script only after the corresponding checkpoint passes.
+
+**Checkpoint:** All retained `vraj` features still work, each selected upstream
+feature has a passing checkpoint, and no out-of-scope infrastructure was added.
+
 
 ## Cut List (if time runs out, cut in this order)
 For Phase 8, cut in this order:

@@ -144,7 +144,15 @@ These entries define the intended reusable surfaces. Mark them BUILT and add con
 - Path: components/copilot-panel.tsx
 - Purpose: case-scoped read-only assistant with grounded answers, source chips, fallback state, and audited prompts
 - Props: `caseId: string`
-- Used in: `CaseCommandCenter`
+- Used in: `CopilotDrawer`
+
+### CopilotDrawer — BUILT (Phase 9)
+- Path: components/copilot-drawer.tsx
+- Purpose: persistent right-edge AI trigger that opens the case-scoped copilot in an off-canvas drawer
+- Props: `caseId: string`
+- Used in: `app/cases/[id]/layout.tsx`
+
+**Pattern notes:** Keep the launcher compact and icon-first. The drawer owns the only intentional full-height overlay and reuses `CopilotPanel` so citations, fallback states, and read-only behavior stay consistent.
 
 ### RequestReadinessChecklist — BUILT (Phase 8E)
 - Path: components/request-readiness-checklist.tsx
@@ -157,6 +165,30 @@ These entries define the intended reusable surfaces. Mark them BUILT and add con
 - Purpose: explains flagged provider rows and links them to entities, evidence, and investigation steps
 - Props: `correlations: ResponseCorrelationOut[]`, `onPromote: (rowIndex: number) => Promise<void>`
 - Used in: `app/cases/[id]/requests/page.tsx`
+
+## Planned Phase 10 Components
+
+These are planned native ports of upstream behavior. Do not copy the separate
+Go/Vite component implementations or create parallel application shells. Mark
+an entry BUILT only after the implementation and its checkpoint pass.
+
+### TimelineWorkspace — PLANNED (Phase 10A)
+- Path: components/timeline-workspace.tsx
+- Purpose: chronological AI/officer timeline with CCTV pins, source references, confidence, and note actions
+- Props: `caseId: string`, `events: TimelineEventOut[]`, callbacks for note/CCTV actions
+- Used in: `app/(authenticated)/cases/[id]/timeline/page.tsx`
+
+### OsintEnrichmentPanel — PLANNED (Phase 10B)
+- Path: components/osint-enrichment-panel.tsx
+- Purpose: case-entity OSINT risk summary with social profiles, breach exposure, source chips, and unconfirmed pivots
+- Props: `caseId: string`, `entityId: string`, `result?: EntityOsintResultOut`, loading/error callbacks
+- Used in: entity pivot/case workspace
+
+### VideoEvidenceWorkspace — PLANNED (Phase 10C)
+- Path: components/video-evidence-workspace.tsx
+- Purpose: secure video upload/progress plus native video playback synchronized to timestamped incident events
+- Props: `caseId: string`, upload/status/report callbacks
+- Used in: `app/(authenticated)/cases/[id]/evidence/page.tsx` or a case-scoped video route
 
 ## Phase 9 — Ferrari Design Upgrades (not new components, updated existing)
 

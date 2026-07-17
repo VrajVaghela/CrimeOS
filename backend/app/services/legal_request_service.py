@@ -8,6 +8,7 @@ from email.header import Header
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import re
+from typing import Any
 
 
 import jinja2

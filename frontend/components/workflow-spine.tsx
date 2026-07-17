@@ -31,10 +31,10 @@ export function WorkflowSpine({ stages, currentStage, onStageSelect }: WorkflowS
           
           if (isCompleted) {
             icon = <Check className="h-4 w-4 stroke-[3px]" />;
-            nodeBg = "bg-success/20 text-success border-success/40 glow-success";
+            nodeBg = "bg-success/10 text-success border-success/40";
           } else if (status === "in_progress" || isActive) {
             icon = <Loader2 className="h-4 w-4 animate-spin text-primary" />;
-            nodeBg = "bg-primary/20 text-primary border-primary/40 glow-primary animate-pulse";
+            nodeBg = "bg-primary/10 text-primary border-primary/40";
           } else if (status === "skipped") {
             icon = <Check className="h-4 w-4 text-muted-foreground" />;
             nodeBg = "bg-secondary text-muted-foreground border-border/20";
@@ -55,7 +55,7 @@ export function WorkflowSpine({ stages, currentStage, onStageSelect }: WorkflowS
                 className={cn(
                   "flex items-center justify-center w-11 h-11 rounded-full border-2 transition-all duration-300",
                   nodeBg,
-                  isActive && "scale-110 border-primary"
+                  isActive && "border-primary"
                 )}
               >
                 {icon}

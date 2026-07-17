@@ -140,8 +140,8 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
   };
 
   return (
-    <Card className="border border-border/60 bg-card/40 backdrop-blur-md flex flex-col h-[600px] relative overflow-hidden rounded-xl">
-      <CardHeader className="border-b border-border/40 pb-4 bg-card/25">
+    <Card className="flex h-full flex-col overflow-hidden rounded-none border-0 bg-card/40 backdrop-blur-md">
+      <CardHeader className="border-b border-border/40 bg-card/25 pb-4 pr-14">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary animate-pulse" />

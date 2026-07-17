@@ -195,8 +195,7 @@ export default function SummaryPage() {
                 </div>
 
                 <div className="px-6 pb-6">
-                  {/* Info-blue left-bordered content block */}
-                  <div className="bg-[#0f0f0f]/60 border border-border rounded-[8px] p-5 border-l-2 border-l-[#2d7ee9]">
+                  <div className="bg-background border border-info/30 rounded-squircle-sm p-5">
                     <pre className="text-sm leading-relaxed text-foreground font-sans whitespace-pre-wrap">
                       {selected.content}
                     </pre>

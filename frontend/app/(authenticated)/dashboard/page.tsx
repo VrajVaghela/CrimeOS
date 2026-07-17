@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   Activity,
   FileSearch,
-  LogOut,
   Network,
   Plus,
   ShieldCheck,
@@ -63,8 +62,8 @@ export default function DashboardPage() {
         try {
           const res = await getPendingRequests();
           setPendingRequests(res);
-        } catch (e) {
-          console.error("Failed to load pending requests", e);
+        } catch (caught: unknown) {
+          setError(caught instanceof ApiError ? caught.message : "Approval queue unavailable");
         } finally {
           setLoadingRequests(false);
         }
@@ -80,7 +79,7 @@ export default function DashboardPage() {
       setPendingRequests((prev) => prev.filter((r) => r.id !== reqId));
       setDashboard(await getDashboard());
     } catch (e) {
-      alert(e instanceof ApiError ? e.message : "Failed to approve request");
+      setError(e instanceof ApiError ? e.message : "Failed to approve request");
     } finally {
       setApprovingId(null);
     }
@@ -102,12 +101,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background p-6">
+    <main className="min-h-screen bg-background p-6 lg:p-8">
       <div className="flex items-center justify-between gap-4 mb-6">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono mb-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-success animate-breathe" />
-            Crime OS AI command dashboard
+            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            Station workspace
           </div>
           <h1 className="font-heading text-2xl font-bold md:text-3xl flex items-center gap-3 flex-wrap">
             Investigation Workspace
@@ -118,7 +117,7 @@ export default function DashboardPage() {
               </span>
             )}
             {user.role === "LEGAL" && (
-              <span className="text-[10px] bg-violet/15 border border-violet/30 text-violet px-2 py-0.5 rounded-full uppercase tracking-wider font-mono font-normal flex items-center gap-1">
+                <span className="text-[10px] bg-info/10 border border-info/30 text-info px-2 py-0.5 rounded-squircle-sm uppercase tracking-wider font-mono font-normal flex items-center gap-1">
                 <Scale className="h-3 w-3" /> Legal Advisory Mode
               </span>
             )}
@@ -149,7 +148,6 @@ export default function DashboardPage() {
         {/* SHO Approval Queue */}
         {user.role === "SHO" && (
           <Card hover className="animate-fade-up delay-200 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-accent via-primary to-accent/30" />
             <CardHeader>
               <div>
                 <CardTitle className="font-heading text-lg font-bold flex items-center gap-2 text-accent">
@@ -219,7 +217,6 @@ export default function DashboardPage() {
         {/* Legal Advisor section */}
         {user.role === "LEGAL" && (
           <Card hover className="animate-fade-up delay-300 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet via-primary to-violet/30" />
             <CardHeader>
               <div>
                 <CardTitle className="font-heading text-lg font-bold flex items-center gap-2 text-violet">
@@ -274,7 +271,7 @@ export default function DashboardPage() {
                       else if (user.role === "SHO") router.push(`/cases/${item.id}/summary`);
                       else router.push(`/cases/${item.id}`);
                     }}
-                    className="w-full text-left flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:border-primary/40 hover:glow-primary hover:-translate-y-0.5 md:flex-row md:items-center md:justify-between animate-fade-up"
+                            className="w-full text-left flex flex-col gap-3 rounded-squircle border border-border/60 bg-card p-4 transition-colors duration-200 hover:border-primary/40 md:flex-row md:items-center md:justify-between animate-fade-up"
                     style={{ animationDelay: `${idx * 80}ms` }}
 
                   >
@@ -308,11 +305,11 @@ export default function DashboardPage() {
 }
 
 const STAT_COLORS = {
-  primary: { bg: "bg-primary/15 border-primary/25", icon: "text-primary", glow: "hover:glow-primary" },
-  accent: { bg: "bg-accent/15 border-accent/25", icon: "text-accent", glow: "hover:glow-warning" },
-  info: { bg: "bg-info/15 border-info/25", icon: "text-info", glow: "hover:glow-info" },
-  violet: { bg: "bg-violet/15 border-violet/25", icon: "text-violet", glow: "hover:glow-violet" },
-  rose: { bg: "bg-rose/15 border-rose/25", icon: "text-rose", glow: "hover:glow-rose" },
+  primary: { bg: "bg-secondary border-border", icon: "text-primary", glow: "" },
+  accent: { bg: "bg-secondary border-border", icon: "text-warn", glow: "" },
+  info: { bg: "bg-secondary border-border", icon: "text-info", glow: "" },
+  violet: { bg: "bg-secondary border-border", icon: "text-info", glow: "" },
+  rose: { bg: "bg-secondary border-border", icon: "text-destructive", glow: "" },
 } as const;
 
 function StatCard({

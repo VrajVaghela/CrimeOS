@@ -34,14 +34,11 @@ export function NextBestAction({
   const isCompleted = !actionType || actionType === "none";
 
   return (
-    <div className="bg-primary/10 border border-primary/20 rounded-xl p-5 glow-primary transition-all duration-200">
+    <div className="bg-primary/[0.06] border border-primary/25 rounded-squircle p-5 transition-colors duration-200">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2 max-w-2xl">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
+            <span className="h-2 w-2 rounded-full bg-primary" />
             <h3 className="text-sm font-semibold font-heading uppercase tracking-wider text-primary">
               Prioritized Next Action / अगला अनुशंसित कदम
             </h3>
@@ -78,7 +75,7 @@ export function NextBestAction({
           <Button
             onClick={() => onAction(actionType)}
             disabled={disabled}
-            className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 py-2 h-11 shadow-md glow-primary rounded-lg transition-transform hover:scale-105 active:scale-95 flex items-center gap-2"
+            className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 py-2 h-11 rounded-squircle-sm flex items-center gap-2"
           >
             <Play className="h-4 w-4 fill-current" />
             <span>Execute Action</span>

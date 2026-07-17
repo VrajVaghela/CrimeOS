@@ -13,7 +13,7 @@ from app.ai import gemini_client
 from app.ai.prompts import INSIGHT_GENERATION_PROMPT
 from app.config import settings
 from app.exceptions import NotFoundError, AppError
-from app.models import Case, Complaint, ExtractedEntity, LegalRequest, ProviderResponse
+from app.models import Case, Complaint, ExtractedEntity, LegalRequest, ProviderResponse, User
 from app.models.enums import ProviderType, RequestStatus
 from app.services import audit_service
 

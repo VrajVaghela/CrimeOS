@@ -132,9 +132,10 @@
     --warn: 49 100% 50%;          /* #ffd200 */
     --warn-foreground: 0 0% 0%;
 
-    --violet: 255 92% 76%;
-    --violet-foreground: 0 0% 0%;
-    --rose: 346 84% 61%;
+    /* Compatibility aliases: role and error states stay within the core palette. */
+    --violet: 214 82% 54%;
+    --violet-foreground: 0 0% 100%;
+    --rose: 3 100% 60%;
     --rose-foreground: 0 0% 100%;
     
     --surface-alt: 0 0% 6%;
@@ -143,50 +144,44 @@
   }
 
   html {
+    height: 100%;
     color-scheme: dark;
-    scroll-behavior: smooth;
+    overflow: hidden;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    height: 100%;
     font-size: 14px;
     line-height: 1.5;
-    
-    /* Ferrari dot grid and red top radial glow overlay */
-    background-image: 
-      radial-gradient(circle at 50% 0%, rgba(220, 0, 0, 0.12) 0%, transparent 60%),
-      radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-    background-size: 100% 600px, 24px 24px;
-    background-repeat: no-repeat, repeat;
-    background-position: top center, top left;
-    background-attachment: scroll, scroll;
-    background-color: #0b0b0b;
+    background-color: var(--bg);
+    overflow: hidden;
   }
 
   /* Improved text selection */
   ::selection {
     background: hsl(0 100% 43% / 0.35);
-    color: hsl(0 0% 100%);
+    color: var(--fg);
   }
 
   /* Focus-visible global style */
   :focus-visible {
-    outline: 2px solid hsl(0 100% 43%);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-radius: var(--radius);
   }
 
-  /* Custom thin scrollbars */
+  /* Scrolling stays available without adding visual chrome to every nested panel. */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 0;
+    height: 0;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: hsl(0 0% 100% / 0.12);
-    border-radius: 9999px;
+    background: color-mix(in oklab, var(--fg) 12%, transparent);
+    border-radius: var(--radius-pill);
     transition: background 200ms ease;
   }
   ::-webkit-scrollbar-thumb:hover {
@@ -195,8 +190,7 @@
 
   /* Firefox scrollbar */
   * {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(0 0% 100% / 0.12) transparent;
+    scrollbar-width: none;
   }
 
   /* Tap highlight for mobile */
@@ -206,6 +200,26 @@
 }
 
 @layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* The app shell owns the only page-level scroll position. */
+  .workspace-scroll {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .workspace-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
   /* ── Ferrari button transition ── */
   .btn-ferrari {
     transition: transform var(--motion-fast) var(--ease-standard),
@@ -213,11 +227,10 @@
                 box-shadow var(--motion-fast) var(--ease-standard);
   }
   .btn-ferrari:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px -4px rgba(220, 0, 0, 0.45);
+    background: var(--accent-hover);
   }
   .btn-ferrari:active {
-    transform: scale(0.98);
+    background: var(--accent-active);
   }
 
   /* ── Squircle panel card ── */
@@ -228,7 +241,7 @@
     transition: border-color var(--motion-base) var(--ease-standard);
   }
   .panel-card:hover {
-    border-color: color-mix(in oklab, var(--accent) 25%, var(--border));
+    border-color: var(--border);
   }
   .panel-card-warm {
     border-radius: var(--radius-squircle);
@@ -246,25 +259,25 @@
 
   /* ── Glow utilities ── */
   .glow-primary {
-    box-shadow: 0 0 20px -4px rgba(220, 0, 0, 0.3);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent);
   }
   .glow-success {
-    box-shadow: 0 0 16px -4px rgba(15, 157, 88, 0.4);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--success) 35%, transparent);
   }
   .glow-destructive {
-    box-shadow: 0 0 16px -4px rgba(255, 59, 48, 0.4);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--danger) 35%, transparent);
   }
   .glow-warning {
-    box-shadow: 0 0 16px -4px rgba(255, 210, 0, 0.4);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--warn) 35%, transparent);
   }
   .glow-info {
-    box-shadow: 0 0 16px -4px rgba(45, 126, 233, 0.4);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--info) 35%, transparent);
   }
   .glow-violet {
-    box-shadow: 0 0 16px -4px hsl(255 92% 76% / 0.5);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--info) 35%, transparent);
   }
   .glow-rose {
-    box-shadow: 0 0 16px -4px hsl(346 84% 61% / 0.5);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--danger) 35%, transparent);
   }
 
   /* ── Glass utilities ── */
@@ -293,20 +306,13 @@
 
   /* ── Background patterns ── */
   .grid-bg {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background: var(--surface);
   }
   .dot-pattern {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background: var(--surface);
   }
   .grid-bg-subtle {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-    background-size: 48px 48px;
+    background: var(--surface);
   }
 
   /* ── Animation delay utilities ── */

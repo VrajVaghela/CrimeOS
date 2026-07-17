@@ -113,3 +113,22 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 
 
 
+
+- [x] Professional polish pass: removed decorative grid/glow/stripe treatments, tightened shared controls, and fixed authenticated-shell prerendering.
+- [x] Shell usability pass: retractable sidebar, flow-based case header, redundant scrollbar cleanup, and right-edge copilot drawer.
+- [x] Shell and login polish: pinned sidebar footer, single workspace scroll owner, aligned spacing, and restrained sign-in surface.
+
+## Phase 10 — Selective Upstream Feature Integration
+Planning baseline: `vraj` remains canonical; current uncommitted work is protected. Source branches are feature references only.
+
+- [x] Read and compare upstream branch histories (`origin/main`, `origin/crimeos/digitalfootprint`, `origin/crimeos/videoAnalyzer`)
+- [x] Document selective-port architecture, merge order, conflict policy, and acceptance checkpoints in `architecture.md` and `build_plan.md`
+- [ ] 10.0 Protected baseline: preserve/commit current `vraj` work before merge operations
+- [ ] 10A Timeline Agent + CCTV pinning: native integration of `origin/main` timeline feature
+- [ ] 10A checkpoint: timeline synthesis, officer note, CCTV pin, provenance, and audit verified
+- [ ] 10B OSINT enrichment: native FastAPI/PostgreSQL/Next.js port of digital-footprint behavior
+- [ ] 10B checkpoint: deterministic entity risk summary, sources, unconfirmed pivots, and audit verified
+- [ ] 10C Video evidence analysis: native case-scoped upload, background progress, report, and seekable timeline
+- [ ] 10C checkpoint: video workflow and audit verified without Celery/Redis/Mongo or a duplicate app
+- [ ] 10D Full integration verification: golden path plus one intelligence moment from a fresh seed
+- [ ] 10D checkpoint: all retained `vraj` features and selected upstream features pass smoke/review checks
