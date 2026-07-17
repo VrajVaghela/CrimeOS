@@ -123,7 +123,7 @@ Planning baseline: `vraj` remains canonical; current uncommitted work is protect
 
 - [x] Read and compare upstream branch histories (`origin/main`, `origin/crimeos/digitalfootprint`, `origin/crimeos/videoAnalyzer`)
 - [x] Document selective-port architecture, merge order, conflict policy, and acceptance checkpoints in `architecture.md` and `build_plan.md`
-- [ ] 10.0 Protected baseline: preserve/commit current `vraj` work before merge operations
+- [x] 10.0 Protected baseline: preserve/commit current `vraj` work before merge operations
 - [ ] 10A Timeline Agent + CCTV pinning: native integration of `origin/main` timeline feature
 - [ ] 10A checkpoint: timeline synthesis, officer note, CCTV pin, provenance, and audit verified
 - [ ] 10B OSINT enrichment: native FastAPI/PostgreSQL/Next.js port of digital-footprint behavior
