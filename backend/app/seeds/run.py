@@ -11,7 +11,8 @@ from app.models import (
     Case, LegalCode, LegalSection, SopChunk, SopDocument, User, UserRole,
     CopilotMessage, AiCitation, Complaint, ExtractedEntity, CaseEntity,
     EntityRelationship, EvidenceFile, EvidenceMarker, InvestigationPath,
-    PathStep, LegalRequest, ProviderResponse, CaseWorkflowState
+    PathStep, LegalRequest, ProviderResponse, CaseWorkflowState,
+    OsintScan, SocialProfile, DataBreach, OsintSnapshot
 )
 from app.models.enums import ProviderType, RequestStatus, SourceType, StepStatus
 from app.services.audit_service import record
@@ -162,7 +163,7 @@ def main() -> None:
             ent_profile = CaseEntity(
                 case_id=case2.id,
                 entity_type="person",
-                canonical_value="fake_profile_123",
+                canonical_value="Fake_Profile_123",
                 display_value="@fake_profile_123",
                 confidence=0.90
             )
@@ -391,10 +392,363 @@ Missing dates. Missing target identifiers. Missing legal basis.""",
                 current_stage="summarize",
                 blocker_codes=[],
                 next_action_type="generate_summary",
-                next_action_label="Generate Case Summary / मामले का सारांश बनाएं",
+                next_action_label="Generate Case Summary / मामले का साराංශ बनाएं",
                 updated_at=datetime.utcnow()
             )
             db.add(workflow2)
+            db.flush()
+
+            # 11. Seed OSINT Scan and Results for Case 2
+            # A. Email scan (HIGH/CRITICAL risk)
+            scan_email = OsintScan(
+                case_id=case2.id,
+                entity_id=ent_email.id,
+                entity_type="email",
+                entity_value="culprit@harass.com",
+                status="COMPLETED",
+                started_at=datetime.utcnow(),
+                completed_at=datetime.utcnow()
+            )
+            db.add(scan_email)
+            db.flush()
+
+            # Social Profiles for Email Scan
+            db.add_all([
+                SocialProfile(
+                    scan_id=scan_email.id,
+                    platform="Spotify",
+                    username="culprit@harass.com",
+                    profile_url="",
+                    exists_confidence="LIKELY"
+                ),
+                SocialProfile(
+                    scan_id=scan_email.id,
+                    platform="Netflix",
+                    username="culprit@harass.com",
+                    profile_url="",
+                    exists_confidence="LIKELY"
+                ),
+                SocialProfile(
+                    scan_id=scan_email.id,
+                    platform="Amazon",
+                    username="culprit@harass.com",
+                    profile_url="",
+                    exists_confidence="UNCERTAIN"
+                )
+            ])
+
+            # Data Breaches for Email Scan
+            db.add_all([
+                DataBreach(
+                    scan_id=scan_email.id,
+                    breach_name="DataVault Leak 2021",
+                    breach_domain="datavault.example.com",
+                    leak_date="2021-03-15",
+                    exposed_data_classes=["Emails", "Passwords", "Financial Credentials"],
+                    record_count=4200000,
+                    severity="CRITICAL",
+                    source_note="Credential dump found on paste site"
+                ),
+                DataBreach(
+                    scan_id=scan_email.id,
+                    breach_name="ShopSphere Exposure 2020",
+                    breach_domain="shopsphere.example.com",
+                    leak_date="2020-11-02",
+                    exposed_data_classes=["Emails", "Passwords", "Physical Address"],
+                    record_count=12500000,
+                    severity="HIGH",
+                    source_note="E-commerce platform database breach"
+                )
+            ])
+            db.flush()
+
+            # Compute and save snapshot for Email
+            email_snapshot_data = {
+                "scan": {
+                    "id": str(scan_email.id),
+                    "case_id": str(case2.id),
+                    "entity_id": str(ent_email.id),
+                    "entity_type": "email",
+                    "entity_value": "culprit@harass.com",
+                    "status": "COMPLETED",
+                    "started_at": scan_email.started_at.isoformat(),
+                    "completed_at": scan_email.completed_at.isoformat()
+                },
+                "social_profiles": [
+                    {"platform": "Spotify", "username": "culprit@harass.com", "profile_url": "", "exists_confidence": "LIKELY", "profile_picture_url": None, "bio": None, "location_hint": None, "timezone_hint": None, "follower_count": None, "follower_count_delta": None, "bio_changed": False, "location_changed": False, "is_verified": False},
+                    {"platform": "Netflix", "username": "culprit@harass.com", "profile_url": "", "exists_confidence": "LIKELY", "profile_picture_url": None, "bio": None, "location_hint": None, "timezone_hint": None, "follower_count": None, "follower_count_delta": None, "bio_changed": False, "location_changed": False, "is_verified": False},
+                    {"platform": "Amazon", "username": "culprit@harass.com", "profile_url": "", "exists_confidence": "UNCERTAIN", "profile_picture_url": None, "bio": None, "location_hint": None, "timezone_hint": None, "follower_count": None, "follower_count_delta": None, "bio_changed": False, "location_changed": False, "is_verified": False}
+                ],
+                "breaches": [
+                    {"breach_name": "DataVault Leak 2021", "breach_domain": "datavault.example.com", "leak_date": "2021-03-15", "exposed_data_classes": ["Emails", "Passwords", "Financial Credentials"], "record_count": 4200000, "severity": "CRITICAL", "source_note": "Credential dump found on paste site"},
+                    {"breach_name": "ShopSphere Exposure 2020", "breach_domain": "shopsphere.example.com", "leak_date": "2020-11-02", "exposed_data_classes": ["Emails", "Passwords", "Physical Address"], "record_count": 12500000, "severity": "HIGH", "source_note": "E-commerce platform database breach"}
+                ],
+                "risk_summary": {
+                    "total_breaches": 2,
+                    "critical_breaches": 1,
+                    "platforms_found": 3,
+                    "overall_risk_level": "CRITICAL"
+                }
+            }
+            db.add(OsintSnapshot(scan_id=scan_email.id, case_id=case2.id, entity_id=ent_email.id, snapshot_data=email_snapshot_data))
+
+            # B. Person scan (fake_profile_123) -> returns bio with unconfirmed pivots
+            scan_profile = OsintScan(
+                case_id=case2.id,
+                entity_id=ent_profile.id,
+                entity_type="person",
+                entity_value="Fake_Profile_123",
+                status="COMPLETED",
+                started_at=datetime.utcnow(),
+                completed_at=datetime.utcnow()
+            )
+            db.add(scan_profile)
+            db.flush()
+
+            bio_text = "Coffee addict & code writer. Contact me at partner_in_crime@steal.com or call +919999988888 @another_alias"
+            sp = SocialProfile(
+                scan_id=scan_profile.id,
+                platform="GitHub",
+                username="fake_profile_123",
+                profile_url="https://github.com/fake_profile_123",
+                profile_picture_url="https://api.dicebear.com/7.x/initials/svg?seed=fake_profile_123",
+                bio=bio_text,
+                location_hint="India",
+                timezone_hint="IST",
+                follower_count=137,
+                is_verified=False,
+                exists_confidence="CONFIRMED"
+            )
+            db.add(sp)
+            db.flush()
+
+            # Save Snapshot for Person
+            person_snapshot_data = {
+                "scan": {
+                    "id": str(scan_profile.id),
+                    "case_id": str(case2.id),
+                    "entity_id": str(ent_profile.id),
+                    "entity_type": "person",
+                    "entity_value": "Fake_Profile_123",
+                    "status": "COMPLETED",
+                    "started_at": scan_profile.started_at.isoformat(),
+                    "completed_at": scan_profile.completed_at.isoformat()
+                },
+                "social_profiles": [
+                    {
+                        "platform": "GitHub",
+                        "username": "fake_profile_123",
+                        "profile_url": "https://github.com/fake_profile_123",
+                        "profile_picture_url": "https://api.dicebear.com/7.x/initials/svg?seed=fake_profile_123",
+                        "bio": bio_text,
+                        "location_hint": "India",
+                        "timezone_hint": "IST",
+                        "follower_count": 137,
+                        "follower_count_delta": None,
+                        "bio_changed": False,
+                        "location_changed": False,
+                        "is_verified": False,
+                        "exists_confidence": "CONFIRMED"
+                    }
+                ],
+                "breaches": [],
+                "risk_summary": {
+                    "total_breaches": 0,
+                    "critical_breaches": 0,
+                    "platforms_found": 1,
+                    "overall_risk_level": "LOW"
+                }
+            }
+            db.add(OsintSnapshot(scan_id=scan_profile.id, case_id=case2.id, entity_id=ent_profile.id, snapshot_data=person_snapshot_data))
+
+            # C. Seed unconfirmed pivot entities in case_entities & AiCitations linked to scan_profile
+            # email pivot: partner_in_crime@steal.com
+            pivot_email = CaseEntity(
+                case_id=case2.id,
+                entity_type="email",
+                canonical_value="partner_in_crime@steal.com",
+                display_value="partner_in_crime@steal.com",
+                confidence=0.95,
+                status="unconfirmed"
+            )
+            # phone pivot: +919999988888
+            pivot_phone = CaseEntity(
+                case_id=case2.id,
+                entity_type="phone",
+                canonical_value="919999988888",
+                display_value="+919999988888",
+                confidence=0.85,
+                status="unconfirmed"
+            )
+            # person pivot: @another_alias
+            pivot_alias = CaseEntity(
+                case_id=case2.id,
+                entity_type="person",
+                canonical_value="another_alias",
+                display_value="@another_alias",
+                confidence=0.80,
+                status="unconfirmed"
+            )
+            db.add_all([pivot_email, pivot_phone, pivot_alias])
+            db.flush()
+
+            # --- Phase 10A: Timeline seeds for Case 2 ---
+            # AI-synthesized chronological timeline events
+            from app.models.timeline import TimelineEvent
+
+            tl_event_1 = TimelineEvent(
+                case_id=case2.id,
+                occurred_at=datetime(2026, 7, 1, 10, 30),
+                event_type="complaint_filed",
+                title="Victim Files Complaint",
+                description="Inspector Asha Patel receives a written complaint from the victim reporting sustained online harassment and identity theft from account @fake_profile_123.",
+                location="Ahmedabad, GJ",
+                confidence=1.0,
+                ai_generated=False,
+                source_ref={"type": "complaint", "id": str(complaint2.id)},
+            )
+            tl_event_2 = TimelineEvent(
+                case_id=case2.id,
+                occurred_at=datetime(2026, 7, 2, 14, 15),
+                event_type="entity_extracted",
+                title="Suspect Identifiers Extracted by AI",
+                description="Gemini Flash extracted phone 9876543210, email culprit@harass.com, and social handle @fake_profile_123 from the Gujarati image complaint with high confidence.",
+                confidence=0.95,
+                ai_generated=True,
+                source_ref={"type": "complaint", "id": str(complaint2.id)},
+            )
+            tl_event_3 = TimelineEvent(
+                case_id=case2.id,
+                occurred_at=datetime(2026, 7, 5, 9, 0),
+                event_type="request_dispatched",
+                title="Legal Request Sent to Meta Platforms",
+                description="Inspector Asha Patel dispatched a legal preservation request to Meta Platforms Inc. for subscriber data and IP access logs for @fake_profile_123.",
+                location=None,
+                confidence=None,
+                ai_generated=False,
+                source_ref={"type": "legal_request", "id": str(req_platform.id)},
+            )
+            tl_event_4 = TimelineEvent(
+                case_id=case2.id,
+                occurred_at=datetime(2026, 7, 7, 11, 45),
+                event_type="response_received",
+                title="Meta Platforms Responds with Subscriber Data",
+                description="Meta Platforms Inc. confirmed the harassing account registered with phone 9876543210 and email culprit@harass.com, accessing from IP 103.88.22.14 during the incident window.",
+                confidence=0.98,
+                ai_generated=True,
+                source_ref={"type": "provider_response", "id": str(resp_platform.id)},
+            )
+            # Officer note event (manually entered, no AI confidence)
+            tl_event_note = TimelineEvent(
+                case_id=case2.id,
+                occurred_at=datetime(2026, 7, 8, 8, 0),
+                event_type="officer_note",
+                title="IO Observation: Suspect Likely in Ahmedabad",
+                description="Based on Meta's IP geolocation data (103.88.22.14), the suspect device was operating from the Ahmedabad metropolitan area during the harassment window. Recommend cross-referencing CDR for confirmation.",
+                location="Ahmedabad, GJ",
+                confidence=None,
+                ai_generated=False,
+                source_ref={"type": "officer_note"},
+            )
+            # CCTV frame event (AI-analyzed image pin)
+            tl_cctv_evidence = EvidenceFile(
+                case_id=case2.id,
+                file_path="uploads/evidence/demo_cctv_frame.jpg",
+                file_type="image",
+                ai_tags={
+                    "forensic_description": "CCTV capture from ATM premises on 2026-07-02 showing a person matching the suspect's partial description.",
+                    "tags": ["cctv", "atm", "partial-match"],
+                    "confidence": 0.72,
+                    "description": "Partial face visible, dark jacket, timestamp 14:22:05 IST.",
+                    "flagged_elements": ["partial_face_match", "dark_jacket", "14:22:05_IST"],
+                }
+            )
+            db.add(tl_cctv_evidence)
+            db.flush()
+
+            tl_event_cctv = TimelineEvent(
+                case_id=case2.id,
+                occurred_at=datetime(2026, 7, 2, 14, 22),
+                event_type="cctv_frame",
+                title="CCTV Frame Pinned: ATM Vicinity",
+                description="Gemini Vision analyzed a CCTV capture from the ATM near the victim's residence. A person matching the suspect's partial description (dark jacket) was detected at 14:22:05 IST.",
+                location="ATM, Paldi Road, Ahmedabad",
+                confidence=0.72,
+                ai_generated=True,
+                evidence_file_id=tl_cctv_evidence.id,
+                source_ref={"type": "cctv_frame", "evidence_file_id": str(tl_cctv_evidence.id)},
+                cctv_analysis={
+                    "persons_detected": 1,
+                    "vehicles_detected": 0,
+                    "forensic_flags": ["partial_face_detected", "dark_jacket"],
+                    "timestamp_in_video": "00:00:05",
+                    "confidence_reason": "Partial face match; insufficient for positive ID. Refer for forensic enhancement."
+                }
+            )
+            db.add_all([tl_event_1, tl_event_2, tl_event_3, tl_event_4, tl_event_note, tl_event_cctv])
+            db.flush()
+            record(db, case_id=case2.id, user_id=users["io"].id, action="timeline.seeded", detail={"event_count": 6, "source": "phase_10a_seed"})
+
+            # --- Phase 10C: Seeded video evidence fixture for Case 2 ---
+            # Demonstrates the video analysis report without requiring an actual upload
+            video_evidence_seed = EvidenceFile(
+                case_id=case2.id,
+                file_path="uploads/evidence/demo_cctv_clip.mp4",
+                file_type="video",
+                ai_tags={
+                    "video_status": "COMPLETED",
+                    "progress_percentage": 100,
+                    "error_detail": None,
+                    "original_md5": "a1b2c3d4e5f6789012345678abcdef01",
+                    "duration_seconds": 45,
+                    "summary": "45-second CCTV footage from ATM vicinity on 2026-07-02. One person matching partial suspect description detected at timestamp 00:00:05.",
+                    "crime_summary": "Footage shows a dark-jacketed individual near the ATM at 14:22 IST on the same date as the harassment incident. Partial face detected; recommend forensic enhancement before court submission.",
+                    "risk_evaluation": "MEDIUM",
+                    "timeline": [
+                        {"timestamp_in_video": "00:00:05", "timestamp_seconds": 5.0, "description": "Individual enters ATM vestibule. Dark jacket, obscured face."},
+                        {"timestamp_in_video": "00:00:18", "timestamp_seconds": 18.0, "description": "Individual uses ATM keypad. Hand visible but face not captured."},
+                        {"timestamp_in_video": "00:00:40", "timestamp_seconds": 40.0, "description": "Individual exits vestibule and moves off-camera to the south."},
+                    ],
+                    "entities_detected": ["Person:dark_jacket", "ATM", "Timestamp:14:22:05"]
+                }
+            )
+            db.add(video_evidence_seed)
+            db.flush()
+            record(db, case_id=case2.id, user_id=users["io"].id, action="video.analysis_completed", detail={"evidence_id": str(video_evidence_seed.id), "source": "phase_10c_seed"})
+
+            # AiCitations for pivots
+            db.add_all([
+                AiCitation(
+                    case_id=case2.id,
+                    output_type="case_entity",
+                    output_id=pivot_email.id,
+                    source_type="osint_scan",
+                    source_id=str(scan_profile.id),
+                    excerpt=f"Extracted from GitHub bio: \"{bio_text}\"",
+                    locator="GitHub:bio",
+                    confidence=0.95
+                ),
+                AiCitation(
+                    case_id=case2.id,
+                    output_type="case_entity",
+                    output_id=pivot_phone.id,
+                    source_type="osint_scan",
+                    source_id=str(scan_profile.id),
+                    excerpt=f"Extracted from GitHub bio: \"{bio_text}\"",
+                    locator="GitHub:bio",
+                    confidence=0.85
+                ),
+                AiCitation(
+                    case_id=case2.id,
+                    output_type="case_entity",
+                    output_id=pivot_alias.id,
+                    source_type="osint_scan",
+                    source_id=str(scan_profile.id),
+                    excerpt=f"Extracted from GitHub bio: \"{bio_text}\"",
+                    locator="GitHub:bio",
+                    confidence=0.80
+                )
+            ])
             db.flush()
 
         if not db.scalar(select(LegalSection).limit(1)):

@@ -15,6 +15,8 @@ from app.models.sop import SopChunk, SopDocument
 from app.models.summary import CaseSummary
 from app.models.user import User
 from app.models.copilot import AiCitation, CopilotMessage
+from app.models.timeline import TimelineEvent
+from app.models.osint import OsintScan, SocialProfile, DataBreach, OsintSnapshot
 
 __all__ = [
     "AiCitation",
@@ -26,6 +28,7 @@ __all__ = [
     "CaseWorkflowState",
     "Complaint",
     "CopilotMessage",
+    "DataBreach",
     "EntityRelationship",
     "EvidenceFile",
     "EvidenceMarker",
@@ -35,14 +38,18 @@ __all__ = [
     "LegalCode",
     "LegalRequest",
     "LegalSection",
+    "OsintScan",
+    "OsintSnapshot",
     "PathStep",
     "ProviderResponse",
     "ProviderType",
     "RequestStatus",
+    "SocialProfile",
     "SopChunk",
     "SopDocument",
     "SourceType",
     "StepStatus",
+    "TimelineEvent",
     "User",
     "UserRole",
 ]

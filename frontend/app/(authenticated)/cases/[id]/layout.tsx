@@ -17,6 +17,7 @@ import {
   Radar,
   Network,
   Search,
+  Clock,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const TABS = [
   { label: "Requests", href: "requests", icon: Mail, color: "text-accent border-accent", group: "Work" },
   { label: "Responses", href: "responses", icon: Activity, color: "text-success border-success", group: "Work" },
   { label: "Evidence", href: "evidence", icon: Camera, color: "text-primary border-primary", group: "Evidence" },
+  { label: "Timeline", href: "timeline", icon: Clock, color: "text-violet border-violet", group: "Record" },
   { label: "Summary", href: "summary", icon: Radar, color: "text-info border-info", group: "Record" },
   { label: "Audit", href: "audit", icon: Network, color: "text-rose border-rose", group: "Record" },
 ] as const;

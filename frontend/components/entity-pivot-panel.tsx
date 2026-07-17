@@ -16,6 +16,7 @@ import type {
   EntityRelationshipOut,
   RelatedCaseOut,
 } from "@/lib/types";
+import { OsintEnrichmentPanel } from "@/components/osint-enrichment-panel";
 
 interface EntityPivotPanelProps {
   entities: CaseEntityOut[];
@@ -301,6 +302,15 @@ export function EntityPivotPanel({
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* OSINT Enrichment Module */}
+            <div className="pt-4 border-t border-border/60">
+              <OsintEnrichmentPanel
+                caseId={selectedEntity.case_id}
+                entity={selectedEntity}
+                onPivotAction={onSync}
+              />
             </div>
           </>
         ) : (

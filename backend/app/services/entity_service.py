@@ -192,30 +192,49 @@ def sync_case_entities(db: Session, case_id: uuid.UUID) -> list[CaseEntity]:
         # confidence is average confidence
         avg_conf = sum(m["confidence"] for m in mentions) / len(mentions)
 
+        is_new = False
         if (ent_type, canonical) in existing_map:
             ent = existing_map[(ent_type, canonical)]
             ent.display_value = display
             ent.confidence = avg_conf
             ent.last_seen_at = datetime.utcnow()
         else:
+            is_new = True
             ent = CaseEntity(
                 case_id=case_id,
                 entity_type=ent_type,
                 canonical_value=canonical,
                 display_value=display,
                 confidence=avg_conf,
+                status="confirmed",
                 first_seen_at=datetime.utcnow(),
                 last_seen_at=datetime.utcnow(),
             )
             db.add(ent)
             db.flush()
 
+        # Enqueue and trigger OSINT scan on new confirmed entities of supported types
+        if is_new and ent.entity_type.lower() in ("email", "phone", "person", "username", "social_handle"):
+            from app.services import osint_service
+            try:
+                scan = osint_service.enqueue_osint_scan(
+                    db,
+                    case_id=case_id,
+                    entity_id=ent.id,
+                    entity_type=ent.entity_type,
+                    entity_value=ent.canonical_value
+                )
+                osint_service.trigger_scan_async(scan.id)
+            except Exception as osint_err:
+                logger.error("Failed to auto-trigger OSINT scan on sync: %s", osint_err)
+
         active_ids.add(ent.id)
         synced_entities.append(ent)
 
     # Delete case entities that are no longer referenced (optional, but keep for consistency)
+    # Only delete confirmed entities that are no longer referenced to avoid clearing unconfirmed pivots
     for key, ent in existing_map.items():
-        if ent.id not in active_ids:
+        if ent.status == "confirmed" and ent.id not in active_ids:
             # First delete relationships pointing to it
             db.execute(
                 delete(EntityRelationship).where(

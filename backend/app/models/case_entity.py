@@ -18,6 +18,7 @@ class CaseEntity(UuidPkMixin, Base):
     canonical_value: Mapped[str] = mapped_column(String(255), nullable=False)
     display_value: Mapped[str] = mapped_column(String(255), nullable=False)
     confidence: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    status: Mapped[str] = mapped_column(String(64), default="confirmed", nullable=False)  # confirmed, unconfirmed, ignored
     first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

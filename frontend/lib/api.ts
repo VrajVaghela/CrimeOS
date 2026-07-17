@@ -18,6 +18,9 @@ import type {
   CaseSectionOut,
   CommandCenterOut,
   CopilotMessageOut,
+  VideoUploadResponse,
+  VideoStatusResponse,
+  VideoReportResponse,
 } from "@/lib/types";
 
 
@@ -415,6 +418,157 @@ export async function promoteResponseRow(
     method: "POST",
   });
 }
+
+
+// Timeline Agent
+import type { TimelineEventOut, CctvPinOut } from "@/lib/types";
+
+export async function getCaseTimeline(caseId: string): Promise<TimelineEventOut[]> {
+  return request<TimelineEventOut[]>(`/timeline/cases/${caseId}`);
+}
+
+export async function uploadCctvFrame(
+  caseId: string,
+  file: File
+): Promise<CctvPinOut> {
+  const form = new FormData();
+  form.append("file", file);
+  return request<CctvPinOut>(`/timeline/cases/${caseId}/cctv`, {
+    method: "POST",
+    body: form,
+  });
+}
+
+export async function addTimelineNote(
+  caseId: string,
+  data: { title: string; description: string; occurred_at: string; location: string | null }
+): Promise<TimelineEventOut> {
+  return request<TimelineEventOut>(`/timeline/cases/${caseId}/notes`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// Phase 10B: OSINT API Calls
+import type { OsintScanResultResponse } from "@/lib/types";
+
+export async function getEntityOsintResult(
+  caseId: string,
+  entityId: string
+): Promise<OsintScanResultResponse> {
+  return request<OsintScanResultResponse>(`/cases/${caseId}/osint/${entityId}`);
+}
+
+export async function triggerEntityOsint(
+  caseId: string,
+  entityId: string
+): Promise<{ status: string; scan_id: string }> {
+  return request<{ status: string; scan_id: string }>(`/cases/${caseId}/osint/${entityId}/trigger`, {
+    method: "POST",
+  });
+}
+
+export async function confirmPivot(
+  caseId: string,
+  entityId: string
+): Promise<{
+  success: boolean;
+  entity: { id: string; status: string };
+  scan: { scan_id: string; status: string } | null;
+}> {
+  return request<{
+    success: boolean;
+    entity: { id: string; status: string };
+    scan: { scan_id: string; status: string } | null;
+  }>(`/cases/${caseId}/osint/pivots/${entityId}/confirm`, {
+    method: "POST",
+  });
+}
+
+export async function ignorePivot(
+  caseId: string,
+  entityId: string
+): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>(`/cases/${caseId}/osint/pivots/${entityId}/ignore`, {
+    method: "POST",
+  });
+}
+
+export async function exportDossier(caseId: string, entityId: string): Promise<string> {
+  const token = getStoredToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${API_URL}/cases/${caseId}/osint/${entityId}/export`, {
+    headers,
+  });
+  if (!response.ok) {
+    throw new Error("Failed to export dossier");
+  }
+  return response.text();
+}
+
+// Phase 10C: Video analysis API client helpers
+export function uploadVideo(
+  caseId: string,
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<VideoUploadResponse> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append("case_id", caseId);
+    formData.append("file", file);
+
+    xhr.upload.addEventListener("progress", (event) => {
+      if (event.lengthComputable && onProgress) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        onProgress(percent);
+      }
+    });
+
+    xhr.addEventListener("load", () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response: VideoUploadResponse = JSON.parse(xhr.responseText);
+          resolve(response);
+        } catch {
+          reject(new Error("Failed to parse upload response"));
+        }
+      } else {
+        try {
+          const error = JSON.parse(xhr.responseText);
+          reject(new Error(error.detail || `Upload failed with status ${xhr.status}`));
+        } catch {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      }
+    });
+
+    xhr.addEventListener("error", () => {
+      reject(new Error("Network error during upload"));
+    });
+
+    xhr.open("POST", `${API_URL}/api/v1/video/analyze`);
+    
+    const token = getStoredToken();
+    if (token) {
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    }
+    
+    xhr.send(formData);
+  });
+}
+
+export async function pollVideoStatus(taskId: string): Promise<VideoStatusResponse> {
+  return request<VideoStatusResponse>(`/api/v1/video/status/${taskId}`);
+}
+
+export async function getVideoReport(caseId: string): Promise<VideoReportResponse> {
+  return request<VideoReportResponse>(`/api/v1/video/report/${caseId}`);
+}
+
 
 
 

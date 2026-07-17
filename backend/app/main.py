@@ -21,6 +21,9 @@ from app.routers import (
     command_center,
     entities,
     copilot,
+    timeline,
+    osint,
+    video,
 )
 from app.schemas.common import MessageOut
 
@@ -52,6 +55,9 @@ app.include_router(evidence.router)
 app.include_router(command_center.router)
 app.include_router(entities.router)
 app.include_router(copilot.router)
+app.include_router(timeline.router)
+app.include_router(osint.router)
+app.include_router(video.router)
 
 
 

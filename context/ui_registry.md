@@ -172,23 +172,23 @@ These are planned native ports of upstream behavior. Do not copy the separate
 Go/Vite component implementations or create parallel application shells. Mark
 an entry BUILT only after the implementation and its checkpoint pass.
 
-### TimelineWorkspace — PLANNED (Phase 10A)
+### TimelineWorkspace — BUILT (Phase 10A)
 - Path: components/timeline-workspace.tsx
 - Purpose: chronological AI/officer timeline with CCTV pins, source references, confidence, and note actions
 - Props: `caseId: string`, `events: TimelineEventOut[]`, callbacks for note/CCTV actions
 - Used in: `app/(authenticated)/cases/[id]/timeline/page.tsx`
 
-### OsintEnrichmentPanel — PLANNED (Phase 10B)
+### OsintEnrichmentPanel — BUILT (Phase 10B)
 - Path: components/osint-enrichment-panel.tsx
-- Purpose: case-entity OSINT risk summary with social profiles, breach exposure, source chips, and unconfirmed pivots
-- Props: `caseId: string`, `entityId: string`, `result?: EntityOsintResultOut`, loading/error callbacks
-- Used in: entity pivot/case workspace
+- Purpose: case-entity OSINT risk summary with social profiles, breach exposure, risk level banners, and unconfirmed pivots
+- Props: `caseId: string`, `entity: CaseEntityOut`, `onPivotAction: () => Promise<void>`
+- Used in: `EntityPivotPanel` (`components/entity-pivot-panel.tsx`)
 
-### VideoEvidenceWorkspace — PLANNED (Phase 10C)
+### VideoEvidenceWorkspace — BUILT (Phase 10C)
 - Path: components/video-evidence-workspace.tsx
 - Purpose: secure video upload/progress plus native video playback synchronized to timestamped incident events
-- Props: `caseId: string`, upload/status/report callbacks
-- Used in: `app/(authenticated)/cases/[id]/evidence/page.tsx` or a case-scoped video route
+- Props: `evidence: EvidenceOut`, `onRefresh: () => void`
+- Used in: `app/(authenticated)/cases/[id]/evidence/page.tsx`
 
 ## Phase 9 — Ferrari Design Upgrades (not new components, updated existing)
 

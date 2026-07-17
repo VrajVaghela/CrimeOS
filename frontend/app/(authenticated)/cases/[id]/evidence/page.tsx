@@ -21,9 +21,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getEvidence, uploadEvidence, ApiError } from "@/lib/api";
+import { getEvidence, uploadEvidence, uploadVideo, ApiError } from "@/lib/api";
 import type { EvidenceOut } from "@/lib/types";
 import { EvidenceReviewWorkspace } from "@/components/evidence-review-workspace";
+import { VideoEvidenceWorkspace } from "@/components/video-evidence-workspace";
 
 export default function EvidencePage() {
   const params = useParams();
@@ -40,14 +41,16 @@ export default function EvidencePage() {
     if (caseId) void loadEvidence();
   }, [caseId]);
 
-  async function loadEvidence() {
+  async function loadEvidence(autoSelectId?: string) {
     setLoading(true);
     setError(null);
     try {
       const data = await getEvidence(caseId);
       setEvidenceList(data);
-      // If an item was selected, update its data in case markers changed
-      if (selectedEvidence) {
+      if (autoSelectId) {
+        const item = data.find((e) => e.id === autoSelectId);
+        if (item) setSelectedEvidence(item);
+      } else if (selectedEvidence) {
         const updated = data.find((e) => e.id === selectedEvidence.id);
         if (updated) setSelectedEvidence(updated);
       }
@@ -65,12 +68,12 @@ export default function EvidencePage() {
     // Validate allowed mime types: images, audio, video, documents
     const isImage = file.type.startsWith("image/");
     const isAudio = file.type.startsWith("audio/");
-    const isVideo = file.type.startsWith("video/");
+    const isVideo = file.type.startsWith("video/") || file.name.endsWith(".mp4") || file.name.endsWith(".mov") || file.name.endsWith(".avi");
     const isDoc = file.type === "application/pdf" || file.type.startsWith("text/") || file.name.endsWith(".txt") || file.name.endsWith(".pdf");
 
     if (!isImage && !isAudio && !isVideo && !isDoc) {
       setError(
-        "Supported file formats for AI forensic analysis are images (PNG/JPG), audio (MP3/WAV), video (MP4), and documents (PDF/TXT)."
+        "Supported file formats for AI forensic analysis are images (PNG/JPG), audio (MP3/WAV), video (MP4/MOV/AVI), and documents (PDF/TXT)."
       );
       return;
     }
@@ -78,9 +81,14 @@ export default function EvidencePage() {
     setUploading(true);
     setError(null);
     try {
-      const uploaded = await uploadEvidence(caseId, file);
-      setEvidenceList((prev) => [uploaded, ...prev]);
-      setSelectedEvidence(uploaded); // Auto-open uploaded file in workspace
+      if (isVideo) {
+        const res = await uploadVideo(caseId, file);
+        await loadEvidence(res.case_id);
+      } else {
+        const uploaded = await uploadEvidence(caseId, file);
+        setEvidenceList((prev) => [uploaded, ...prev]);
+        setSelectedEvidence(uploaded); // Auto-open uploaded file in workspace
+      }
       toastSuccess(file.name);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Evidence upload failed");
@@ -135,12 +143,21 @@ export default function EvidencePage() {
           <ChevronLeft className="h-4 w-4" /> Back to Evidence Gallery / गैलरी पर वापस जाएं
         </Button>
 
-        <EvidenceReviewWorkspace
-          evidence={selectedEvidence}
-          onRefresh={() => {
-            void loadEvidence();
-          }}
-        />
+        {selectedEvidence.file_type === "video" ? (
+          <VideoEvidenceWorkspace
+            evidence={selectedEvidence}
+            onRefresh={() => {
+              void loadEvidence();
+            }}
+          />
+        ) : (
+          <EvidenceReviewWorkspace
+            evidence={selectedEvidence}
+            onRefresh={() => {
+              void loadEvidence();
+            }}
+          />
+        )}
       </div>
     );
   }

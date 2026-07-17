@@ -124,11 +124,22 @@ Planning baseline: `vraj` remains canonical; current uncommitted work is protect
 - [x] Read and compare upstream branch histories (`origin/main`, `origin/crimeos/digitalfootprint`, `origin/crimeos/videoAnalyzer`)
 - [x] Document selective-port architecture, merge order, conflict policy, and acceptance checkpoints in `architecture.md` and `build_plan.md`
 - [x] 10.0 Protected baseline: preserve/commit current `vraj` work before merge operations
-- [ ] 10A Timeline Agent + CCTV pinning: native integration of `origin/main` timeline feature
-- [ ] 10A checkpoint: timeline synthesis, officer note, CCTV pin, provenance, and audit verified
-- [ ] 10B OSINT enrichment: native FastAPI/PostgreSQL/Next.js port of digital-footprint behavior
-- [ ] 10B checkpoint: deterministic entity risk summary, sources, unconfirmed pivots, and audit verified
-- [ ] 10C Video evidence analysis: native case-scoped upload, background progress, report, and seekable timeline
-- [ ] 10C checkpoint: video workflow and audit verified without Celery/Redis/Mongo or a duplicate app
-- [ ] 10D Full integration verification: golden path plus one intelligence moment from a fresh seed
-- [ ] 10D checkpoint: all retained `vraj` features and selected upstream features pass smoke/review checks
+- [x] 10A Timeline Agent + CCTV pinning: native integration of `origin/main` timeline feature
+- [x] 10A checkpoint: timeline synthesis, officer note, CCTV pin, provenance, and audit verified
+- [x] 10B OSINT enrichment: native FastAPI/PostgreSQL/Next.js port of digital-footprint behavior
+- [x] 10B checkpoint: deterministic entity risk summary, sources, unconfirmed pivots, and audit verified
+- [x] 10C Video evidence analysis: native case-scoped upload, background progress, report, and seekable timeline
+- [x] 10C checkpoint: video workflow and audit verified without Celery/Redis/Mongo or a duplicate app
+- [x] 10D Full integration verification: golden path plus one intelligence moment from a fresh seed
+- [x] 10D checkpoint: all retained `vraj` features and selected upstream features pass smoke/review checks
+
+### 10D Verification Summary (2026-07-18)
+- Frontend: `next build` ✅ zero errors, 14 routes compiled cleanly
+- TypeScript: `tsc --noEmit` ✅ zero errors
+- Backend: `python -c "import app.main"` ✅ all routers import cleanly (auth, cases, ingestion, paths, requests, responses, summaries, audit, mock_provider, mock_cctns, evidence, command_center, entities, copilot, timeline, osint, video)
+- Raw fetch() audit: ✅ all `fetch()` calls are inside `lib/api.ts` (generic wrapper + OSINT dossier export)
+- Route provenance review: ✅ every Phase 10 router uses `get_current_user`, no business logic in HTTP layer
+- Phase 10 seeds added: 6 timeline events + 1 CCTV evidence + 1 video fixture for Case 2
+- DEMO_SCRIPT updated with 10A/10B/10C moments + fresh-seed smoke checklist
+- ui_registry.md: Phase 10 components marked BUILT
+- memory.md written at project root

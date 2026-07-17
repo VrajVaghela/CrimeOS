@@ -127,6 +127,7 @@ export interface CaseEntityOut {
   canonical_value: string;
   display_value: string;
   confidence: number;
+  status: string; // confirmed, unconfirmed, ignored
   first_seen_at: string;
   last_seen_at: string;
 }
@@ -220,6 +221,14 @@ export interface EvidenceOut {
     tags: string[];
     confidence: number;
     flagged_features?: string[];
+    video_status?: string;
+    progress_percentage?: number;
+    error_detail?: string | null;
+    original_md5?: string;
+    summary?: string | null;
+    crime_summary?: string | null;
+    risk_evaluation?: string | null;
+    timeline?: any[];
   };
   uploaded_at: string;
   markers: EvidenceMarkerOut[];
@@ -314,6 +323,168 @@ export interface ResponseCorrelationOut {
   linked_path_step_title: string;
   is_promoted: boolean;
 }
+
+
+// Timeline Agent types
+
+export type TimelineEventType =
+  | "complaint_filed"
+  | "entity_extracted"
+  | "path_generated"
+  | "step_completed"
+  | "request_dispatched"
+  | "response_received"
+  | "cctv_frame"
+  | "officer_note";
+
+export interface TimelineEventOut {
+  id: string;
+  case_id: string;
+  occurred_at: string;
+  event_type: TimelineEventType;
+  title: string;
+  description: string;
+  location: string | null;
+  confidence: number | null;
+  source_ref: Record<string, unknown>;
+  ai_generated: boolean;
+  evidence_file_id: string | null;
+  cctv_analysis: CctvAnalysisDetail | null;
+  created_at: string;
+}
+
+export interface CctvAnalysisDetail {
+  detected_timestamp: string;
+  location_description: string;
+  persons_detected: string[];
+  vehicles_detected: string[];
+  forensic_flags: string[];
+  confidence: number;
+}
+
+export interface CctvPinOut {
+  event: TimelineEventOut;
+  analysis: CctvAnalysisDetail;
+}
+
+export interface OfficerNoteIn {
+  title: string;
+  description: string;
+  occurred_at: string; // ISO 8601
+  location?: string | null;
+}
+
+// Phase 10B: OSINT types
+export type OsintScanStatus = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+
+export interface OsintScanMetadata {
+  id: string;
+  case_id: string;
+  entity_id: string;
+  entity_type: string;
+  entity_value: string;
+  status: OsintScanStatus;
+  started_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OsintSocialProfile {
+  platform: string;
+  username: string;
+  profile_url: string;
+  profile_picture_url: string | null;
+  bio: string | null;
+  location_hint: string | null;
+  timezone_hint: string | null;
+  follower_count: number | null;
+  follower_count_delta: number | null;
+  bio_changed: boolean;
+  location_changed: boolean;
+  is_verified: boolean;
+  exists_confidence: "CONFIRMED" | "LIKELY" | "UNCERTAIN";
+}
+
+export interface OsintDataBreach {
+  breach_name: string;
+  breach_domain: string | null;
+  leak_date: string | null;
+  exposed_data_classes: string[];
+  record_count: number | null;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+  source_note: string | null;
+}
+
+export interface OsintRiskSummary {
+  total_breaches: number;
+  critical_breaches: number;
+  platforms_found: number;
+  overall_risk_level: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+}
+
+export interface OsintDiscoveredFootprint {
+  entity_id: string;
+  entity_type: string;
+  display_value: string;
+  confidence: number;
+  source_field: string;
+  source_snippet: string | null;
+}
+
+export interface OsintScanResult {
+  scan: OsintScanMetadata;
+  social_profiles: OsintSocialProfile[];
+  breaches: OsintDataBreach[];
+  risk_summary: OsintRiskSummary;
+  discovered_footprints: OsintDiscoveredFootprint[];
+}
+
+export interface OsintScanResultResponse {
+  osint: OsintScanResult;
+}
+
+// Phase 10C: Video evidence analysis
+export interface VideoUploadResponse {
+  case_id: string;
+  task_id: string;
+  status: string;
+}
+
+export interface VideoStatusResponse {
+  task_id: string;
+  case_id: string | null;
+  celery_state: string;
+  video_case_status: string | null;
+  progress_percentage: number;
+  error_detail: string | null;
+}
+
+export interface VideoTimelineEntry {
+  timestamp_in_video: string;
+  timestamp_seconds: number;
+  description: string;
+  entities_detected: string[] | null;
+  risk_level: string;
+  sequence_order: number;
+}
+
+export interface VideoReportResponse {
+  case_id: string;
+  filename: string;
+  original_md5: string;
+  duration_seconds: number | null;
+  file_size_bytes: number;
+  status: string;
+  risk_evaluation: string | null;
+  summary: string | null;
+  crime_summary: string | null;
+  created_at: string;
+  timeline: VideoTimelineEntry[];
+  chain_valid: boolean;
+}
+
 
 
 

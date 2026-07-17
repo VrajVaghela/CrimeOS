@@ -131,9 +131,71 @@ To show the advanced analytical and adaptive capabilities of Crime OS AI, naviga
    * Note the original Gujarati transcript next to the English translation.
    * Observe the **Evidence Marker** bounding box linking the transcript segment `"You won't be spared tonight"` to `@fake_profile_123` with a verification badge.
 7. **Case-Scoped Cited Copilot**:
-   * Return to the **Overview** (Command Center) tab.
-   * In the **Case Copilot Panel** on the right, read the pre-seeded conversation log:
-     * *IO Question*: `"What did Meta's response reveal about the suspect profile?"`
-     * *AI Answer*: Shows the registered email/phone and IP address highlighted in a glowing electric-blue card.
-     * *Provenance*: Under the answer, click the **Source Chip** linking directly to the Meta Platforms response record to show strict citation grounding.
+   - Return to the **Overview** (Command Center) tab.
+   - In the **Case Copilot Panel** on the right, read the pre-seeded conversation log:
+     - *IO Question*: `"What did Meta's response reveal about the suspect profile?"`
+     - *AI Answer*: Shows the registered email/phone and IP address highlighted in a glowing electric-blue card.
+     - *Provenance*: Under the answer, click the **Source Chip** linking directly to the Meta Platforms response record to show strict citation grounding.
 
+
+---
+
+### 🗓️ Part 10: Phase 10 Intelligence Moments (Selective Upstream Features)
+
+> Demonstrate the Timeline Agent, OSINT enrichment, and Video evidence analysis all within ERH26-CYB-0002.
+
+#### 10A — Timeline Agent & CCTV Pinning
+1. **Timeline tab**: Click the **Timeline** tab in Case 2's navigation.
+   - Observe the **Chronological Case Timeline** pre-populated with 6 events ranging from 2026-07-01 to 2026-07-08.
+   - Distinguish AI-generated events (blue "AI" badge, confidence percent) from officer notes (green "Officer Note" badge, no confidence).
+   - Locate the **CCTV Frame Pinned: ATM Vicinity** event with 72% confidence and a location pin "ATM, Paldi Road, Ahmedabad".
+2. **Officer Note**: Click **Add Note** and enter a brief observation (e.g., "Victim confirmed no other suspects"). Click Save.
+   - Observe the new officer note appear at the bottom of the timeline with the current timestamp.
+3. **CCTV Pin**: Click **Pin CCTV Frame** and select a JPEG image. Observe the upload and the AI-analyzed CCTV event appear on the timeline with forensic flags and confidence score.
+4. **Audit Verification**: Switch to the **Audit** tab and confirm `timeline.seeded` and officer note events appear in the append-only audit trail.
+
+#### 10B — OSINT Digital Footprint Enrichment
+1. **Entity Pivot Panel**: Return to the **Overview** tab of Case 2.
+   - Scroll to the **Key Entities** panel and click on the **email** entity `culprit@harass.com`.
+2. **OSINT Risk Summary**: The **OSINT Enrichment Panel** opens inline.
+   - Note the **CRITICAL risk banner** (2 data breaches: DataVault Leak 2021, ShopSphere Exposure 2020).
+   - View the 3 social profiles found (Spotify, Netflix, Amazon — LIKELY existence).
+3. **Unconfirmed Pivots**: Scroll down to see the pivot section for `@fake_profile_123` (person entity).
+   - Observe 3 unconfirmed pivots extracted from GitHub bio: `partner_in_crime@steal.com`, `+919999988888`, `@another_alias`.
+   - Click **Confirm Pivot** on one to promote it to a verified case entity, or **Ignore** to dismiss.
+4. **Source Provenance**: Click the source chip on any pivot to confirm it traces to the OSINT scan source (not invented).
+5. **Dossier Export**: Click **Export Dossier** on the email entity to download a text report — confirm it cites source labels and confidence explicitly.
+
+#### 10C — Video Evidence Analysis
+1. **Evidence tab**: Click the **Evidence** tab in Case 2.
+   - Observe the **CCTV Clip (Video)** card showing a `COMPLETED` badge (seeded fixture).
+   - Click on the video card to open the **VideoEvidenceWorkspace**.
+2. **Report View**: The workspace shows:
+   - The incident summary: *"45-second CCTV footage from ATM vicinity..."*
+   - The crime summary with forensic caveats.
+   - The 3-event timestamped incident timeline.
+3. **Click-to-Seek**: Click the **00:00:05** event ("Individual enters ATM vestibule"). Note that if a real MP4 is uploaded, the native video player would seek to that timestamp — the seek mechanism uses `videoRef.current.currentTime`.
+4. **Upload Demo**: Click **Upload Evidence File** and select a short `.mp4` or `.mov` clip.
+   - Observe the progress bar animate through UPLOADED → ANALYZING → COMPLETED states via polling.
+   - Once complete, the report populates automatically.
+5. **Audit Trail**: Switch to the Audit tab to confirm `video.analysis_completed` appears in the case audit trail.
+
+---
+
+### ✅ Smoke Test Checklist (Fresh Seed)
+
+After running `python -m app.seeds.run` from the backend:
+
+| Check | Expected Result |
+|---|---|
+| Login as `io` | Dashboard shows 2 seeded cases |
+| Case 1 → Ingestion tab | Empty, ready for upload |
+| Case 2 → Overview | Command Center with workflow spine and next action |
+| Case 2 → Timeline tab | 6 pre-seeded events (AI + officer + CCTV) |
+| Case 2 → Evidence tab | CCTV clip (video, COMPLETED) + chat screenshot |
+| Case 2 → Entity panel → OSINT | Email entity shows CRITICAL risk + 3 social profiles |
+| Case 2 → Requests tab | Draft Airtel request fails readiness checklist |
+| Login as `sho` | Approval queue shows platform request |
+| Login as `legal` | Legal section review visible for Case 2 |
+| Backend `/health` | `{"message":"ok"}` |
+| Backend `/docs` | All routes visible including `/timeline`, `/osint`, `/api/v1/video` |
