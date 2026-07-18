@@ -79,7 +79,7 @@ export default function SummaryPage() {
         <Button
           onClick={handleGenerate}
           disabled={generating}
-          className="bg-primary text-primary-foreground font-medium text-sm h-9 px-4 rounded-[8px] hover:scale-105 hover:bg-[color-mix(in_oklab,#dc0000,black_8%)] glow-primary transition-all duration-[130ms] flex items-center gap-2"
+          className="bg-primary text-primary-foreground font-medium text-sm h-9 px-4 rounded-squircle-sm hover:scale-105 hover:bg-primary/90 glow-primary transition-all duration-[130ms] flex items-center gap-2"
           id="btn-generate-summary"
         >
           {generating ? (
@@ -104,7 +104,7 @@ export default function SummaryPage() {
           <p className="text-sm text-muted-foreground">Loading summaries...</p>
         </div>
       ) : summaries.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-[12px] bg-[#171717] border border-border p-12 text-center">
+        <div className="flex flex-col items-center gap-4 rounded-squircle bg-card border border-border p-12 text-center">
           <div className="rounded-full bg-primary/10 p-4 border border-primary/20">
             <Radar className="h-8 w-8 text-primary" />
           </div>
@@ -139,7 +139,7 @@ export default function SummaryPage() {
                       "animate-fade-up",
                       isSelected
                         ? "bg-primary/10 border-primary text-foreground glow-primary"
-                        : "bg-[#171717] border-border text-muted-foreground hover:bg-[#1f1f1f] hover:text-foreground hover:border-primary/30",
+                        : "bg-card border-border text-muted-foreground hover:bg-surface-elevated hover:text-foreground hover:border-primary/30",
                     ].join(" ")}
                     style={{ animationDelay: `${idx * 50}ms` }}
                   >
@@ -164,7 +164,7 @@ export default function SummaryPage() {
           <div className="lg:col-span-3">
             {selected && (
               <div
-                className="relative overflow-hidden rounded-[12px] border border-[#2d7ee9]/20 animate-fade-up delay-200"
+                className="relative overflow-hidden rounded-squircle border border-info/20 animate-fade-up delay-200"
                 style={{ background: "var(--surface-warm)" }}
               >
                 {/* Top accent line */}
@@ -175,8 +175,8 @@ export default function SummaryPage() {
                     <div>
                       <div className="font-heading text-base font-bold flex items-center gap-2.5">
                         {/* Blue AI icon per Phase 9E spec */}
-                        <div className="rounded-[8px] bg-[#2d7ee9]/15 border border-[#2d7ee9]/30 p-1.5 flex items-center justify-center">
-                          <Sparkles className="h-4 w-4 text-[#2d7ee9]" />
+                        <div className="rounded-squircle-sm bg-info/15 border border-info/30 p-1.5 flex items-center justify-center">
+                          <Sparkles className="h-4 w-4 text-info" />
                         </div>
                         AI Case Summary — Version {selected.version}
                       </div>

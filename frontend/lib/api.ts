@@ -550,7 +550,7 @@ export function uploadVideo(
       reject(new Error("Network error during upload"));
     });
 
-    xhr.open("POST", `${API_URL}/api/v1/video/analyze`);
+    xhr.open("POST", `${API_URL}/video/analyze`);
     
     const token = getStoredToken();
     if (token) {
@@ -562,13 +562,12 @@ export function uploadVideo(
 }
 
 export async function pollVideoStatus(taskId: string): Promise<VideoStatusResponse> {
-  return request<VideoStatusResponse>(`/api/v1/video/status/${taskId}`);
+  return request<VideoStatusResponse>(`/video/status/${taskId}`);
 }
 
 export async function getVideoReport(caseId: string): Promise<VideoReportResponse> {
-  return request<VideoReportResponse>(`/api/v1/video/report/${caseId}`);
+  return request<VideoReportResponse>(`/video/report/${caseId}`);
 }
-
 
 
 

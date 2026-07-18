@@ -224,7 +224,7 @@ export interface EvidenceOut {
     video_status?: string;
     progress_percentage?: number;
     error_detail?: string | null;
-    original_md5?: string;
+    original_sha256?: string;
     summary?: string | null;
     crime_summary?: string | null;
     risk_evaluation?: string | null;
@@ -455,7 +455,7 @@ export interface VideoUploadResponse {
 export interface VideoStatusResponse {
   task_id: string;
   case_id: string | null;
-  celery_state: string;
+  processing_state: "queued" | "processing" | "completed" | "failed";
   video_case_status: string | null;
   progress_percentage: number;
   error_detail: string | null;
@@ -473,7 +473,7 @@ export interface VideoTimelineEntry {
 export interface VideoReportResponse {
   case_id: string;
   filename: string;
-  original_md5: string;
+  original_sha256: string;
   duration_seconds: number | null;
   file_size_bytes: number;
   status: string;
@@ -484,8 +484,6 @@ export interface VideoReportResponse {
   timeline: VideoTimelineEntry[];
   chain_valid: boolean;
 }
-
-
 
 
 

@@ -15,10 +15,10 @@ interface PathStepperProps {
 
 
 const STATUS_CLASSES = {
-  pending: "border-border text-muted-foreground bg-[#171717]",
-  in_progress: "border-primary text-primary bg-[#1a0a0a] animate-glow-pulse glow-primary",
-  done: "border-success text-success bg-[#0a170f] glow-success",
-  skipped: "border-muted-foreground/30 text-muted-foreground bg-[#171717]",
+  pending: "border-border text-muted-foreground bg-card",
+  in_progress: "border-primary text-primary bg-primary/10 animate-glow-pulse glow-primary",
+  done: "border-success text-success bg-success/10 glow-success",
+  skipped: "border-muted-foreground/30 text-muted-foreground bg-card",
 };
 
 export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps) {
@@ -46,7 +46,7 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
                   background: isDone
                     ? "var(--gradient-accent-info-v)"
                     : isActive
-                    ? "linear-gradient(180deg, #dc0000 0%, #dc000066 100%)"
+          ? "var(--gradient-accent-info-v)"
                     : "hsl(0 0% 100% / 0.12)",
                 }}
               />
@@ -69,8 +69,8 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
                 isActive
                   ? "glass border-primary/60 glow-primary"
                   : isDone
-                  ? "bg-[#0a170f] border-success/30"
-                  : "bg-[#171717] border-border hover:border-primary/30",
+      ? "bg-success/10 border-success/30"
+      : "bg-card border-border hover:border-primary/30",
               ].join(" ")}
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -124,7 +124,7 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
                         `/cases/${caseId}/requests?step_id=${step.id}&provider_type=${step.suggested_action_type}`
                       )
                     }
-                    className="bg-primary text-primary-foreground font-medium text-xs h-8 px-3 rounded-[8px] hover:scale-105 hover:bg-[color-mix(in_oklab,#dc0000,black_8%)] glow-primary transition-all duration-[130ms] flex items-center gap-1.5"
+          className="bg-primary text-primary-foreground font-medium text-xs h-8 px-3 rounded-squircle-sm hover:scale-105 hover:bg-primary/90 glow-primary transition-all duration-[130ms] flex items-center gap-1.5"
                     id={`btn-action-${step.id}`}
                   >
                     <span>Generate {step.suggested_action_type.toUpperCase()} Request</span>

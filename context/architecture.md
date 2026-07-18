@@ -152,3 +152,22 @@ Integration rules:
 3. Merge compatible history first (Timeline Agent), then port the two incompatible feature branches as native features. Do not create parallel backends or frontends.
 4. All new endpoints go through `lib/api.ts`; all AI calls go through `gemini_client.py`; all prompts live in `prompts.py`; all state changes record an audit event; all AI output exposes provenance and deterministic fallback behavior.
 5. A feature is not considered integrated until its schema/model, migration, service, router/schema, typed API, current Ferrari UI, seed/demo data, and smoke checkpoint are complete.
+
+## Post-Phase 10 Review Remediation Boundary
+
+The Phase 10 upstream ports are functionally integrated, but the 2026-07-18
+code review identified conformance debt concentrated in the video workflow and
+its surrounding UI. Phase 11 is a hardening pass, not a new product phase.
+
+- Video status and report reads are authenticated and case-scoped like every
+  other application read.
+- The video API uses the flat `/video` route convention and application-owned
+  processing states; Celery/Redis terminology is not part of the contract.
+- Video AI uses typed helpers in `gemini_client.py`, named prompts in
+  `prompts.py`, deterministic fallback/cache behavior, and the shared audit
+  service. No service constructs `AuditEvent` directly.
+- Chain-of-custody metadata may remain append-only and verifiable, but it must
+  live inside the shared audit event shape and retain the initiating actor.
+- Phase 10 frontend surfaces use the existing Ferrari semantic tokens and
+  shared error/toast patterns. No raw palette values, arbitrary hex colors,
+  arbitrary shadows, browser alerts, or `any` catches are introduced.

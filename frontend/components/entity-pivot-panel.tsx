@@ -55,18 +55,18 @@ export function EntityPivotPanel({
   const getEntityIcon = (type: string) => {
     switch (type) {
       case "person":
-        return <Users className="h-4 w-4 text-sky-400" />;
+        return <Users className="h-4 w-4 text-info" />;
       case "phone":
-        return <Phone className="h-4 w-4 text-emerald-400" />;
+        return <Phone className="h-4 w-4 text-success" />;
       case "bank_account":
-        return <CreditCard className="h-4 w-4 text-purple-400" />;
+        return <CreditCard className="h-4 w-4 text-info" />;
       case "ip":
       case "ip_address":
-        return <Globe className="h-4 w-4 text-indigo-400" />;
+        return <Globe className="h-4 w-4 text-info" />;
       case "email":
-        return <Mail className="h-4 w-4 text-pink-400" />;
+        return <Mail className="h-4 w-4 text-info" />;
       default:
-        return <Layers className="h-4 w-4 text-amber-400" />;
+        return <Layers className="h-4 w-4 text-warn" />;
     }
   };
 
@@ -170,7 +170,7 @@ export function EntityPivotPanel({
           ))}
 
           {entities.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground text-xs bg-slate-900/40 rounded-xl border border-dashed border-border">
+            <div className="text-center py-8 text-muted-foreground text-xs bg-surface-alt/40 rounded-xl border border-dashed border-border">
               No normalized entities synced yet. Trigger sync to build.
             </div>
           )}
@@ -178,7 +178,7 @@ export function EntityPivotPanel({
       </div>
 
       {/* Selected Entity Intelligence panel */}
-      <div className="lg:col-span-1 border border-border rounded-[12px] bg-[#0f0f0f] p-4 space-y-4 min-h-[300px]">
+      <div className="lg:col-span-1 border border-border rounded-squircle bg-surface-alt p-4 space-y-4 min-h-[300px]">
         {selectedEntity ? (
           <>
             <div className="space-y-1 pb-3 border-b border-border">
@@ -212,10 +212,10 @@ export function EntityPivotPanel({
                   return (
                     <div
                       key={r.id}
-                      className="p-2 rounded bg-slate-900 border border-slate-800 text-xs flex flex-col gap-1"
+                      className="p-2 rounded bg-surface-alt border border-border text-xs flex flex-col gap-1"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-slate-400 capitalize">
+                        <span className="font-semibold text-muted-foreground capitalize">
                           {r.relationship_type.replace("_", " ")}
                         </span>
                         <span className="text-[10px] text-muted-foreground font-mono">
@@ -269,7 +269,7 @@ export function EntityPivotPanel({
                 <span className="text-[10px] font-bold font-mono text-muted-foreground uppercase block">
                   Related Cases / संबंधित मामले
                 </span>
-                <span className="text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded">
+                  <span className="text-[10px] font-bold bg-warn/10 text-warn border border-warn/20 px-1.5 py-0.5 rounded">
                   POSSIBLE MATCH
                 </span>
               </div>
@@ -277,13 +277,13 @@ export function EntityPivotPanel({
                 {matchingRelatedCases.map((rc) => (
                   <div
                     key={rc.case_id}
-                    className="p-2 rounded bg-slate-900 border border-slate-800 text-xs space-y-1"
+                    className="p-2 rounded bg-surface-alt border border-border text-xs space-y-1"
                   >
                     <div className="flex items-center justify-between font-mono text-[11px]">
                       <span className="font-bold text-foreground">
                         {rc.case_number}
                       </span>
-                      <span className="text-slate-400 capitalize">
+                      <span className="text-muted-foreground capitalize">
                         {rc.status}
                       </span>
                     </div>

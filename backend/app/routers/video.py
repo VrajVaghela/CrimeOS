@@ -4,7 +4,7 @@ import hashlib
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Request, BackgroundTasks
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, BackgroundTasks
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -12,16 +12,25 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.dependencies import get_current_user
-from app.models import User, Case, EvidenceFile, EvidenceMarker
+from app.exceptions import AuthorizationError
+from app.models import User, UserRole, Case, EvidenceFile, EvidenceMarker
 from app.schemas.video import UploadResponse, StatusResponse, ReportResponse, TimelineEntryResponse
 from app.services.video_service import LedgerService, analyze_video_task
 
 logger = logging.getLogger("crime_os.routers.video")
 
-router = APIRouter(prefix="/api/v1/video", tags=["video-incident-analyzer"])
+router = APIRouter(prefix="/video", tags=["video-incident-analyzer"])
 
 ALLOWED_VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi"}
 MAGIC_BYTE_READ_SIZE = 32
+
+
+def _ensure_case_access(case: Case | None, current_user: User) -> Case:
+    if not case:
+        raise HTTPException(status_code=404, detail="Video case not found")
+    if current_user.role == UserRole.IO and case.created_by != current_user.id:
+        raise AuthorizationError("You do not have access to this case")
+    return case
 
 def _is_valid_video_signature(header: bytes) -> bool:
     """Check if file header bytes match known video signatures."""
@@ -37,7 +46,6 @@ def _is_valid_video_signature(header: bytes) -> bool:
 
 @router.post("/analyze", response_model=UploadResponse)
 async def upload_video(
-    request: Request,
     background_tasks: BackgroundTasks,
     case_id: str = Form(..., description="UUID of the parent case"),
     file: UploadFile = File(..., description="Video file to analyze"),
@@ -51,9 +59,7 @@ async def upload_video(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid case ID format")
         
-    case = db.get(Case, case_uuid)
-    if not case:
-        raise HTTPException(status_code=404, detail="Parent case not found")
+    _ensure_case_access(db.get(Case, case_uuid), current_user)
 
     # 2. Validate file extension
     filename = file.filename or "unknown.mp4"
@@ -64,7 +70,7 @@ async def upload_video(
             detail=f"Unsupported file type. Allowed: {', '.join(ALLOWED_VIDEO_EXTENSIONS)}"
         )
 
-    # 3. Stream to disk and compute MD5
+    # 3. Stream to disk and compute SHA-256
     max_upload_size_mb = getattr(settings, "MAX_UPLOAD_SIZE_MB", 500)
     max_bytes = max_upload_size_mb * 1024 * 1024
     
@@ -74,7 +80,7 @@ async def upload_video(
     stored_name = f"{uuid.uuid4()}{ext}"
     temp_filepath = os.path.join(evidence_dir, stored_name)
 
-    md5_hash = hashlib.md5()
+    sha256_hash = hashlib.sha256()
     bytes_written = 0
     header_bytes = b""
     header_validated = False
@@ -112,7 +118,7 @@ async def upload_video(
                     )
 
                 f.write(chunk)
-                md5_hash.update(chunk)
+                sha256_hash.update(chunk)
     except HTTPException:
         raise
     except Exception as e:
@@ -121,7 +127,7 @@ async def upload_video(
         logger.error(f"Failed during file streaming: {e}")
         raise HTTPException(status_code=500, detail="Failed to write file to disk")
 
-    original_md5 = md5_hash.hexdigest()
+    original_sha256 = sha256_hash.hexdigest()
     relative_path = os.path.join("uploads", "evidence", str(case_uuid), stored_name).replace("\\", "/")
 
     # 4. Create EvidenceFile record with UPLOADED state in ai_tags
@@ -133,7 +139,7 @@ async def upload_video(
             "video_status": "UPLOADED",
             "progress_percentage": 0,
             "error_detail": None,
-            "original_md5": original_md5,
+            "original_sha256": original_sha256,
             "summary": None,
             "crime_summary": None,
             "risk_evaluation": None,
@@ -154,14 +160,15 @@ async def upload_video(
         payload={
             "evidence_id": str(evidence_id),
             "filename": filename,
-            "original_md5": original_md5,
+            "original_sha256": original_sha256,
             "file_size_bytes": bytes_written
-        }
+        },
+        user_id=current_user.id,
     )
     db.commit()
 
     # 6. Dispatch background analysis task via FastAPI BackgroundTasks
-    background_tasks.add_task(analyze_video_task, evidence_id=evidence_id, filepath=temp_filepath)
+    background_tasks.add_task(analyze_video_task, evidence_id=evidence_id, filepath=temp_filepath, actor_id=current_user.id)
     
     # Return response matching the schema
     return UploadResponse(
@@ -172,7 +179,11 @@ async def upload_video(
 
 
 @router.get("/status/{task_id}", response_model=StatusResponse)
-def get_status(task_id: uuid.UUID, db: Session = Depends(get_db)):
+async def get_status(
+    task_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> StatusResponse:
     """Poll the current progress and status of the video analysis task."""
     evidence = db.get(EvidenceFile, task_id)
     if not evidence or evidence.file_type != "video":
@@ -180,25 +191,27 @@ def get_status(task_id: uuid.UUID, db: Session = Depends(get_db)):
             status_code=404,
             detail=f"No video analysis task found with ID '{task_id}'"
         )
+    _ensure_case_access(db.get(Case, evidence.case_id), current_user)
 
     ai_tags = evidence.ai_tags or {}
     video_status = ai_tags.get("video_status", "UPLOADED")
     progress = ai_tags.get("progress_percentage", 0)
     error_detail = ai_tags.get("error_detail")
 
-    # Map video status to equivalent celery states for the frontend uploader
-    celery_state = "PROGRESS"
+    processing_state = "processing"
+    if video_status == "UPLOADED":
+        processing_state = "queued"
     if video_status == "COMPLETED":
-        celery_state = "SUCCESS"
+        processing_state = "completed"
         progress = 100
     elif video_status == "FAILED":
-        celery_state = "FAILURE"
+        processing_state = "failed"
         progress = 100
 
     return StatusResponse(
         task_id=str(task_id),
         case_id=str(task_id),
-        celery_state=celery_state,
+        processing_state=processing_state,
         video_case_status=video_status,
         progress_percentage=progress,
         error_detail=error_detail
@@ -206,7 +219,11 @@ def get_status(task_id: uuid.UUID, db: Session = Depends(get_db)):
 
 
 @router.get("/report/{case_id}", response_model=ReportResponse)
-def get_report(case_id: uuid.UUID, db: Session = Depends(get_db)):
+async def get_report(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ReportResponse | JSONResponse:
     """Retrieve the completed video analysis report with chain-of-custody validation."""
     evidence = db.get(EvidenceFile, case_id)
     if not evidence or evidence.file_type != "video":
@@ -214,6 +231,7 @@ def get_report(case_id: uuid.UUID, db: Session = Depends(get_db)):
             status_code=404,
             detail=f"Video evidence file '{case_id}' not found"
         )
+    _ensure_case_access(db.get(Case, evidence.case_id), current_user)
 
     ai_tags = evidence.ai_tags or {}
     status = ai_tags.get("video_status", "UPLOADED")
@@ -273,7 +291,7 @@ def get_report(case_id: uuid.UUID, db: Session = Depends(get_db)):
     return ReportResponse(
         case_id=str(evidence.id),
         filename=filename,
-        original_md5=ai_tags.get("original_md5", ""),
+        original_sha256=ai_tags.get("original_sha256", ""),
         duration_seconds=ai_tags.get("duration_seconds"),
         file_size_bytes=file_size,
         status=status,

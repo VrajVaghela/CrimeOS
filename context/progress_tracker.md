@@ -50,7 +50,8 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] Evidence image upload + AI tagging
 - [x] Polish: loading/empty states, second seeded case, DEMO_SCRIPT.md
 - [x] Deliverable docs: architecture diagram, SOP-grounding note, sample datasets in data/
-- [ ] ✅ CHECKPOINT: 5-min demo rehearsed twice from fresh seed
+- [x] ✅ CHECKPOINT: 5-min demo rehearsed twice from fresh seed
+  - Confirmed by user 2026-07-18 as part of the Phase 11D fresh-seed rehearsal.
 
 ## Phase 7 — Frontend Design Refinement & Impeccable Polish
 - [x] Typography Pass: Space Grotesk layout, letter-spacing check, Indic fallbacks
@@ -143,3 +144,61 @@ Planning baseline: `vraj` remains canonical; current uncommitted work is protect
 - DEMO_SCRIPT updated with 10A/10B/10C moments + fresh-seed smoke checklist
 - ui_registry.md: Phase 10 components marked BUILT
 - memory.md written at project root
+
+### 10D Post-review note (2026-07-18)
+- Functional build/import checks passed, but `CODE_REVIEW.md` found security,
+  shared-boundary, API-contract, router-convention, and UI-token debt in the
+  Phase 10 ports. The 10D integration checkbox records feature integration;
+  Phase 11 below is required before calling the code review closed or treating
+  the demo as ship-ready.
+
+## Phase 11 — Code Review Conformance & Demo Hardening
+Planning source: `CODE_REVIEW.md` generated 2026-07-18. No implementation has
+been performed for this phase yet.
+
+### 11A — Security and API contract
+- [x] Authenticate video status and report reads and enforce accessible-case ownership
+- [x] Move video routes to the flat `/video` contract and update typed client paths
+- [x] Replace `celery_state` with provider-neutral processing states across API/UI
+- [x] Make video handlers async and remove router-level exception remapping drift
+- [x] ✅ CHECKPOINT: unauthenticated video reads fail safely and the new contract works
+
+### 11B — Shared AI, audit, and provenance boundaries
+- [x] Route all video Gemini work through `gemini_client.py` with retry/cache/logging
+- [x] Move the video forensic prompt into named `prompts.py` constants
+- [x] Route chain-of-custody audit writes through `audit_service.record(...)` with actor identity
+- [x] Replace MD5 content fingerprints with SHA-256 throughout the video workflow
+- [x] ✅ CHECKPOINT: video fallback, provenance, actor-attributed audit, and chain verification pass
+  - Re-verified in 11D: deterministic fallback validates against `IncidentReport`,
+    provenance recorded in `ai_tags`, audit events carry actor `user_id`, SHA-256
+    chain append/verify passes and detects tampering.
+
+### 11C — Frontend conformance and feedback states
+- [x] Replace raw palette/hex/shadow values in the flagged Phase 10 surfaces with UI tokens
+- [x] Replace `catch (err: any)` with `unknown`-safe error narrowing
+- [x] Replace request/CCTNS browser alerts with toast or `<Alert>` feedback
+- [x] Preserve video loading, failure, responsive, and reduced-motion states under the new contract
+- [x] ✅ CHECKPOINT: targeted UI passes token, strict-TypeScript, and no-browser-alert audits
+  - Verified 2026-07-18: targeted static audit clean; local `tsc --noEmit` clean; `next build` clean.
+
+### 11D — Verification and handoff
+- [x] Run static boundary audits for Gemini imports, audit writes, prompts, auth, async routers, and Celery terminology
+- [x] Run frontend build/type checks and verify all HTTP remains behind `lib/api.ts`
+- [x] Confirm or perform the still-open Phase 6 five-minute fresh-seed rehearsal
+- [x] Rehearse the golden path plus authenticated video upload → report → timeline seek from a fresh seed
+- [x] Verify unauthenticated, inaccessible, Gemini-failure, invalid-file, oversized-file, and UI mutation-failure cases
+- [x] ✅ CHECKPOINT: all `CODE_REVIEW.md` findings are closed or explicitly documented
+  - Verified 2026-07-18. Static audits: only `gemini_client.py` imports google-genai;
+    no `AuditEvent(...)` construction outside the model (`LedgerService` routes through
+    `audit_service.record()` with actor `user_id`); `VIDEO_FORENSIC_ANALYSIS_PROMPT` is a
+    named constant; both video reads require `get_current_user` + `_ensure_case_access`;
+    video routers are `async`; no Celery vocabulary; SHA-256 end to end; flat `/video`
+    prefix. Build: `tsc --noEmit` clean, `next build` clean (14 routes), `import app.main`
+    OK. All frontend HTTP behind `lib/api.ts` (only two `fetch` calls, both in `api.ts`).
+    Negative cases (TestClient, 7/7): unauth status/report → 401, authed-missing → 404,
+    unsupported ext → 415, spoofed .mp4 signature → 415, missing case → 404, malformed
+    case_id → 400. Access guard (unit): cross-owner IO → 403, owner IO / SHO allowed,
+    missing case → 404. Deterministic fallback validates against `IncidentReport`.
+    Chain of custody: time-separated append→verify passes, tamper detected, actor
+    attributed. Also fixed `/api/v1/video` → `/video` doc drift in `DEMO_SCRIPT.md` and
+    `memory.md`. Golden-path + video live rehearsal confirmed by user.

@@ -17,6 +17,9 @@ from app.database import SessionLocal
 from app.models import AuditEvent, EvidenceFile, EvidenceMarker, Case
 from app.models.timeline import TimelineEvent
 from app.schemas.video import IncidentReport, TimelineEntry
+from app.ai import gemini_client
+from app.ai.prompts import VIDEO_FORENSIC_ANALYSIS_PROMPT
+from app.services import audit_service
 
 logger = logging.getLogger("crime_os.services.video")
 
@@ -83,6 +86,7 @@ class LedgerService:
         case_id: uuid.UUID,
         event_type: str,
         payload: dict,
+        user_id: uuid.UUID | None,
     ) -> AuditEvent:
         prev_hash = self._get_tail_hash(db, case_id)
         record_hash = self.compute_record_hash(
@@ -100,12 +104,13 @@ class LedgerService:
             "signature": signature
         }
 
-        event = AuditEvent(
+        event = audit_service.record(
+            db,
             case_id=case_id,
+            user_id=user_id,
             action=event_type,
-            detail=detail
+            detail=detail,
         )
-        db.add(event)
         db.flush()
 
         logger.info(f"Ledger event appended: case={case_id}, type={event_type}, hash={record_hash[:16]}")
@@ -217,7 +222,7 @@ def get_deterministic_report() -> dict:
     }
 
 
-def analyze_video_task(evidence_id: uuid.UUID, filepath: str):
+def analyze_video_task(evidence_id: uuid.UUID, filepath: str, actor_id: uuid.UUID | None = None):
     """Background task implementing the video analysis pipeline."""
     db = SessionLocal()
     ledger = LedgerService()
@@ -248,7 +253,8 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str):
             payload={
                 "evidence_id": str(evidence_id),
                 "duration_seconds": duration,
-            }
+            },
+            user_id=actor_id,
         )
         db.commit()
 
@@ -256,6 +262,7 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str):
         gemini_file_uri = None
         report_data = None
         use_gemini = bool(settings.GEMINI_API_KEY)
+        used_fallback = False
 
         if use_gemini:
             try:
@@ -268,12 +275,8 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str):
                 db.flush()
                 db.commit()
 
-                from google import genai
-                from google.genai import types
-
-                client = genai.Client(api_key=settings.GEMINI_API_KEY)
                 logger.info(f"Uploading video {filepath} to Gemini for evidence {evidence_id}")
-                gemini_file = client.files.upload(file=filepath)
+                gemini_file = gemini_client.upload_file(filepath)
                 gemini_file_uri = gemini_file.name
 
                 # Update tags with Gemini URI
@@ -286,33 +289,19 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str):
                     db=db,
                     case_id=case_id,
                     event_type="GEMINI_UPLOAD_COMPLETE",
-                    payload={"gemini_file_uri": gemini_file_uri}
+                    payload={"gemini_file_uri": gemini_file_uri},
+                    user_id=actor_id,
                 )
                 db.commit()
 
-                # Poll status
-                poll_interval = 2
-                max_wait = 180
-                elapsed = 0
-                while elapsed < max_wait:
-                    gemini_file = client.files.get(name=gemini_file_uri)
-                    state_name = getattr(gemini_file.state, "name", str(gemini_file.state))
-                    logger.info(f"Gemini file state for evidence {evidence_id}: {state_name}")
-                    if state_name == "ACTIVE":
-                        break
-                    elif state_name == "FAILED":
-                        raise RuntimeError("Gemini video processing failed")
-                    time.sleep(poll_interval)
-                    elapsed += poll_interval
-                    
-                    # Update progress proportionally
-                    ai_tags = dict(evidence.ai_tags)
-                    ai_tags["progress_percentage"] = min(35 + int((elapsed / max_wait) * 20), 55)
-                    evidence.ai_tags = ai_tags
-                    db.flush()
-                    db.commit()
-                else:
-                    raise RuntimeError("Gemini processing timed out")
+                # Poll status through the shared Gemini gateway.
+                gemini_file = gemini_client.wait_for_file(gemini_file_uri, poll_interval=2, max_wait=180)
+                logger.info(f"Gemini file state for evidence {evidence_id}: ACTIVE")
+                ai_tags = dict(evidence.ai_tags)
+                ai_tags["progress_percentage"] = 55
+                evidence.ai_tags = ai_tags
+                db.flush()
+                db.commit()
 
                 # Perform analysis prompt
                 ai_tags = dict(evidence.ai_tags)
@@ -321,34 +310,28 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str):
                 db.flush()
                 db.commit()
 
-                analysis_prompt = """You are a forensic video analyst. Analyze this video and return:
-1. Executive Summary
-2. Crime Summary (null if none)
-3. Risk Evaluation (LOW, MEDIUM, or HIGH)
-4. Chronological Timeline of events (timestamps in MM:SS)
-5. Entities Detected (vehicles, weapons, persons, locations, signs)"""
-
-                response = client.models.generate_content(
+                parsed_report = gemini_client.generate_json_from_file(
+                    db,
+                    purpose="video_forensic_analysis",
+                    prompt=VIDEO_FORENSIC_ANALYSIS_PROMPT,
+                    schema=IncidentReport,
+                    media_file=gemini_file,
                     model=settings.GEMINI_FLASH_MODEL,
-                    contents=[gemini_file, analysis_prompt],
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        response_schema=IncidentReport,
-                    ),
                 )
-                parsed_report = IncidentReport.model_validate_json(response.text)
                 report_data = parsed_report.model_dump()
                 logger.info(f"Successfully analyzed video via Gemini for evidence {evidence_id}")
 
             except Exception as e:
                 logger.error(f"Gemini analysis failed: {e}. Falling back to deterministic report.")
                 report_data = get_deterministic_report()
+                used_fallback = True
         else:
             # Deterministic offline fallback
             logger.info(f"No Gemini key configured. Using deterministic fallback report for evidence {evidence_id}")
             # Simulate a brief delay to mimic background analysis
             time.sleep(2)
             report_data = get_deterministic_report()
+            used_fallback = True
 
         # Update progress to Persisting
         ai_tags = dict(evidence.ai_tags)
@@ -409,6 +392,13 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str):
             "entities_detected": report_data.get("entities_detected", []),
             "timeline": report_data.get("timeline"),
             "error_detail": None,
+            "provenance": {
+                "source_type": "video_file",
+                "source_id": str(evidence_id),
+                "prompt": "VIDEO_FORENSIC_ANALYSIS_PROMPT",
+                "model": settings.GEMINI_FLASH_MODEL if not used_fallback else "deterministic_fallback",
+                "fallback": used_fallback,
+            },
         })
         evidence.ai_tags = ai_tags
         db.flush()
@@ -422,20 +412,22 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str):
                 "crime_summary": report_data.get("crime_summary"),
                 "risk_evaluation": risk_level,
                 "timeline_count": len(report_data.get("timeline", []))
-            }
+            },
+            user_id=actor_id,
         )
         db.commit()
 
         # 4. Cleanup Gemini file and local temp file
         if use_gemini and gemini_file_uri:
             try:
-                client.files.delete(name=gemini_file_uri)
+                gemini_client.delete_file(gemini_file_uri)
                 logger.info(f"Deleted Gemini video file: {gemini_file_uri}")
                 ledger.append_ledger_event(
                     db=db,
                     case_id=case_id,
                     event_type="GEMINI_FILE_DELETED",
-                    payload={"gemini_file_uri": gemini_file_uri}
+                    payload={"gemini_file_uri": gemini_file_uri},
+                    user_id=actor_id,
                 )
                 db.commit()
             except Exception as e:
@@ -457,7 +449,8 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str):
             payload={
                 "evidence_id": str(evidence_id),
                 "local_file_deleted": not os.path.exists(filepath),
-            }
+            },
+            user_id=actor_id,
         )
 
         # Verify chain integrity
@@ -484,7 +477,8 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str):
                     db=db,
                     case_id=evidence.case_id,
                     event_type="ANALYSIS_FAILED",
-                    payload={"reason": str(e)[:300]}
+                    payload={"reason": str(e)[:300]},
+                    user_id=actor_id,
                 )
                 db.commit()
         except Exception as rollback_err:

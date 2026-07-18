@@ -274,6 +274,108 @@ and sees the action/source in the audit trail.
 **Checkpoint:** All retained `vraj` features still work, each selected upstream
 feature has a passing checkpoint, and no out-of-scope infrastructure was added.
 
+---
+
+## Phase 11 — Code Review Conformance & Demo Hardening
+
+Baseline: `CODE_REVIEW.md` (2026-07-18). This is a remediation phase for the
+Phase 10 ports. It must preserve the existing FastAPI + Next.js + PostgreSQL /
+pgvector stack, Ferrari UI system, golden path, deterministic fallbacks,
+provenance, and audit trail. Do not add Celery, Redis, Mongo, a second app, or
+new external integrations.
+
+### Phase 11A — Security and API contract first
+1. Add `get_current_user` to video status and report reads, then verify the
+   requested evidence belongs to an accessible case before returning progress
+   or forensic report data. Keep upload authorization and existing role rules.
+2. Rename the video router prefix from `/api/v1/video` to the project’s flat
+   `/video` convention and update the typed client/XHR paths together. Decide
+   whether a temporary compatibility route is needed before removing the old
+   path; do not leave two undocumented contracts.
+3. Replace Celery-shaped response fields with provider-neutral application
+   state (for example `processing_state` using `UPLOADED`, `PROCESSING`,
+   `COMPLETED`, and `FAILED`) plus progress and error fields. Update the
+   backend schema, `lib/types.ts`, `lib/api.ts`, and the video workspace as one
+   contract change.
+4. Make all video router handlers `async def`, and remove router-level
+   exception remapping where the shared `AppError` handler and service
+   exceptions already provide the project-standard response shape.
+
+**Checkpoint:** unauthenticated requests cannot read video status/reports;
+authenticated video upload, polling, and report retrieval work on the flat
+route with no Celery terminology in API or UI code.
+
+### Phase 11B — Restore the shared AI and audit boundaries
+1. Move video Gemini file upload, readiness polling, structured report
+   generation, retry/backoff, fallback-cache lookup, and call logging behind
+   typed helpers owned by `backend/app/ai/gemini_client.py`. Keep the existing
+   deterministic report as the final demo fallback and preserve the bounded
+   timeout for the FastAPI background task.
+2. Add a named `VIDEO_FORENSIC_ANALYSIS_PROMPT` to `prompts.py`; remove the
+   inline forensic prompt from `video_service.py`. Keep the `IncidentReport`
+   schema as the validation boundary and return provenance for AI-generated
+   report content.
+3. Eliminate direct `AuditEvent` construction from `video_service.py`. Fold
+   the chain-of-custody hash/signature metadata into the shared audit service
+   so every video state change calls `audit_service.record(...)`, carries the
+   initiating user where available, and uses the same event shape as the rest
+   of the application. Preserve append-only ordering and chain verification.
+4. Pass the initiating user identity into the background analysis task (or
+   explicitly classify unavoidable system-generated events) so video audit
+   events do not silently omit their actor.
+5. Replace the MD5 content fingerprint with SHA-256 end to end: storage tags,
+   report schema, TypeScript types, UI labels, deterministic fixtures, and
+   chain-of-custody verification. Do not present MD5 as tamper evidence.
+
+**Checkpoint:** the only `google-genai` import is in `gemini_client.py`, the
+only audit write path is the shared audit service, the video prompt is named in
+`prompts.py`, fallback/cache behavior is retained, and a seeded video run has
+actor-attributed audit entries with a valid SHA-256 chain.
+
+### Phase 11C — Frontend design-system and error-state cleanup
+1. Replace raw Tailwind palette classes, arbitrary hex values, and arbitrary
+   shadows in `evidence-review-workspace.tsx`,
+   `osint-enrichment-panel.tsx`, `video-evidence-workspace.tsx`,
+   `entity-pivot-panel.tsx`, `path-stepper.tsx`, and the summary page with
+   existing semantic Tailwind/CSS-variable tokens from `ui_tokens.md`. Keep
+   the Accent Red, Blue Citation, Amber Attention, Emerald Done, and
+   Glow-on-Demand rules intact; do not create new one-off colors.
+2. Replace every `catch (err: any)` in the flagged components with
+   `unknown`-safe narrowing and the existing `ApiError` contract.
+3. Replace browser `alert()` calls on request dispatch/approval/update and
+   CCTNS sync surfaces with the existing toast or `<Alert>` patterns. Every
+   async mutation must visibly expose loading, success, and failure states.
+4. Update the video UI for the provider-neutral status contract and SHA-256
+   label while preserving responsive, empty, loading, failure, and reduced-
+   motion behavior.
+
+**Checkpoint:** the targeted frontend files contain no raw palette/hex/shadow
+drift, no `any` catches, and no browser alerts; a failure on a golden-path
+action remains inside the application shell and is retryable.
+
+### Phase 11D — Verification and handoff
+1. Run static conformance checks: only `gemini_client.py` imports Google
+   Gemini; no service/router outside the audit service constructs
+   `AuditEvent`; all prompts are named constants; all video reads require
+   authentication; all video routers are async; no Celery vocabulary remains.
+2. Run frontend type/build checks and review every changed API path through
+   `lib/api.ts`; verify no component makes a direct backend request.
+3. Confirm the Phase 6 fresh-seed five-minute rehearsal checkpoint. If it has
+   not actually been performed, keep it open and run it as part of this phase.
+4. Rehearse from a fresh seed: login → complaint ingestion → cited path →
+   legal request → mock response → analytics → summary → audit, then one
+   authenticated video upload → progress → report → timeline seek.
+5. Verify negative cases: unauthenticated video reads, inaccessible evidence,
+   failed Gemini analysis, malformed video signature, oversized upload, and
+   request/CCTNS failures all return safe, visible, recoverable states.
+6. Update `progress_tracker.md`, `ui_registry.md` only if a new reusable
+   component is created, and demo/smoke notes after the checkpoints pass.
+
+**Checkpoint:** every finding in `CODE_REVIEW.md` is closed or explicitly
+documented, the Phase 6 rehearsal status is truthful, and the golden path plus
+the video intelligence moment pass from a fresh seed without new
+infrastructure.
+
 
 ## Cut List (if time runs out, cut in this order)
 For Phase 8, cut in this order:

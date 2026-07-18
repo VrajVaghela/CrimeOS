@@ -160,7 +160,7 @@ export default function RequestsPage() {
       setSelectedRequest(null);
       await loadRequests();
     } catch (e) {
-      alert(e instanceof ApiError ? e.message : "Failed to update draft");
+      setError(e instanceof ApiError ? e.message : "Failed to update draft");
     } finally {
       setSavingEdit(false);
     }
@@ -173,7 +173,7 @@ export default function RequestsPage() {
       setRequests((prev) => prev.map((r) => (r.id === reqId ? updated : r)));
       await loadRequests();
     } catch (e) {
-      alert(e instanceof ApiError ? e.message : "Failed to approve request");
+      setError(e instanceof ApiError ? e.message : "Failed to approve request");
     } finally {
       setActionLoading(null);
     }
@@ -186,7 +186,7 @@ export default function RequestsPage() {
       setRequests((prev) => prev.map((r) => (r.id === reqId ? updated : r)));
       await loadRequests();
     } catch (e) {
-      alert(e instanceof ApiError ? e.message : "Failed to dispatch request");
+      setError(e instanceof ApiError ? e.message : "Failed to dispatch request");
     } finally {
       setActionLoading(null);
     }
@@ -200,7 +200,7 @@ export default function RequestsPage() {
       await loadRequests();
       router.push(`/cases/${caseId}/responses`);
     } catch (e) {
-      alert(e instanceof ApiError ? e.message : "Failed to trigger response");
+      setError(e instanceof ApiError ? e.message : "Failed to trigger response");
     } finally {
       setActionLoading(null);
     }

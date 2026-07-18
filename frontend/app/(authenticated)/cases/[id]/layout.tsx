@@ -90,7 +90,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
       setSyncDialogOpen(false);
       await load();
     } catch (e) {
-      alert(e instanceof ApiError ? e.message : "Synchronization failed");
+      setError(e instanceof ApiError ? e.message : "Synchronization failed");
     } finally {
       setSyncing(false);
     }

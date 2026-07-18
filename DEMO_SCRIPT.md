@@ -198,4 +198,4 @@ After running `python -m app.seeds.run` from the backend:
 | Login as `sho` | Approval queue shows platform request |
 | Login as `legal` | Legal section review visible for Case 2 |
 | Backend `/health` | `{"message":"ok"}` |
-| Backend `/docs` | All routes visible including `/timeline`, `/osint`, `/api/v1/video` |
+| Backend `/docs` | All routes visible including `/timeline`, `/osint`, `/video` |

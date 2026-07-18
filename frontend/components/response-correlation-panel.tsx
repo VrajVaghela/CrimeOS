@@ -29,10 +29,10 @@ export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCo
         title: "Record Promoted",
         description: "Successfully promoted record to case diary and audit timeline.",
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: "Promotion Failed",
-        description: err.message || "Failed to promote record.",
+        description: err instanceof Error ? err.message : "Failed to promote record.",
         variant: "destructive",
       });
     } finally {
@@ -185,9 +185,9 @@ export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCo
       </div>
 
       {toastMessage && (
-        <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-xl border glass shadow-2xl animate-fade-up flex flex-col gap-1 max-w-sm ${toastMessage.variant === 'destructive' ? 'border-destructive bg-destructive/10' : 'border-emerald-500/20 bg-slate-950/90'}`}>
+        <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-xl border glass shadow-2xl animate-fade-up flex flex-col gap-1 max-w-sm ${toastMessage.variant === 'destructive' ? 'border-destructive bg-destructive/10' : 'border-success/20 bg-background/90'}`}>
           <div className="flex items-center gap-2 text-sm font-semibold">
-            {toastMessage.variant === 'destructive' ? <AlertTriangle className="h-4 w-4 text-destructive" /> : <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
+            {toastMessage.variant === 'destructive' ? <AlertTriangle className="h-4 w-4 text-destructive" /> : <CheckCircle2 className="h-4 w-4 text-success" />}
             {toastMessage.title}
           </div>
           <div className="text-xs text-muted-foreground">{toastMessage.description}</div>
@@ -196,4 +196,3 @@ export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCo
     </div>
   );
 }
-

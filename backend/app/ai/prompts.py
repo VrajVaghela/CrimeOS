@@ -198,6 +198,16 @@ Instructions:
 Return ONLY schema-valid JSON matching the requested output.
 """.strip()
 
+VIDEO_FORENSIC_ANALYSIS_PROMPT = """
+You are a forensic video analyst. Analyze this video and return:
+1. Executive Summary
+2. Crime Summary (null if none)
+3. Risk Evaluation (LOW, MEDIUM, or HIGH)
+4. Chronological Timeline of events (timestamps in MM:SS)
+5. Entities Detected (vehicles, weapons, persons, locations, signs)
+Return only schema-valid JSON.
+""".strip()
+
 DOCUMENT_EVIDENCE_PROMPT = """
 You are Crime OS AI. Analyze the supplied document (PDF or Text) and extract relevant forensic information.
 Instructions:

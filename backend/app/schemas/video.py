@@ -46,11 +46,14 @@ class UploadResponse(BaseModel):
     status: str = "UPLOADED"
 
 
+ProcessingState = Literal["queued", "processing", "completed", "failed"]
+
+
 class StatusResponse(BaseModel):
     """Response from the status polling endpoint."""
     task_id: str
     case_id: Optional[str] = None
-    celery_state: str
+    processing_state: ProcessingState
     video_case_status: Optional[str] = None
     progress_percentage: int = 0
     error_detail: Optional[str] = None
@@ -70,7 +73,7 @@ class ReportResponse(BaseModel):
     """Full report response including case details, timeline, and chain validity."""
     case_id: str
     filename: str
-    original_md5: str
+    original_sha256: str
     duration_seconds: Optional[float] = None
     file_size_bytes: int
     status: str

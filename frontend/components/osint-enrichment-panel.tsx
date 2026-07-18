@@ -24,6 +24,7 @@ import {
   exportDossier,
   confirmPivot,
   ignorePivot,
+  ApiError,
 } from "@/lib/api";
 import type { OsintScanResult, CaseEntityOut } from "@/lib/types";
 
@@ -51,11 +52,12 @@ export function OsintEnrichmentPanel({
     try {
       const data = await getEntityOsintResult(caseId, entity.id);
       setScanResult(data.osint);
-    } catch (err: any) {
-      if (err.status === 404 || err.message?.includes("not found")) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to fetch OSINT results";
+      if ((err instanceof ApiError && err.code === "not_found") || message.toLowerCase().includes("not found")) {
         setScanResult(null);
       } else {
-        setError(err.message ?? "Failed to fetch OSINT results");
+        setError(message);
       }
     } finally {
       setLoading(false);
@@ -122,8 +124,8 @@ export function OsintEnrichmentPanel({
             }
       );
       await fetchResult();
-    } catch (err: any) {
-      setError(err.message ?? "Failed to trigger scan");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to trigger scan");
     } finally {
       setTriggering(false);
     }
@@ -143,8 +145,8 @@ export function OsintEnrichmentPanel({
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } catch (err: any) {
-      setError(err.message ?? "Failed to export dossier");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to export dossier");
     } finally {
       setExporting(false);
     }
@@ -155,8 +157,8 @@ export function OsintEnrichmentPanel({
     try {
       await confirmPivot(caseId, pivotId);
       await Promise.all([fetchResult(), onPivotAction()]);
-    } catch (err: any) {
-      setError(err.message ?? "Failed to confirm pivot");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to confirm pivot");
     } finally {
       setPivotLoadingId(null);
     }
@@ -167,8 +169,8 @@ export function OsintEnrichmentPanel({
     try {
       await ignorePivot(caseId, pivotId);
       await Promise.all([fetchResult(), onPivotAction()]);
-    } catch (err: any) {
-      setError(err.message ?? "Failed to ignore pivot");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to ignore pivot");
     } finally {
       setPivotLoadingId(null);
     }
@@ -181,26 +183,26 @@ export function OsintEnrichmentPanel({
   const getRiskColor = (level: string) => {
     switch (level) {
       case "CRITICAL":
-        return "bg-rose-500/20 text-rose-400 border-rose-500/40 glow-danger";
+        return "bg-destructive/20 text-destructive border-destructive/40 glow-destructive";
       case "HIGH":
-        return "bg-amber-500/20 text-amber-400 border-amber-500/40 glow-warn";
+        return "bg-warn/20 text-warn border-warn/40 glow-warning";
       case "MEDIUM":
-        return "bg-yellow-500/15 text-yellow-300 border-yellow-500/30";
+        return "bg-warn/15 text-warn border-warn/30";
       default:
-        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+        return "bg-success/10 text-success border-success/30";
     }
   };
 
   const getBreachSeverityColor = (level: string) => {
     switch (level) {
       case "CRITICAL":
-        return "text-rose-500 font-bold";
+        return "text-destructive font-bold";
       case "HIGH":
-        return "text-amber-500 font-semibold";
+        return "text-warn font-semibold";
       case "MEDIUM":
-        return "text-yellow-400";
+        return "text-warn";
       default:
-        return "text-emerald-400";
+        return "text-success";
     }
   };
 
@@ -235,9 +237,9 @@ export function OsintEnrichmentPanel({
       </div>
 
       {error && (
-        <div className="p-3 rounded border border-rose-500/20 bg-rose-950/20 text-xs text-rose-200 flex items-center justify-between">
+<div className="p-3 rounded border border-destructive/20 bg-destructive/10 text-xs text-foreground flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-rose-400 hover:text-rose-200">
+<button onClick={() => setError(null)} className="text-destructive hover:text-foreground">
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -249,7 +251,7 @@ export function OsintEnrichmentPanel({
           <span>Fetching intelligence data…</span>
         </div>
       ) : !scanResult ? (
-        <div className="p-6 rounded-squircle-sm border border-border bg-[#141414] text-center space-y-4">
+        <div className="p-6 rounded-squircle-sm border border-border bg-surface-alt text-center space-y-4">
           <Search className="h-10 w-10 mx-auto text-muted-foreground/30 animate-pulse" />
           <div className="space-y-1">
             <h5 className="text-sm font-semibold text-foreground">No OSINT Enrichment Found</h5>
@@ -306,7 +308,7 @@ export function OsintEnrichmentPanel({
 
           {/* Running state details */}
           {(scanResult.scan.status === "PENDING" || scanResult.scan.status === "RUNNING") && (
-            <div className="p-4 rounded-squircle bg-[#161616] border border-border/40 text-center space-y-3">
+            <div className="p-4 rounded-squircle bg-surface-alt border border-border/40 text-center space-y-3">
               <RefreshCw className="h-5 w-5 animate-spin mx-auto text-primary" />
               <div className="text-xs text-muted-foreground">
                 OSINT scanners running. Mapping usernames, emails, breaches, and social handles…
@@ -315,15 +317,15 @@ export function OsintEnrichmentPanel({
           )}
 
           {scanResult.scan.status === "FAILED" && (
-            <div className="p-4 rounded-squircle bg-rose-950/10 border border-rose-900/30 space-y-3">
-              <div className="text-xs font-semibold text-rose-400">OSINT scan failed</div>
-              <div className="text-xs text-rose-300 font-mono break-all bg-rose-950/20 p-2 rounded">
+<div className="p-4 rounded-squircle bg-destructive/10 border border-destructive/30 space-y-3">
+<div className="text-xs font-semibold text-destructive">OSINT scan failed</div>
+<div className="text-xs text-foreground font-mono break-all bg-destructive/10 p-2 rounded">
                 {scanResult.scan.error_message ?? "Unknown scanner error occurred"}
               </div>
               <button
                 onClick={handleTrigger}
                 disabled={triggering}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border border-rose-500/40 text-rose-400 bg-rose-500/5 hover:bg-rose-500/10 text-xs font-medium transition-all"
+className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border border-destructive/40 text-destructive bg-destructive/5 hover:bg-destructive/10 text-xs font-medium transition-all"
               >
                 <RefreshCw className={`h-3 w-3 ${triggering ? "animate-spin" : ""}`} />
                 Retry OSINT Lookup
@@ -348,7 +350,7 @@ export function OsintEnrichmentPanel({
                         <div className="font-semibold text-foreground flex items-center gap-1">
                           {profile.platform}
                           {profile.is_verified && (
-                            <ShieldCheck className="h-3 w-3 text-sky-400 shrink-0" />
+                            <ShieldCheck className="h-3 w-3 text-info shrink-0" />
                           )}
                         </div>
                         <div className="text-muted-foreground font-mono text-[11px]">
@@ -436,7 +438,7 @@ export function OsintEnrichmentPanel({
                   >
                     <div className="flex items-start justify-between">
                       <div className="font-bold text-foreground flex items-center gap-1.5">
-                        <Lock className="h-3 w-3 text-rose-400 shrink-0" />
+<Lock className="h-3 w-3 text-destructive shrink-0" />
                         {breach.breach_name}
                       </div>
                       <span
@@ -470,7 +472,7 @@ export function OsintEnrichmentPanel({
                       {breach.exposed_data_classes.map((cls, ci) => (
                         <span
                           key={ci}
-                          className="bg-rose-500/10 text-rose-300 border border-rose-500/20 text-[9px] font-mono px-1 rounded"
+className="bg-destructive/10 text-foreground border border-destructive/20 text-[9px] font-mono px-1 rounded"
                         >
                           {cls}
                         </span>
@@ -498,7 +500,7 @@ export function OsintEnrichmentPanel({
                 {scanResult.discovered_footprints.map((pivot, index) => (
                   <div
                     key={pivot.entity_id}
-                    className="p-3 rounded bg-amber-500/5 border border-amber-500/20 text-xs flex flex-col gap-2"
+className="p-3 rounded bg-warn/5 border border-warn/20 text-xs flex flex-col gap-2"
                   >
                     <div className="flex items-start justify-between min-w-0">
                       <div className="min-w-0">
@@ -509,7 +511,7 @@ export function OsintEnrichmentPanel({
                           {pivot.display_value}
                         </div>
                       </div>
-                      <span className="text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/25 px-1 py-0.5 rounded shrink-0">
+<span className="text-[9px] font-mono font-bold bg-warn/10 text-warn border border-warn/25 px-1 py-0.5 rounded shrink-0">
                         {Math.round(pivot.confidence * 100)}% Confidence
                       </span>
                     </div>
@@ -521,7 +523,7 @@ export function OsintEnrichmentPanel({
                     )}
 
                     <div className="flex gap-2 justify-end mt-1 border-t border-border/20 pt-2">
-                      <button
+                <button
                         onClick={() => handleIgnorePivot(pivot.entity_id)}
                         disabled={pivotLoadingId !== null}
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-border hover:bg-foreground/5 text-[10px] font-medium text-muted-foreground transition-all disabled:opacity-50"
@@ -532,7 +534,7 @@ export function OsintEnrichmentPanel({
                       <button
                         onClick={() => handleConfirmPivot(pivot.entity_id)}
                         disabled={pivotLoadingId !== null}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-500 text-slate-950 hover:bg-amber-400 text-[10px] font-semibold transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-warn text-warn-foreground hover:bg-warn/90 text-[10px] font-semibold transition-all disabled:opacity-50"
                       >
                         {pivotLoadingId === pivot.entity_id ? (
                           <RefreshCw className="h-3 w-3 animate-spin" />

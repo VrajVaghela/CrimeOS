@@ -40,7 +40,7 @@ Last updated: 2026-07-18 02:05 IST
 ## Problems solved
 
 - None in 10D (it is a verification phase; all 10A/B/C implementations were done in previous sessions).
-- Confirmed that `uploadVideo()` in `api.ts` correctly uses `/api/v1/video/analyze` which matches the router prefix `prefix="/api/v1/video"` in `backend/app/routers/video.py`.
+- Confirmed that `uploadVideo()` in `api.ts` correctly uses `/video/analyze` which matches the router prefix `prefix="/video"` in `backend/app/routers/video.py` (flattened from the old `/api/v1/video` in Phase 11A).
 - Confirmed that both raw `fetch()` calls in `api.ts` are within the file (not in page components), satisfying the provenance rule.
 
 ## Current state
