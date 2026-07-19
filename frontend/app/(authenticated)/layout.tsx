@@ -130,8 +130,8 @@ function AuthenticatedLayoutContent({
             <div className="p-1.5 rounded-squircle-sm border border-border bg-surface-alt flex items-center justify-center">
               <Shield className="h-5 w-5 text-info" />
             </div>
-            {!sidebarCollapsed && <div className="flex flex-1 flex-col min-w-0">
-              <div className="flex items-center">
+            {!sidebarCollapsed && <div className="flex flex-1 flex-col overflow-hidden">
+              <div className="flex items-center whitespace-nowrap">
                 <span className="font-heading font-bold text-sm tracking-wider text-foreground">CRIME OS</span>
                 <span className="font-heading font-bold text-sm tracking-wider text-primary ml-1">AI</span>
               </div>

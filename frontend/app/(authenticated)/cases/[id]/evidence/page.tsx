@@ -291,13 +291,13 @@ export default function EvidencePage() {
                   {/* Tags */}
                   <div className="flex flex-wrap gap-1 items-center">
                     <Tag className="h-3 w-3 text-muted-foreground shrink-0 mr-1" />
-                    {ev.ai_tags.tags.slice(0, 3).map((t) => (
+                    {(ev.ai_tags?.tags ?? []).slice(0, 3).map((t) => (
                       <Badge key={t} variant="secondary" className="text-[9px] uppercase font-mono">
                         {t}
                       </Badge>
                     ))}
-                    {ev.ai_tags.tags.length > 3 && (
-                      <span className="text-[9px] font-mono text-muted-foreground">+{ev.ai_tags.tags.length - 3}</span>
+                    {(ev.ai_tags?.tags?.length ?? 0) > 3 && (
+                      <span className="text-[9px] font-mono text-muted-foreground">+{(ev.ai_tags.tags.length - 3)}</span>
                     )}
                   </div>
 
