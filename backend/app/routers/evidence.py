@@ -26,26 +26,18 @@ async def upload_evidence(
 
     content = await file.read()
 
-    # 2. delegate creation & analysis to service
-    try:
-        evidence_record = evidence_service.create_evidence(
-            db=db,
-            case_id=case_id,
-            file_name=file.filename,
-            content_type=file.content_type or "application/octet-stream",
-            content=content,
-            current_user_id=current_user.id,
-        )
-        db.commit()
-        db.refresh(evidence_record)
-        return EvidenceOut.model_validate(evidence_record)
-    except Exception as e:
-        db.rollback()
-        # Raise standard HTTPException or let FastAPI handle it if AppError maps
-        from app.exceptions import AppError
-        if isinstance(e, AppError):
-            raise HTTPException(status_code=e.status_code, detail=e.message)
-        raise HTTPException(status_code=400, detail=str(e))
+    # 2. Delegate creation & analysis to service — AppError propagates to global handler
+    evidence_record = evidence_service.create_evidence(
+        db=db,
+        case_id=case_id,
+        file_name=file.filename,
+        content_type=file.content_type or "application/octet-stream",
+        content=content,
+        current_user_id=current_user.id,
+    )
+    db.commit()
+    db.refresh(evidence_record)
+    return EvidenceOut.model_validate(evidence_record)
 
 
 @router.get("/cases/{case_id}", response_model=list[EvidenceOut], summary="List all evidence files for a case")
@@ -67,26 +59,19 @@ async def create_marker(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> EvidenceMarkerOut:
-    try:
-        marker = evidence_service.create_marker(
-            db=db,
-            evidence_file_id=evidence_id,
-            marker_type=payload.marker_type,
-            start_ms=payload.start_ms,
-            end_ms=payload.end_ms,
-            transcript_text=payload.transcript_text,
-            linked_entity_ids=payload.linked_entity_ids,
-            current_user_id=current_user.id,
-        )
-        db.commit()
-        db.refresh(marker)
-        return EvidenceMarkerOut.model_validate(marker)
-    except Exception as e:
-        db.rollback()
-        from app.exceptions import AppError
-        if isinstance(e, AppError):
-            raise HTTPException(status_code=e.status_code, detail=e.message)
-        raise HTTPException(status_code=400, detail=str(e))
+    marker = evidence_service.create_marker(
+        db=db,
+        evidence_file_id=evidence_id,
+        marker_type=payload.marker_type,
+        start_ms=payload.start_ms,
+        end_ms=payload.end_ms,
+        transcript_text=payload.transcript_text,
+        linked_entity_ids=payload.linked_entity_ids,
+        current_user_id=current_user.id,
+    )
+    db.commit()
+    db.refresh(marker)
+    return EvidenceMarkerOut.model_validate(marker)
 
 
 @router.post("/markers/{marker_id}/link", response_model=EvidenceMarkerOut, summary="Link a marker to a case entity")
@@ -96,22 +81,15 @@ async def link_marker_to_entity(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> EvidenceMarkerOut:
-    try:
-        marker = evidence_service.link_marker_to_entity(
-            db=db,
-            marker_id=marker_id,
-            entity_id=entity_id,
-            current_user_id=current_user.id,
-        )
-        db.commit()
-        db.refresh(marker)
-        return EvidenceMarkerOut.model_validate(marker)
-    except Exception as e:
-        db.rollback()
-        from app.exceptions import AppError
-        if isinstance(e, AppError):
-            raise HTTPException(status_code=e.status_code, detail=e.message)
-        raise HTTPException(status_code=400, detail=str(e))
+    marker = evidence_service.link_marker_to_entity(
+        db=db,
+        marker_id=marker_id,
+        entity_id=entity_id,
+        current_user_id=current_user.id,
+    )
+    db.commit()
+    db.refresh(marker)
+    return EvidenceMarkerOut.model_validate(marker)
 
 
 @router.post("/markers/{marker_id}/promote", response_model=EvidenceMarkerOut, summary="Promote an evidence marker fact to the case timeline")
@@ -121,19 +99,12 @@ async def promote_marker(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> EvidenceMarkerOut:
-    try:
-        marker = evidence_service.promote_marker_to_case(
-            db=db,
-            marker_id=marker_id,
-            current_user_id=current_user.id,
-            note=note,
-        )
-        db.commit()
-        db.refresh(marker)
-        return EvidenceMarkerOut.model_validate(marker)
-    except Exception as e:
-        db.rollback()
-        from app.exceptions import AppError
-        if isinstance(e, AppError):
-            raise HTTPException(status_code=e.status_code, detail=e.message)
-        raise HTTPException(status_code=400, detail=str(e))
+    marker = evidence_service.promote_marker_to_case(
+        db=db,
+        marker_id=marker_id,
+        current_user_id=current_user.id,
+        note=note,
+    )
+    db.commit()
+    db.refresh(marker)
+    return EvidenceMarkerOut.model_validate(marker)

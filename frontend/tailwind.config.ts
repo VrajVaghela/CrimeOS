@@ -83,24 +83,24 @@ const config: Config = {
       },
       keyframes: {
         "fade-up": {
-          from: { opacity: "0", transform: "translateY(0.5rem)" },
-          to: { opacity: "1", transform: "translateY(0)" },
+          from: { opacity: "0", transform: "translate3d(0, 8px, 0)" },
+          to: { opacity: "1", transform: "translate3d(0, 0, 0)" },
         },
         "fade-in": {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
         "fade-down": {
-          from: { opacity: "0", transform: "translateY(-0.5rem)" },
-          to: { opacity: "1", transform: "translateY(0)" },
+          from: { opacity: "0", transform: "translate3d(0, -8px, 0)" },
+          to: { opacity: "1", transform: "translate3d(0, 0, 0)" },
         },
         "scale-in": {
-          from: { opacity: "0", transform: "scale(0.95)" },
+          from: { opacity: "0", transform: "scale(0.97)" },
           to: { opacity: "1", transform: "scale(1)" },
         },
         "slide-in-right": {
-          from: { opacity: "0", transform: "translateX(100%)" },
-          to: { opacity: "1", transform: "translateX(0)" },
+          from: { opacity: "0", transform: "translate3d(100%, 0, 0)" },
+          to: { opacity: "1", transform: "translate3d(0, 0, 0)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
@@ -138,11 +138,11 @@ const config: Config = {
         },
       },
       animation: {
-        "fade-up": "fade-up 300ms ease-out both",
-        "fade-in": "fade-in 400ms ease-out both",
-        "fade-down": "fade-down 300ms ease-out both",
-        "scale-in": "scale-in 300ms ease-out both",
-        "slide-in-right": "slide-in-right 300ms ease-out both",
+        "fade-up": "fade-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "fade-in": "fade-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "fade-down": "fade-down 220ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "scale-in": "scale-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "slide-in-right": "slide-in-right 260ms cubic-bezier(0.16, 1, 0.3, 1) both",
         "shimmer": "shimmer 2s ease-in-out infinite",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",

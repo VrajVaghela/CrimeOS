@@ -235,9 +235,9 @@ export default function EvidencePage() {
               <Card
                 key={ev.id}
                 hover
-                className="overflow-hidden cursor-pointer transition-all hover:scale-[1.01] flex flex-col justify-between"
+                className="overflow-hidden cursor-pointer transition-transform duration-150 hover:scale-[1.01] flex flex-col justify-between"
                 onClick={() => setSelectedEvidence(ev)}
-                style={{ animationDelay: `${idx * 50}ms` }}
+                style={{ animationDelay: `${Math.min(idx, 8) * 35}ms` }}
               >
                 <div>
                   {/* Thumb Preview Panel */}

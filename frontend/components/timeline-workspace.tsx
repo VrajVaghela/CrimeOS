@@ -151,7 +151,7 @@ function TimelineNode({ event }: { event: TimelineEventOut }) {
 
       {/* Card */}
       <div
-        className={`flex-1 mb-6 rounded-xl border bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 ${
+        className={`flex-1 mb-6 rounded-xl border bg-card p-4 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 ${
           isCctv
             ? "border-rose/40 hover:border-rose/70"
             : isAi

@@ -325,7 +325,7 @@ export default function RequestsPage() {
                     req.status === "responded" ? "border-success/30" : "",
                     "animate-fade-up",
                   ].join(" ")}
-                  style={{ animationDelay: `${idx * 60}ms` }}
+                  style={{ animationDelay: `${Math.min(idx, 8) * 35}ms` }}
                 >
                   {/* Status indicator bar */}
                   {req.status === "dispatched" && (

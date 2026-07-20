@@ -141,7 +141,7 @@ export default function SummaryPage() {
                         ? "bg-primary/10 border-primary text-foreground glow-primary"
                         : "bg-card border-border text-muted-foreground hover:bg-surface-elevated hover:text-foreground hover:border-primary/30",
                     ].join(" ")}
-                    style={{ animationDelay: `${idx * 50}ms` }}
+                    style={{ animationDelay: `${Math.min(idx, 8) * 35}ms` }}
                   >
                     <div className="flex items-center gap-1.5 font-heading text-sm font-bold text-foreground">
                       <FileText className="h-4 w-4 text-primary" />

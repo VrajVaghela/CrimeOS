@@ -147,7 +147,7 @@ export default function CasesPage() {
         <div className="flex items-center gap-2 shrink-0">
           <Button
             onClick={() => setDialogOpen(true)}
-            className="bg-[#dc0000] hover:bg-[#c00000] text-white rounded-squircle-sm hover:scale-105 hover:glow-primary transition-all duration-130"
+            className="hover:glow-primary hover:-translate-y-0.5 transition-all duration-150"
           >
             <Plus className="h-4 w-4" />
             New Case
@@ -228,8 +228,8 @@ export default function CasesPage() {
                     key={item.id}
                     id={`case-row-${item.id}`}
                     onClick={() => router.push(`/cases/${item.id}`)}
-                    className="w-full text-left flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:border-primary/40 hover:glow-primary hover:-translate-y-0.5 md:flex-row md:items-center md:justify-between animate-fade-up"
-                    style={{ animationDelay: `${idx * 60}ms` }}
+                    className="w-full text-left flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 transition-[transform,border-color,box-shadow] duration-150 hover:border-primary/40 hover:glow-primary hover:-translate-y-0.5 md:flex-row md:items-center md:justify-between animate-fade-up"
+                    style={{ animationDelay: `${Math.min(idx, 8) * 35}ms` }}
 
                   >
                     <div className="min-w-0 flex-1">

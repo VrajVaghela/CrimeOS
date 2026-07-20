@@ -178,8 +178,8 @@ export default function DashboardPage() {
                     return (
                       <div
                         key={req.id}
-                        className="py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between transition-all duration-200 hover:bg-primary/[0.02] rounded-lg px-2 -mx-2 animate-fade-up"
-                        style={{ animationDelay: `${idx * 50}ms` }}
+                        className="py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between transition-colors duration-150 hover:bg-primary/[0.02] rounded-lg px-2 -mx-2 animate-fade-up"
+                        style={{ animationDelay: `${Math.min(idx, 8) * 35}ms` }}
                       >
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -272,7 +272,7 @@ export default function DashboardPage() {
                       else router.push(`/cases/${item.id}`);
                     }}
                             className="w-full text-left flex flex-col gap-3 rounded-squircle border border-border/60 bg-card p-4 transition-colors duration-200 hover:border-primary/40 md:flex-row md:items-center md:justify-between animate-fade-up"
-                    style={{ animationDelay: `${idx * 80}ms` }}
+                    style={{ animationDelay: `${Math.min(idx, 8) * 35}ms` }}
 
                   >
                     <div className="min-w-0 flex-1">

@@ -315,21 +315,23 @@
     background: var(--surface);
   }
 
-  /* ── Animation delay utilities ── */
-  .delay-100 { animation-delay: 100ms; }
-  .delay-200 { animation-delay: 200ms; }
-  .delay-300 { animation-delay: 300ms; }
-  .delay-500 { animation-delay: 500ms; }
-  .delay-700 { animation-delay: 700ms; }
-  .delay-1000 { animation-delay: 1000ms; }
+  /* ── Animation delay utilities ──
+     Kept short: sections settle within ~250ms so the page never feels like
+     it's waiting on choreography (product register). */
+  .delay-100 { animation-delay: 60ms; }
+  .delay-200 { animation-delay: 120ms; }
+  .delay-300 { animation-delay: 180ms; }
+  .delay-500 { animation-delay: 240ms; }
+  .delay-700 { animation-delay: 300ms; }
+  .delay-1000 { animation-delay: 360ms; }
 
   /* ── Stagger animation children ── */
-  .stagger-1 { animation-delay: 50ms; }
-  .stagger-2 { animation-delay: 100ms; }
-  .stagger-3 { animation-delay: 150ms; }
-  .stagger-4 { animation-delay: 200ms; }
-  .stagger-5 { animation-delay: 250ms; }
-  .stagger-6 { animation-delay: 300ms; }
+  .stagger-1 { animation-delay: 35ms; }
+  .stagger-2 { animation-delay: 70ms; }
+  .stagger-3 { animation-delay: 105ms; }
+  .stagger-4 { animation-delay: 140ms; }
+  .stagger-5 { animation-delay: 175ms; }
+  .stagger-6 { animation-delay: 210ms; }
 
   /* ── Keyframes ── */
   @keyframes fade-in {
@@ -337,24 +339,24 @@
     to { opacity: 1; }
   }
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translate3d(0, 8px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes fade-down {
-    from { opacity: 0; transform: translateY(-12px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translate3d(0, -8px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.95); }
+    from { opacity: 0; transform: scale(0.97); }
     to { opacity: 1; transform: scale(1); }
   }
   @keyframes slide-in-right {
-    from { opacity: 0; transform: translateX(100%); }
-    to { opacity: 1; transform: translateX(0); }
+    from { opacity: 0; transform: translate3d(100%, 0, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes slide-in-left {
-    from { opacity: 0; transform: translateX(-100%); }
-    to { opacity: 1; transform: translateX(0); }
+    from { opacity: 0; transform: translate3d(-100%, 0, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes shimmer {
     0% { background-position: -200% 0; }
@@ -408,24 +410,27 @@
     100% { background-position: 200% 0; }
   }
 
-  /* ── Animation classes ── */
+  /* ── Animation classes ──
+     Product-register timing: fast (150–250ms), ease-out so entrances land
+     softly. Kept on transform/opacity only, so they stay on the compositor
+     and never repaint during scroll. */
   .animate-fade-in {
-    animation: fade-in 400ms ease-out both;
+    animation: fade-in 240ms var(--ease-standard) both;
   }
   .animate-fade-up {
-    animation: fade-up 300ms ease-out both;
+    animation: fade-up 220ms var(--ease-standard) both;
   }
   .animate-fade-down {
-    animation: fade-down 300ms ease-out both;
+    animation: fade-down 220ms var(--ease-standard) both;
   }
   .animate-scale-in {
-    animation: scale-in 300ms ease-out both;
+    animation: scale-in 200ms var(--ease-standard) both;
   }
   .animate-slide-in-right {
-    animation: slide-in-right 300ms ease-out both;
+    animation: slide-in-right 260ms var(--ease-standard) both;
   }
   .animate-slide-in-left {
-    animation: slide-in-left 300ms ease-out both;
+    animation: slide-in-left 260ms var(--ease-standard) both;
   }
   .animate-shimmer {
     background: linear-gradient(
@@ -504,6 +509,7 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;

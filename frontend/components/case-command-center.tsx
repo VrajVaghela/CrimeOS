@@ -44,24 +44,33 @@ function AnimatedMetric({ value, suffix = "" }: { value: number; suffix?: string
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
-    let start = 0;
-    const end = value;
-    if (start === end) {
-      setDisplayValue(end);
+    // Honor reduced-motion: land on the value immediately, no count-up.
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setDisplayValue(value);
       return;
     }
-    const duration = 800;
-    const increment = end / (duration / 16); // ~60fps
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= end) {
-        clearInterval(timer);
-        setDisplayValue(end);
-      } else {
-        setDisplayValue(Math.floor(start));
-      }
-    }, 16);
-    return () => clearInterval(timer);
+    if (value === 0) {
+      setDisplayValue(0);
+      return;
+    }
+
+    // rAF-driven count-up with ease-out so it decelerates into the final
+    // number. Self-corrects to real elapsed time, so it never drifts or janks.
+    const duration = 600;
+    let raf = 0;
+    let startTs = 0;
+    const step = (ts: number) => {
+      if (!startTs) startTs = ts;
+      const t = Math.min((ts - startTs) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      setDisplayValue(Math.round(value * eased));
+      if (t < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
   }, [value]);
 
   return <span className="font-mono">{displayValue}{suffix}</span>;

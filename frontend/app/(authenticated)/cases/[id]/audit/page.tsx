@@ -161,7 +161,7 @@ export default function AuditPage() {
                 <div
                   key={event.id}
                   className="relative flex gap-4 pb-6 pl-12 animate-fade-up"
-                  style={{ animationDelay: `${idx * 40}ms` }}
+                  style={{ animationDelay: `${Math.min(idx, 8) * 30}ms` }}
                 >
                   {/* Timeline node — color-coded by action type */}
                   <div
@@ -179,7 +179,7 @@ export default function AuditPage() {
                       "flex-1 rounded-[12px] border p-4 transition-all cursor-pointer",
                       idx === 0
                         ? "bg-primary/5 border-primary/40 glow-primary"
-                        : "bg-[#171717] border-border hover:border-primary/30 hover:bg-primary/5",
+                        : "bg-card border-border hover:border-primary/30 hover:bg-primary/5",
                     ].join(" ")}
                     onClick={() => setExpandedId(isExpanded ? null : event.id)}
                   >

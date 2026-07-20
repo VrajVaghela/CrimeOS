@@ -149,7 +149,7 @@ export default function ResponsesPage() {
                         ? "bg-primary/10 border-primary text-foreground"
                         : "bg-card/50 border-border/60 text-muted-foreground hover:bg-secondary hover:text-foreground",
                     ].join(" ")}
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
                   >
                     <div className="flex items-center gap-1.5 font-heading text-sm font-bold text-foreground">
                       <FileText className="h-4 w-4 text-primary" />
