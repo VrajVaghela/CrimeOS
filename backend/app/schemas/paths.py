@@ -39,6 +39,11 @@ class PathStepOut(BaseModel):
 class InvestigationPathOut(BaseModel):
     id: uuid.UUID
     case_id: uuid.UUID
+    parent_path_id: uuid.UUID | None = None
+    revision_number: int
+    trigger_type: str
+    change_reason: str | None = None
+    is_active: bool
     generated_at: datetime
     model_used: str
     steps: list[PathStepOut] = []
@@ -54,3 +59,9 @@ class PathGenerationStatusOut(BaseModel):
     message: str
     path: InvestigationPathOut | None = None
     case_sections: list[CaseSectionOut] = []
+
+
+class PathRevisionTriggerIn(BaseModel):
+    trigger_type: str  # "complaint", "entities_verified", "evidence", "provider_response", "manual"
+    change_reason: str
+

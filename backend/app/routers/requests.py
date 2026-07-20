@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import get_current_user, require_role
 from app.models import User, UserRole
-from app.schemas.requests import LegalRequestCreateIn, LegalRequestUpdateIn, LegalRequestOut
+from app.schemas.requests import LegalRequestCreateIn, LegalRequestUpdateIn, LegalRequestOut, RequestReadinessOut
 from app.services import legal_request_service
+
 
 router = APIRouter(prefix="/requests", tags=["legal requests"])
 
@@ -86,6 +87,15 @@ async def approve_request(
     return LegalRequestOut.model_validate(request)
 
 
+@router.get("/{request_id}/readiness", response_model=RequestReadinessOut, summary="Get pre-dispatch readiness checklist")
+async def get_request_readiness(
+    request_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> RequestReadinessOut:
+    readiness = legal_request_service.check_request_readiness(db, request_id, current_user)
+    return RequestReadinessOut.model_validate(readiness)
+
 
 @router.post("/{request_id}/dispatch", response_model=LegalRequestOut, summary="Dispatch a legal request via email")
 async def dispatch_request(
@@ -95,3 +105,4 @@ async def dispatch_request(
 ) -> LegalRequestOut:
     request = await legal_request_service.dispatch_request(db, request_id, current_user)
     return LegalRequestOut.model_validate(request)
+

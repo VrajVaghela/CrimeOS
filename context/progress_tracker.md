@@ -50,7 +50,8 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] Evidence image upload + AI tagging
 - [x] Polish: loading/empty states, second seeded case, DEMO_SCRIPT.md
 - [x] Deliverable docs: architecture diagram, SOP-grounding note, sample datasets in data/
-- [ ] ✅ CHECKPOINT: 5-min demo rehearsed twice from fresh seed
+- [x] ✅ CHECKPOINT: 5-min demo rehearsed twice from fresh seed
+  - Confirmed by user 2026-07-18 as part of the Phase 11D fresh-seed rehearsal.
 
 ## Phase 7 — Frontend Design Refinement & Impeccable Polish
 - [x] Typography Pass: Space Grotesk layout, letter-spacing check, Indic fallbacks
@@ -63,43 +64,141 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 
 ## Phase 8 — Investigation Intelligence & Command Center
 ### 8A — Design and workflow foundation
-- [ ] Resolve font/token drift and remove non-AI side-stripe usage
-- [ ] Add `case_workflow_state` schema, migration, service, router, and typed API contract
-- [ ] Build Case Command Center with workflow spine, blockers, next-best action, and recent activity
-- [ ] Group case navigation into Work / Evidence / Record without breaking deep links
-- [ ] ☐ CHECKPOINT: seeded case opens with a truthful workflow state and one obvious next action
+- [x] Resolve font/token drift and remove non-AI side-stripe usage
+- [x] Add `case_workflow_state` schema, migration, service, router, and typed API contract
+- [x] Build Case Command Center with workflow spine, blockers, next-best action, and recent activity
+- [x] Group case navigation into Work / Evidence / Record without breaking deep links
+- [x] ✅ CHECKPOINT: seeded case opens with a truthful workflow state and one obvious next action
+
 
 ### 8B — Adaptive paths and entity intelligence
-- [ ] Add append-only investigation path revisions and visible change explanations
-- [ ] Normalize case entities and preserve raw mentions/confidence
-- [ ] Add entity relationships and grouped entity pivot panel
-- [ ] Add cautious possible-match related-case search with source disclosure
-- [ ] ☐ CHECKPOINT: provider response creates a cited path revision and entity pivot
+- [x] Add append-only investigation path revisions and visible change explanations
+- [x] Normalize case entities and preserve raw mentions/confidence
+- [x] Add entity relationships and grouped entity pivot panel
+- [x] Add cautious possible-match related-case search with source disclosure
+- [x] ✅ CHECKPOINT: provider response creates a cited path revision and entity pivot
 
 ### 8C — Evidence workspace
 - [x] Add evidence markers, transcript segments, timestamps, and entity links
-- [x] Add original/translation review surface and explicit "add to case" actions (officer notes)
-- [x] Add audit events for evidence links and promoted facts (cctv_frame_pinned, officer_note_added, timeline_synthesized)
-- [x] Timeline Agent: AI-synthesized case timeline + CCTV frame upload + Gemini Vision location pinpointing
-- [x] ☐ CHECKPOINT: evidence marker links to an entity and appears in the audit trail
+- [x] Add original/translation review surface and explicit “add to case” actions
+- [x] Add audit events for evidence links and promoted facts
+- [x] ✅ CHECKPOINT: evidence marker links to an entity and appears in the audit trail
 
 ### 8D — Cited case copilot
-- [ ] Add `ai_citations` and `copilot_messages` schema, migration, and typed API contracts
-- [ ] Add case-scoped read-only copilot with named prompts and source chips
-- [ ] Add deterministic fallback and audited question/answer events
-- [ ] ☐ CHECKPOINT: three seeded questions return grounded answers and no citation-free output
+- [x] Add `ai_citations` and `copilot_messages` schema, migration, and typed API contracts
+- [x] Add case-scoped read-only copilot with named prompts and source chips
+- [x] Add deterministic fallback and audited question/answer events
+- [x] ✅ CHECKPOINT: three seeded questions return grounded answers and no citation-free output
 
 ### 8E — Request quality and response correlation
-- [ ] Add pre-dispatch readiness service and checklist UI
-- [ ] Block dispatch when required data, approval, or provenance is missing
-- [ ] Add explainable provider-response correlations with promote-to-diary action
-- [ ] ☐ CHECKPOINT: flagged response rows trace back to raw data, entities, and a path step
+- [x] Add pre-dispatch readiness service and checklist UI
+- [x] Block dispatch when required data, approval, or provenance is missing
+- [x] Add explainable provider-response correlations with promote-to-diary action
+- [x] ✅ CHECKPOINT: flagged response rows trace back to raw data, entities, and a path step
+
 
 ### 8F — Demo hardening
-- [ ] Seed Phase 8 examples and add fresh-seed smoke steps
-- [ ] Verify keyboard, contrast, reduced-motion, responsive, loading, empty, and failure states
-- [ ] Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed
-- [ ] ☐ CHECKPOINT: golden path plus one Phase 8 intelligence moment completes in under 7 minutes
+- [x] Seed Phase 8 examples and add fresh-seed smoke steps
+- [x] Verify keyboard, contrast, reduced-motion, responsive, loading, empty, and failure states
+- [x] Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed
+- [x] ✅ CHECKPOINT: golden path plus one Phase 8 intelligence moment completes in under 7 minutes
+
+## Phase 9 — Ferrari Design System Overhaul
+- [x] Phase 9A — Global Styles & Core Tokens Setup (CSS variables, tailwind.config mapping, backgrounds, layout fonts)
+- [x] Phase 9B — Navigation Sidebar & Command Topbar (sidebar, topbar, active/hover navigation styles)
+- [x] Phase 9C — Case Workspace Hero & Signal Cards (case hero layout, 4-column signals, confidence indicators)
+- [x] Phase 9D — Workspace Panels & Steppers (stepper links, entity grid rows, SVG timeline charts)
+- [x] Phase 9E — Summary, Dialogs & Micro-interactions (warm surface card, glass overlays, toast notification transitions)
+- [x] Phase 9F — Integration & Verification (contrast validation, responsive breakpoints, golden path verification)
+- [x] ✅ CHECKPOINT: Full design overhauled to Ferrari command center look, all functions verified.
 
 
 
+
+- [x] Professional polish pass: removed decorative grid/glow/stripe treatments, tightened shared controls, and fixed authenticated-shell prerendering.
+- [x] Shell usability pass: retractable sidebar, flow-based case header, redundant scrollbar cleanup, and right-edge copilot drawer.
+- [x] Shell and login polish: pinned sidebar footer, single workspace scroll owner, aligned spacing, and restrained sign-in surface.
+
+## Phase 10 — Selective Upstream Feature Integration
+Planning baseline: `vraj` remains canonical; current uncommitted work is protected. Source branches are feature references only.
+
+- [x] Read and compare upstream branch histories (`origin/main`, `origin/crimeos/digitalfootprint`, `origin/crimeos/videoAnalyzer`)
+- [x] Document selective-port architecture, merge order, conflict policy, and acceptance checkpoints in `architecture.md` and `build_plan.md`
+- [x] 10.0 Protected baseline: preserve/commit current `vraj` work before merge operations
+- [x] 10A Timeline Agent + CCTV pinning: native integration of `origin/main` timeline feature
+- [x] 10A checkpoint: timeline synthesis, officer note, CCTV pin, provenance, and audit verified
+- [x] 10B OSINT enrichment: native FastAPI/PostgreSQL/Next.js port of digital-footprint behavior
+- [x] 10B checkpoint: deterministic entity risk summary, sources, unconfirmed pivots, and audit verified
+- [x] 10C Video evidence analysis: native case-scoped upload, background progress, report, and seekable timeline
+- [x] 10C checkpoint: video workflow and audit verified without Celery/Redis/Mongo or a duplicate app
+- [x] 10D Full integration verification: golden path plus one intelligence moment from a fresh seed
+- [x] 10D checkpoint: all retained `vraj` features and selected upstream features pass smoke/review checks
+
+### 10D Verification Summary (2026-07-18)
+- Frontend: `next build` ✅ zero errors, 14 routes compiled cleanly
+- TypeScript: `tsc --noEmit` ✅ zero errors
+- Backend: `python -c "import app.main"` ✅ all routers import cleanly (auth, cases, ingestion, paths, requests, responses, summaries, audit, mock_provider, mock_cctns, evidence, command_center, entities, copilot, timeline, osint, video)
+- Raw fetch() audit: ✅ all `fetch()` calls are inside `lib/api.ts` (generic wrapper + OSINT dossier export)
+- Route provenance review: ✅ every Phase 10 router uses `get_current_user`, no business logic in HTTP layer
+- Phase 10 seeds added: 6 timeline events + 1 CCTV evidence + 1 video fixture for Case 2
+- DEMO_SCRIPT updated with 10A/10B/10C moments + fresh-seed smoke checklist
+- ui_registry.md: Phase 10 components marked BUILT
+- memory.md written at project root
+
+### 10D Post-review note (2026-07-18)
+- Functional build/import checks passed, but `CODE_REVIEW.md` found security,
+  shared-boundary, API-contract, router-convention, and UI-token debt in the
+  Phase 10 ports. The 10D integration checkbox records feature integration;
+  Phase 11 below is required before calling the code review closed or treating
+  the demo as ship-ready.
+
+## Phase 11 — Code Review Conformance & Demo Hardening
+Planning source: `CODE_REVIEW.md` generated 2026-07-18. No implementation has
+been performed for this phase yet.
+
+### 11A — Security and API contract
+- [x] Authenticate video status and report reads and enforce accessible-case ownership
+- [x] Move video routes to the flat `/video` contract and update typed client paths
+- [x] Replace `celery_state` with provider-neutral processing states across API/UI
+- [x] Make video handlers async and remove router-level exception remapping drift
+- [x] ✅ CHECKPOINT: unauthenticated video reads fail safely and the new contract works
+
+### 11B — Shared AI, audit, and provenance boundaries
+- [x] Route all video Gemini work through `gemini_client.py` with retry/cache/logging
+- [x] Move the video forensic prompt into named `prompts.py` constants
+- [x] Route chain-of-custody audit writes through `audit_service.record(...)` with actor identity
+- [x] Replace MD5 content fingerprints with SHA-256 throughout the video workflow
+- [x] ✅ CHECKPOINT: video fallback, provenance, actor-attributed audit, and chain verification pass
+  - Re-verified in 11D: deterministic fallback validates against `IncidentReport`,
+    provenance recorded in `ai_tags`, audit events carry actor `user_id`, SHA-256
+    chain append/verify passes and detects tampering.
+
+### 11C — Frontend conformance and feedback states
+- [x] Replace raw palette/hex/shadow values in the flagged Phase 10 surfaces with UI tokens
+- [x] Replace `catch (err: any)` with `unknown`-safe error narrowing
+- [x] Replace request/CCTNS browser alerts with toast or `<Alert>` feedback
+- [x] Preserve video loading, failure, responsive, and reduced-motion states under the new contract
+- [x] ✅ CHECKPOINT: targeted UI passes token, strict-TypeScript, and no-browser-alert audits
+  - Verified 2026-07-18: targeted static audit clean; local `tsc --noEmit` clean; `next build` clean.
+
+### 11D — Verification and handoff
+- [x] Run static boundary audits for Gemini imports, audit writes, prompts, auth, async routers, and Celery terminology
+- [x] Run frontend build/type checks and verify all HTTP remains behind `lib/api.ts`
+- [x] Confirm or perform the still-open Phase 6 five-minute fresh-seed rehearsal
+- [x] Rehearse the golden path plus authenticated video upload → report → timeline seek from a fresh seed
+- [x] Verify unauthenticated, inaccessible, Gemini-failure, invalid-file, oversized-file, and UI mutation-failure cases
+- [x] ✅ CHECKPOINT: all `CODE_REVIEW.md` findings are closed or explicitly documented
+  - Verified 2026-07-18. Static audits: only `gemini_client.py` imports google-genai;
+    no `AuditEvent(...)` construction outside the model (`LedgerService` routes through
+    `audit_service.record()` with actor `user_id`); `VIDEO_FORENSIC_ANALYSIS_PROMPT` is a
+    named constant; both video reads require `get_current_user` + `_ensure_case_access`;
+    video routers are `async`; no Celery vocabulary; SHA-256 end to end; flat `/video`
+    prefix. Build: `tsc --noEmit` clean, `next build` clean (14 routes), `import app.main`
+    OK. All frontend HTTP behind `lib/api.ts` (only two `fetch` calls, both in `api.ts`).
+    Negative cases (TestClient, 7/7): unauth status/report → 401, authed-missing → 404,
+    unsupported ext → 415, spoofed .mp4 signature → 415, missing case → 404, malformed
+    case_id → 400. Access guard (unit): cross-owner IO → 403, owner IO / SHO allowed,
+    missing case → 404. Deterministic fallback validates against `IncidentReport`.
+    Chain of custody: time-separated append→verify passes, tamper detected, actor
+    attributed. Also fixed `/api/v1/video` → `/video` doc drift in `DEMO_SCRIPT.md` and
+    `memory.md`. Golden-path + video live rehearsal confirmed by user.

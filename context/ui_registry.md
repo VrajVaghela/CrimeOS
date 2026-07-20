@@ -96,77 +96,134 @@ Last updated: 2026-07-05
 - Props: N/A (reads from API directly)
 - Used in: `app/cases/[id]/summary/page.tsx`
 
+### CaseCommandCenter — BUILT (Phase 8A)
+- Path: components/case-command-center.tsx
+- Purpose: case overview projection showing workflow spine, blockers, next-best action, key entities, active requests, latest insight, and recent activity
+- Props: `caseId: string`
+- Used in: `app/cases/[id]/page.tsx`
+
+### WorkflowSpine — BUILT (Phase 8A)
+- Path: components/workflow-spine.tsx
+- Purpose: compact Ingest → Verify → Investigate → Request → Analyze → Summarize progress indicator with accessible stage labels
+- Props: `stages: WorkflowStageOut[]`, `currentStage: string`, `onStageSelect?: (stage) => void`
+- Used in: `CaseCommandCenter`
+
+### NextBestAction — BUILT (Phase 8A)
+- Path: components/next-best-action.tsx
+- Purpose: single prioritized action with blocker explanation and direct route/mutation callback
+- Props: `actionType: string | null`, `actionLabel: string | null`, `blockerCodes: string[]`, `onAction: (actionType: string) => void`, `disabled?: boolean`
+- Used in: `CaseCommandCenter`
+
+### SourceChip — BUILT (Phase 8B)
+- Path: components/source-chip.tsx
+- Purpose: compact provenance link showing source type, label, locator, and confidence
+- Props: `sourceType: string`, `sourceLabel: string`, `locator?: string`, `confidence?: number`
+- Used in: AI content cards, entity pivots
+
+### PathRevisionList — BUILT (Phase 8B)
+- Path: components/path-revision-list.tsx
+- Purpose: active and superseded adaptive investigation-path revisions with trigger and change explanation
+- Props: `revisions: InvestigationPathOut[]`, `activeRevisionId: string | null`, `onSelectRevision: (revision: InvestigationPathOut) => void`, `selectedRevisionId: string | null`
+- Used in: `app/cases/[id]/path/page.tsx`
+
+### EntityPivotPanel — BUILT (Phase 8B)
+- Path: components/entity-pivot-panel.tsx
+- Purpose: grouped case entities with confidence, source links, related cases, and evidence/request pivots
+- Props: `entities: CaseEntityOut[]`, `relationships: EntityRelationshipOut[]`, `relatedCases: RelatedCaseOut[]`, `onSync: () => Promise<void>`
+- Used in: `CaseCommandCenter`, `app/cases/[id]/page.tsx`
+### EvidenceReviewWorkspace — BUILT (Phase 8C)
+- Path: components/evidence-review-workspace.tsx
+- Purpose: original media/transcript/translation review with timestamp markers and explicit add-to-case actions
+- Props: `evidence: EvidenceOut`, `onRefresh: () => void`
+- Used in: `app/cases/[id]/evidence/page.tsx`
+
 ## Planned Phase 8 components
 These entries define the intended reusable surfaces. Mark them BUILT and add concrete usage after implementation; do not create duplicates with different names.
 
-### CaseCommandCenter
-- Path: components/case-command-center.tsx
-- Purpose: case overview projection showing workflow spine, blockers, next-best action, key entities, active requests, latest insight, and recent activity
-- Props: `caseId: string`, `workflow: CaseWorkflowStateOut`, `caseData: CaseDetailOut`
-- Used in: `app/cases/[id]/page.tsx`
-
-### WorkflowSpine
-- Path: components/workflow-spine.tsx
-- Purpose: compact Ingest → Verify → Investigate → Request → Analyze → Summarize progress indicator with accessible stage labels
-- Props: `stages: WorkflowStageOut[]`, `currentStage: WorkflowStage`, `onStageSelect?: (stage) => void`
-- Used in: `CaseCommandCenter`
-
-### NextBestAction
-- Path: components/next-best-action.tsx
-- Purpose: single prioritized action with blocker explanation and direct route/mutation callback
-- Props: `action: NextActionOut`, `onAction: () => void`, `disabled?: boolean`
-- Used in: `CaseCommandCenter`
-
-### SourceChip
-- Path: components/source-chip.tsx
-- Purpose: compact provenance link showing source type, label, locator, and confidence
-- Props: `source: AiCitationOut`, `onOpen?: () => void`
-- Used in: AI content, copilot, response correlations, summary
-
-### PathRevisionList
-- Path: components/path-revision-list.tsx
-- Purpose: active and superseded adaptive investigation-path revisions with trigger and change explanation
-- Props: `revisions: InvestigationPathRevisionOut[]`, `activeRevisionId: string`
-- Used in: `app/cases/[id]/path/page.tsx`
-
-### EntityPivotPanel
-- Path: components/entity-pivot-panel.tsx
-- Purpose: grouped case entities with confidence, source links, related cases, and evidence/request pivots
-- Props: `entities: CaseEntityOut[]`, `relationships: EntityRelationshipOut[]`, `onSelect: (entityId) => void`
-- Used in: `CaseCommandCenter`, `app/cases/[id]/evidence/page.tsx`
-
-### EvidenceReviewWorkspace
-- Path: components/evidence-review-workspace.tsx
-- Purpose: original media/transcript/translation review with timestamp markers and explicit add-to-case actions
-- Props: `evidence: EvidenceOut`, `markers: EvidenceMarkerOut[]`, `onLink: (markerId, entityId) => Promise<void>`
-- Used in: `app/cases/[id]/evidence/page.tsx`
-
-### CopilotPanel
+### CopilotPanel — BUILT (Phase 8D)
 - Path: components/copilot-panel.tsx
 - Purpose: case-scoped read-only assistant with grounded answers, source chips, fallback state, and audited prompts
-- Props: `caseId: string`, `messages: CopilotMessageOut[]`, `onAsk: (question: string) => Promise<void>`
-- Used in: `CaseCommandCenter`, case detail pages
+- Props: `caseId: string`
+- Used in: `CopilotDrawer`
 
-### RequestReadinessChecklist
+### CopilotDrawer — BUILT (Phase 9)
+- Path: components/copilot-drawer.tsx
+- Purpose: persistent right-edge AI trigger that opens the case-scoped copilot in an off-canvas drawer
+- Props: `caseId: string`
+- Used in: `app/cases/[id]/layout.tsx`
+
+**Pattern notes:** Keep the launcher compact and icon-first. The drawer owns the only intentional full-height overlay and reuses `CopilotPanel` so citations, fallback states, and read-only behavior stay consistent.
+
+### RequestReadinessChecklist — BUILT (Phase 8E)
 - Path: components/request-readiness-checklist.tsx
 - Purpose: pre-dispatch validation checklist with missing-data links and approval state
-- Props: `readiness: RequestReadinessOut`, `onResolve: (item) => void`
+- Props: `readiness: RequestReadinessOut`, `onEditClick?: () => void`, `onRoleApprovalClick?: () => void`
 - Used in: `app/cases/[id]/requests/page.tsx`
 
-### ResponseCorrelationPanel
+### ResponseCorrelationPanel — BUILT (Phase 8E)
 - Path: components/response-correlation-panel.tsx
 - Purpose: explains flagged provider rows and links them to entities, evidence, and investigation steps
-- Props: `correlations: ResponseCorrelationOut[]`, `onPromote: (correlationId) => Promise<void>`
-- Used in: `app/cases/[id]/responses/page.tsx`
+- Props: `correlations: ResponseCorrelationOut[]`, `onPromote: (rowIndex: number) => Promise<void>`
+- Used in: `app/cases/[id]/requests/page.tsx`
 
-### TimelineEventNode — BUILT (Phase 8C)
-- Path: app/cases/[id]/timeline/page.tsx (inline component)
-- Purpose: renders a single chronological timeline event node with type-coded dot, AI badge, confidence chip, location chip, and CCTV intelligence expand/collapse detail panel
-- Props: `event: TimelineEventOut`
-- Used in: `app/cases/[id]/timeline/page.tsx`
+## Planned Phase 10 Components
 
-### CctvIntelPanel — BUILT (Phase 8C)
-- Path: app/cases/[id]/timeline/page.tsx (inline component, exported as CctvPanel)
-- Purpose: drag-drop CCTV frame uploader that calls Gemini Vision, shows analysis result (OSD timestamp, location, persons, vehicles, forensic flags), and pins a timeline event on success
-- Props: `caseId: string`, `onPinned: (result: CctvPinOut) => void`
-- Used in: `app/cases/[id]/timeline/page.tsx`
+These are planned native ports of upstream behavior. Do not copy the separate
+Go/Vite component implementations or create parallel application shells. Mark
+an entry BUILT only after the implementation and its checkpoint pass.
+
+### TimelineWorkspace — BUILT (Phase 10A)
+- Path: components/timeline-workspace.tsx
+- Purpose: chronological AI/officer timeline with CCTV pins, source references, confidence, and note actions
+- Props: `caseId: string`, `events: TimelineEventOut[]`, callbacks for note/CCTV actions
+- Used in: `app/(authenticated)/cases/[id]/timeline/page.tsx`
+
+### OsintEnrichmentPanel — BUILT (Phase 10B)
+- Path: components/osint-enrichment-panel.tsx
+- Purpose: case-entity OSINT risk summary with social profiles, breach exposure, risk level banners, and unconfirmed pivots
+- Props: `caseId: string`, `entity: CaseEntityOut`, `onPivotAction: () => Promise<void>`
+- Used in: `EntityPivotPanel` (`components/entity-pivot-panel.tsx`)
+
+### VideoEvidenceWorkspace — BUILT (Phase 10C)
+- Path: components/video-evidence-workspace.tsx
+- Purpose: secure video upload/progress plus native video playback synchronized to timestamped incident events
+- Props: `evidence: EvidenceOut`, `onRefresh: () => void`
+- Used in: `app/(authenticated)/cases/[id]/evidence/page.tsx`
+
+## Phase 9 — Ferrari Design Upgrades (not new components, updated existing)
+
+### PathStepper — UPGRADED (Phase 9D)
+- Connector lines now use `var(--gradient-accent-info-v)` (red→blue) for done steps
+- Active step card uses `.glass` with `border-primary/60 glow-primary`  
+- Step cards use `rounded-[12px]` squircle radius
+- Citation button uses info-blue style
+
+### CitationDialog — UPGRADED (Phase 9D/9E)
+- Trigger uses info-blue border/text
+- Dialog content uses `.glass-strong` panel with `rounded-[12px]`
+- Content block uses info-blue left border
+
+### SummaryPage — UPGRADED (Phase 9E)
+- Summary card uses `var(--surface-warm)` (#23130f) background
+- Blue AI icon header with rounded-[8px] container
+- Red primary CTA button with scale-105 hover + glow
+- Info-blue left-bordered content block
+
+### Dialog (UI) — UPGRADED (Phase 9E)
+- Backdrop: `bg-[#0b0b0b]/85 backdrop-blur-xl`
+- Content: `bg-[#171717]/90 backdrop-blur-xl rounded-[12px]`
+
+### Button (UI) — UPGRADED (Phase 9E)
+- Base transition: `duration-[130ms]` (130ms per Ferrari spec)
+- Default/destructive/success variants: `hover:scale-105` (previously scale-[1.02])
+
+### AuditPage — UPGRADED (Phase 9D)
+- Timeline vertical line: `var(--gradient-accent-info-v)` red→blue gradient
+- Event cards: `rounded-[12px]` squircle; latest card gets `glow-primary`
+
+### CaseCommandCenter Signal Cards — UPGRADED (Phase 9D)
+- All 4 signal cards: `rounded-[12px]` squircle, `bg-[#171717]`, `duration-[130ms]`
+
+### Root Layout SVG Defs — ADDED (Phase 9F)
+- Global `<svg>` element with `linearGradient` defs for gradient IDs:
+  `#gradient-accent-info-h`, `#gradient-accent-info-v`, `#gradient-graph-fill`

@@ -150,6 +150,23 @@ async def update_entity(
         raise HTTPException(status_code=404, detail="Entity not found")
 
     entity.value = body.value
+    db.flush()
+
+    from app.services import entity_service, path_revision_service
+    entity_service.sync_case_entities(db, case_id=case_id)
+    try:
+        path_revision_service.generate_path_revision(
+            db=db,
+            case_id=case_id,
+            user_id=current_user.id,
+            trigger_type="entities_verified",
+            change_reason=f"Investigating Officer verified or corrected case entity ({entity.entity_type}) to '{body.value}'."
+        )
+    except Exception as pr_exc:
+        # Don't fail the correction if path revision fails, but log it
+        import logging
+        logging.getLogger("crime_os.ingestion").error("Path revision failed on entity update: %s", pr_exc, exc_info=True)
+
     audit_service.record(
         db,
         case_id=case_id,

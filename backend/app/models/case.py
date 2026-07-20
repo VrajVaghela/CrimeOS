@@ -21,4 +21,6 @@ class Case(UuidPkMixin, Base):
     creator = relationship("User", back_populates="cases")
     complaints = relationship("Complaint", back_populates="case")
     audit_events = relationship("AuditEvent", back_populates="case")
+    workflow_state = relationship("CaseWorkflowState", back_populates="case", uselist=False, cascade="all, delete-orphan")
     timeline_events = relationship("TimelineEvent", back_populates="case", cascade="all, delete-orphan")
+

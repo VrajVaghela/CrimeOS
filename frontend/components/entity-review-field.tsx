@@ -30,7 +30,10 @@ export function EntityReviewField({ entity, onChange }: EntityReviewFieldProps) 
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(entity.value);
   const [saving, setSaving] = useState(false);
-  const isLowConfidence = entity.confidence < 0.7;
+  const confidence = entity.confidence;
+  const isHigh = confidence >= 0.85;
+  const isMedium = confidence >= 0.7 && confidence < 0.85;
+  const isLow = confidence < 0.7;
 
   const handleSave = async () => {
     if (value === entity.value) {
@@ -49,8 +52,10 @@ export function EntityReviewField({ entity, onChange }: EntityReviewFieldProps) 
   return (
     <div
       className={[
-        "rounded-lg border bg-secondary p-3 transition-all duration-200",
-        isLowConfidence ? "border-accent/80 ring-2 ring-accent/25 shadow-[0_0_12px_rgba(245,158,11,0.2)]" : "border-border",
+        "rounded-[8px] border bg-secondary p-3 transition-all duration-200",
+        isLow
+          ? "border-warn/80 ring-2 ring-warn/25 shadow-[0_0_12px_rgba(255,210,0,0.15)]"
+          : "border-border",
       ].join(" ")}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -63,19 +68,33 @@ export function EntityReviewField({ entity, onChange }: EntityReviewFieldProps) 
         <div className="flex items-center gap-1.5 flex-shrink-0">
           <span
             className={[
-              "font-mono text-xs",
-              isLowConfidence ? "text-accent" : "text-muted-foreground",
+              "font-mono text-xs font-bold",
+              isHigh ? "text-success" : "text-warn",
             ].join(" ")}
             title={`Confidence: ${Math.round(entity.confidence * 100)}%`}
           >
             {Math.round(entity.confidence * 100)}%
           </span>
-          {isLowConfidence && (
+          {isLow ? (
             <Badge
-              className="bg-accent/20 text-accent border-accent/30 text-xs px-1.5 py-0"
+              className="bg-warn/15 text-warn border-warn/20 text-[10px] px-1.5 py-0 hover:bg-warn/20 rounded-squircle-sm"
               variant="outline"
             >
               Review
+            </Badge>
+          ) : isMedium ? (
+            <Badge
+              className="bg-warn/10 text-warn border-warn/20 text-[10px] px-1.5 py-0 hover:bg-warn/15 rounded-squircle-sm"
+              variant="outline"
+            >
+              Medium
+            </Badge>
+          ) : (
+            <Badge
+              className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0 hover:bg-success/15 rounded-squircle-sm"
+              variant="outline"
+            >
+              Verify
             </Badge>
           )}
         </div>

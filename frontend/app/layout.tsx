@@ -1,28 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Outfit, IBM_Plex_Mono, Noto_Sans_Devanagari, Noto_Sans_Gujarati } from "next/font/google";
+import { Noto_Sans_Devanagari, Noto_Sans_Gujarati } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-  weight: ["300", "400", "500", "600"],
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
-  weight: ["400", "500", "600"],
-});
 
 const notoDevanagari = Noto_Sans_Devanagari({
   subsets: ["devanagari"],
@@ -44,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B0F19",
+  themeColor: "#0b0b0b",
   width: "device-width",
   initialScale: 1,
 };
@@ -53,10 +32,29 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang="en"
-      className={`dark ${plusJakartaSans.variable} ${outfit.variable} ${ibmPlexMono.variable} ${notoDevanagari.variable} ${notoGujarati.variable}`}
+      className={`dark ${notoDevanagari.variable} ${notoGujarati.variable}`}
     >
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {/* Hidden SVG defs for gradient IDs reused by chart components (Phase 9D/9F) */}
+          <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
+            <defs>
+              <linearGradient id="gradient-accent-info-h" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="var(--accent)" />
+                <stop offset="100%" stopColor="var(--info)" />
+              </linearGradient>
+              <linearGradient id="gradient-accent-info-v" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="var(--accent)" />
+                <stop offset="100%" stopColor="var(--info)" />
+              </linearGradient>
+              <linearGradient id="gradient-graph-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.15" />
+                <stop offset="100%" stopColor="var(--info)" stopOpacity="0.02" />
+              </linearGradient>
+            </defs>
+          </svg>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
