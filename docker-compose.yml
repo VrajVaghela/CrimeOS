@@ -1,6 +1,8 @@
 services:
   db:
-    image: pgvector/pgvector:pg16
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     restart: unless-stopped
     env_file: .env
     environment:

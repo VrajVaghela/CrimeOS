@@ -64,7 +64,10 @@ const config: Config = {
         heading: ["var(--font-heading)", "var(--font-noto-devanagari)", "var(--font-noto-gujarati)", "sans-serif"],
         sans: ["var(--font-body)", "var(--font-noto-devanagari)", "var(--font-noto-gujarati)", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
+        "noto-devanagari": ["var(--font-noto-devanagari)", "sans-serif"],
+        "noto-gujarati": ["var(--font-noto-gujarati)", "sans-serif"],
       },
+
       fontSize: {
         xs: ["0.75rem", { lineHeight: "1rem" }],
         sm: ["0.875rem", { lineHeight: "1.25rem" }],

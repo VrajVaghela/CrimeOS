@@ -101,5 +101,33 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [ ] Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed
 - [ ] ☐ CHECKPOINT: golden path plus one Phase 8 intelligence moment completes in under 7 minutes
 
+## Branch: manan/multilingual — Hybrid Multilingual Support (EN / HI / GU)
 
+### Tier 1 — Static UI i18n
+- [x] JSON dictionaries: `frontend/lib/i18n/en.ts`, `hi.ts`, `gu.ts` (Golden Path keys only)
+- [x] `LanguageContext` + `useLanguage()` + `useT()` hook with 3-level fallback (localStorage persistence)
+- [x] `LanguageToggle` component (EN / हिंदी / ગુજ, design-token-only styling)
+- [x] `layout.tsx` — wrapped with `LanguageProvider`
+- [x] `dashboard/page.tsx` — all hardcoded strings replaced with `t()`, LanguageToggle in header
+- [x] Tailwind config — `font-noto-devanagari` and `font-noto-gujarati` utility classes added
+
+### Tier 2 — AI Output Translation
+- [x] `TRANSLATION_PROMPT` constant added to `backend/app/ai/prompts.py` (entity-preserving rules)
+- [x] `backend/app/services/translate_service.py` — Gemini via generate_text(), in-memory cache, fallback=English
+- [x] `backend/app/routers/translate.py` — `POST /translate`, no audit event (display transform)
+- [x] `backend/app/main.py` — translate router registered
+- [x] `frontend/lib/api.ts` — `translateText()` added (sole HTTP gateway, no direct Gemini calls)
+- [x] `frontend/hooks/use-translated-content.ts` — manual-trigger hook, module-level cache, isFallback flag
+- [x] `cases/[id]/summary/page.tsx` — "Translate Summary" button + fallback indicator wired in
+
+### Tier 3 — Already built (no changes)
+- [x] Ingestion pipeline already translates Hindi/Gujarati/English → English for AI reasoning
+
+### Architecture compliance
+- [x] No audit events for translation (deliberate: display transform, not mutation)
+- [x] Translated text never written to DB — authoritative English always the source
+- [x] No Redis, no new DB tables, no Celery — in-memory cache only
+- [x] All Gemini calls through `gemini_client.py` only
+- [x] All prompts as named constants in `prompts.py`
+- [x] Fallback always returns original English — demo cannot die
 

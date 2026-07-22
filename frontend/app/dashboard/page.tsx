@@ -23,17 +23,20 @@ import {
 } from "lucide-react";
 
 import { StatusBadge } from "@/components/status-badge";
+import { LanguageToggle } from "@/components/language-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { ApiError, getDashboard, getPendingRequests, approveRequest } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 import type { DashboardOut, LegalRequestOut } from "@/lib/types";
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, loading, signOut } = useAuth();
+  const { t } = useLanguage();
   const [dashboard, setDashboard] = useState<DashboardOut | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -109,43 +112,44 @@ export default function DashboardPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono mb-0.5">
               <span className="h-1.5 w-1.5 rounded-full bg-success animate-breathe" />
-              Crime OS AI command dashboard
+              {t("dashboard.subtitle")}
             </div>
             <h1 className="font-heading text-2xl font-bold md:text-3xl flex items-center gap-3 flex-wrap">
-              Investigation Workspace
+              {t("dashboard.title")}
               {user.role === "SHO" && (
                 <span className="text-[10px] bg-accent/15 border border-accent/30 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider font-mono font-normal">
                   <Shield className="h-3 w-3 inline mr-1" />
-                  SHO Command Mode
+                  {t("dashboard.role_sho")}
                 </span>
               )}
               {user.role === "LEGAL" && (
                 <span className="text-[10px] bg-violet/15 border border-violet/30 text-violet px-2 py-0.5 rounded-full uppercase tracking-wider font-mono font-normal flex items-center gap-1">
-                  <Scale className="h-3 w-3" /> Legal Advisory Mode
+                  <Scale className="h-3 w-3" /> {t("dashboard.role_legal")}
                 </span>
               )}
             </h1>
             <p className="text-xs text-muted-foreground mt-1">
-              Logged in as{" "}
+              {t("dashboard.logged_in_as")}{" "}
               <span className="text-foreground font-semibold">{user.full_name}</span>{" "}
               <span className="font-mono text-info text-[10px]">({user.role})</span>
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            <LanguageToggle />
             {user.role === "IO" && (
               <Button onClick={() => router.push("/cases")} className="hidden sm:inline-flex bg-gradient-to-r from-primary to-info hover:from-primary/90 hover:to-info/90">
                 <Plus className="h-4 w-4" />
-                Cases
+                {t("dashboard.new_case")}
               </Button>
             )}
             {user.role !== "IO" && (
               <Button variant="outline" size="sm" onClick={() => router.push("/cases")}>
-                View Case Queue
+                {t("common.view_case_queue")}
               </Button>
             )}
             <Button variant="ghost" size="sm" onClick={() => { signOut(); router.push("/login"); }} className="text-muted-foreground">
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sign out</span>
+              <span className="hidden sm:inline">{t("common.sign_out")}</span>
             </Button>
           </div>
         </div>
@@ -161,9 +165,9 @@ export default function DashboardPage() {
 
         {/* Dashboard Stats — Each with a distinct color */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <StatCard icon={FileSearch} label="Total cases in station" value={dashboard?.total_cases ?? 0} color="primary" delay="delay-100" />
-          <StatCard icon={Network} label="Awaiting SHO Approval" value={dashboard?.pending_requests ?? 0} color="accent" delay="delay-200" />
-          <StatCard icon={Activity} label="System audit logs" value={dashboard?.audit_events ?? 0} color="info" delay="delay-300" />
+          <StatCard icon={FileSearch} label={t("dashboard.stat_cases")} value={dashboard?.total_cases ?? 0} color="primary" delay="delay-100" />
+          <StatCard icon={Network} label={t("dashboard.stat_pending")} value={dashboard?.pending_requests ?? 0} color="accent" delay="delay-200" />
+          <StatCard icon={Activity} label={t("dashboard.stat_audit")} value={dashboard?.audit_events ?? 0} color="info" delay="delay-300" />
         </div>
 
         {/* SHO Approval Queue */}
@@ -174,10 +178,10 @@ export default function DashboardPage() {
               <div>
                 <CardTitle className="font-heading text-lg font-bold flex items-center gap-2 text-accent">
                   <Sparkles className="h-5 w-5 text-accent" />
-                  SHO Legal Requests Approval Queue
+                  {t("dashboard.sho_queue_title")}
                 </CardTitle>
                 <CardDescription className="text-xs text-muted-foreground">
-                  Review and authorize legal dispatch requests to telecom companies, banks, and platform services.
+                  {t("dashboard.sho_queue_subtitle")}
                 </CardDescription>
               </div>
             </CardHeader>
@@ -190,8 +194,8 @@ export default function DashboardPage() {
               ) : pendingRequests.length === 0 ? (
                 <div className="py-8 text-center border border-dashed border-border/40 rounded-xl bg-success/5">
                   <CheckCircle2 className="h-10 w-10 text-success mx-auto mb-3" />
-                  <p className="text-sm font-medium text-foreground">All clear</p>
-                  <p className="text-xs text-muted-foreground mt-1">No pending legal requests in queue.</p>
+                  <p className="text-sm font-medium text-foreground">{t("dashboard.sho_all_clear")}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("dashboard.sho_all_clear_sub")}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-border/30">
@@ -211,7 +215,7 @@ export default function DashboardPage() {
                             <span className="font-mono text-xs text-info">{req.provider_name}</span>
                           </div>
                           <h3 className="font-heading font-semibold text-foreground text-sm">
-                            Legal Request Draft for Case ID {req.case_id.substring(0, 8)}
+                            {t("cases.legal_request_for")} {req.case_id.substring(0, 8)}
                           </h3>
                           <p className="text-xs text-muted-foreground font-mono mt-0.5">
                             Target: {req.recipient_email}
@@ -220,11 +224,11 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-2 shrink-0">
                           <Button variant="outline" size="sm" onClick={() => router.push(`/cases/${req.case_id}/requests`)}>
                             <FileText className="h-3.5 w-3.5" />
-                            Review Draft
+                            {t("common.review_draft")}
                           </Button>
                           <Button size="sm" variant="success" onClick={() => void handleApprove(req.id)} disabled={isApproving} loading={isApproving}>
                             {!isApproving && <CheckCircle2 className="h-3.5 w-3.5" />}
-                            Approve
+                            {t("common.approve")}
                           </Button>
                         </div>
                       </div>
@@ -244,19 +248,17 @@ export default function DashboardPage() {
               <div>
                 <CardTitle className="font-heading text-lg font-bold flex items-center gap-2 text-violet">
                   <Scale className="h-5 w-5 text-violet" />
-                  Legal Citation Auditing Dashboard
+                  {t("dashboard.legal_title")}
                 </CardTitle>
                 <CardDescription className="text-xs text-muted-foreground">
-                  Review, verify, or update recommended BNS/BNSS/BSA criminal charges for active cases.
+                  {t("dashboard.legal_subtitle")}
                 </CardDescription>
               </div>
             </CardHeader>
             <CardContent>
               <div className="py-2 space-y-4">
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  As the Station Legal Advisor, your role is to verify the legal section recommendations
-                  generated by Crime OS AI. Below are the cases currently listed in the station.
-                  Select a case to audit its suggested charges.
+                  {t("dashboard.legal_body")}
                 </p>
               </div>
             </CardContent>
@@ -267,12 +269,12 @@ export default function DashboardPage() {
         <Card className="animate-fade-up delay-300">
           <CardHeader>
             <div>
-              <CardTitle>Active cases queue</CardTitle>
-              <CardDescription>Current station case registry</CardDescription>
+              <CardTitle>{t("dashboard.cases_title")}</CardTitle>
+              <CardDescription>{t("dashboard.cases_subtitle")}</CardDescription>
             </div>
             {user.role === "IO" && (
               <Button variant="secondary" size="sm" onClick={() => router.push("/cases")}>
-                View Registry
+                {t("common.view_registry")}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             )}
@@ -281,8 +283,8 @@ export default function DashboardPage() {
             {(dashboard?.active_cases ?? []).length === 0 ? (
               <div className="rounded-xl border border-dashed border-border/40 bg-surface-alt/50 p-8 text-center">
                 <FileSearch className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm font-medium text-foreground">No cases registered yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Create your first case to begin an investigation.</p>
+                <p className="text-sm font-medium text-foreground">{t("dashboard.cases_empty")}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t("dashboard.cases_empty_sub")}</p>
               </div>
             ) : (
               dashboard?.active_cases.map((item, idx) => {
@@ -303,12 +305,12 @@ export default function DashboardPage() {
                         <p className="font-mono text-sm text-primary">{item.case_number}</p>
                         {user.role === "LEGAL" && (
                           <span className="text-[10px] bg-violet/10 border border-violet/20 text-violet px-1.5 py-0.5 rounded font-mono uppercase">
-                            Awaiting Audit
+                            {t("dashboard.awaiting_audit")}
                           </span>
                         )}
                       </div>
                       <h2 className="font-heading text-lg font-semibold truncate">{item.title}</h2>
-                      <p className="text-sm text-muted-foreground">{item.crime_type ?? "Awaiting classification"}</p>
+                      <p className="text-sm text-muted-foreground">{item.crime_type ?? t("dashboard.awaiting_classification")}</p>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="text-xs text-muted-foreground font-mono">

@@ -16,14 +16,21 @@ depends_on = None
 def upgrade() -> None:
     op.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
-    role = postgresql.ENUM("IO", "SHO", "LEGAL", name="userrole")
-    source_type = postgresql.ENUM("pdf", "image", "audio", "text", name="sourcetype")
-    legal_code = postgresql.ENUM("BNS", "BNSS", "BSA", name="legalcode")
-    step_status = postgresql.ENUM("pending", "in_progress", "done", "skipped", name="stepstatus")
-    provider_type = postgresql.ENUM("telecom", "bank", "platform", name="providertype")
-    request_status = postgresql.ENUM("draft", "approved", "dispatched", "responded", name="requeststatus")
-    for enum in (role, source_type, legal_code, step_status, provider_type, request_status):
-        enum.create(op.get_bind(), checkfirst=True)
+    # Create enum types explicitly in database
+    op.execute("CREATE TYPE userrole AS ENUM ('IO', 'SHO', 'LEGAL')")
+    op.execute("CREATE TYPE sourcetype AS ENUM ('pdf', 'image', 'audio', 'text')")
+    op.execute("CREATE TYPE legalcode AS ENUM ('BNS', 'BNSS', 'BSA')")
+    op.execute("CREATE TYPE stepstatus AS ENUM ('pending', 'in_progress', 'done', 'skipped')")
+    op.execute("CREATE TYPE providertype AS ENUM ('telecom', 'bank', 'platform')")
+    op.execute("CREATE TYPE requeststatus AS ENUM ('draft', 'approved', 'dispatched', 'responded')")
+
+    # Define ENUM instances with create_type=False so SQLAlchemy doesn't recreate them
+    role = postgresql.ENUM("IO", "SHO", "LEGAL", name="userrole", create_type=False)
+    source_type = postgresql.ENUM("pdf", "image", "audio", "text", name="sourcetype", create_type=False)
+    legal_code = postgresql.ENUM("BNS", "BNSS", "BSA", name="legalcode", create_type=False)
+    step_status = postgresql.ENUM("pending", "in_progress", "done", "skipped", name="stepstatus", create_type=False)
+    provider_type = postgresql.ENUM("telecom", "bank", "platform", name="providertype", create_type=False)
+    request_status = postgresql.ENUM("draft", "approved", "dispatched", "responded", name="requeststatus", create_type=False)
 
     op.create_table(
         "users",

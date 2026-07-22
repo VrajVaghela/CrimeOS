@@ -170,3 +170,9 @@ These entries define the intended reusable surfaces. Mark them BUILT and add con
 - Purpose: drag-drop CCTV frame uploader that calls Gemini Vision, shows analysis result (OSD timestamp, location, persons, vehicles, forensic flags), and pins a timeline event on success
 - Props: `caseId: string`, `onPinned: (result: CctvPinOut) => void`
 - Used in: `app/cases/[id]/timeline/page.tsx`
+
+### LanguageToggle — BUILT (manan/multilingual)
+- Path: components/language-toggle.tsx
+- Purpose: compact 3-button EN / हिंदी / ગુજ language switcher; reads/writes lang to LanguageContext + localStorage; uses design tokens only (no hardcoded colors)
+- Props: none (reads `useLanguage()` internally)
+- Used in: `app/dashboard/page.tsx`, `app/login/page.tsx`
