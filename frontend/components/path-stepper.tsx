@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Clock, Play, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TranslatedTextBlock } from "@/components/translated-text-block";
+import { useLanguage } from "@/lib/language-context";
 import { CitationDialog } from "@/components/citation-dialog";
 import { useAuth } from "@/lib/auth-context";
 import type { PathStepOut, StepStatus } from "@/lib/types";
@@ -30,6 +32,7 @@ const STATUS_CLASSES = {
 export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   // Sort steps by step_order just in case
   const sortedSteps = [...steps].sort((a, b) => a.step_order - b.step_order);
@@ -72,31 +75,31 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
             <div className="rounded-xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30">
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <h3 className="font-heading text-base font-semibold text-foreground flex items-center gap-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {step.description}
-                  </p>
+                  <div className="font-heading text-base font-semibold text-foreground flex items-center gap-2">
+                    <TranslatedTextBlock content={step.title} autoTranslate={true} />
+                  </div>
+                  <div className="text-sm text-muted-foreground leading-relaxed">
+                    <TranslatedTextBlock content={step.description} autoTranslate={true} />
+                  </div>
                 </div>
 
                 {/* Status Selector dropdown */}
                 <div className="flex-shrink-0">
                   {user?.role === "IO" ? (
                     <select
-                      value={step.status}
+                      value={t(`path.${step.status}` as any) || step.status}
                       onChange={(e) => void onStatusChange(step.id, e.target.value as StepStatus)}
                       className="h-8 rounded bg-input border border-border px-2 text-xs font-mono text-foreground focus-visible:ring-1 focus-visible:ring-primary w-32 cursor-pointer"
                       id={`select-status-${step.id}`}
                     >
-                      <option value="pending">PENDING</option>
-                      <option value="in_progress">IN PROGRESS</option>
-                      <option value="done">DONE</option>
-                      <option value="skipped">SKIPPED</option>
+                      <option value="pending">{t("path.pending" as any)}</option>
+                      <option value="in_progress">{t("path.in_progress" as any)}</option>
+                      <option value="done">{t("path.done" as any)}</option>
+                      <option value="skipped">{t("path.skipped" as any)}</option>
                     </select>
                   ) : (
                     <span className="font-mono text-xs uppercase px-2 py-1 rounded bg-secondary border border-border text-muted-foreground">
-                      {step.status}
+                      {t(`path.${step.status}` as any) || step.status}
                     </span>
                   )}
                 </div>
@@ -120,7 +123,7 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
                     className="bg-primary text-primary-foreground font-medium text-xs h-8 px-3 rounded hover:scale-105 glow-primary transition-all duration-200 flex items-center gap-1.5"
                     id={`btn-action-${step.id}`}
                   >
-                    <span>Generate {step.suggested_action_type.toUpperCase()} Request</span>
+                    <span>{t(`requests.generate_${step.suggested_action_type.toLowerCase()}` as any)}</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
                 )}

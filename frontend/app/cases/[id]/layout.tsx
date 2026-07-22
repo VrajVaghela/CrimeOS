@@ -34,17 +34,18 @@ import {
 } from "@/components/ui/dialog";
 import { ApiError, getCase, syncCctns } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 import type { CaseDetailOut } from "@/lib/types";
 
 const TABS = [
-  { label: "Ingestion", href: "ingestion", icon: Search, color: "text-info border-info" },
-  { label: "Investigation", href: "path", icon: Crosshair, color: "text-violet border-violet" },
-  { label: "Requests", href: "requests", icon: Mail, color: "text-accent border-accent" },
-  { label: "Responses", href: "responses", icon: Activity, color: "text-success border-success" },
-  { label: "Evidence", href: "evidence", icon: Camera, color: "text-primary border-primary" },
-  { label: "Timeline", href: "timeline", icon: Clock, color: "text-violet border-violet" },
-  { label: "Summary", href: "summary", icon: Radar, color: "text-info border-info" },
-  { label: "Audit", href: "audit", icon: Network, color: "text-rose border-rose" },
+  { key: "ingestion", href: "ingestion", icon: Search, color: "text-info border-info" },
+  { key: "path", href: "path", icon: Crosshair, color: "text-violet border-violet" },
+  { key: "requests", href: "requests", icon: Mail, color: "text-accent border-accent" },
+  { key: "responses", href: "responses", icon: Activity, color: "text-success border-success" },
+  { key: "evidence", href: "evidence", icon: Camera, color: "text-primary border-primary" },
+  { key: "timeline", href: "timeline", icon: Clock, color: "text-violet border-violet" },
+  { key: "summary", href: "summary", icon: Radar, color: "text-info border-info" },
+  { key: "audit", href: "audit", icon: Network, color: "text-rose border-rose" },
 ] as const;
 
 export default function CaseLayout({ children }: { children: React.ReactNode }) {
@@ -52,6 +53,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const pathname = usePathname();
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
   const caseId = params.id as string;
 
   const [caseData, setCaseData] = useState<CaseDetailOut | null>(null);
@@ -116,7 +118,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
           <div className="flex items-center gap-3 mb-3">
             <Button variant="ghost" size="sm" onClick={() => router.push("/cases")} className="gap-1.5 text-muted-foreground hover:text-foreground">
               <ArrowLeft className="h-4 w-4" />
-              Cases
+              {t("nav.cases")}
             </Button>
           </div>
 
@@ -133,7 +135,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   {activeTabMeta && (
                     <span className={["text-xs font-mono uppercase tracking-wider", activeTabMeta.color.split(" ")[0]].join(" ")}>
-                      {activeTabMeta.label}
+                      {t(`nav.${activeTabMeta.key}` as any)}
                     </span>
                   )}
                   <Shield className="h-4 w-4 text-primary shrink-0" />
@@ -142,7 +144,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                 </div>
                 <h1 className="font-heading text-xl font-bold md:text-2xl truncate">{caseData.title}</h1>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {caseData.crime_type ?? "Awaiting classification"}
+                  {caseData.crime_type ?? t("dashboard.awaiting_classification")}
                   <span className="font-mono mx-1.5">·</span>
                   {new Date(caseData.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                 </p>
@@ -151,7 +153,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                 {caseData.status !== "synced" ? (
                   <Button onClick={() => setSyncDialogOpen(true)} size="sm" className="bg-gradient-to-r from-primary to-info hover:from-primary/90 hover:to-info/90" id="sync-cctns-btn">
                     <Globe className="h-4 w-4" />
-                    Sync to CCTNS
+                    {t("common.sync_cctns" as any)}
                   </Button>
                 ) : (
                   <div className="flex items-center gap-1.5 bg-success/15 border border-success/30 rounded-lg px-3 py-1.5 text-xs text-success font-mono">
@@ -180,7 +182,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                   }`}
                 >
                   <Icon className={`h-4 w-4 transition-colors duration-200 ${isActive ? tab.color.split(" ")[0] : "text-muted-foreground group-hover:text-foreground"}`} />
-                  {tab.label}
+                  {t(`nav.${tab.key}` as any)}
                   {isActive && (
                     <span className={["absolute bottom-0 left-2 right-2 h-0.5 rounded-full", tab.color.split(" ")[1]].join(" ")} />
                   )}

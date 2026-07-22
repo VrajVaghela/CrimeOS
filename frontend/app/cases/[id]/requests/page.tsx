@@ -40,6 +40,7 @@ import {
   ApiError,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 import type { LegalRequestOut, ProviderType } from "@/lib/types";
 
 const PROVIDER_DEFAULTS = {
@@ -50,6 +51,7 @@ const PROVIDER_DEFAULTS = {
 
 export default function RequestsPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -191,17 +193,17 @@ export default function RequestsPage() {
           <CardHeader className="pb-3">
             <CardTitle className="font-heading text-lg font-bold flex items-center gap-2 text-primary">
               <Sparkles className="h-5 w-5 text-primary" />
-              Generate {providerTypeParam.toUpperCase()} Request Draft
+              {t("requests.generate_draft").replace("{provider}", providerTypeParam.toUpperCase())}
             </CardTitle>
             <CardDescription className="text-muted-foreground text-xs">
-              LERS-style legal request templates pre-populated with case details and extracted suspect entities.
+              {t("requests.subtitle")}
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleCreateDraft}>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="provider_name">Nodal Provider / Institution Name</Label>
+                  <Label htmlFor="provider_name">{t("requests.provider_name")}</Label>
                   <Input
                     id="provider_name"
                     value={providerName}
@@ -211,7 +213,7 @@ export default function RequestsPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="recipient_email">Nodal Officer Email Address</Label>
+                  <Label htmlFor="recipient_email">{t("requests.provider_email")}</Label>
                   <Input
                     id="recipient_email"
                     type="email"
@@ -238,7 +240,7 @@ export default function RequestsPage() {
               </Button>
               <Button type="submit" disabled={creating} loading={creating}>
                 {!creating && <FileText className="h-4 w-4" />}
-                Generate Draft
+                {t("requests.generate_btn")}
               </Button>
             </CardFooter>
           </form>
@@ -267,10 +269,9 @@ export default function RequestsPage() {
             <FileSearch className="h-8 w-8 text-primary" />
           </div>
           <div className="max-w-sm space-y-1">
-            <h3 className="font-heading font-semibold text-lg">No Legal Requests Generated</h3>
+            <h3 className="font-heading font-semibold text-lg">{t("requests.no_requests")}</h3>
             <p className="text-sm text-muted-foreground">
-              Use the <span className="text-primary font-medium">Investigation Path</span> tab to trigger
-              automatic LERS request drafting for this case.
+              {t("requests.no_requests_sub")}
             </p>
           </div>
         </div>
@@ -279,7 +280,7 @@ export default function RequestsPage() {
           <div className="flex items-center justify-between">
             <h2 className="font-heading text-xl font-bold flex items-center gap-2">
               <Mail className="h-5 w-5 text-primary" />
-              Legal Requests Timeline
+              {t("requests.title")}
               {requests.length > 0 && (
                 <span className="text-sm font-mono text-muted-foreground font-normal">
                   ({requests.length})
@@ -365,7 +366,7 @@ export default function RequestsPage() {
                         onClick={() => openEditDialog(req)}
                       >
                         <FileText className="h-3.5 w-3.5" />
-                        {req.status === "draft" && user?.role === "IO" ? "Edit Draft" : req.status === "draft" ? "View Draft" : "View Template"}
+                        {req.status === "draft" && user?.role === "IO" ? t("requests.edit_draft") : req.status === "draft" ? t("requests.view_draft") : t("requests.view_template")}
                       </Button>
                     </div>
 
@@ -382,11 +383,11 @@ export default function RequestsPage() {
                               className="text-accent border-accent/40 hover:bg-accent/10"
                             >
                               {!isLoading && <UserCheck className="h-3.5 w-3.5" />}
-                              Approve
+                              {t("requests.approve")}
                             </Button>
                           ) : (
                             <span className="text-xs text-accent font-semibold px-2.5 py-1 bg-accent/15 border border-accent/30 rounded font-mono">
-                              Awaiting SHO
+                              {t("requests.awaiting_sho")}
                             </span>
                           )}
                         </>
@@ -400,7 +401,7 @@ export default function RequestsPage() {
                           loading={isLoading}
                         >
                           {!isLoading && <Send className="h-3.5 w-3.5" />}
-                          Dispatch
+                          {t("requests.dispatch")}
                         </Button>
                       )}
 
@@ -413,7 +414,7 @@ export default function RequestsPage() {
                           loading={isLoading}
                         >
                           {!isLoading && <Sparkles className="h-3.5 w-3.5" />}
-                          Trigger Mock Response
+                          {t("requests.trigger_mock")}
                         </Button>
                       )}
 
@@ -425,7 +426,7 @@ export default function RequestsPage() {
                           className="text-success hover:text-success hover:bg-success/10 gap-1"
                         >
                           <CheckCircle className="h-3.5 w-3.5" />
-                          Received
+                          {t("requests.received")}
                           <ArrowRight className="h-3.5 w-3.5" />
                         </Button>
                       )}
@@ -444,10 +445,10 @@ export default function RequestsPage() {
           <DialogHeader>
             <DialogTitle className="font-heading text-lg font-bold flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
-              {selectedRequest?.status === "draft" ? "Edit Legal Request Draft" : "View Dispatched Legal Request"}
+              {selectedRequest?.status === "draft" ? t("requests.edit_dialog_title") : t("requests.view_dialog_title")}
             </DialogTitle>
             <DialogDescription className="text-muted-foreground text-xs">
-              Preview and modify LERS-style letter content, target recipient email, and provider institution metadata.
+              {t("requests.dialog_subtitle")}
             </DialogDescription>
           </DialogHeader>
 

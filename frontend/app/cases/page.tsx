@@ -6,6 +6,7 @@ import { FileSearch, Loader2, Plus, Search, Shield, X, ArrowLeft, FolderOpen } f
 
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/language-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -27,6 +28,7 @@ const CASE_COLORS = ["border-l-primary", "border-l-info", "border-l-violet"] as 
 export default function CasesPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
   const [cases, setCases] = useState<CaseOut[]>([]);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -119,22 +121,20 @@ export default function CasesPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono mb-0.5">
               <Shield className="h-3 w-3 text-primary" />
-              Crime OS AI · Case Registry
+              {t("login.title")} · {t("cases.title")}
             </div>
             <h1 className="font-heading text-2xl font-bold md:text-3xl flex items-center gap-3">
-              Cases
-              <span className="text-muted-foreground text-lg font-normal font-sans">/ शिकायतें</span>
+              {t("cases.title")}
             </h1>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard")} className="hidden sm:flex">
               <ArrowLeft className="h-4 w-4" />
-              Dashboard
+              {t("nav.dashboard")}
             </Button>
             <Button onClick={() => setDialogOpen(true)} className="bg-gradient-to-r from-primary to-info hover:from-primary/90 hover:to-info/90">
               <Plus className="h-4 w-4" />
-              New Case
-              <span className="text-primary-foreground/70 text-xs hidden sm:inline ml-1">/ नई शिकायत</span>
+              {t("cases.new_case")}
             </Button>
           </div>
         </div>
@@ -152,8 +152,8 @@ export default function CasesPage() {
         <Card className="animate-fade-up">
           <CardHeader>
             <div>
-              <CardTitle>All cases</CardTitle>
-              <CardDescription>Station case queue — click to investigate</CardDescription>
+              <CardTitle>{t("cases.title")}</CardTitle>
+              <CardDescription>{t("cases.subtitle")}</CardDescription>
             </div>
             <FileSearch className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -163,7 +163,7 @@ export default function CasesPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 ref={searchInputRef}
-                placeholder="Search by case number or title... (Ctrl+K)"
+                placeholder={t("cases.search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-9 pr-9"
@@ -197,13 +197,13 @@ export default function CasesPage() {
                 </div>
                 <div className="max-w-xs">
                   <p className="font-heading font-semibold text-foreground text-lg">
-                    {searchQuery ? "No matching cases" : "No cases yet"}
+                    {searchQuery ? t("cases.empty") : t("cases.all_clear")}
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {searchQuery ? "Try a different search term or case number" : "Create your first case to start an investigation"}
+                    {searchQuery ? t("cases.empty") : t("dashboard.cases_empty_sub")}
                   </p>
                 </div>
-                {!searchQuery && <Button onClick={() => setDialogOpen(true)}><Plus className="h-4 w-4" /> New Case</Button>}
+                {!searchQuery && <Button onClick={() => setDialogOpen(true)}><Plus className="h-4 w-4" /> {t("cases.new_case")}</Button>}
               </div>
             ) : (
               <div className="flex flex-col gap-3">
@@ -237,14 +237,14 @@ export default function CasesPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-heading">New Investigation Case</DialogTitle>
-            <DialogDescription>Enter a title for the new case. You&apos;ll upload the complaint next.</DialogDescription>
+            <DialogTitle className="font-heading">{t("cases.create_dialog_title")}</DialogTitle>
+            <DialogDescription>{t("cases.create_dialog_subtitle")}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="case-title-input" required>Case title</Label>
+              <Label htmlFor="case-title-input" required>{t("cases.case_title_label")}</Label>
               <Input
-                placeholder="e.g. Cyber fraud — Rajesh Patel"
+                placeholder={t("cases.case_title_placeholder")}
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") void handleCreate(); }}
@@ -255,8 +255,8 @@ export default function CasesPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => { setDialogOpen(false); setNewTitle(""); setCreateError(null); }}>Cancel</Button>
-            <Button onClick={() => void handleCreate()} disabled={creating} loading={creating}>Create case</Button>
+            <Button variant="ghost" onClick={() => { setDialogOpen(false); setNewTitle(""); setCreateError(null); }}>{t("common.cancel")}</Button>
+            <Button onClick={() => void handleCreate()} disabled={creating} loading={creating}>{creating ? t("cases.creating") : t("cases.create_submit")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

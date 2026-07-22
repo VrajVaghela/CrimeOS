@@ -12,11 +12,14 @@ import { PathStepper } from "@/components/path-stepper";
 import { AiContentCard } from "@/components/ai-content-card";
 import { getCasePath, generateCasePath, updateStepStatus, updateSectionStatus, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
+import { TranslatedTextBlock } from "@/components/translated-text-block";
 import type { CaseSectionOut, InvestigationPathOut, StepStatus } from "@/lib/types";
 
 export default function PathPage() {
   const params = useParams();
   const caseId = params.id as string;
+  const { t } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<"processing" | "done" | "failed" | "not_started">("not_started");
@@ -160,11 +163,10 @@ export default function PathPage() {
         </div>
         <div className="max-w-md space-y-2">
           <h2 className="font-heading text-xl font-bold text-foreground">
-            Generate Investigation Path
+            {t("path.title")}
           </h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Analyze the complaint materials using Crime OS RAG. System will automatically match
-            Standard Operating Procedures (SOPs), suggest BNS/BNSS/BSA legal sections, and lay out the steps.
+            {t("path.subtitle")}
           </p>
         </div>
         {error && (
@@ -174,7 +176,7 @@ export default function PathPage() {
           </Alert>
         )}
         <Button onClick={handleGenerate} size="lg" id="btn-generate-path">
-          Analyze & Generate Path
+          {t("path.analyze_btn")}
         </Button>
       </div>
     );
@@ -191,13 +193,13 @@ export default function PathPage() {
         </div>
         <div className="max-w-md space-y-1">
           <h2 className="font-heading text-lg font-semibold text-foreground">
-            Generating Case Intelligence...
+            {t("path.generating")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Retrieving SOPs, analyzing entities, and aligning BNS sections.
+            {t("path.generating_sub")}
           </p>
           <p className="font-mono text-xs text-primary mt-2">
-            Elapsed: {elapsedTime}s
+            {t("common.elapsed")}: {elapsedTime}s
           </p>
         </div>
         <div className="w-full max-w-sm space-y-2 mt-2">
@@ -218,7 +220,7 @@ export default function PathPage() {
         </div>
         <div className="max-w-md space-y-1">
           <h2 className="font-heading text-lg font-bold text-destructive">
-            Generation Failed
+            {t("path.failed")}
           </h2>
           <p className="text-sm text-muted-foreground">
             {message || "An unexpected error occurred during path suggestion."}
@@ -226,7 +228,7 @@ export default function PathPage() {
         </div>
         <Button onClick={handleGenerate} variant="secondary" id="btn-retry-path">
           <RefreshCw className="h-4 w-4" />
-          Regenerate Path
+          {t("path.regenerate")}
         </Button>
       </div>
     );
@@ -243,7 +245,7 @@ export default function PathPage() {
               <div className="rounded-lg bg-violet/15 p-1.5">
                 <Crosshair className="h-5 w-5 text-violet" />
               </div>
-              Investigation Blueprint
+              {t("path.blueprint")}
             </h2>
             <p className="text-xs text-muted-foreground mt-1">
               Model: <span className="font-mono text-primary">{path?.model_used}</span> · Grounded in seeded police SOPs
@@ -256,7 +258,7 @@ export default function PathPage() {
             id="btn-regenerate"
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            Regenerate
+            {t("path.regenerate")}
           </Button>
         </div>
 
@@ -279,17 +281,17 @@ export default function PathPage() {
             <div className="rounded-lg bg-violet/15 p-1.5">
               <Scale className="h-5 w-5 text-violet" />
             </div>
-            Legal Grounding
+            {t("path.legal_grounding")}
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
-            Statutory citations matching BNS / BNSS / BSA
+            {t("path.legal_grounding_sub")}
           </p>
         </div>
 
         <div className="space-y-4">
           {caseSections.length === 0 ? (
             <div className="text-center p-8 bg-muted/30 rounded-xl border border-dashed border-border/40">
-              <p className="text-sm text-muted-foreground">No legal sections suggested for this crime classification.</p>
+              <p className="text-sm text-muted-foreground">{t("path.no_sections")}</p>
             </div>
           ) : (
             caseSections.map((sec) => {
@@ -322,15 +324,15 @@ export default function PathPage() {
                     {/* AI Reasoning */}
                     <div className="text-xs text-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
                       <span className="font-bold text-[10px] text-primary block uppercase tracking-wider mb-1">
-                        Application Reasoning
+                        {t("path.ai_reasoning")}
                       </span>
-                      {sec.ai_reasoning}
+                      <TranslatedTextBlock content={sec.ai_reasoning} autoTranslate={true} />
                     </div>
 
                     {/* Status */}
                     <div className="flex items-center justify-between border-t border-border/30 pt-3">
                       <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-wider">
-                        Review status:
+                        {t("path.review_status")}
                       </span>
                       {sec.status === "approved" && (
                         <Badge variant="success">Verified Charge</Badge>
@@ -353,7 +355,7 @@ export default function PathPage() {
                           onClick={() => void handleSectionStatusChange(sec.id, "rejected")}
                           className="text-xs h-7 px-2.5 text-destructive hover:bg-destructive/10"
                         >
-                          Flag Inapplicable
+                          {t("path.flag")}
                         </Button>
                         <Button
                           size="sm"
@@ -364,7 +366,7 @@ export default function PathPage() {
                           className="text-xs h-7 px-2.5"
                         >
                           {updatingSectionId !== sec.id && <CheckCircle2 className="h-3 w-3" />}
-                          Verify Citation
+                          {t("path.verify")}
                         </Button>
                       </div>
                     )}

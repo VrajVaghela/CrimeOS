@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getEvidence, uploadEvidence, ApiError } from "@/lib/api";
+import { useLanguage } from "@/lib/language-context";
 import type { EvidenceOut } from "@/lib/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -25,6 +26,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 export default function EvidencePage() {
   const params = useParams();
   const caseId = params.id as string;
+  const { t } = useLanguage();
 
   const [evidenceList, setEvidenceList] = useState<EvidenceOut[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +56,7 @@ export default function EvidencePage() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setError("Only image evidence (JPG, PNG) is supported for automated AI forensic tagging.");
+      setError(t("evidence.unsupported_type" as any));
       return;
     }
 
@@ -78,10 +80,10 @@ export default function EvidencePage() {
         <div>
           <h2 className="font-heading text-lg font-bold flex items-center gap-2">
             <Camera className="h-5 w-5 text-primary" />
-            Evidence Material Gallery
+            {t("evidence.title" as any)}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Upload incident images and documents to automatically tag and analyze forensic features via Gemini Vision.
+            {t("evidence.subtitle" as any)}
           </p>
         </div>
 
@@ -101,7 +103,7 @@ export default function EvidencePage() {
             id="upload-evidence-btn"
           >
             {!uploading && <Upload className="h-4 w-4" />}
-            {uploading ? "Analyzing Image..." : "Upload Image Evidence"}
+            {uploading ? t("evidence.analyzing" as any) : t("evidence.upload_btn" as any)}
           </Button>
         </div>
       </div>
@@ -124,14 +126,14 @@ export default function EvidencePage() {
             <Camera className="h-8 w-8 text-primary" />
           </div>
           <div className="max-w-sm space-y-1">
-            <h3 className="font-heading font-semibold text-lg">No Evidence Uploaded</h3>
+            <h3 className="font-heading font-semibold text-lg">{t("evidence.no_evidence" as any)}</h3>
             <p className="text-sm text-muted-foreground">
-              Upload photographs, CCTV screenshots, or transaction receipt images to invoke Gemini Vision auto-tagging.
+              {t("evidence.no_evidence_sub" as any)}
             </p>
           </div>
           <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
             <ImageIcon className="h-4 w-4" />
-            Select File
+            {t("evidence.select_file" as any)}
           </Button>
         </div>
       ) : (

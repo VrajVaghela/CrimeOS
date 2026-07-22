@@ -40,6 +40,8 @@ import type {
   TimelineEventOut,
   TimelineEventType,
 } from "@/lib/types";
+import { useLanguage } from "@/lib/language-context";
+import { TranslatedTextBlock } from "@/components/translated-text-block";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Token maps — all colours via token classes, never raw hex
@@ -127,7 +129,7 @@ function ConfidenceBadge({ value }: { value: number | null }) {
   );
 }
 
-function TimelineNode({ event }: { event: TimelineEventOut }) {
+function TimelineNode({ event, lang }: { event: TimelineEventOut, lang: string }) {
   const [expanded, setExpanded] = useState(false);
   const meta = EVENT_META[event.event_type] ?? EVENT_META.officer_note;
   const Icon = meta.icon;
@@ -136,7 +138,7 @@ function TimelineNode({ event }: { event: TimelineEventOut }) {
   const cctv = event.cctv_analysis as CctvAnalysisDetail | null;
 
   const formatTime = (iso: string) =>
-    new Date(iso).toLocaleString("en-IN", {
+    new Date(iso).toLocaleString(lang === "hi" ? "hi-IN" : (lang === "gu" ? "gu-IN" : "en-IN"), {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -187,7 +189,7 @@ function TimelineNode({ event }: { event: TimelineEventOut }) {
         </div>
 
         {/* Title */}
-        <p className="mt-2 text-sm font-semibold font-heading">{event.title}</p>
+        <div className="mt-2 text-sm font-semibold font-heading"><TranslatedTextBlock content={event.title} autoTranslate={true} /></div>
 
         {/* Location chip */}
         {event.location && (
@@ -198,9 +200,9 @@ function TimelineNode({ event }: { event: TimelineEventOut }) {
         )}
 
         {/* Description */}
-        <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-          {event.description}
-        </p>
+        <div className="mt-2 text-xs text-muted-foreground leading-relaxed">
+          <TranslatedTextBlock content={event.description} autoTranslate={true} />
+        </div>
 
         {/* CCTV details — expand/collapse */}
         {isCctv && cctv && (
@@ -280,6 +282,7 @@ function CctvPanel({
   caseId: string;
   onPinned: (result: CctvPinOut) => void;
 }) {
+  const { t } = useLanguage();
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -354,11 +357,11 @@ function CctvPanel({
                 Analyzing CCTV frame via Gemini Vision…
               </span>
             ) : (
-              "Drop CCTV frame here or click to upload"
+              t("timeline.cctv_drop_hint" as any)
             )}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            JPEG / PNG / WebP · max 20 MB · Gemini Vision extracts location, persons, vehicles
+            {t("timeline.cctv_drop_sub" as any)}
           </p>
         </div>
       </div>
@@ -376,7 +379,7 @@ function CctvPanel({
         <div className="rounded-xl border border-success/30 bg-success/5 p-4 space-y-3 animate-fade-up">
           <div className="flex items-center gap-2 text-success text-sm font-semibold">
             <CheckCircle2 className="h-4 w-4" />
-            Frame Pinned to Timeline
+            {t("timeline.pin_success" as any)}
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
@@ -532,6 +535,7 @@ function OfficerNoteForm({
 export default function TimelinePage() {
   const params = useParams();
   const caseId = params.id as string;
+  const { t, lang } = useLanguage();
 
   const [events, setEvents] = useState<TimelineEventOut[]>([]);
   const [loading, setLoading] = useState(true);
@@ -588,7 +592,7 @@ export default function TimelinePage() {
           <div className="flex items-center gap-2 mb-1">
             <Clock className="h-5 w-5 text-violet" />
             <h1 className="font-heading text-xl font-bold">
-              Timeline Agent
+              {t("timeline.title")}
             </h1>
             <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-xs text-primary font-medium">
               <Sparkles className="h-3 w-3" />
@@ -596,12 +600,12 @@ export default function TimelinePage() {
             </span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Chronological intelligence view — AI synthesizes case events · Upload CCTV frames to pinpoint locations
+            {t("timeline.subtitle")}
           </p>
           {/* Stats row */}
           {!loading && events.length > 0 && (
             <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground font-mono">
-              <span>{events.length} events</span>
+              <span>{events.length} {t("timeline.events" as any) ?? "events"}</span>
               {cctvCount > 0 && <span className="text-rose">{cctvCount} CCTV frames</span>}
               {locationsSet.size > 0 && (
                 <span className="flex items-center gap-1 text-primary">
@@ -625,7 +629,7 @@ export default function TimelinePage() {
           ) : (
             <Zap className="h-3.5 w-3.5" />
           )}
-          Re-Synthesize
+          {t("timeline.re_synthesize")}
         </Button>
       </div>
 
@@ -634,9 +638,9 @@ export default function TimelinePage() {
         <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary animate-pulse-glow">
           <Loader2 className="h-4 w-4 animate-spin shrink-0" />
           <div>
-            <p className="font-medium">Timeline Agent is synthesizing…</p>
+            <p className="font-medium">{t("timeline.synthesizing")}</p>
             <p className="text-xs text-primary/70 mt-0.5">
-              Gemini is reading your case data and building the chronological event chain.
+              {t("timeline.synthesizing_sub")}
             </p>
           </div>
         </div>
@@ -650,8 +654,7 @@ export default function TimelinePage() {
             <div className="mb-5 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
               <Sparkles className="h-3.5 w-3.5 shrink-0" />
               <span>
-                AI-suggested · sourced from complaint text, path steps, legal requests, and audit events.
-                CCTV events include Gemini Vision analysis.
+                {t("timeline.ai_provenance")}
               </span>
             </div>
           )}
@@ -687,15 +690,15 @@ export default function TimelinePage() {
           ) : events.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border py-16 text-center">
               <Clock className="h-10 w-10 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">No timeline events yet.</p>
+              <p className="text-sm text-muted-foreground">{t("timeline.no_events")}</p>
               <p className="text-xs text-muted-foreground/60 max-w-xs">
-                Ingest a complaint and generate an investigation path — the Timeline Agent will synthesize events automatically.
+                {t("timeline.no_events_sub")}
               </p>
             </div>
           ) : (
             <div>
               {events.map((event) => (
-                <TimelineNode key={event.id} event={event} />
+                <TimelineNode key={event.id} event={event} lang={lang} />
               ))}
             </div>
           )}
@@ -710,17 +713,17 @@ export default function TimelinePage() {
                 <Camera className="h-4 w-4 text-rose" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold font-heading">CCTV Intelligence</h2>
-                <p className="text-xs text-muted-foreground">Upload footage frames to pinpoint locations</p>
+                <h2 className="text-sm font-semibold font-heading">{t("timeline.cctv_title")}</h2>
+                <p className="text-xs text-muted-foreground">{t("timeline.cctv_subtitle")}</p>
               </div>
             </div>
             <CctvPanel caseId={caseId} onPinned={handlePinned} />
             {/* How it works */}
             <div className="rounded-lg bg-muted/50 border border-border/50 p-3 space-y-1.5 text-xs text-muted-foreground">
-              <p className="font-medium text-foreground">How it works</p>
-              <p>1. Upload any CCTV still frame (JPEG/PNG)</p>
-              <p>2. Gemini Vision extracts OSD timestamp, visible location cues, persons, vehicles, and forensic flags</p>
-              <p>3. The event is pinned on the timeline at the detected real-world time</p>
+              <p className="font-medium text-foreground">{t("timeline.how_it_works")}</p>
+              <p>{t("timeline.cctv_step1")}</p>
+              <p>{t("timeline.cctv_step2")}</p>
+              <p>{t("timeline.cctv_step3")}</p>
             </div>
           </Card>
 
@@ -733,8 +736,8 @@ export default function TimelinePage() {
                 <MessageSquarePlus className="h-4 w-4 text-muted-foreground" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold font-heading">Officer Note</h2>
-                <p className="text-xs text-muted-foreground">Add manual observations to the timeline</p>
+                <h2 className="text-sm font-semibold font-heading">{t("timeline.officer_note")}</h2>
+                <p className="text-xs text-muted-foreground">{t("timeline.officer_note_sub")}</p>
               </div>
             </div>
             <OfficerNoteForm caseId={caseId} onAdded={handleNoteAdded} />
@@ -745,7 +748,7 @@ export default function TimelinePage() {
             <Card className="p-4 border border-primary/20 bg-primary/5 space-y-3">
               <div className="flex items-center gap-2 text-sm font-semibold font-heading">
                 <MapPin className="h-4 w-4 text-primary" />
-                Locations Identified
+                {t("timeline.locations")}
               </div>
               <div className="flex flex-wrap gap-2">
                 {[...locationsSet].map((loc, i) => (
@@ -759,7 +762,7 @@ export default function TimelinePage() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Derived from CCTV analysis and complaint entities. Locations marked on events above.
+                {t("timeline.locations_sub")}
               </p>
             </Card>
           )}

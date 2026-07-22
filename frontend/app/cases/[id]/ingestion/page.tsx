@@ -27,6 +27,8 @@ import {
   updateEntity,
   uploadComplaint,
 } from "@/lib/api";
+import { useLanguage } from "@/lib/language-context";
+import { TranslatedTextBlock } from "@/components/translated-text-block";
 import type { CaseDetailOut, ComplaintOut } from "@/lib/types";
 
 const LANGUAGE_LABELS: Record<string, string> = {
@@ -44,6 +46,7 @@ const SOURCE_LABELS: Record<string, string> = {
 
 export default function IngestionPage() {
   const { id: caseId } = useParams();
+  const { t } = useLanguage();
   const [caseData, setCaseData] = useState<CaseDetailOut | null>(null);
   const [processing, setProcessing] = useState(false);
   const [processingStarted, setProcessingStarted] = useState<Date | null>(null);
@@ -140,12 +143,10 @@ export default function IngestionPage() {
           <div className="rounded-lg bg-gradient-to-br from-info to-violet p-1.5">
             <FileText className="h-5 w-5 text-white" />
           </div>
-          Complaint Ingestion
-          <span className="text-muted-foreground font-normal text-base font-sans">/ शिकायत अपलोड</span>
+          {t("ingestion.title")}
         </h2>
         <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-          Upload the complaint file — PDF, handwritten image, or audio recording in Gujarati, Hindi,
-          or English. AI will transcribe, translate, and extract key entities.
+          {t("ingestion.subtitle")}
         </p>
       </div>
 
@@ -158,7 +159,7 @@ export default function IngestionPage() {
       ) : null}
 
       {processing && processingStarted ? (
-        <ProcessingCard label="Analyzing complaint with Gemini AI…" startedAt={processingStarted} />
+        <ProcessingCard label={t("ingestion.analyzing")} startedAt={processingStarted} />
       ) : complaint ? null : (
         <Card hover className="animate-fade-up delay-100 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-info via-violet to-primary" />
@@ -167,7 +168,7 @@ export default function IngestionPage() {
               <div className="rounded-lg bg-gradient-to-br from-info/20 to-violet/20 p-1.5">
                 <Upload className="h-4 w-4 text-info" />
               </div>
-              Upload Complaint File
+              {t("ingestion.upload_btn")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -181,9 +182,9 @@ export default function IngestionPage() {
           {/* Success banner */}
           <Alert variant="success" className="animate-fade-down">
             <CheckCircle2 className="h-4 w-4" />
-            <AlertTitle className="text-success">Complaint analyzed</AlertTitle>
+            <AlertTitle className="text-success">{t("ingestion.success_title")}</AlertTitle>
             <AlertDescription className="text-muted-foreground">
-              AI has transcribed, translated, and extracted entities. Review and correct below.
+              {t("ingestion.success_desc")}
             </AlertDescription>
           </Alert>
 
@@ -209,7 +210,7 @@ export default function IngestionPage() {
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2 text-muted-foreground">
                   <span className="h-2 w-2 rounded-full bg-muted-foreground" />
-                  Original Text
+                  {t("ingestion.original_text")}
                   <span className="text-xs font-mono text-muted-foreground ml-1">
                     ({complaint.detected_language?.toUpperCase() ?? "—"})
                   </span>
@@ -217,9 +218,7 @@ export default function IngestionPage() {
               </CardHeader>
               <CardContent>
                 {complaint.raw_text ? (
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap font-sans">
-                    {complaint.raw_text}
-                  </p>
+                  <TranslatedTextBlock content={complaint.raw_text} />
                 ) : (
                   <div className="flex flex-col gap-2">
                     {[90, 75, 80, 60, 70].map((w, i) => (
@@ -234,7 +233,7 @@ export default function IngestionPage() {
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2 text-info">
                   <Sparkles className="h-3.5 w-3.5" />
-                  English Translation
+                  {t("ingestion.english_translation")}
                   <Badge variant="info" className="text-[10px] px-1.5 py-0 ml-1">
                     AI-suggested
                   </Badge>
@@ -242,9 +241,7 @@ export default function IngestionPage() {
               </CardHeader>
               <CardContent>
                 {complaint.translated_text ? (
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap font-sans">
-                    {complaint.translated_text}
-                  </p>
+                  <TranslatedTextBlock content={complaint.translated_text} />
                 ) : (
                   <div className="flex flex-col gap-2">
                     {[85, 70, 90, 55, 75].map((w, i) => (
@@ -256,7 +253,7 @@ export default function IngestionPage() {
             </Card>
           </div>
 
-          <Separator label="Extracted Entities" />
+          <Separator label={t("ingestion.extracted_entities")} />
 
           {/* Extracted entities */}
           <div className="animate-fade-up delay-300">
@@ -264,19 +261,19 @@ export default function IngestionPage() {
               <div className="rounded-lg bg-violet/15 p-1.5">
                 <Sparkles className="h-4 w-4 text-violet" />
               </div>
-              <h3 className="font-heading font-semibold">Review & Correct Entities</h3>
+              <h3 className="font-heading font-semibold">{t("ingestion.review_correct")}</h3>
               <Badge variant="info" className="text-xs">
                 AI-suggested
               </Badge>
               <span className="text-xs text-muted-foreground ml-auto hidden sm:inline">
-                Click any field to edit · Amber border = low confidence
+                {t("ingestion.review_hint")}
               </span>
             </div>
 
             {complaint.entities.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border/40 bg-muted/30 p-8 text-center">
                 <p className="text-sm text-muted-foreground">
-                  No entities extracted. The AI may still be processing — refresh in a moment.
+                  {t("ingestion.no_entities")}
                 </p>
               </div>
             ) : (
@@ -297,7 +294,7 @@ export default function IngestionPage() {
           <details className="group text-sm">
             <summary className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors font-medium flex items-center gap-2">
               <Upload className="h-4 w-4 group-open:rotate-180 transition-transform" />
-              Upload a different file
+              {t("ingestion.upload_different")}
             </summary>
             <div className="mt-4 animate-fade-down">
               <FileUploadZone onUpload={handleUpload} disabled={processing} />

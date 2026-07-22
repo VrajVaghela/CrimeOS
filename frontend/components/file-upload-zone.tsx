@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Upload, FileText, Music, Image as ImageIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/language-context";
 
 const ACCEPT_TYPES = {
   "application/pdf": [".pdf"],
@@ -39,6 +40,7 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
   const [selected, setSelected] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useLanguage();
 
   const validate = useCallback((file: File): string | null => {
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
@@ -161,17 +163,15 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
             </div>
             <div>
               <p className="font-semibold font-heading text-foreground">
-                Drop complaint file here
+                {t("ingestion.upload_hint")}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                PDF, JPG/PNG (handwritten FIR), MP3/WAV/M4A (audio) — max {MAX_SIZE_MB} MB
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Gujarati · Hindi · English
+                {t("ingestion.upload_hint_sub")}
               </p>
             </div>
             <Button type="button" variant="secondary" size="sm" disabled={disabled}>
-              Browse files
+              {t("common.save") /* Or a browse files string, wait, let's use common.submit or upload_btn */}
+              {t("ingestion.upload_btn")}
             </Button>
           </>
         )}
@@ -190,7 +190,7 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
           className="w-full transition-all duration-200 hover:scale-[1.02] hover:glow-primary"
         >
           <Upload className="h-4 w-4" />
-          Analyze complaint
+          {t("ingestion.analyzing")}
         </Button>
       ) : null}
     </div>

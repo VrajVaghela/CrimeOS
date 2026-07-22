@@ -30,6 +30,11 @@ const en = {
     review_draft: "Review Draft",
     back: "Back",
     refresh: "Refresh",
+    sync_cctns: "Sync to CCTNS",
+
+    elapsed: "Elapsed",
+    ago: "ago",
+    m: "m",
   },
 
   nav: {
@@ -128,6 +133,24 @@ const en = {
     low_confidence: "Low confidence — please verify",
     no_complaint: "No complaint uploaded yet",
     no_complaint_sub: "Upload a PDF, scanned image, or audio recording to begin.",
+    analyzing: "Analyzing complaint...",
+    upload_btn: "Upload Complaint",
+    success_title: "Complaint analyzed",
+    success_desc: "AI has transcribed, translated, and extracted entities. Review and correct below.",
+    original_text: "Original Text",
+    english_translation: "English Translation",
+    extracted_entities: "Extracted Entities",
+    review_correct: "Review & Correct Entities",
+    review_hint: "Click any field to edit · Amber border = low confidence",
+    no_entities: "No entities extracted. The AI may still be processing — refresh in a moment.",
+    upload_different: "Upload a different file",
+    ai_processing: "AI is processing…",
+    elapsed_suffix: "elapsed",
+    step_transcribing: "Transcribing / OCR-ing complaint",
+    step_detecting: "Detecting language",
+    step_translating: "Translating to English",
+    step_extracting: "Extracting entities",
+    gemini_info: "Gemini AI · multimodal analysis · Gujarati/Hindi/English",
   },
 
   path: {
@@ -144,6 +167,21 @@ const en = {
     confidence: "Confidence",
     ai_reasoning: "AI Reasoning",
     view_citation: "View SOP Citation",
+    analyze_btn: "Analyze & Generate Path",
+    generating_sub: "Retrieving SOPs, analyzing entities, and aligning BNS sections.",
+    failed: "Generation Failed",
+    regenerate: "Regenerate Path",
+    blueprint: "Investigation Blueprint",
+    legal_grounding: "Legal Grounding",
+    legal_grounding_sub: "Statutory citations matching BNS / BNSS / BSA",
+    no_sections: "No legal sections suggested for this crime classification.",
+    review_status: "Review status:",
+    flag: "Flag Inapplicable",
+    verify: "Verify Citation",
+    model_fallback: "Model: deterministic-fallback · Grounded in seeded police SOPs",
+    in_progress: "IN PROGRESS",
+    done: "DONE",
+    skipped: "SKIPPED",
   },
 
   requests: {
@@ -164,6 +202,19 @@ const en = {
     draft_subtitle: "Review before approving for dispatch",
     recipient: "Recipient",
     template: "Template Used",
+    generate_draft: "Generate {provider} Request Draft",
+    provider_name: "Nodal Provider / Institution Name",
+    provider_email: "Nodal Officer Email Address",
+    generate_btn: "Generate Draft",
+    edit_draft: "Edit Draft",
+    view_draft: "View Draft",
+    view_template: "View Template",
+    awaiting_sho: "Awaiting SHO",
+    trigger_mock: "Trigger Mock Response",
+    received: "Received",
+    edit_dialog_title: "Edit Legal Request Draft",
+    view_dialog_title: "View Dispatched Legal Request",
+    dialog_subtitle: "Preview and modify LERS-style letter content, target recipient email, and provider institution metadata.",
   },
 
   responses: {
@@ -176,6 +227,12 @@ const en = {
     no_responses_sub: "Responses will appear after legal requests are dispatched.",
     records: "records",
     flagged: "Flagged",
+    subtitle_desc: "Gemini-generated insights and pattern correlation over provider raw records.",
+    parsed_records: "Parsed Response Records",
+    parsed_records_desc: "Tabular extraction of CSV data received from provider.",
+    download: "Download CSV",
+    no_rows: "No rows found in this response file.",
+    trigger_mock: "Trigger Mock Response",
   },
 
   summary: {
@@ -201,6 +258,8 @@ const en = {
     timestamp: "Timestamp",
     detail: "Detail",
     expand: "Expand",
+    case_opened: "Case opened",
+    events_recorded: "{count} event(s) recorded · Append-only audit log",
   },
 
   timeline: {
@@ -224,7 +283,34 @@ const en = {
     note_location: "Location (optional)",
     note_occurred_at: "Date & Time",
     note_submit: "Add to Timeline",
+    re_synthesize: "Re-Synthesize",
+    synthesizing_sub: "Gemini is reading your case data and building the chronological event chain.",
+    ai_provenance: "AI-suggested · sourced from complaint text, path steps, legal requests, and audit events. CCTV events include Gemini Vision analysis.",
+    cctv_title: "CCTV Intelligence",
+    cctv_subtitle: "Upload footage frames to pinpoint locations",
+    how_it_works: "How it works",
+    cctv_step1: "1. Upload any CCTV still frame (JPEG/PNG)",
+    cctv_step2: "2. Gemini Vision extracts OSD timestamp, visible location cues, persons, vehicles, and forensic flags",
+    cctv_step3: "3. The event is pinned on the timeline at the detected real-world time",
+    officer_note_sub: "Add manual observations to the timeline",
+    locations: "Locations Identified",
+    locations_sub: "Derived from CCTV analysis and complaint entities. Locations marked on events above.",
+    cctv_drop_hint: "Drop CCTV frame here or click to upload",
+    cctv_drop_sub: "JPEG / PNG / WebP · max 20 MB · Gemini Vision extracts location, persons, vehicles",
+
   },
+
+  evidence: {
+    title: "Evidence Material Gallery",
+    subtitle: "Upload incident images and documents to automatically tag and analyze forensic features via Gemini Vision.",
+    no_evidence: "No Evidence Uploaded",
+    no_evidence_sub: "Upload photographs, CCTV screenshots, or transaction receipt images to invoke Gemini Vision auto-tagging.",
+    select_file: "Select File",
+    upload_btn: "Upload Image Evidence",
+    analyzing: "Analyzing Image...",
+    unsupported_type: "Only image evidence (JPG, PNG) is supported for automated AI forensic tagging.",
+  },
+
 } as const;
 
 // Dictionary: same shape as `en` but all leaf values are plain `string`.

@@ -24,6 +24,7 @@ export default function SummaryPage() {
   const params = useParams();
   const caseId = params.id as string;
 
+
   const [summaries, setSummaries] = useState<CaseSummaryOut[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -83,10 +84,10 @@ export default function SummaryPage() {
         <div>
           <h2 className="font-heading text-lg font-bold flex items-center gap-2">
             <Radar className="h-5 w-5 text-primary" />
-            Case Summary
+            {t("summary.title")}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            AI-generated case summaries with full version history
+            {t("summary.subtitle")}
           </p>
         </div>
         <Button
@@ -95,7 +96,7 @@ export default function SummaryPage() {
           loading={generating}
         >
           {!generating && <Sparkles className="h-4 w-4" />}
-          Generate New Summary
+          {t("summary.generate")}
         </Button>
       </div>
 
@@ -117,10 +118,9 @@ export default function SummaryPage() {
             <Radar className="h-8 w-8 text-primary" />
           </div>
           <div className="max-w-sm space-y-1">
-            <h3 className="font-heading font-semibold text-lg">No Summary Generated Yet</h3>
+            <h3 className="font-heading font-semibold text-lg">{t("summary.no_summary")}</h3>
             <p className="text-sm text-muted-foreground">
-              Click <span className="text-primary font-medium">Generate New Summary</span> to create an
-              AI-powered case summary with full citation and audit trail.
+              {t("summary.no_summary_sub")}
             </p>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function SummaryPage() {
                         <div className="rounded-lg bg-violet/15 p-1.5">
                           <Sparkles className="h-4 w-4 text-violet" />
                         </div>
-                        AI Case Summary — Version {selected.version}
+                        AI {t("summary.title")} — Version {selected.version}
                         {isTranslated && (
                           <span className="text-[10px] bg-primary/15 border border-primary/25 text-primary px-2 py-0.5 rounded-full font-mono">
                             {lang === "hi" ? "हिंदी" : "ગુજ"}

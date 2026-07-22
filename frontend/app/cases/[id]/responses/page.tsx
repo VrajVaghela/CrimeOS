@@ -19,11 +19,14 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getCaseResponses, regenerateInsights, ApiError } from "@/lib/api";
+import { useLanguage } from "@/lib/language-context";
+import { TranslatedTextBlock } from "@/components/translated-text-block";
 import type { ProviderResponseOut } from "@/lib/types";
 
 export default function ResponsesPage() {
   const params = useParams();
   const caseId = params.id as string;
+  const { t } = useLanguage();
 
   const [responses, setResponses] = useState<ProviderResponseOut[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,10 +91,9 @@ export default function ResponsesPage() {
             <Activity className="h-8 w-8 text-primary" />
           </div>
           <div className="max-w-sm space-y-1">
-            <h3 className="font-heading font-semibold text-lg">No Provider Responses Received Yet</h3>
+            <h3 className="font-heading font-semibold text-lg">{t("responses.no_responses")}</h3>
             <p className="text-sm text-muted-foreground">
-              Dispatch a legal request to a telecom or bank, then click{" "}
-              <span className="text-success font-medium">Trigger Mock Response</span> to simulate the provider sending back data.
+              {t("responses.no_responses_sub")}
             </p>
           </div>
         </div>
@@ -101,7 +103,7 @@ export default function ResponsesPage() {
           <div className="lg:col-span-1 space-y-3">
             <h3 className="font-heading text-xs font-bold text-muted-foreground uppercase tracking-wider px-1 flex items-center gap-2">
               <FileText className="h-3.5 w-3.5" />
-              Response Files
+              {t("responses.title")}
               <Badge variant="secondary" className="ml-auto font-mono text-xs">
                 {responses.length}
               </Badge>
@@ -150,10 +152,10 @@ export default function ResponsesPage() {
                         <div className="rounded-lg bg-info/15 p-1.5">
                           <Sparkles className="h-4 w-4 text-info" />
                         </div>
-                        AI Analysis & Insights
+                        {t("responses.subtitle")}
                       </CardTitle>
                       <CardDescription className="text-xs text-muted-foreground">
-                        Gemini-generated insights and pattern correlation over provider raw records.
+                        {t("responses.subtitle_desc")}
                       </CardDescription>
                     </div>
                     <Button
@@ -164,12 +166,12 @@ export default function ResponsesPage() {
                       loading={regenerating}
                     >
                       {!regenerating && <RefreshCw className="h-3.5 w-3.5" />}
-                      Regenerate
+                      {t("common.regenerate")}
                     </Button>
                   </CardHeader>
                   <CardContent>
                     <div className="text-sm leading-relaxed text-foreground bg-primary/5 border border-primary/20 rounded-lg p-4 font-sans whitespace-pre-wrap">
-                      {selectedResponse.ai_insights}
+                      <TranslatedTextBlock content={selectedResponse.ai_insights} />
                     </div>
                   </CardContent>
                 </Card>
@@ -180,10 +182,10 @@ export default function ResponsesPage() {
                     <div>
                       <CardTitle className="font-heading text-base font-bold flex items-center gap-2">
                         <TableIcon className="h-4 w-4 text-primary" />
-                        Parsed Response Records
+                        {t("responses.parsed_records")}
                       </CardTitle>
                       <CardDescription className="text-xs text-muted-foreground">
-                        Tabular extraction of CSV data received from provider.
+                        {t("responses.parsed_records_desc")}
                       </CardDescription>
                     </div>
                     {selectedResponse.file_path && (
@@ -195,7 +197,7 @@ export default function ResponsesPage() {
                           rel="noreferrer"
                         >
                           <Download className="h-3.5 w-3.5" />
-                          Download CSV
+                          {t("responses.download")}
                         </a>
                       </Button>
                     )}
@@ -203,7 +205,7 @@ export default function ResponsesPage() {
                   <CardContent>
                     {records.length === 0 ? (
                       <p className="text-sm text-muted-foreground py-6 text-center">
-                        No rows found in this response file.
+                        {t("responses.no_rows")}
                       </p>
                     ) : (
                       <div className="rounded-lg border border-border/60 overflow-x-auto">

@@ -20,7 +20,9 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { TranslatedTextBlock } from "@/components/translated-text-block";
 import { getAuditEvents, ApiError } from "@/lib/api";
+import { useLanguage } from "@/lib/language-context";
 import type { AuditEventOut } from "@/lib/types";
 
 const ACTION_CONFIG: Record<string, { icon: React.ElementType; color: string; label: string }> = {
@@ -55,22 +57,23 @@ function getActionColor(action: string): string {
   return "bg-muted";
 }
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, t: any, lang: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60) return `${diffSec}s ago`;
+  if (diffSec < 60) return `${diffSec}${t("common.s")} ${t("common.ago")}`;
   const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 60) return `${diffMin}${t("common.m")} ${t("common.ago")}`;
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
-  return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  if (diffHr < 24) return `${diffHr}${t("common.h")} ${t("common.ago")}`;
+  return date.toLocaleDateString(lang === "hi" ? "hi-IN" : (lang === "gu" ? "gu-IN" : "en-IN"), { day: "2-digit", month: "short", year: "numeric" });
 }
 
 export default function AuditPage() {
   const params = useParams();
   const caseId = params.id as string;
+  const { t, lang } = useLanguage();
 
   const [events, setEvents] = useState<AuditEventOut[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,10 +104,10 @@ export default function AuditPage() {
         <div>
           <h2 className="font-heading text-lg font-bold flex items-center gap-2">
             <Network className="h-5 w-5 text-primary" />
-            Audit Timeline
+            {t("audit.title")}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Append-only event log — every AI action, approval, and dispatch recorded
+            {t("audit.subtitle")}
           </p>
         </div>
         <Button
@@ -114,7 +117,7 @@ export default function AuditPage() {
           disabled={loading}
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          Refresh
+          {t("common.refresh")}
         </Button>
       </div>
 
@@ -136,9 +139,9 @@ export default function AuditPage() {
             <Network className="h-8 w-8 text-primary" />
           </div>
           <div className="max-w-sm space-y-1">
-            <h3 className="font-heading font-semibold text-lg">No Audit Events Yet</h3>
+            <h3 className="font-heading font-semibold text-lg">{t("audit.no_events")}</h3>
             <p className="text-sm text-muted-foreground">
-              Every action taken on this case will appear here automatically.
+              {t("audit.no_events_sub")}
             </p>
           </div>
         </div>
@@ -183,18 +186,18 @@ export default function AuditPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-2 min-w-0">
                         <Icon className={`h-4 w-4 shrink-0 ${config.color}`} />
-                        <span className="font-heading text-sm font-semibold text-foreground truncate">
-                          {config.label}
-                        </span>
+                        <div className="font-heading text-sm font-semibold text-foreground truncate">
+                          <TranslatedTextBlock content={config.label} autoTranslate={true} />
+                        </div>
                         {idx === 0 && (
                           <Badge variant="info" className="text-[10px] font-mono shrink-0">
-                            LATEST
+                            {t("summary.latest")}
                           </Badge>
                         )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
                         {event.user_id && <User className="h-3 w-3" />}
-                        <span className="font-mono whitespace-nowrap">{formatRelativeTime(event.created_at)}</span>
+                        <span className="font-mono whitespace-nowrap">{formatRelativeTime(event.created_at, t, lang)}</span>
                       </div>
                     </div>
 
@@ -215,7 +218,7 @@ export default function AuditPage() {
                       >
                         <div className="bg-muted/50 border border-border/60 rounded-lg p-3 space-y-1">
                           <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2">
-                            Event Detail
+                            {t("audit.detail")}
                           </p>
                           {detailKeys.map((key) => (
                             <div key={key} className="flex gap-2 text-xs">
@@ -233,7 +236,7 @@ export default function AuditPage() {
 
                     {detailKeys.length > 0 && !isExpanded && (
                       <p className="text-[10px] text-muted-foreground mt-2 hover:text-primary transition-colors">
-                        Click to expand event detail →
+                        {t("audit.expand")} →
                       </p>
                     )}
                   </div>
