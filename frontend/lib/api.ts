@@ -569,6 +569,29 @@ export async function getVideoReport(caseId: string): Promise<VideoReportRespons
   return request<VideoReportResponse>(`/video/report/${caseId}`);
 }
 
+// Multilingual translation (Tier 2 — display transform, not stored in DB)
+export interface TranslateOut {
+  translated: string;
+  fallback: boolean; // true = Gemini failed, original English returned
+  cached: boolean;   // true = served from backend in-memory cache
+}
+
+/**
+ * Translate AI-generated text into Hindi or Gujarati.
+ * Call this ONLY via useTranslatedContent() hook, never directly in components.
+ * Does NOT write audit events (display-only transform).
+ * Preserves legal identifiers verbatim per TRANSLATION_PROMPT rules.
+ */
+export async function translateText(
+  text: string,
+  targetLang: "en" | "hi" | "gu"
+): Promise<TranslateOut> {
+  return request<TranslateOut>("/translate", {
+    method: "POST",
+    body: JSON.stringify({ text, target_lang: targetLang }),
+  });
+}
+
 
 
 

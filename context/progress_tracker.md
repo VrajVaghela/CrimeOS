@@ -103,6 +103,36 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed
 - [x] ✅ CHECKPOINT: golden path plus one Phase 8 intelligence moment completes in under 7 minutes
 
+## Phase 10 — UI/UX Improvement Pass
+- [ ] P0-1: Normalize tab bar — remove per-tab accent colors, standardize to muted/primary only
+- [ ] P0-2: Simplify case header — remove activeTabMeta label, consolidate meta row, move CCTNS button
+- [ ] P0-3: Fix eyebrow label overuse in command center signal cards and hero metadata rows
+- [ ] P0-4: Move bilingual text out of headings — English headings only, Hindi as subtitle
+- [ ] P0-5: Remove decorative gradient stripes and gradient icon backgrounds (ingestion + requests)
+- [ ] P0-6: Remove demo scaffolding from officer-facing UI (requests page email note + mock button)
+- [ ] P1-1: Dashboard role badge — move out of h1 into subtitle row
+- [ ] P1-2: Limit AnimatedMetric count-up to one card (Case Confidence only)
+- [ ] P1-3: Replace tab group text labels (Work/Evidence/Record) with dividers
+- [ ] P1-4: Reduce workflow spine node size w-11→w-8, fix focus ring
+- [ ] P1-5: Restore subtle scrollbars — remove global scrollbar-width:none from *
+- [ ] P1-6: Split dual-purpose command center card (requests + response) into two cards
+- [ ] P1-7: Remove duplicate AI-suggested badges on ingestion page
+- [ ] P1-8: Shorten stat card labels on dashboard
+- [ ] P1-9: Remove per-item stagger delays from all list rows
+- [ ] P1-10: Replace hover:glow-primary + translate on case list rows with subtle tint
+- [ ] P1-11: Remove animate-pulse-glow from dispatched request cards
+- [ ] P1-12: Path stepper — remove triple animation (glow-pulse + glass + pulse dot) on active step
+- [ ] P1-13: Replace native <select> for step status with DropdownMenu
+- [ ] P1-14: Add aria-current="page" to active tabs
+- [ ] P1-15: Fix touch targets on tab bar (py-2 px-3) and search clear button (h-9 w-9 wrapper)
+- [ ] P2-1: Login page — remove duplicate LockKeyhole icon from card header
+- [ ] P2-2: Remove "Navigation" eyebrow label from sidebar
+- [ ] P2-3: Wire or disable Settings/Help topbar buttons (add aria-disabled + tooltip)
+- [ ] P2-4: Fix broken indentation in path-stepper.tsx
+- [ ] P2-5: Remove all dead imports and dead constants (dashboard, cases, requests, workflow-spine)
+- [ ] P2-6: Audit copilot drawer z-index against semantic scale
+- [ ] ✅ CHECKPOINT: Golden Path demo with clean, professional, clutter-free UI
+
 ## Phase 9 — Ferrari Design System Overhaul
 - [x] Phase 9A — Global Styles & Core Tokens Setup (CSS variables, tailwind.config mapping, backgrounds, layout fonts)
 - [x] Phase 9B — Navigation Sidebar & Command Topbar (sidebar, topbar, active/hover navigation styles)
@@ -202,3 +232,19 @@ been performed for this phase yet.
     Chain of custody: time-separated append→verify passes, tamper detected, actor
     attributed. Also fixed `/api/v1/video` → `/video` doc drift in `DEMO_SCRIPT.md` and
     `memory.md`. Golden-path + video live rehearsal confirmed by user.
+
+## Phase 12 — Multilingual Support Integration
+Planning source: `context/multilingual_merge_plan.md` (2026-07-28). Ported the
+i18n infrastructure from `origin/manan/multilingual` via cherry-pick (NOT a raw
+merge — the branch predates Phase 8–11 and uses an older flat route structure).
+
+- [x] Extract 9 new i18n files (frontend dictionaries, language context, toggle, translated-text-block, hook; backend translate router + service) from `origin/manan/multilingual`
+- [x] Port 2 missing dependencies the extracted files needed: `TRANSLATION_PROMPT` in `prompts.py`, `translateText()` + `TranslateOut` in `lib/api.ts`
+- [x] Wire `LanguageProvider` into `frontend/app/layout.tsx`
+- [x] Add `<LanguageToggle>` to `frontend/app/(authenticated)/layout.tsx` topbar
+- [x] Register `translate.router` in `backend/app/main.py`
+- [x] ✅ CHECKPOINT: `import app.main` OK (translate wired); `tsc --noEmit` clean; `next build` clean (14 routes)
+  - Verified 2026-07-28. Backend: all routers import incl. translate. Frontend:
+    tsc exit 0, next build exit 0. NOTE: Phase 8–11 UI strings not yet keyed in
+    en/hi/gu dictionaries — they render English via `useT()` fallback until a
+    follow-up pass adds their keys (documented in merge plan as out-of-scope).

@@ -85,6 +85,11 @@ The application features two seeded demo cases:
 * **Versioned Summaries**: Generates case diaries and case summaries that log edits across versions without deletion.
 * **Immutable Audit Trail**: Append-only transactional event log records all actions with user credentials.
 
+### 9. Multilingual Support (EN / HI / GU)
+* **Hybrid Two-Tier i18n**: Tier 1 translates static UI chrome via typed dictionaries (`lib/i18n/{en,hi,gu}.ts`) with silent English fallback for missing keys; Tier 2 translates AI-generated case content on demand via a backend `/translate` service (Gemini-backed, in-memory cache, never persisted).
+* **Language Toggle**: Topbar control persists preference to `localStorage`; the DB remains the authoritative English source.
+* **Status**: Implemented (Phase 12, 2026-07-28) — see `context/multilingual_merge_plan.md`. Phase 8–11 UI strings fall back to English until keyed in the dictionaries.
+
 ---
 
 ## Design System: Ferrari Command Center Aesthetic

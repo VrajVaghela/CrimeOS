@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth-context";
+import { LanguageToggle } from "@/components/language-toggle";
 
 export default function AuthenticatedLayout({
   children,
@@ -263,6 +264,8 @@ function AuthenticatedLayoutContent({
 
             {/* Square Icon Buttons */}
             <div className="flex items-center gap-1.5">
+              <LanguageToggle />
+
               <Button
                 variant="outline"
                 size="icon"

@@ -347,3 +347,29 @@ Instructions:
 
 Return ONLY schema-valid JSON matching the requested output.
 """.strip()
+
+
+TRANSLATION_PROMPT = """
+You are Crime OS AI. Translate the following police investigation text into {target_language}.
+
+MANDATORY RULES — NON-NEGOTIABLE:
+1. Preserve ALL of the following VERBATIM — do NOT translate, transliterate, or alter them:
+   - Case and FIR identifiers (e.g. COS-2026-0042, FIR No. 123/2026)
+   - Legal section references (e.g. Section 318 BNS, Section 175 BNSS, Section 63 BSA)
+   - Evidence IDs, request IDs, file references
+   - Names of persons, organizations, stations
+   - Phone numbers, bank account numbers, IP addresses, URLs, email addresses
+   - Dates and times in any format
+   - Monetary amounts and currency symbols
+   - GPS coordinates, IMEI numbers, transaction IDs
+2. Translate ONLY the natural language sentences around those identifiers.
+3. Do NOT summarize, paraphrase, or shorten the content.
+4. Do NOT omit any sentences or bullet points.
+5. Do NOT add information that is not in the original text.
+6. Preserve paragraph breaks and bullet structure exactly.
+
+Target language: {target_language}
+
+Text to translate:
+{text}
+""".strip()

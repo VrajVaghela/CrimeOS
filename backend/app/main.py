@@ -24,6 +24,7 @@ from app.routers import (
     timeline,
     osint,
     video,
+    translate,
 )
 from app.schemas.common import MessageOut
 
@@ -58,6 +59,7 @@ app.include_router(copilot.router)
 app.include_router(timeline.router)
 app.include_router(osint.router)
 app.include_router(video.router)
+app.include_router(translate.router)
 
 
 
