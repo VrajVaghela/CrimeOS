@@ -1,30 +1,18 @@
-import os
 import uuid
-from datetime import datetime
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
-from app.config import settings
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import User, Case, EvidenceFile
-from app.schemas.evidence import EvidenceOut
-from app.services import audit_service
-from app.ai import gemini_client
+from app.schemas.evidence import EvidenceOut, EvidenceMarkerOut, EvidenceMarkerCreate
+from app.services import evidence_service
 
 router = APIRouter(prefix="/evidence", tags=["evidence"])
 
 
-class GeminiTagsResponse(BaseModel):
-    description: str
-    tags: list[str]
-    confidence: float
-    flagged_features: list[str]
-
-
-@router.post("/cases/{case_id}", response_model=EvidenceOut, summary="Upload case evidence and auto-tag via Gemini")
+@router.post("/cases/{case_id}", response_model=EvidenceOut, summary="Upload case evidence (image, audio, video, doc) and analyze via Gemini")
 async def upload_evidence(
     case_id: uuid.UUID,
     file: UploadFile = File(...),
@@ -36,72 +24,17 @@ async def upload_evidence(
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
 
-    # 2. Check if file is image
-    if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=415, detail="Only image evidence is supported for auto-tagging.")
-
     content = await file.read()
 
-    # 3. Save file locally
-    evidence_dir = os.path.join(settings.UPLOAD_DIR, "evidence", str(case_id))
-    os.makedirs(evidence_dir, exist_ok=True)
-    filename = f"{uuid.uuid4()}_{file.filename}"
-    file_path = os.path.join(evidence_dir, filename)
-    with open(file_path, "wb") as f:
-        f.write(content)
-
-    # Convert path to relative URL/relative path
-    relative_path = os.path.join("uploads", "evidence", str(case_id), filename).replace("\\", "/")
-
-    # 4. Invoke Gemini for Auto-Tagging
-    from app.ai.prompts import EVIDENCE_TAGGING_PROMPT
-
-    # Fallback response
-    fallback_tags = GeminiTagsResponse(
-        description="Uploaded evidence image.",
-        tags=["evidence", "image", "upload"],
-        confidence=0.8,
-        flagged_features=["No specific forensic features flagged."]
-    )
-
-    try:
-        # Pass bytes to gemini_client
-        tags_data: GeminiTagsResponse = gemini_client.generate_json(
-            db,
-            purpose="evidence_tagging",
-            prompt=EVIDENCE_TAGGING_PROMPT,
-            schema=GeminiTagsResponse,
-            files=[(content, file.content_type)],
-            model=settings.GEMINI_FLASH_MODEL
-        )
-    except Exception as e:
-        logger = gemini_client.logger
-        logger.error(f"Failed to auto-tag evidence image via Gemini: {e}. Using fallback.")
-        tags_data = fallback_tags
-
-    # 5. Save to database
-    evidence_record = EvidenceFile(
+    # 2. Delegate creation & analysis to service — AppError propagates to global handler
+    evidence_record = evidence_service.create_evidence(
+        db=db,
         case_id=case_id,
-        file_path=relative_path,
-        ai_tags=tags_data.model_dump()
+        file_name=file.filename,
+        content_type=file.content_type or "application/octet-stream",
+        content=content,
+        current_user_id=current_user.id,
     )
-    db.add(evidence_record)
-    db.flush()
-
-    # Record Audit Event
-    audit_service.record(
-        db,
-        case_id=case_id,
-        user_id=current_user.id,
-        action="evidence_uploaded",
-        detail={
-            "evidence_id": str(evidence_record.id),
-            "filename": file.filename,
-            "tags": tags_data.tags,
-            "description": tags_data.description
-        }
-    )
-
     db.commit()
     db.refresh(evidence_record)
     return EvidenceOut.model_validate(evidence_record)
@@ -117,3 +50,61 @@ async def list_evidence(
         select(EvidenceFile).where(EvidenceFile.case_id == case_id).order_by(EvidenceFile.uploaded_at.desc())
     ))
     return [EvidenceOut.model_validate(e) for e in evidence]
+
+
+@router.post("/{evidence_id}/markers", response_model=EvidenceMarkerOut, summary="Create a segment marker on an evidence file")
+async def create_marker(
+    evidence_id: uuid.UUID,
+    payload: EvidenceMarkerCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> EvidenceMarkerOut:
+    marker = evidence_service.create_marker(
+        db=db,
+        evidence_file_id=evidence_id,
+        marker_type=payload.marker_type,
+        start_ms=payload.start_ms,
+        end_ms=payload.end_ms,
+        transcript_text=payload.transcript_text,
+        linked_entity_ids=payload.linked_entity_ids,
+        current_user_id=current_user.id,
+    )
+    db.commit()
+    db.refresh(marker)
+    return EvidenceMarkerOut.model_validate(marker)
+
+
+@router.post("/markers/{marker_id}/link", response_model=EvidenceMarkerOut, summary="Link a marker to a case entity")
+async def link_marker_to_entity(
+    marker_id: uuid.UUID,
+    entity_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> EvidenceMarkerOut:
+    marker = evidence_service.link_marker_to_entity(
+        db=db,
+        marker_id=marker_id,
+        entity_id=entity_id,
+        current_user_id=current_user.id,
+    )
+    db.commit()
+    db.refresh(marker)
+    return EvidenceMarkerOut.model_validate(marker)
+
+
+@router.post("/markers/{marker_id}/promote", response_model=EvidenceMarkerOut, summary="Promote an evidence marker fact to the case timeline")
+async def promote_marker(
+    marker_id: uuid.UUID,
+    note: str | None = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> EvidenceMarkerOut:
+    marker = evidence_service.promote_marker_to_case(
+        db=db,
+        marker_id=marker_id,
+        current_user_id=current_user.id,
+        note=note,
+    )
+    db.commit()
+    db.refresh(marker)
+    return EvidenceMarkerOut.model_validate(marker)

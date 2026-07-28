@@ -126,6 +126,69 @@ def transcribe(db: Session, *, purpose: str, prompt: str, content: bytes, mime_t
     raise GenerationError(f"Gemini transcription failed for {purpose}")
 
 
+def upload_file(filepath: str) -> Any:
+    """Upload a large media file through the shared Gemini gateway."""
+    return _client().files.upload(file=filepath)
+
+
+def wait_for_file(name: str, *, poll_interval: int = 2, max_wait: int = 180) -> Any:
+    """Wait for a Gemini media upload to become active."""
+    client = _client()
+    elapsed = 0
+    while elapsed < max_wait:
+        media_file = client.files.get(name=name)
+        state_name = getattr(media_file.state, "name", str(media_file.state))
+        if state_name == "ACTIVE":
+            return media_file
+        if state_name == "FAILED":
+            raise GenerationError("Gemini media processing failed")
+        time.sleep(poll_interval)
+        elapsed += poll_interval
+    raise GenerationError("Gemini media processing timed out")
+
+
+def generate_json_from_file(
+    db: Session,
+    *,
+    purpose: str,
+    prompt: str,
+    schema: type[T],
+    media_file: Any,
+    model: str | None = None,
+) -> T:
+    """Generate structured JSON from an already-uploaded Gemini media file."""
+    model_name = model or settings.GEMINI_FLASH_MODEL
+    input_hash = _hash_input({"prompt": prompt, "file": getattr(media_file, "name", ""), "model": model_name})
+    client = _client()
+    for attempt in range(3):
+        started = time.perf_counter()
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=[media_file, prompt],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=schema,
+                ),
+            )
+            parsed = schema.model_validate_json(response.text or "{}")
+            _store_cache(db, purpose, input_hash, parsed.model_dump(mode="json"))
+            logger.info("gemini_file_json purpose=%s model=%s latency=%.2f", purpose, model_name, time.perf_counter() - started)
+            return parsed
+        except Exception as exc:
+            logger.warning("gemini_file_json_failed purpose=%s attempt=%s error=%s", purpose, attempt + 1, exc)
+            time.sleep(0.5 * (attempt + 1))
+    cached = _get_cached(db, purpose, input_hash)
+    if cached:
+        return schema.model_validate(cached)
+    raise GenerationError(f"Gemini file generation failed for {purpose} and no fallback cache is available")
+
+
+def delete_file(name: str) -> None:
+    """Delete a temporary Gemini media file through the shared gateway."""
+    _client().files.delete(name=name)
+
+
 def embed(texts: Sequence[str]) -> list[list[float]]:
     if not settings.GEMINI_API_KEY:
         raise GenerationError("GEMINI_API_KEY is not configured")

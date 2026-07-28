@@ -3,13 +3,10 @@ import type {
   CaseDetailOut,
   CaseOut,
   ComplaintOut,
-  CctvPinOut,
   DashboardOut,
   ExtractedEntityOut,
   IngestionStatusOut,
-  OfficerNoteIn,
   TokenResponse,
-  TimelineEventOut,
   UserOut,
   PathGenerationStatusOut,
   PathStepOut,
@@ -19,7 +16,13 @@ import type {
   AuditEventOut,
   EvidenceOut,
   CaseSectionOut,
+  CommandCenterOut,
+  CopilotMessageOut,
+  VideoUploadResponse,
+  VideoStatusResponse,
+  VideoReportResponse,
 } from "@/lib/types";
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "crime_os_token";
@@ -301,7 +304,125 @@ export async function getPendingRequests(): Promise<LegalRequestOut[]> {
   return request<LegalRequestOut[]>("/requests/pending");
 }
 
+export async function getCommandCenter(caseId: string): Promise<CommandCenterOut> {
+  return request<CommandCenterOut>(`/command_center/${caseId}`);
+}
+
+// Phase 8B: Path Revisions and Case Entity Intelligence APIs
+import type {
+  CaseEntityOut,
+  EntityRelationshipOut,
+  RelatedCaseOut,
+  InvestigationPathOut,
+} from "@/lib/types";
+
+export async function getPathRevisions(caseId: string): Promise<InvestigationPathOut[]> {
+  return request<InvestigationPathOut[]>(`/paths/cases/${caseId}/revisions`);
+}
+
+export async function triggerPathRevision(
+  caseId: string,
+  body: { trigger_type: string; change_reason: string }
+): Promise<InvestigationPathOut> {
+  return request<InvestigationPathOut>(`/paths/cases/${caseId}/revision`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getCaseEntities(caseId: string): Promise<CaseEntityOut[]> {
+  return request<CaseEntityOut[]>(`/entities/cases/${caseId}`);
+}
+
+export async function getEntityRelationships(caseId: string): Promise<EntityRelationshipOut[]> {
+  return request<EntityRelationshipOut[]>(`/entities/cases/${caseId}/relationships`);
+}
+
+export async function getRelatedCases(caseId: string): Promise<RelatedCaseOut[]> {
+  return request<RelatedCaseOut[]>(`/entities/cases/${caseId}/related-cases`);
+}
+
+export async function syncEntities(caseId: string): Promise<CaseEntityOut[]> {
+  return request<CaseEntityOut[]>(`/entities/cases/${caseId}/sync`, {
+    method: "POST",
+  });
+}
+
+// Phase 8C: Evidence Markers, Links, and Promotion APIs
+import type { EvidenceMarkerOut } from "@/lib/types";
+
+export async function createEvidenceMarker(
+  evidenceId: string,
+  body: {
+    marker_type: string;
+    start_ms?: number | null;
+    end_ms?: number | null;
+    transcript_text?: string | null;
+    linked_entity_ids?: string[];
+  }
+): Promise<EvidenceMarkerOut> {
+  return request<EvidenceMarkerOut>(`/evidence/${evidenceId}/markers`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function linkEvidenceMarkerToEntity(
+  markerId: string,
+  entityId: string
+): Promise<EvidenceMarkerOut> {
+  return request<EvidenceMarkerOut>(`/evidence/markers/${markerId}/link?entity_id=${entityId}`, {
+    method: "POST",
+  });
+}
+
+export async function promoteEvidenceMarker(
+  markerId: string,
+  note?: string
+): Promise<EvidenceMarkerOut> {
+  const url = note
+    ? `/evidence/markers/${markerId}/promote?note=${encodeURIComponent(note)}`
+    : `/evidence/markers/${markerId}/promote`;
+  return request<EvidenceMarkerOut>(url, {
+    method: "POST",
+  });
+}
+
+
+export async function getCopilotChat(caseId: string): Promise<CopilotMessageOut[]> {
+  return request<CopilotMessageOut[]>(`/copilot/cases/${caseId}/chat`);
+}
+
+export async function askCopilot(caseId: string, question: string): Promise<CopilotMessageOut> {
+  return request<CopilotMessageOut>(`/copilot/cases/${caseId}/chat`, {
+    method: "POST",
+    body: JSON.stringify({ question }),
+  });
+}
+
+import type { RequestReadinessOut, ResponseCorrelationOut } from "@/lib/types";
+
+export async function getRequestReadiness(requestId: string): Promise<RequestReadinessOut> {
+  return request<RequestReadinessOut>(`/requests/${requestId}/readiness`);
+}
+
+export async function getResponseCorrelations(responseId: string): Promise<ResponseCorrelationOut[]> {
+  return request<ResponseCorrelationOut[]>(`/responses/${responseId}/correlations`);
+}
+
+export async function promoteResponseRow(
+  responseId: string,
+  rowIndex: number
+): Promise<{ message: string; citation_id: string }> {
+  return request<{ message: string; citation_id: string }>(`/responses/${responseId}/promote/${rowIndex}`, {
+    method: "POST",
+  });
+}
+
+
 // Timeline Agent
+import type { TimelineEventOut, CctvPinOut } from "@/lib/types";
+
 export async function getCaseTimeline(caseId: string): Promise<TimelineEventOut[]> {
   return request<TimelineEventOut[]>(`/timeline/cases/${caseId}`);
 }
@@ -320,14 +441,133 @@ export async function uploadCctvFrame(
 
 export async function addTimelineNote(
   caseId: string,
-  body: OfficerNoteIn
+  data: { title: string; description: string; occurred_at: string; location: string | null }
 ): Promise<TimelineEventOut> {
   return request<TimelineEventOut>(`/timeline/cases/${caseId}/notes`, {
     method: "POST",
-    body: JSON.stringify(body),
+    body: JSON.stringify(data),
   });
 }
 
+// Phase 10B: OSINT API Calls
+import type { OsintScanResultResponse } from "@/lib/types";
+
+export async function getEntityOsintResult(
+  caseId: string,
+  entityId: string
+): Promise<OsintScanResultResponse> {
+  return request<OsintScanResultResponse>(`/cases/${caseId}/osint/${entityId}`);
+}
+
+export async function triggerEntityOsint(
+  caseId: string,
+  entityId: string
+): Promise<{ status: string; scan_id: string }> {
+  return request<{ status: string; scan_id: string }>(`/cases/${caseId}/osint/${entityId}/trigger`, {
+    method: "POST",
+  });
+}
+
+export async function confirmPivot(
+  caseId: string,
+  entityId: string
+): Promise<{
+  success: boolean;
+  entity: { id: string; status: string };
+  scan: { scan_id: string; status: string } | null;
+}> {
+  return request<{
+    success: boolean;
+    entity: { id: string; status: string };
+    scan: { scan_id: string; status: string } | null;
+  }>(`/cases/${caseId}/osint/pivots/${entityId}/confirm`, {
+    method: "POST",
+  });
+}
+
+export async function ignorePivot(
+  caseId: string,
+  entityId: string
+): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>(`/cases/${caseId}/osint/pivots/${entityId}/ignore`, {
+    method: "POST",
+  });
+}
+
+export async function exportDossier(caseId: string, entityId: string): Promise<string> {
+  const token = getStoredToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${API_URL}/cases/${caseId}/osint/${entityId}/export`, {
+    headers,
+  });
+  if (!response.ok) {
+    throw new Error("Failed to export dossier");
+  }
+  return response.text();
+}
+
+// Phase 10C: Video analysis API client helpers
+export function uploadVideo(
+  caseId: string,
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<VideoUploadResponse> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append("case_id", caseId);
+    formData.append("file", file);
+
+    xhr.upload.addEventListener("progress", (event) => {
+      if (event.lengthComputable && onProgress) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        onProgress(percent);
+      }
+    });
+
+    xhr.addEventListener("load", () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response: VideoUploadResponse = JSON.parse(xhr.responseText);
+          resolve(response);
+        } catch {
+          reject(new Error("Failed to parse upload response"));
+        }
+      } else {
+        try {
+          const error = JSON.parse(xhr.responseText);
+          reject(new Error(error.detail || `Upload failed with status ${xhr.status}`));
+        } catch {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      }
+    });
+
+    xhr.addEventListener("error", () => {
+      reject(new Error("Network error during upload"));
+    });
+
+    xhr.open("POST", `${API_URL}/video/analyze`);
+    
+    const token = getStoredToken();
+    if (token) {
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    }
+    
+    xhr.send(formData);
+  });
+}
+
+export async function pollVideoStatus(taskId: string): Promise<VideoStatusResponse> {
+  return request<VideoStatusResponse>(`/video/status/${taskId}`);
+}
+
+export async function getVideoReport(caseId: string): Promise<VideoReportResponse> {
+  return request<VideoReportResponse>(`/video/report/${caseId}`);
+}
 // Multilingual translation (Tier 2 — display transform, not stored in DB)
 export interface TranslateOut {
   translated: string;
@@ -350,3 +590,4 @@ export async function translateText(
     body: JSON.stringify({ text, target_lang: targetLang }),
   });
 }
+

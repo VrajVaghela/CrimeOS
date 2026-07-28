@@ -4,86 +4,193 @@
 
 @layer base {
   :root {
-    --background: 223 39% 7%;
-    --foreground: 0 0% 100%;
-    --card: 223 26% 14%;
-    --card-foreground: 0 0% 100%;
-    --sidebar: 223 30% 9%;
-    --sidebar-foreground: 0 0% 100%;
-    --toolbar: 223 24% 16%;
-    --toolbar-foreground: 0 0% 100%;
-    --primary: 217 91% 60%;
+    /* Ferrari Cyber-Command Console Theme Tokens */
+    
+    /* Backgrounds */
+    --bg: #0b0b0b;                  /* Carbon Black */
+    --surface: #171717;             /* Card/Panel surface */
+    --surface-warm: #23130f;        /* Summary Card, warm accents */
+
+    /* Text */
+    --fg: #fffaf0;                  /* Warm off-white primary text */
+    --fg-2: #e8dcc8;                /* Warm off-white secondary text */
+    --muted: #a89f91;               /* Labels, metadata, placeholders */
+
+    /* Accent colors */
+    --meta: #ffd200;                /* Yellow metadata highlights */
+    --accent: #dc0000;              /* Ferrari Red primary accent */
+    --accent-on: #ffffff;
+    --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+    --accent-active: color-mix(in oklab, var(--accent), black 14%);
+
+    /* Semantic colors */
+    --success: #0f9d58;             /* Green - completed/high confidence */
+    --warn: #ffd200;                /* Yellow - pending review/attention */
+    --danger: #ff3b30;              /* Red - error/threat alerts */
+    --info: #2d7ee9;                /* Info Blue - AI content, citations */
+    --info-on: #ffffff;
+
+    /* Borders */
+    --border: #342a24;              /* Strong border, hover states */
+    --border-soft: #241f1b;         /* Default soft border */
+
+    /* Font stacks */
+    --font-heading: "Ferrari Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Ferrari Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "SF Mono", ui-monospace, Menlo, monospace;
+
+    /* Type scale */
+    --text-xs: 12px;
+    --text-sm: 14px;
+    --text-base: 16px;
+    --text-lg: 19px;
+    --text-xl: 26px;
+    --text-2xl: 40px;
+    --text-3xl: 62px;
+    --text-4xl: 88px;
+
+    /* Line heights */
+    --leading-body: 1.5;
+    --leading-tight: 0.98;
+
+    /* Letter spacing */
+    --tracking-display: -0.03em;
+
+    /* Spacing scale */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+
+    /* Border radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 14px;
+    --radius-pill: 9999px;
+    --radius-squircle: 12px;
+    --radius-squircle-sm: 8px;
+
+    /* Elevation */
+    --elev-flat: none;
+    --elev-ring: 0 0 0 1px var(--border);
+    --elev-raised: 0 26px 80px rgba(0, 0, 0, 0.48);
+    --focus-ring: 0 0 0 4px rgba(220, 0, 0, 0.30);
+
+    /* Glass effects */
+    --glass-bg: color-mix(in oklch, var(--surface) 55%, transparent);
+    --glass-border: color-mix(in oklch, var(--accent) 30%, transparent);
+
+    /* Gradients */
+    --gradient-accent-info-v: linear-gradient(180deg, var(--accent) 0%, var(--info) 100%); /* Vertical red-to-blue */
+    --gradient-accent-info-h: linear-gradient(90deg, var(--accent) 0%, var(--info) 100%);  /* Horizontal red-to-blue */
+    --gradient-graph-fill: linear-gradient(180deg, color-mix(in oklab, var(--accent) 15%, transparent) 0%, color-mix(in oklab, var(--info) 2%, transparent) 100%);
+
+    /* Motion */
+    --motion-fast: 130ms;
+    --motion-base: 220ms;
+    --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* ── Tailwind / shadcn compatible variables (HSL format) ── */
+    --background: 0 0% 4%;        /* #0b0b0b */
+    --foreground: 40 100% 97%;    /* #fffaf0 */
+    --card: 0 0% 9%;              /* #171717 */
+    --card-foreground: 40 100% 97%;
+    --sidebar: 0 0% 6%;           /* #0f0f0f */
+    --sidebar-foreground: 40 100% 97%;
+    --toolbar: 0 0% 9%;           /* #171717 */
+    --toolbar-foreground: 40 100% 97%;
+    
+    --primary: 0 100% 43%;        /* #dc0000 Ferrari Red */
     --primary-foreground: 0 0% 100%;
-    --secondary: 223 26% 18%;
-    --secondary-foreground: 0 0% 100%;
-    --success: 160 84% 39%;
+    
+    --secondary: 0 0% 9%;         /* Card surface */
+    --secondary-foreground: 38 39% 85%; /* #e8dcc8 */
+    
+    --success: 151 83% 34%;       /* #0f9d58 */
     --success-foreground: 0 0% 100%;
-    --accent: 38 92% 55%;
-    --accent-foreground: 26 83% 14%;
-    --destructive: 0 84% 60%;
+    
+    --accent: 0 100% 43%;         /* Same as primary */
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 3 100% 60%;    /* #ff3b30 */
     --destructive-foreground: 0 0% 100%;
-    --muted: 223 26% 12%;
-    --muted-foreground: 215 20% 65%;
-    --border: 0 0% 100% / 0.1;
-    --input: 223 26% 18%;
-    --ring: 217 91% 60%;
+    
+    --muted: 24 15% 12%;          /* Soft border bg */
+    --muted-foreground: 36 12% 61%; /* #a89f91 */
+    
+    --border: 24 18% 17%;         /* #342a24 */
+    --input: 24 15% 12%;
+    --ring: 0 100% 43%;
     --radius: 0.75rem;
-    --info: 187 85% 53%;
+
+    --info: 214 82% 54%;          /* #2d7ee9 Info Blue */
     --info-foreground: 0 0% 100%;
-    --violet: 255 92% 76%;
-    --violet-foreground: 0 0% 0%;
-    --rose: 346 84% 61%;
+    --warn: 49 100% 50%;          /* #ffd200 */
+    --warn-foreground: 0 0% 0%;
+
+    /* Compatibility aliases: role and error states stay within the core palette. */
+    --violet: 214 82% 54%;
+    --violet-foreground: 0 0% 100%;
+    --rose: 3 100% 60%;
     --rose-foreground: 0 0% 100%;
-    --surface-alt: 223 28% 10%;
-    --surface-elevated: 223 24% 20%;
-    --overlay: 223 39% 7% / 0.85;
+    
+    --surface-alt: 0 0% 6%;
+    --surface-elevated: 0 0% 12%;
+    --overlay: 0 0% 4% / 0.85;
   }
 
   html {
+    height: 100%;
     color-scheme: dark;
-    scroll-behavior: smooth;
+    overflow: hidden;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    height: 100%;
     font-size: 14px;
     line-height: 1.5;
+    background-color: var(--bg);
+    overflow: hidden;
   }
 
   /* Improved text selection */
   ::selection {
-    background: hsl(217 91% 60% / 0.35);
-    color: hsl(0 0% 100%);
+    background: hsl(0 100% 43% / 0.35);
+    color: var(--fg);
   }
 
   /* Focus-visible global style */
   :focus-visible {
-    outline: 2px solid hsl(217 91% 60%);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-radius: var(--radius);
   }
 
-  /* Custom thin scrollbars */
+  /* Scrolling stays available without adding visual chrome to every nested panel. */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 0;
+    height: 0;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: hsl(0 0% 100% / 0.12);
-    border-radius: 9999px;
+    background: color-mix(in oklab, var(--fg) 12%, transparent);
+    border-radius: var(--radius-pill);
     transition: background 200ms ease;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(217 91% 60% / 0.6);
+    background: hsl(0 100% 43% / 0.6);
   }
 
   /* Firefox scrollbar */
   * {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(0 0% 100% / 0.12) transparent;
+    scrollbar-width: none;
   }
 
   /* Tap highlight for mobile */
@@ -93,82 +200,138 @@
 }
 
 @layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* The app shell owns the only page-level scroll position. */
+  .workspace-scroll {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .workspace-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Ferrari button transition ── */
+  .btn-ferrari {
+    transition: transform var(--motion-fast) var(--ease-standard),
+                background var(--motion-fast) var(--ease-standard),
+                box-shadow var(--motion-fast) var(--ease-standard);
+  }
+  .btn-ferrari:hover {
+    background: var(--accent-hover);
+  }
+  .btn-ferrari:active {
+    background: var(--accent-active);
+  }
+
+  /* ── Squircle panel card ── */
+  .panel-card {
+    border-radius: var(--radius-squircle);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: border-color var(--motion-base) var(--ease-standard);
+  }
+  .panel-card:hover {
+    border-color: var(--border);
+  }
+  .panel-card-warm {
+    border-radius: var(--radius-squircle);
+    border: 1px solid var(--border);
+    background: var(--surface-warm);
+  }
+
+  /* ── SVG timeline chart gradient utilities ── */
+  .chart-line-gradient {
+    stroke: url(#gradient-accent-info-h);
+  }
+  .chart-fill-gradient {
+    fill: url(#gradient-graph-fill);
+  }
+
   /* ── Glow utilities ── */
   .glow-primary {
-    box-shadow: 0 0 20px -4px hsl(217 91% 60% / 0.5);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent);
   }
   .glow-success {
-    box-shadow: 0 0 16px -4px hsl(160 84% 39% / 0.5);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--success) 35%, transparent);
   }
   .glow-destructive {
-    box-shadow: 0 0 16px -4px hsl(0 84% 60% / 0.5);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--danger) 35%, transparent);
   }
   .glow-warning {
-    box-shadow: 0 0 16px -4px hsl(38 92% 55% / 0.5);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--warn) 35%, transparent);
   }
   .glow-info {
-    box-shadow: 0 0 16px -4px hsl(187 85% 53% / 0.5);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--info) 35%, transparent);
   }
   .glow-violet {
-    box-shadow: 0 0 16px -4px hsl(255 92% 76% / 0.5);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--info) 35%, transparent);
   }
   .glow-rose {
-    box-shadow: 0 0 16px -4px hsl(346 84% 61% / 0.5);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--danger) 35%, transparent);
   }
 
   /* ── Glass utilities ── */
   .glass {
-    background: hsl(223 26% 14% / 0.7);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid hsl(0 0% 100% / 0.1);
+    border: 1px solid var(--glass-border);
   }
   .glass-strong {
-    background: hsl(223 26% 14% / 0.9);
+    background: color-mix(in oklch, var(--surface) 75%, transparent);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid hsl(0 0% 100% / 0.12);
+    border: 1px solid color-mix(in oklch, var(--accent) 50%, transparent);
   }
   @supports not (backdrop-filter: blur()) {
-    .glass,
+    .glass {
+      background: #171717;
+      border: 1px solid #342a24;
+    }
     .glass-strong {
-      background: hsl(223 26% 14% / 0.96);
+      background: #0f0f0f;
+      border: 1px solid #dc0000;
     }
   }
 
   /* ── Background patterns ── */
   .grid-bg {
-    background-image:
-      linear-gradient(hsl(0 0% 100% / 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(0 0% 100% / 0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background: var(--surface);
   }
   .dot-pattern {
-    background-image: radial-gradient(hsl(0 0% 100% / 0.08) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background: var(--surface);
   }
   .grid-bg-subtle {
-    background-image:
-      linear-gradient(hsl(0 0% 100% / 0.025) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(0 0% 100% / 0.025) 1px, transparent 1px);
-    background-size: 48px 48px;
+    background: var(--surface);
   }
 
-  /* ── Animation delay utilities ── */
-  .delay-100 { animation-delay: 100ms; }
-  .delay-200 { animation-delay: 200ms; }
-  .delay-300 { animation-delay: 300ms; }
-  .delay-500 { animation-delay: 500ms; }
-  .delay-700 { animation-delay: 700ms; }
-  .delay-1000 { animation-delay: 1000ms; }
+  /* ── Animation delay utilities ──
+     Kept short: sections settle within ~250ms so the page never feels like
+     it's waiting on choreography (product register). */
+  .delay-100 { animation-delay: 60ms; }
+  .delay-200 { animation-delay: 120ms; }
+  .delay-300 { animation-delay: 180ms; }
+  .delay-500 { animation-delay: 240ms; }
+  .delay-700 { animation-delay: 300ms; }
+  .delay-1000 { animation-delay: 360ms; }
 
   /* ── Stagger animation children ── */
-  .stagger-1 { animation-delay: 50ms; }
-  .stagger-2 { animation-delay: 100ms; }
-  .stagger-3 { animation-delay: 150ms; }
-  .stagger-4 { animation-delay: 200ms; }
-  .stagger-5 { animation-delay: 250ms; }
-  .stagger-6 { animation-delay: 300ms; }
+  .stagger-1 { animation-delay: 35ms; }
+  .stagger-2 { animation-delay: 70ms; }
+  .stagger-3 { animation-delay: 105ms; }
+  .stagger-4 { animation-delay: 140ms; }
+  .stagger-5 { animation-delay: 175ms; }
+  .stagger-6 { animation-delay: 210ms; }
 
   /* ── Keyframes ── */
   @keyframes fade-in {
@@ -176,24 +339,24 @@
     to { opacity: 1; }
   }
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translate3d(0, 8px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes fade-down {
-    from { opacity: 0; transform: translateY(-12px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translate3d(0, -8px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.95); }
+    from { opacity: 0; transform: scale(0.97); }
     to { opacity: 1; transform: scale(1); }
   }
   @keyframes slide-in-right {
-    from { opacity: 0; transform: translateX(100%); }
-    to { opacity: 1; transform: translateX(0); }
+    from { opacity: 0; transform: translate3d(100%, 0, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes slide-in-left {
-    from { opacity: 0; transform: translateX(-100%); }
-    to { opacity: 1; transform: translateX(0); }
+    from { opacity: 0; transform: translate3d(-100%, 0, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes shimmer {
     0% { background-position: -200% 0; }
@@ -201,10 +364,10 @@
   }
   @keyframes pulse-glow {
     0%, 100% {
-      box-shadow: 0 0 12px -2px hsl(217 91% 60% / 0.4);
+      box-shadow: 0 0 12px -2px hsl(0 100% 43% / 0.4);
     }
     50% {
-      box-shadow: 0 0 28px 2px hsl(217 91% 60% / 0.7);
+      box-shadow: 0 0 28px 2px hsl(0 100% 43% / 0.7);
     }
   }
   @keyframes breathe {
@@ -217,12 +380,12 @@
   }
   @keyframes glow-pulse {
     0%, 100% {
-      box-shadow: 0 0 12px -2px hsl(217 91% 60% / 0.4);
-      border-color: hsl(217 91% 60% / 0.5);
+      box-shadow: 0 0 12px -2px hsl(0 100% 43% / 0.4);
+      border-color: hsl(0 100% 43% / 0.5);
     }
     50% {
-      box-shadow: 0 0 24px 2px hsl(217 91% 60% / 0.8);
-      border-color: hsl(217 91% 60% / 1);
+      box-shadow: 0 0 24px 2px hsl(0 100% 43% / 0.8);
+      border-color: hsl(0 100% 43% / 1);
     }
   }
   @keyframes typing-dot {
@@ -230,9 +393,9 @@
     30% { opacity: 1; transform: translateY(-4px); }
   }
   @keyframes border-flow {
-    0% { border-color: hsl(217 91% 60% / 0.3); }
-    50% { border-color: hsl(217 91% 60% / 0.8); }
-    100% { border-color: hsl(217 91% 60% / 0.3); }
+    0% { border-color: hsl(0 100% 43% / 0.3); }
+    50% { border-color: hsl(0 100% 43% / 0.8); }
+    100% { border-color: hsl(0 100% 43% / 0.3); }
   }
   @keyframes spin-slow {
     from { transform: rotate(0deg); }
@@ -247,30 +410,33 @@
     100% { background-position: 200% 0; }
   }
 
-  /* ── Animation classes ── */
+  /* ── Animation classes ──
+     Product-register timing: fast (150–250ms), ease-out so entrances land
+     softly. Kept on transform/opacity only, so they stay on the compositor
+     and never repaint during scroll. */
   .animate-fade-in {
-    animation: fade-in 400ms ease-out both;
+    animation: fade-in 240ms var(--ease-standard) both;
   }
   .animate-fade-up {
-    animation: fade-up 300ms ease-out both;
+    animation: fade-up 220ms var(--ease-standard) both;
   }
   .animate-fade-down {
-    animation: fade-down 300ms ease-out both;
+    animation: fade-down 220ms var(--ease-standard) both;
   }
   .animate-scale-in {
-    animation: scale-in 300ms ease-out both;
+    animation: scale-in 200ms var(--ease-standard) both;
   }
   .animate-slide-in-right {
-    animation: slide-in-right 300ms ease-out both;
+    animation: slide-in-right 260ms var(--ease-standard) both;
   }
   .animate-slide-in-left {
-    animation: slide-in-left 300ms ease-out both;
+    animation: slide-in-left 260ms var(--ease-standard) both;
   }
   .animate-shimmer {
     background: linear-gradient(
       90deg,
       transparent 0%,
-      hsl(0 0% 100% / 0.06) 50%,
+      rgba(255, 255, 255, 0.06) 50%,
       transparent 100%
     );
     background-size: 200% 100%;
@@ -287,8 +453,8 @@
       90deg,
       transparent 0px,
       transparent 16px,
-      hsl(217 91% 60% / 0.3) 16px,
-      hsl(217 91% 60% / 0.3) 20px
+      hsl(0 100% 43% / 0.3) 16px,
+      hsl(0 100% 43% / 0.3) 20px
     );
     background-size: 40px 100%;
     animation: data-flow 3s linear infinite;
@@ -308,9 +474,9 @@
   .animate-skeleton {
     background: linear-gradient(
       90deg,
-      hsl(223 26% 14%) 25%,
-      hsl(223 26% 18%) 50%,
-      hsl(223 26% 14%) 75%
+      #171717 25%,
+      #23130f 50%,
+      #171717 75%
     );
     background-size: 200% 100%;
     animation: skeleton-load 1.5s ease-in-out infinite;
@@ -326,7 +492,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: hsl(217 91% 60%);
+    background: hsl(0 100% 43%);
     animation: typing-dot 1.4s ease-in-out infinite;
   }
   .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
@@ -343,13 +509,14 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
     .animate-shimmer,
     .animate-skeleton {
-      background: hsl(223 26% 12%);
+      background: #171717;
     }
     .typing-indicator span {
       animation: none;

@@ -1,7 +1,7 @@
 """add_timeline_events
 
 Revision ID: a1b2c3d4e5f6
-Revises: 70d1356ca59c
+Revises: aa84c34ff68b
 Create Date: 2026-07-16 21:10:00.000000
 
 """
@@ -13,7 +13,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 # revision identifiers, used by Alembic.
 revision: str = "a1b2c3d4e5f6"
-down_revision: Union[str, None] = "70d1356ca59c"
+down_revision: Union[str, None] = "aa84c34ff68b"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

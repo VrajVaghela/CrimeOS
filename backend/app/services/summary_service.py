@@ -127,7 +127,22 @@ def _assemble_case_context(db: Session, case_id: uuid.UUID) -> dict[str, Any]:
         for pr in provider_responses:
             if pr.ai_insights:
                 insight_lines.append(pr.ai_insights[:400])
+
+    # Promoted evidence from responses
+    from app.models.copilot import AiCitation
+    promoted = list(db.scalars(
+        select(AiCitation).where(
+            AiCitation.case_id == case_id,
+            AiCitation.source_type == "provider_response_row"
+        )
+    ))
+    if promoted:
+        insight_lines.append("Promoted Provider Response Records (Case Diary):")
+        for p in promoted:
+            insight_lines.append(f"- [{p.locator}] (Confidence {p.confidence:.0%}): {p.excerpt}")
+
     provider_insights_text = "\n---\n".join(insight_lines) or "No provider responses received."
+
 
     # Last 10 audit events
     audit_events = list(

@@ -124,9 +124,258 @@ Goal: make the completed golden path feel like one adaptive, evidence-grounded i
 3. Run keyboard, contrast, reduced-motion, responsive, loading, empty, and failure-state checks.
 4. Rehearse IO → SHO → Legal Advisor flows twice from a fresh seed.
 
-**Checkpoint:** The full golden path plus one adaptive-path, evidence, copilot, and explainable-response moment completes in under 7 minutes without manual DB edits.
 
 ---
+
+## Phase 9 — Ferrari Design System Migration
+Goal: Overhaul the design & UI of the application to match the Ferrari Cyber-Command Console aesthetics.
+
+### Phase 9A — Global Styles & Core Tokens Setup
+1. Define custom properties in `globals.css` base layer (`--bg`, `--surface`, `--surface-warm`, `--fg`, `--fg-2`, `--muted`, `--accent`, `--border`, `--border-soft`, etc.).
+2. Map tailwind base variables to corresponding HSL values in `globals.css` `:root` class.
+3. Configure `tailwind.config.ts` to extend border radius squircle definitions (`squircle` 12px, `squircle-sm` 8px).
+4. Set up the dot grid background on `body` and red radial glow atop the workspace layout in CSS.
+5. Define Ferrari Sans and SF Mono in font variables within Next.js root layout.
+
+**Checkpoint:** App layout shows correct deep carbon-black backgrounds, off-white text, and borders.
+
+### Phase 9B — Navigation Sidebar & Command Topbar
+1. Restructure the sidebar panel (fixed 248px width, narrows to 214px at 1080px).
+2. Format brand lockup with glass shield brand mark and red accent border.
+3. Apply Ferrari Red active highlight for sidebar navigation links, keeping standard links muted off-white.
+4. Position breadcrumb navigation, full case search bar (max width 280px, red focus ring on active), and square icon buttons in topbar (68px).
+
+**Checkpoint:** Sidebar and topbar match the layouts and interactions with proper active/hover indicators.
+
+### Phase 9C — Case Workspace Hero & Signal Cards
+1. Style Case Hero: 2-column squircle layout (`1.3fr 0.7fr` collapsing at 1080px). Wrap the AI summary inside a left-bordered info blue block.
+2. Restructure 4 Signal Cards in a grid (`repeat(4, 1fr)`). Add viewport entry count-up animations for metric values.
+3. Implement confidence badges with conditional coloring (green for >=85%, yellow for 70-84%, amber border on input for <70%).
+
+**Checkpoint:** Ingestion details, case confidence metrics, and confidence badges render with accurate layout proportions and colors.
+
+### Phase 9D — Workspace Panels & Steppers
+1. Apply Squircle (`12px`) radii to all panels, case-hero cards, and summary cards.
+2. Format entity list rows into 3-column grid layouts.
+3. Update investigation path stepper: completed/active steps connected by red-to-blue gradient lines, current step having glass bg with red accent border, and info blue citation buttons.
+4. Update SVG timeline charts with red-to-blue horizontal gradient stroke lines and gradient graph fill underneath.
+5. Apply vertical red-to-blue gradient to active timeline connector vertical lines.
+
+**Checkpoint:** Stepper, entity layout, timelines, and SVG charts render with red-to-blue gradient accents.
+
+### Phase 9E — Summary, Dialogs & Micro-interactions
+1. Apply warm surface bg (`#23130f`), blue AI icon, and red primary CTA button on summary cards.
+2. Refactor toast notification element, sliding entity review sheet, and citation modal dialog. Use `.glass` panel over a darkened blurred backdrop.
+3. Apply button transitions (130ms duration, scale-105 on hover, red glow).
+4. Implement prefers-reduced-motion media query block.
+
+**Checkpoint:** Dialogs open correctly, toast messages auto-dismiss, and animations run smoothly.
+
+### Phase 9F — Integration & Verification
+1. Verify contrast ratio compliance (all texts pass WCAG AA).
+2. Audit responsive layout breakpoints (1080px, 760px, 420px, 360px) to ensure no headline overflows or visual glitches.
+3. Run the golden path end-to-end to ensure all features function perfectly under the new design tokens.
+
+**Checkpoint:** The full golden path works end-to-end with high-quality visual polish.
+
+---
+
+## Phase 10 — Selective Upstream Feature Integration
+
+Goal: bring the useful features from `origin/main`,
+`origin/crimeos/digitalfootprint`, and `origin/crimeos/videoAnalyzer` into
+`vraj` while preserving every current feature, route, design token, and golden
+path behavior. This phase is a selective port, not a wholesale multi-project
+merge.
+
+### Phase 10.0 — Protected baseline and merge preparation
+1. Record the current `vraj` commit and dirty-worktree file list.
+2. Commit or safely stash the current uncommitted Ferrari/shell work before any
+   Git merge; never reset or checkout away current work.
+3. Refresh remote refs and verify the source commits: `origin/main` timeline
+   (`cfaf939`/`0d06aca`), digital footprint (`dc33884`), and video analyzer
+   (`a6f6c29`).
+4. Create a temporary integration branch from `vraj` for conflict resolution;
+   keep `vraj` itself recoverable until all checkpoints pass.
+
+**Checkpoint:** Current `vraj` UI and backend changes are recoverable, and the
+working tree is clean before merge operations begin.
+
+### Phase 10A — Timeline Agent and CCTV pinning (`origin/main`)
+1. Merge only the compatible timeline history with `--no-commit` first.
+2. Resolve route/layout conflicts in favor of the current authenticated App
+   Router and Ferrari shell; adapt the upstream timeline page into
+   `app/(authenticated)/cases/[id]/timeline/page.tsx`.
+3. Add the timeline model, migration, schemas, service, router registration,
+   typed API functions, and prompt constants while reusing existing evidence,
+   audit, Gemini, and upload abstractions.
+4. Add seed data and explicit UI states for synthesized events, CCTV analysis,
+   officer notes, unsupported images, and Gemini fallback output.
+5. Verify timeline events distinguish AI-generated events from officer notes,
+   expose source references/confidence, and append audit entries.
+
+**Checkpoint:** A seeded case opens the timeline, synthesizes events once,
+accepts an officer note, and pins a CCTV frame without breaking the existing
+case tabs or golden path.
+
+### Phase 10B — Digital-footprint/OSINT enrichment (`origin/crimeos/digitalfootprint`)
+1. Extract the feature contract from the Go branch: entity-scoped scan status,
+   social-profile results, breach exposure, risk summary, discovered pivots, and
+   exportable dossier data.
+2. Implement native SQLAlchemy models/migration, Pydantic schemas, service, and
+   router under the existing FastAPI app. Keep scans deterministic/demo-safe;
+   do not introduce live Sherlock/Holehe/HaveIBeenPwned calls or new workers.
+3. Attach results to `case_entities` and `ai_citations` with source labels,
+   confidence, and an explicit unconfirmed status for discovered pivots.
+4. Add typed `lib/api.ts` functions and a token-driven Ferrari
+   `OsintEnrichmentPanel`/risk summary surface in the entity/case workspace.
+5. Add seeded LOW/HIGH-risk examples, loading/error/not-found states, and audit
+   events for scan creation, completion, failure, and dossier export.
+
+**Checkpoint:** An officer can open a confirmed case entity, see a deterministic
+OSINT risk summary with social/breach sources, and distinguish confirmed data
+from unconfirmed pivots; the golden path remains unchanged.
+
+### Phase 10C — Video evidence analysis (`origin/crimeos/videoAnalyzer`)
+1. Extract the feature contract from the video branch: upload validation,
+   progress polling, incident summary, risk level, timestamped timeline rows,
+   and click-to-seek playback.
+2. Implement it as an evidence workflow for an existing case using
+   `EvidenceFile`, existing upload storage, FastAPI `BackgroundTasks`, and the
+   existing Gemini gateway. Do not add Celery, Redis, Mongo, a second case
+   table, or a second frontend application.
+3. Persist timestamped events and provenance in the existing timeline/evidence
+   aggregates; make video processing fallback deterministic when Gemini is
+   unavailable.
+4. Add typed API polling/report functions and a responsive Ferrari
+   `VideoEvidenceWorkspace` that reuses existing evidence/timeline patterns and
+   native HTML media controls.
+5. Add safe upload limits/signature validation, partial/failure states, audit
+   events, and a seeded short demo clip or fixture reference that does not
+   require external services.
+
+**Checkpoint:** An officer uploads a supported video to an existing case,
+observes progress, opens the report, clicks a timeline event to seek the video,
+and sees the action/source in the audit trail.
+
+### Phase 10D — Integration verification and handoff
+1. Run the existing frontend build/lint and backend import/smoke checks after
+   each feature, not only at the end.
+2. Run a fresh-seed golden-path rehearsal: complaint → path → cited legal
+   request → provider response → analytics → summary → audit.
+3. Run one intelligence rehearsal covering timeline/CCTV plus one OSINT or video
+   moment, with keyboard, responsive, reduced-motion, loading, and failure-state
+   checks.
+4. Review every changed route for provenance, explicit officer actions, role
+   checks, and no raw `fetch()` outside `lib/api.ts`.
+5. Update `progress_tracker.md`, `ui_registry.md`, seed notes, and the smoke
+   script only after the corresponding checkpoint passes.
+
+**Checkpoint:** All retained `vraj` features still work, each selected upstream
+feature has a passing checkpoint, and no out-of-scope infrastructure was added.
+
+---
+
+## Phase 11 — Code Review Conformance & Demo Hardening
+
+Baseline: `CODE_REVIEW.md` (2026-07-18). This is a remediation phase for the
+Phase 10 ports. It must preserve the existing FastAPI + Next.js + PostgreSQL /
+pgvector stack, Ferrari UI system, golden path, deterministic fallbacks,
+provenance, and audit trail. Do not add Celery, Redis, Mongo, a second app, or
+new external integrations.
+
+### Phase 11A — Security and API contract first
+1. Add `get_current_user` to video status and report reads, then verify the
+   requested evidence belongs to an accessible case before returning progress
+   or forensic report data. Keep upload authorization and existing role rules.
+2. Rename the video router prefix from `/api/v1/video` to the project’s flat
+   `/video` convention and update the typed client/XHR paths together. Decide
+   whether a temporary compatibility route is needed before removing the old
+   path; do not leave two undocumented contracts.
+3. Replace Celery-shaped response fields with provider-neutral application
+   state (for example `processing_state` using `UPLOADED`, `PROCESSING`,
+   `COMPLETED`, and `FAILED`) plus progress and error fields. Update the
+   backend schema, `lib/types.ts`, `lib/api.ts`, and the video workspace as one
+   contract change.
+4. Make all video router handlers `async def`, and remove router-level
+   exception remapping where the shared `AppError` handler and service
+   exceptions already provide the project-standard response shape.
+
+**Checkpoint:** unauthenticated requests cannot read video status/reports;
+authenticated video upload, polling, and report retrieval work on the flat
+route with no Celery terminology in API or UI code.
+
+### Phase 11B — Restore the shared AI and audit boundaries
+1. Move video Gemini file upload, readiness polling, structured report
+   generation, retry/backoff, fallback-cache lookup, and call logging behind
+   typed helpers owned by `backend/app/ai/gemini_client.py`. Keep the existing
+   deterministic report as the final demo fallback and preserve the bounded
+   timeout for the FastAPI background task.
+2. Add a named `VIDEO_FORENSIC_ANALYSIS_PROMPT` to `prompts.py`; remove the
+   inline forensic prompt from `video_service.py`. Keep the `IncidentReport`
+   schema as the validation boundary and return provenance for AI-generated
+   report content.
+3. Eliminate direct `AuditEvent` construction from `video_service.py`. Fold
+   the chain-of-custody hash/signature metadata into the shared audit service
+   so every video state change calls `audit_service.record(...)`, carries the
+   initiating user where available, and uses the same event shape as the rest
+   of the application. Preserve append-only ordering and chain verification.
+4. Pass the initiating user identity into the background analysis task (or
+   explicitly classify unavoidable system-generated events) so video audit
+   events do not silently omit their actor.
+5. Replace the MD5 content fingerprint with SHA-256 end to end: storage tags,
+   report schema, TypeScript types, UI labels, deterministic fixtures, and
+   chain-of-custody verification. Do not present MD5 as tamper evidence.
+
+**Checkpoint:** the only `google-genai` import is in `gemini_client.py`, the
+only audit write path is the shared audit service, the video prompt is named in
+`prompts.py`, fallback/cache behavior is retained, and a seeded video run has
+actor-attributed audit entries with a valid SHA-256 chain.
+
+### Phase 11C — Frontend design-system and error-state cleanup
+1. Replace raw Tailwind palette classes, arbitrary hex values, and arbitrary
+   shadows in `evidence-review-workspace.tsx`,
+   `osint-enrichment-panel.tsx`, `video-evidence-workspace.tsx`,
+   `entity-pivot-panel.tsx`, `path-stepper.tsx`, and the summary page with
+   existing semantic Tailwind/CSS-variable tokens from `ui_tokens.md`. Keep
+   the Accent Red, Blue Citation, Amber Attention, Emerald Done, and
+   Glow-on-Demand rules intact; do not create new one-off colors.
+2. Replace every `catch (err: any)` in the flagged components with
+   `unknown`-safe narrowing and the existing `ApiError` contract.
+3. Replace browser `alert()` calls on request dispatch/approval/update and
+   CCTNS sync surfaces with the existing toast or `<Alert>` patterns. Every
+   async mutation must visibly expose loading, success, and failure states.
+4. Update the video UI for the provider-neutral status contract and SHA-256
+   label while preserving responsive, empty, loading, failure, and reduced-
+   motion behavior.
+
+**Checkpoint:** the targeted frontend files contain no raw palette/hex/shadow
+drift, no `any` catches, and no browser alerts; a failure on a golden-path
+action remains inside the application shell and is retryable.
+
+### Phase 11D — Verification and handoff
+1. Run static conformance checks: only `gemini_client.py` imports Google
+   Gemini; no service/router outside the audit service constructs
+   `AuditEvent`; all prompts are named constants; all video reads require
+   authentication; all video routers are async; no Celery vocabulary remains.
+2. Run frontend type/build checks and review every changed API path through
+   `lib/api.ts`; verify no component makes a direct backend request.
+3. Confirm the Phase 6 fresh-seed five-minute rehearsal checkpoint. If it has
+   not actually been performed, keep it open and run it as part of this phase.
+4. Rehearse from a fresh seed: login → complaint ingestion → cited path →
+   legal request → mock response → analytics → summary → audit, then one
+   authenticated video upload → progress → report → timeline seek.
+5. Verify negative cases: unauthenticated video reads, inaccessible evidence,
+   failed Gemini analysis, malformed video signature, oversized upload, and
+   request/CCTNS failures all return safe, visible, recoverable states.
+6. Update `progress_tracker.md`, `ui_registry.md` only if a new reusable
+   component is created, and demo/smoke notes after the checkpoints pass.
+
+**Checkpoint:** every finding in `CODE_REVIEW.md` is closed or explicitly
+documented, the Phase 6 rehearsal status is truthful, and the golden path plus
+the video intelligence moment pass from a fresh seed without new
+infrastructure.
+
 
 ## Cut List (if time runs out, cut in this order)
 For Phase 8, cut in this order:

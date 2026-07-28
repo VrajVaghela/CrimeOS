@@ -26,29 +26,34 @@ export function CitationDialog({
 
   return (
     <>
+      {/* Info-blue citation trigger button per Phase 9D spec */}
       <Button
         variant="ghost"
         size="sm"
         onClick={() => setOpen(true)}
-        className="gap-1.5 text-xs text-primary hover:text-primary/80 h-7 px-2 border border-primary/20 hover:bg-primary/5 rounded"
+        className="gap-1.5 text-xs text-info hover:text-info/80 h-7 px-2 border border-info/30 hover:bg-info/10 rounded-squircle-sm transition-colors duration-150"
         id="btn-view-sop"
       >
         <BookOpen className="h-3 w-3" />
         {triggerLabel}
       </Button>
 
+      {/* Glass panel dialog over darkened blurred backdrop per Phase 9E spec */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="glass max-w-lg border-primary/20 text-foreground">
+        <DialogContent className="max-w-lg border-info/30 bg-card text-foreground animate-scale-in">
           <DialogHeader>
-            <DialogTitle className="font-heading text-lg font-semibold flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" />
+            <DialogTitle className="font-heading text-lg font-semibold flex items-center gap-2.5">
+              {/* Blue AI icon per Phase 9E spec */}
+              <div className="rounded-squircle-sm bg-info/10 border border-info/30 p-1.5 flex items-center justify-center">
+                <BookOpen className="h-4 w-4 text-info" />
+              </div>
               SOP Grounding Source
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground font-mono">
               {title}
             </DialogDescription>
           </DialogHeader>
-          <div className="mt-4 rounded-lg bg-muted p-4 border border-border">
+          <div className="mt-4 rounded-squircle-sm bg-background border border-info/30 p-4">
             <p className="text-sm font-sans leading-relaxed text-foreground whitespace-pre-line">
               {sourceText}
             </p>

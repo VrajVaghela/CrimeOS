@@ -1,99 +1,70 @@
-# UI Rules — Crime OS AI
+# UI Rules — Crime OS AI (Ferrari Edition)
 
-Audience: **non-technical police officers** (explicit evaluation criterion) — but the presentation is a **dark, high-tech cyber-command aesthetic** (see `ui_tokens.md`). The tension resolves as: futuristic looks, dead-simple interactions. One obvious action per screen, plain language, statuses visible at a glance — wrapped in glass, glow, and grid motifs that make judges feel they're looking at a real threat-intelligence platform.
+Audience: **non-technical police officers** — but the presentation is a **dark, high-tech Ferrari cyber-command aesthetic**. The tension resolves as: futuristic looks, dead-simple interactions.
 
-## Global Principles
+## 1. Global Principles
 
-1. One primary action per screen, rendered as the single `primary` (electric blue) button. Everything else is `secondary`/`ghost`/outline.
-2. **AI content is always labeled and sourced.** Anything Gemini generated gets: electric-blue left border with subtle glow, `Sparkles` icon + "AI-suggested" badge, and (where applicable) a citation popover showing the SOP/legal-section text it came from. Judges must never wonder "is this hardcoded?"
-3. No blank screens ever: every list has an empty state (icon + CTA on grid-bg), every async view has skeletons, every failure shows a retry alert.
-4. Bilingual labels where cheap: key nav/actions show Hindi under English (`New Complaint / नई शिकायत`). Do not build full i18n.
-5. Dark mode ONLY — no theme toggle. Verify contrast: amber and slate-gray text on midnight backgrounds must pass at `text-sm`.
+1. **The Accent Red Rule**: Ferrari Red (`--accent`) is used at most twice per screen: typically one primary CTA + one active indicator. Never use red as a background wash.
+2. **The Blue Citation Rule**: Blue (`--info`) is reserved for AI-generated content, source citations, data visualization, and informational labels.
+3. **The Amber attention Rule**: Yellow (`--warn`) signals attention-needed states: low-confidence entity extraction, pending approvals.
+4. **The Emerald Done Rule**: Green (`--success`) indicates completed steps, high confidence, and positive status.
+5. **Neutral Dominance**: Neutrals (carbon black `#0b0b0b`, card surface `#171717`, warm gray) make up 85%+ of the visual surface.
+6. **No Blank Screens**: Every list has an empty state (icon + CTA on dot-pattern), every async view has skeletons, every failure shows a retry alert.
+7. **Bilingual Labels**: Primary actions show Hindi/Gujarati helper text where cheap (e.g., `New Complaint / नई शिकायत`).
+8. **Dark Mode Only**: No theme toggle.
 
-### Phase 8 product surfaces
-- The case overview is a command center, not a dashboard of decorative metrics. It must expose one next-best action and the current workflow stage above secondary information.
-- Workflows are progressive: show the next decision first, then expose evidence, citations, history, and advanced pivots on demand.
+---
 
-## Components
-### Cards
-- `bg-card border rounded-xl p-5` (1px white/10 border, no gray shadows). Title `text-lg font-semibold font-heading` + optional StatusBadge right-aligned.
-- Interactive cards: on hover, elevate `-translate-y-0.5` + border shifts to `border-primary/50` + `.glow-primary`. `transition-all duration-200`.
-- Overlapping/floating cards (dashboard stat cards, dispatch preview) use `.glass`.
+## 2. Layout & Spacing Rules
 
-### Buttons
-- **Primary:** solid electric blue, white text, `rounded-lg h-10 px-4`; hover = `scale-105` + `.glow-primary`. Loading state = spinner + disabled + label stays ("Dispatching…"). Never allow double-submit.
-- **Secondary:** transparent bg, `border border-primary/60 text-foreground`; hover = `bg-primary/10`.
-- **Destructive:** solid red, only for reject/delete, always behind a confirm `Dialog`; hover glow `.glow-destructive`.
-- Icon + label always (lucide, `h-4 w-4`) — icon-only buttons need `title`.
+### 2.1 Layout Architecture
+- **App Shell Grid**: `grid-template-columns: 248px minmax(0, 1fr)` (collapses to vertical layout at 760px).
+- **Case Hero**: 2-column layout `1.3fr 0.7fr` (collapses to 1-column at 1080px).
+- **Signal Grid**: 4-column layout `repeat(4, 1fr)` (collapses to 2-column at 760px, 1-column at 360px).
+- **Work Grid**: 2-column layout `minmax(0, 1fr) minmax(310px, 0.76fr)` (collapses to 1-column at 1080px).
+- **Lower Grid**: 2-column layout `minmax(0, 1.1fr) minmax(300px, 0.9fr)` (collapses to 1-column at 1080px).
 
-### Inputs & Forms
-- shadcn `Input`/`Textarea`/`Select` on `--input` slate bg with white/10 border; focus ring = electric blue glow (`focus-visible:ring-ring`). Visible `Label` above (no placeholder-as-label). Errors `text-destructive text-xs` under the field.
-- Extracted-entity review fields: pre-filled, editable, with confidence chip (`font-mono text-xs`) — low confidence (<0.7) gets amber ring to draw the officer's eye.
+### 2.2 Border Radius Rules
+- **Squircle (`12px`)**: Panels, case-hero, summary card.
+- **Squircle-sm (`8px`)**: Buttons, signals, entities, inputs, tabs, badges.
+- **Radius-sm (`4px`)**: Small UI details.
+- **Radius-pill (`9999px`)**: Avatars/pills only.
 
-### Badges
-- `rounded-full px-2 py-0.5 text-xs font-medium`, colors strictly from the semantic status table in `ui_tokens.md`. Status dots pulse when state is live (processing/awaiting). Role badges: IO=primary, SHO=accent, LEGAL=secondary.
+### 2.3 Spacing Rules
+- Base unit is 8px. Gaps allowed: `--space-1` (4px), `--space-2` (8px), `--space-3` (12px), `--space-4` (16px), `--space-5` (20px), `--space-6` (24px), `--space-8` (32px), `--space-12` (48px).
 
-### Modals (Dialog)
-- `.glass` panel over a darkened blurred backdrop. Use only for: confirmations, dispatch preview, citation display. Max `max-w-2xl`. Never nest modals. Esc + overlay-click close (except mid-dispatch).
+---
 
-### Tables
-- shadcn `Table`, `text-sm`, `font-mono` for numbers/IDs, sticky header (`.glass`) if scrolling. Row hover `bg-primary/5`. Provider response tables highlight AI-flagged rows with `bg-destructive/10` + left red border + tooltip explaining why (threat-visualization pattern — red used sparingly, only on flagged rows).
+## 3. Component Style Rules
 
-### Timeline (audit trail / case log)
-- Vertical line (`border-primary/30`) + glowing dot per event (dot color = semantic status, live states pulse); each entry: action (`text-sm font-medium`), actor + timestamp (`text-xs text-muted-foreground font-mono`). Newest first.
+### 3.1 Sidebar & Topbar
+- **Sidebar**: Fixed width `248px` (narrows to `214px` at 1080px). Brand lockup at top, vertical navigation stack, and profile at the bottom.
+- **Topbar**: Height `68px`. Contains breadcrumbs, full case search bar (max width `280px`), notifications, and help icons.
 
-### Stepper (investigation path)
-- Numbered nodes connected by a data-stream line (`border-primary/30`; completed segments solid emerald). Status controls per step (`pending → in progress → done / skip`); citation link per step opens SOP popover; steps with `suggested_action_type` render an inline primary button ("Generate CDR Request →") with hover glow — this is the money moment of the demo, make it prominent.
+### 3.2 Case Hero & Signal Cards
+- **Case Hero**: Rounded card showing Case ID, category, complainants, and an AI summary inside a left-bordered info blue block.
+- **Signal Cards**: Metric cards showing values (e.g. Case Confidence `86/100`, Extracted Entities `18 fields`). Values animate from 0 on viewport entry.
 
-### Page/Section backdrops
-- Dashboard and case-overview headers sit on `.grid-bg` with a radial fade — subtle, never behind dense tables/forms.
-- Sticky top bar: transparent over grid hero, transitions to `.glass` on scroll.
+### 3.3 Buttons
+- **Primary**: Red background, white text, `rounded-squircle-sm`. Scales to 1.05 and adds a red glow on hover.
+- **Secondary**: Surface bg with soft border (`#241f1b`), hover border transitions to strong border (`#342a24`).
+- **Destructive / Danger**: Danger Red (`#ff3b30`) background, used for critical deletions/rejections.
 
-## Motion & Interaction Behaviors
-- **On-load:** page content fades up (`opacity-0 translate-y-2 → visible`, 300ms ease-out, stagger 50ms per card). Use CSS/`tailwindcss-animate` — no heavy animation libs (Framer Motion allowed if already installed for the stepper).
-- **Hover micro-interactions:** buttons `scale-105`, cards lift + glow (see above). `transition-all duration-200` standard.
-- **Live pulses:** processing badges, "awaiting response" dots, and the active stepper node pulse continuously (`animate-pulse` or a soft glow keyframe) — sells "real-time system" to judges.
-- Async AI operations: `.glass` "Processing…" card with skeleton + poll; show elapsed time after 5s ("Analyzing complaint… 8s") so judges see it's live, not canned.
-- Toasts (bottom-right, `.glass`) for success ("Request dispatched to Airtel Nodal Officer"); alerts inline for errors.
-- Scroll reveal ONLY on marketing/landing surfaces (if a landing page is built) — app screens render instantly, no scroll-gating of data.
-- Keyboard: forms submit on Enter; dialogs trap focus (shadcn default is fine).
-- Respect `prefers-reduced-motion`: disable pulses/lifts, keep opacity fades.
+### 3.4 Entity List
+- Each entity row: `108px label | value (truncated) | confidence badge`.
+- Confidence >= 85% → Green; < 85% and >= 70% → Yellow; < 70% → Amber border around input.
 
-## Phase 8 interaction rules
+### 3.5 Timeline & Stepper
+- **Audit Log / Timeline Connector**: The vertical timeline connection line uses the vertical red-to-blue gradient (`--gradient-accent-info-v`) or solid soft border when inactive.
+- **Stepper**: Completed steps connected by lines that can transition via the red-to-blue gradient. Current step marked with glass background and red accent border. Citation buttons styled with Info Blue (`#2d7ee9`) badges.
+- **SVG Timeline Charts**: The main graph line uses the horizontal red-to-blue gradient (`--gradient-accent-info-h`) for a glowing, cyber-threat visualization. The filled area underneath uses the gradient graph fill (`--gradient-graph-fill`). Dash grids and hover points are overlayed cleanly.
 
-### Case Command Center
-- The first viewport shows case identity, workflow spine, one next-best action, blockers, and the latest meaningful event.
-- Workflow stage labels use plain English with optional Hindi helper text; internal status codes stay in `font-mono` metadata.
-- A blocker must name the missing action and link directly to the surface that resolves it.
-- Do not show more than four competing actions in the first viewport. Secondary actions belong in a menu or the relevant tab.
+---
 
-### Adaptive Path Revision
-- A revised path shows its trigger, generated time, active/superseded state, and a concise “what changed” explanation.
-- Never visually merge two path revisions. Officers must be able to tell which steps were active at each point in time.
-- AI-suggested branches require citations and confidence; officer-selected branches require an audit event.
+## 4. Motion & Animation Rules
 
-### Entity Intelligence
-- Show canonical value and raw source value together when they differ.
-- Every entity pivot shows source count, confidence, and links to complaint/evidence/provider rows.
-- Related-case matches must be labeled “possible match” until the officer confirms them.
-- Graph view is optional; grouped entity pivots are the fallback for small screens and low data density.
-
-### Evidence Workspace
-- Keep original media, transcript/translation, source timestamp, and linked case entities in one review context.
-- “Add to case” is always explicit and creates an audit event.
-- AI tags are suggestions, not facts; show confidence and source media reference.
-
-### Cited Case Copilot
-- The copilot is case-scoped, read-only by default, and never replaces an existing approval or dispatch action.
-- Every answer begins with a short answer/fact section and ends with visible sources.
-- If the sources do not support an answer, say “No grounded answer found” and suggest the next evidence to collect.
-- Suggested actions use buttons that call existing typed API mutations; chat text alone cannot mutate state.
-
-### Request Readiness
-- Before dispatch, show a compact checklist with pass/fail labels and direct links to missing data.
-- Dispatch remains disabled until required checks pass and the role approval state is valid.
-- Preserve edited draft content when validation fails.
-
-### Surface hygiene
-- Do not use decorative grid/pattern backgrounds across the whole application; restrict them to graph, map, evidence, or measurement surfaces.
-- Do not use `border-left`/`border-right` greater than 1px for general case cards, alerts, or list rows. AI-content borders are the only exception and must use the shared `AiContentCard` pattern.
+- **Hover Transitions**: Button scale (105%) and card lift (`-translate-y-0.5` + border-glow) transitions set to `--motion-fast` (130ms) with `ease-out`.
+- **Toast/Panel Transitions**: Set to `--motion-base` (220ms) or 240ms for slide-ins.
+- **Entry Reveal**: Content cards fade and slide up (`translate-y-18px` → `0px`, opacity 0 → 1) using standard standard ease-out curve (`cubic-bezier(0.16, 1, 0.3, 1)`), staggered by 80ms.
+- **Count-up**: Signal values animate over 800ms when entering viewport.
+- **Reduced Motion**: Mandatory `@media (prefers-reduced-motion: reduce)` block to eliminate scale/glow animations and instant transitions.
