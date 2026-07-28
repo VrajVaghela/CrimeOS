@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language-context";
 import React, { useState } from "react";
 import {
   Users,
@@ -31,6 +32,7 @@ export function EntityPivotPanel({
   relatedCases,
   onSync,
 }: EntityPivotPanelProps) {
+  const { t } = useLanguage();
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
 
@@ -100,7 +102,7 @@ export function EntityPivotPanel({
           <div className="flex items-center gap-2">
             <Layers className="h-5 w-5 text-primary" />
             <h3 className="text-base font-semibold font-heading text-foreground">
-              Intelligence Pivot Panel / इंटेलिजेंस पिवट
+              {t('command_center.pivot_panel' as any) || 'Intelligence Pivot Panel'}
             </h3>
           </div>
           <button
@@ -109,7 +111,7 @@ export function EntityPivotPanel({
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded border border-primary/40 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} />
-            Sync Entities
+            {t('command_center.sync_entities' as any) || 'Sync Entities'}
           </button>
         </div>
 
@@ -144,7 +146,7 @@ export function EntityPivotPanel({
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {isLowConfidence && (
-                          <span title="Low Confidence / कम आत्मविश्वास">
+                          <span title={`${t('command_center.low_confidence' as any) || 'Low Confidence'}`}>
                             <ShieldAlert
                               className="h-3.5 w-3.5 text-warn animate-pulse"
                             />
@@ -171,7 +173,7 @@ export function EntityPivotPanel({
 
           {entities.length === 0 && (
             <div className="text-center py-8 text-muted-foreground text-xs bg-surface-alt/40 rounded-xl border border-dashed border-border">
-              No normalized entities synced yet. Trigger sync to build.
+              {t('command_center.no_synced_entities' as any) || 'No normalized entities synced yet. Trigger sync to build.'}
             </div>
           )}
         </div>
@@ -317,7 +319,7 @@ export function EntityPivotPanel({
           <div className="h-full flex flex-col items-center justify-center text-center p-4">
             <GitCommit className="h-8 w-8 text-muted-foreground/30 mb-2" />
             <p className="text-xs text-muted-foreground">
-              Select an entity to view relationships, transaction links, and possible case matches.
+              {t('command_center.select_entity' as any) || 'Select an entity to view relationships, transaction links, and possible case matches.'}
             </p>
           </div>
         )}

@@ -1,5 +1,5 @@
 "use client";
-
+import { useLanguage } from "@/lib/language-context";
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import {
@@ -27,6 +27,7 @@ import { EvidenceReviewWorkspace } from "@/components/evidence-review-workspace"
 import { VideoEvidenceWorkspace } from "@/components/video-evidence-workspace";
 
 export default function EvidencePage() {
+  const { t } = useLanguage();
   const params = useParams();
   const caseId = params.id as string;
 
@@ -169,10 +170,10 @@ export default function EvidencePage() {
         <div>
           <h2 className="font-heading text-lg font-bold flex items-center gap-2">
             <Camera className="h-5 w-5 text-primary" />
-            Evidence Material Workspace / साक्ष्य सामग्री कार्यक्षेत्र
+            {t('command_center.evidence_workspace' as any) || 'Evidence Material Workspace'}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Upload images, voice recordings, videos, or documents to automatically extract transcripts, tags, and link facts.
+            {t('command_center.evidence_desc' as any) || 'Upload images, voice recordings, videos, or documents to automatically extract transcripts, tags, and link facts.'}
           </p>
         </div>
 
@@ -215,9 +216,9 @@ export default function EvidencePage() {
             <Camera className="h-8 w-8 text-primary" />
           </div>
           <div className="max-w-sm space-y-1">
-            <h3 className="font-heading font-semibold text-lg">No Evidence Processed</h3>
+            <h3 className="font-heading font-semibold text-lg">{t('command_center.no_evidence' as any) || 'No Evidence Processed'}</h3>
             <p className="text-sm text-muted-foreground">
-              Upload photographs, call recordings, cctv snippets, or statement text files to perform forensic verification.
+              {t('command_center.upload_evidence' as any) || 'Upload photographs, call recordings, cctv snippets, or statement text files to perform forensic verification.'}
             </p>
           </div>
           <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>

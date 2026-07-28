@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language-context";
 import React from "react";
 import { AlertTriangle, ArrowRight, Play, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,10 +19,11 @@ export function NextBestAction({
   onAction,
   disabled = false,
 }: NextBestActionProps) {
+  const { t } = useLanguage();
   
   const getBlockerMessage = (code: string): string => {
     const mapping: Record<string, string> = {
-      MISSING_COMPLAINT: "No complaints have been uploaded for this case yet. Please upload a complaint file (PDF/Audio/Image) to begin.",
+      MISSING_COMPLAINT: t('command_center.upload_complaint_empty' as any) || "No complaints have been uploaded for this case yet. Please upload a complaint file (PDF/Audio/Image) to begin.",
       UNVERIFIED_ENTITIES: "Entities have been extracted from the complaint but not yet verified. Please review and save verified entities.",
       MISSING_PATH: "The complaint is ingested, but no investigation path has been generated. Please generate the AI investigation path.",
       NO_REQUESTS_DISPATCHED: "Investigation path steps are ready, but no legal requests have been drafted or dispatched. Please draft a request.",
@@ -40,7 +42,7 @@ export function NextBestAction({
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-primary" />
             <h3 className="text-sm font-semibold font-heading uppercase tracking-wider text-primary">
-              Prioritized Next Action / अगला अनुशंसित कदम
+              {t('command_center.next_action' as any) || 'Prioritized Next Action'}
             </h3>
           </div>
 

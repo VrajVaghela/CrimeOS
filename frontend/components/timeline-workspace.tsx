@@ -551,7 +551,7 @@ export function TimelineWorkspace({
   const { t, lang } = useLanguage();
   const cctvCount = events.filter((e) => e.event_type === "cctv_frame").length;
   const locationsSet = new Set(
-    events.map((e) => e.location).filter(Boolean)
+    events.map((e) => e.location).filter((l) => Boolean(l))
   );
 
   return (
@@ -693,7 +693,6 @@ export function TimelineWorkspace({
               <p>{t("timeline.cctv_step1" as any) || "1. Upload any CCTV still frame (JPEG/PNG)"}</p>
               <p>{t("timeline.cctv_step2" as any) || "2. Gemini Vision extracts OSD timestamp, visible location cues, persons, vehicles, and forensic flags"}</p>
               <p>{t("timeline.cctv_step3" as any) || "3. The event is pinned on the timeline at the detected real-world time"}</p>
-            </div>
             </div>
           </Card>
 

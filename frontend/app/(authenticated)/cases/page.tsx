@@ -152,8 +152,7 @@ export default function CasesPage() {
             className="hover:glow-primary hover:-translate-y-0.5 transition-all duration-150"
           >
             <Plus className="h-4 w-4" />
-            New Case
-            <span className="text-primary-foreground/70 text-xs hidden sm:inline ml-1">/ नई शिकायत</span>
+            {t("cases.new_case" as any) || "New Case"}
           </Button>
         </div>
       </div>

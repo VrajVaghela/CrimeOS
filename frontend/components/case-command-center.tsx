@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLanguage } from "@/lib/language-context";
 import { useRouter } from "next/navigation";
 import {
   Shield,
@@ -81,6 +82,7 @@ interface CaseCommandCenterProps {
 }
 
 export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
+  const { t } = useLanguage();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -181,7 +183,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
       const sum = allExtracted.reduce((acc, curr) => acc + curr.confidence, 0);
       return Math.round((sum / allExtracted.length) * 100);
     }
-    return 86; // Default demo fallback confidence
+    return 0; // Default demo fallback confidence
   })();
 
   if (loading) {
@@ -252,7 +254,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
             {uniqueComplainants.length > 0 && (
               <div>
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold block mb-1">
-                  Complainants / शिकायतकर्ता
+                  {t('command_center.complainants' as any) || 'Complainants'}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {uniqueComplainants.map((comp, idx) => (
@@ -268,12 +270,12 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
             <div>
               <span className="text-[10px] uppercase tracking-wider text-info font-mono font-bold flex items-center gap-1 mb-1.5">
                 <Sparkles className="h-3 w-3 text-info" />
-                AI Incident Executive Summary / कार्यकारी सारांश
+                {t('command_center.ai_summary' as any) || 'AI Incident Executive Summary'}
               </span>
               <div className="border border-info/30 bg-info/[0.04] p-4 rounded-squircle-sm text-xs leading-relaxed text-foreground/90 font-sans">
                 {summaries.length > 0
                   ? summaries[0].content
-                  : "AI Executive Summary is not generated yet. Run the case analyzer or update details to generate the initial summary."}
+                  : t('command_center.ai_summary_empty' as any) || 'AI Executive Summary is not generated yet. Run the case analyzer or update details to generate the initial summary.'}
               </div>
             </div>
           </div>
@@ -283,7 +285,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
             <div className="space-y-3">
               <div>
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold block mb-1">
-                  Case Status / स्थिति
+                  {t('command_center.case_status' as any) || 'Case Status'}
                 </span>
                 <div className="flex items-center gap-2">
                   <StatusBadge status={caseData?.status || "open"} />
@@ -297,7 +299,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
 
               <div>
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold block mb-1">
-                  Registered Date / पंजीकरण तिथि
+                  {t('command_center.registered_date' as any) || 'Registered Date'}
                 </span>
                 <span className="text-xs font-mono font-semibold text-foreground">
                   {caseData?.created_at
@@ -311,7 +313,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
 
               <div>
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold block mb-1">
-                  Officer In Charge / प्रभारी अधिकारी
+                  {t('command_center.officer_in_charge' as any) || 'Officer In Charge'}
                 </span>
                 <span className="text-xs font-semibold text-foreground">
                   Investigating Officer (IO)
@@ -343,7 +345,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
-                Case Confidence / मामला विश्वास
+                {t('command_center.case_confidence' as any) || 'Case Confidence'}
               </span>
               <Shield className="h-4 w-4 text-primary" />
             </div>
@@ -354,15 +356,15 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
               <div className="flex items-center gap-1.5 mt-1">
                 {avgEntityConf >= 85 ? (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-success font-mono uppercase bg-success/15 border border-success/20 px-1.5 py-0.5 rounded">
-                    High Confidence
+                    {t('command_center.high_confidence' as any) || 'High Confidence'}
                   </span>
                 ) : avgEntityConf >= 70 ? (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-warn font-mono uppercase bg-warn/15 border border-warn/20 px-1.5 py-0.5 rounded">
-                    Medium Confidence
+                    {t('command_center.medium_confidence' as any) || 'Medium Confidence'}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-destructive font-mono uppercase bg-destructive/15 border border-destructive/20 px-1.5 py-0.5 rounded">
-                    Low Confidence
+                    {t('command_center.low_confidence' as any) || 'Low Confidence'}
                   </span>
                 )}
               </div>
@@ -375,7 +377,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
-                Extracted Details / निकाले गए विवरण
+                {t('command_center.extracted_details' as any) || 'Extracted Details'}
               </span>
               <Sparkles className="h-4 w-4 text-info" />
             </div>
@@ -384,7 +386,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                 <AnimatedMetric value={entities.length} />
               </div>
               <div className="text-[10px] text-muted-foreground mt-1 font-mono uppercase">
-                Normalized case entities
+                {t('command_center.normalized_entities' as any) || 'Normalized case entities'}
               </div>
             </div>
           </CardContent>
@@ -395,7 +397,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
-                Legal Requests / भेजे गए अनुरोध
+                {t('command_center.legal_requests' as any) || 'Legal Requests'}
               </span>
               <Mail className="h-4 w-4 text-success" />
             </div>
@@ -405,7 +407,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                 <span className="text-muted-foreground text-sm font-normal"> / {requests.length}</span>
               </div>
               <div className="text-[10px] text-muted-foreground mt-1 font-mono uppercase">
-                Active telecom/bank requests
+                {t('command_center.active_requests' as any) || 'Active telecom/bank requests'}
               </div>
             </div>
           </CardContent>
@@ -416,7 +418,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
           <CardContent className="p-0 flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">
-                Timeline Progress / पूर्णता दर
+                {t('command_center.timeline_progress' as any) || 'Timeline Progress'}
               </span>
               <TrendingUp className="h-4 w-4 text-accent" />
             </div>
@@ -467,7 +469,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-base font-semibold font-heading flex items-center gap-2">
                 <Activity className="h-4 w-4 text-success" />
-                Requests & Response Insights / कानूनी अनुरोध और अंतर्दृष्टि
+                {t('command_center.insights' as any) || 'Requests & Response Insights'}
               </CardTitle>
               {requests.length > 0 && (
                 <Button
@@ -484,12 +486,12 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
               {/* Requests summary */}
               <div>
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 font-mono">
-                  Dispatched Requests
+                  {t('command_center.dispatched_requests' as any) || 'Dispatched Requests'}
                 </h4>
                 {requests.length === 0 ? (
                   <div className="text-center py-4 border border-dashed border-border/40 rounded-lg">
                     <Mail className="h-6 w-6 text-muted-foreground mx-auto mb-1 opacity-50" />
-                    <p className="text-[11px] text-muted-foreground">No requests drafted or dispatched.</p>
+                    <p className="text-[11px] text-muted-foreground">{t('command_center.no_requests' as any) || 'No requests drafted or dispatched.'}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -554,7 +556,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
             <CardHeader>
               <CardTitle className="text-base font-semibold font-heading flex items-center gap-2">
                 <Clock className="h-4 w-4 text-accent" />
-                Recent Case Log / हालिया गतिविधि
+                {t('command_center.recent_log' as any) || 'Recent Case Log'}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -571,7 +573,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                       
                       <div>
                         <p className="text-xs font-semibold font-heading text-foreground">
-                          {activity.action.replace(/_/g, " ").toUpperCase()}
+                          {activity.action === "case_created" ? (t('command_center.case_created' as any) || 'CASE CREATED') : activity.action.replace(/_/g, " ").toUpperCase()}
                         </p>
                         <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground font-mono">
                           <span>{activity.actor_name || "System"}</span>

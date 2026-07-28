@@ -1,5 +1,5 @@
 "use client";
-
+import { useLanguage } from "@/lib/language-context";
 import React, { useState } from "react";
 import { Sparkles, CheckCircle2, Bookmark, BookmarkCheck, AlertTriangle } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,6 +13,7 @@ interface ResponseCorrelationPanelProps {
 }
 
 export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCorrelationPanelProps) {
+  const { t } = useLanguage();
   const [promotingIndex, setPromotingIndex] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState<{ title: string; description: string; variant?: string } | null>(null);
 
@@ -44,14 +45,14 @@ export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCo
   const renderConfidenceBadge = (confidence: number) => {
     const percentage = Math.round(confidence * 100);
     let colorClass = "bg-destructive/10 text-destructive border-destructive/20";
-    let label = "Low Confidence";
+    let label = t('command_center.low_confidence' as any) || 'Low Confidence';
 
     if (percentage >= 85) {
       colorClass = "bg-success/10 text-success border-success/20";
-      label = "High Confidence";
+      label = t('command_center.high_confidence' as any) || 'High Confidence';
     } else if (percentage >= 70) {
       colorClass = "bg-accent/10 text-accent border-accent/20";
-      label = "Medium Confidence";
+      label = t('command_center.medium_confidence' as any) || 'Medium Confidence';
     }
 
     return (
