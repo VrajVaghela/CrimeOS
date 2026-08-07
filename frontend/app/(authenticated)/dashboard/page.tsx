@@ -286,7 +286,7 @@ export default function DashboardPage() {
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                        <p className="font-mono text-sm text-primary">{item.case_number}</p>
+                        <p className="font-mono text-sm text-accent-strong">{item.case_number}</p>
                         {user.role === "LEGAL" && (
                           <span className="text-[10px] bg-violet/10 border border-violet/20 text-violet px-1.5 py-0.5 rounded font-mono uppercase">
                             {t("dashboard.awaiting_audit")}

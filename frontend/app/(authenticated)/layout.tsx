@@ -8,9 +8,6 @@ import {
   FolderOpen,
   Shield,
   Search,
-  Bell,
-  Settings,
-  HelpCircle,
   LogOut,
   ChevronRight,
   User,
@@ -22,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth-context";
 import { LanguageToggle } from "@/components/language-toggle";
+import { NotificationsPopover } from "@/components/notifications-popover";
 
 export default function AuthenticatedLayout({
   children,
@@ -134,7 +132,7 @@ function AuthenticatedLayoutContent({
             {!sidebarCollapsed && <div className="flex flex-1 flex-col overflow-hidden">
               <div className="flex items-center whitespace-nowrap">
                 <span className="font-heading font-bold text-sm tracking-wider text-foreground">CRIME OS</span>
-                <span className="font-heading font-bold text-sm tracking-wider text-primary ml-1">AI</span>
+                <span className="font-heading font-bold text-sm tracking-wider text-accent-strong ml-1">AI</span>
               </div>
               <span className="text-[9px] font-mono tracking-widest text-muted-foreground uppercase mt-0.5">Tactical Portal</span>
             </div>}
@@ -162,7 +160,7 @@ function AuthenticatedLayoutContent({
               href="/dashboard"
               className={`flex items-center gap-3 px-3 py-2.5 rounded-squircle-sm text-sm transition-all duration-130 group relative ${sidebarCollapsed ? "justify-center" : ""} ${
                 isDashboardActive
-                  ? "bg-primary/10 text-primary border border-primary/30 font-medium"
+                  ? "bg-primary/10 text-accent-strong border border-primary/30 font-medium"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               }`}
             >
@@ -178,7 +176,7 @@ function AuthenticatedLayoutContent({
               href="/cases"
               className={`flex items-center gap-3 px-3 py-2.5 rounded-squircle-sm text-sm transition-all duration-130 group relative ${sidebarCollapsed ? "justify-center" : ""} ${
                 isCasesActive
-                  ? "bg-primary/10 text-primary border border-primary/30 font-medium"
+                  ? "bg-primary/10 text-accent-strong border border-primary/30 font-medium"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               }`}
             >
@@ -262,37 +260,10 @@ function AuthenticatedLayoutContent({
 
             <div className="hidden h-5 w-px bg-border/60 sm:block" />
 
-            {/* Square Icon Buttons */}
+            {/* Header Actions */}
             <div className="flex items-center gap-1.5">
               <LanguageToggle />
-
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 rounded-squircle-sm border-border bg-background hover:bg-secondary hover:text-primary transition-colors text-muted-foreground relative"
-                aria-label="System status alerts"
-              >
-                <Bell className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 rounded-squircle-sm border-border bg-background hover:bg-secondary transition-colors text-muted-foreground"
-                aria-label="Settings"
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 rounded-squircle-sm border-border bg-background hover:bg-secondary transition-colors text-muted-foreground"
-                aria-label="Help & Documentation"
-              >
-                <HelpCircle className="h-4 w-4" />
-              </Button>
+              <NotificationsPopover />
             </div>
           </div>
         </header>

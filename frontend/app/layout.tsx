@@ -1,8 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Sans_Devanagari, Noto_Sans_Gujarati } from "next/font/google";
+import {
+  IBM_Plex_Mono,
+  IBM_Plex_Sans,
+  Noto_Sans_Devanagari,
+  Noto_Sans_Gujarati,
+} from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { LanguageProvider } from "@/lib/language-context";
 import "./globals.css";
+
+const plexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-plex-sans",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
 
 const notoDevanagari = Noto_Sans_Devanagari({
   subsets: ["devanagari"],
@@ -33,7 +52,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang="en"
-      className={`dark ${notoDevanagari.variable} ${notoGujarati.variable}`}
+      className={`dark ${plexSans.variable} ${plexMono.variable} ${notoDevanagari.variable} ${notoGujarati.variable}`}
     >
       <body>
         <AuthProvider>

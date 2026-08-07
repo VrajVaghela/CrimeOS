@@ -228,7 +228,7 @@ export function OsintEnrichmentPanel({
                 ? "bg-success/10 text-success border-success/30"
                 : scanResult.scan.status === "FAILED"
                 ? "bg-danger/10 text-danger border-danger/30 animate-pulse"
-                : "bg-primary/10 text-primary border-primary/30 animate-pulse"
+                : "bg-primary/10 text-accent-strong border-primary/30 animate-pulse"
             }`}
           >
             {scanResult.scan.status}
@@ -363,7 +363,7 @@ className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border
                             profile.exists_confidence === "CONFIRMED"
                               ? "bg-success/15 text-success"
                               : profile.exists_confidence === "LIKELY"
-                              ? "bg-primary/10 text-primary"
+                              ? "bg-primary/10 text-accent-strong"
                               : "bg-muted-foreground/10 text-muted-foreground"
                           }`}
                         >
@@ -507,7 +507,7 @@ className="p-3 rounded bg-warn/5 border border-warn/20 text-xs flex flex-col gap
                         <div className="font-bold text-foreground capitalize">
                           {pivot.entity_type.replace("_", " ")}
                         </div>
-                        <div className="text-primary font-mono text-[11px] break-all">
+                        <div className="text-accent-strong font-mono text-[11px] break-all">
                           {pivot.display_value}
                         </div>
                       </div>

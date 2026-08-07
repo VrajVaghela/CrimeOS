@@ -225,7 +225,7 @@ export default function PathPage() {
           <p className="text-sm text-muted-foreground">
             {t("path.generating_sub")}
           </p>
-          <p className="font-mono text-xs text-primary mt-2">
+          <p className="font-mono text-xs text-accent-strong mt-2">
             {t("common.elapsed")}: {elapsedTime}s
           </p>
         </div>
@@ -277,7 +277,7 @@ export default function PathPage() {
               {t("path.blueprint")}
             </h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Model: <span className="font-mono text-primary">{currentPath?.model_used || path?.model_used}</span> · Grounded in seeded police SOPs
+              Model: <span className="font-mono text-accent-strong">{currentPath?.model_used || path?.model_used}</span> · Grounded in seeded police SOPs
             </p>
           </div>
           <Button
@@ -364,7 +364,7 @@ export default function PathPage() {
 
                     {/* AI Reasoning */}
                     <div className="text-xs text-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
-                      <span className="font-bold text-[10px] text-primary block uppercase tracking-wider mb-1">
+                      <span className="font-bold text-[10px] text-accent-strong block uppercase tracking-wider mb-1">
                         {t("path.ai_reasoning")}
                       </span>
                       <TranslatedTextBlock content={sec.ai_reasoning} autoTranslate={true} />

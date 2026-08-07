@@ -58,7 +58,7 @@ const EVENT_META: Record<
     icon: Radar,
     dotClass: "bg-primary",
     borderClass: "border-primary/40",
-    badgeClass: "bg-primary/15 text-primary border-primary/30",
+    badgeClass: "bg-primary/15 text-accent-strong border-primary/30",
   },
   path_generated: {
     label: "Path Generated",
@@ -204,7 +204,7 @@ function TimelineNode({ event, lang }: { event: TimelineEventOut, lang: string }
           <div className="mt-3">
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
+              className="flex items-center gap-1 text-xs text-accent-strong hover:text-accent-strong/80 transition-colors"
             >
               {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
               {expanded ? "Hide" : "Show"} CCTV Intelligence

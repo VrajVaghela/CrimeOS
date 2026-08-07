@@ -18,7 +18,7 @@ interface PathStepperProps {
 
 const STATUS_CLASSES = {
   pending: "border-border text-muted-foreground bg-card",
-  in_progress: "border-primary text-primary bg-primary/10 animate-glow-pulse glow-primary",
+  in_progress: "border-primary text-accent-strong bg-primary/10 animate-glow-pulse glow-primary",
   done: "border-success text-success bg-success/10 glow-success",
   skipped: "border-muted-foreground/30 text-muted-foreground bg-card",
 };

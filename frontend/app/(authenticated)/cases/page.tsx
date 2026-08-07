@@ -42,6 +42,14 @@ export default function CasesPage() {
   const [searching, setSearching] = useState(false);
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeout.current) clearTimeout(searchTimeout.current);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
@@ -85,14 +93,26 @@ export default function CasesPage() {
   function handleSearch(query: string) {
     setSearchQuery(query);
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
-    if (!query.trim()) { setSearchResults(null); return; }
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    if (!query.trim()) { setSearchResults(null); setSearching(false); return; }
     setSearching(true);
     searchTimeout.current = setTimeout(async () => {
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
       try {
         const results = await searchCases(query.trim());
-        setSearchResults(results);
-      } catch { setSearchResults([]); }
-      finally { setSearching(false); }
+        if (!controller.signal.aborted) {
+          setSearchResults(results);
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setSearchResults([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setSearching(false);
+        }
+      }
     }, 350);
   }
 
@@ -234,7 +254,7 @@ export default function CasesPage() {
 
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="font-mono text-sm text-primary">{item.case_number}</p>
+                      <p className="font-mono text-sm text-accent-strong">{item.case_number}</p>
                       <h2 className="font-heading text-lg font-semibold mt-0.5 truncate">{item.title}</h2>
                       <p className="text-sm text-muted-foreground">{item.crime_type ?? "Awaiting classification"}</p>
                     </div>

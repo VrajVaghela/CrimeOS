@@ -258,7 +258,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
                     href={`${API_URL}/${evidence.file_path}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-mono"
+                    className="inline-flex items-center gap-1 text-xs text-accent-strong hover:underline font-mono"
                   >
                     Open Document in New Tab <ExternalLink className="h-3 w-3" />
                   </a>
@@ -464,7 +464,7 @@ className="w-full bg-surface-alt border border-border/60 text-xs rounded p-2 foc
 className="p-3 rounded-lg border border-border bg-surface-alt/60 text-xs space-y-2 animate-fade-up"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-mono text-[10px] text-primary uppercase font-bold bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">
+                          <span className="font-mono text-[10px] text-accent-strong uppercase font-bold bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">
                             {marker.marker_type.replace("_", " ")}
                           </span>
 
@@ -528,7 +528,7 @@ className="bg-background border border-border text-[10px] rounded p-0.5 focus:ou
                           ) : (
                             <button
                               onClick={() => handlePromoteMarker(marker.id, marker.transcript_text)}
-                              className="text-[10px] font-bold text-primary hover:text-primary-foreground hover:bg-primary/20 border border-primary/30 rounded px-2 py-0.5 transition-all flex items-center gap-1"
+                              className="text-[10px] font-bold text-accent-strong hover:text-primary-foreground hover:bg-primary/20 border border-primary/30 rounded px-2 py-0.5 transition-all flex items-center gap-1"
                             >
                               <FolderPlus className="h-3 w-3" /> Add to Case Diary
                             </button>

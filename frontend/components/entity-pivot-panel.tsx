@@ -108,7 +108,7 @@ export function EntityPivotPanel({
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded border border-primary/40 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded border border-primary/40 text-xs font-medium text-accent-strong bg-primary/10 hover:bg-primary/20 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} />
             {t('command_center.sync_entities' as any) || 'Sync Entities'}
@@ -229,13 +229,13 @@ export function EntityPivotPanel({
                           <>
                             <span className="truncate">This</span>
                             <ArrowRight className="h-3 w-3 text-primary shrink-0" />
-                            <span className="truncate text-primary">
+                            <span className="truncate text-accent-strong">
                               {otherEnt.display_value}
                             </span>
                           </>
                         ) : (
                           <>
-                            <span className="truncate text-primary">
+                            <span className="truncate text-accent-strong">
                               {otherEnt.display_value}
                             </span>
                             <ArrowRight className="h-3 w-3 text-primary shrink-0" />
@@ -292,7 +292,7 @@ export function EntityPivotPanel({
                     <div className="text-muted-foreground text-[11px] font-medium truncate">
                       {rc.title}
                     </div>
-                    <div className="text-[10px] text-primary/80 italic font-mono pt-0.5">
+                    <div className="text-[10px] text-accent-strong italic font-mono pt-0.5">
                       Via matching {selectedEntity.entity_type} '{selectedEntity.display_value}'
                     </div>
                   </div>

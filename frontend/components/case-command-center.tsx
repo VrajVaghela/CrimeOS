@@ -243,7 +243,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
           <div className="space-y-4">
             <div>
               <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider mb-1 flex-wrap">
-                <span className="text-primary font-bold">{caseData?.case_number}</span>
+                <span className="text-accent-strong font-bold">{caseData?.case_number}</span>
                 <span className="text-muted-foreground">•</span>
                 <span className="text-muted-foreground">{caseData?.crime_type || "Awaiting Classification"}</span>
               </div>
@@ -325,7 +325,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
             <div className="bg-secondary/40 border border-border/30 rounded-squircle-sm p-3 space-y-2">
               <div className="flex justify-between text-xs font-mono">
                 <span className="text-muted-foreground">Completion</span>
-                <span className="text-primary font-bold">{workflow.completion_percentage}%</span>
+                <span className="text-accent-strong font-bold">{workflow.completion_percentage}%</span>
               </div>
               <div className="w-full bg-secondary/80 rounded-full h-1.5 overflow-hidden">
                 <div
@@ -476,7 +476,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                   onClick={() => router.push(`/cases/${caseId}/requests`)}
                   variant="ghost"
                   size="sm"
-                  className="text-xs text-primary hover:text-primary/80 gap-1"
+                  className="text-xs text-accent-strong hover:text-accent-strong/80 gap-1"
                 >
                   Manage Requests <ArrowRight className="h-3 w-3" />
                 </Button>

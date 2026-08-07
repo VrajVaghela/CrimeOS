@@ -40,7 +40,7 @@ export function PathRevisionList({
             >
               <div className="space-y-1 pr-2 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-primary">
+                  <span className="font-mono text-xs font-bold text-accent-strong">
                     v{rev.revision_number}
                   </span>
                   <span className="text-[10px] font-mono text-muted-foreground uppercase bg-slate-800 px-1.5 py-0.5 rounded">

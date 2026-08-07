@@ -98,7 +98,9 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
     }
   }
 
-  const activeTab = TABS.find((t) => t.href !== "" && pathname.includes(`/${t.href}`))?.href ?? "";
+  const subPath = pathname.split(`/cases/${caseId}`)[1] || "";
+  const routeSegment = subPath.split("/")[1] || "";
+  const activeTab = TABS.find((t) => t.href === routeSegment)?.href ?? "";
   const activeTabMeta = TABS.find((t) => t.href === activeTab);
 
 
@@ -142,7 +144,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                     </span>
                   )}
                   <Shield className="h-4 w-4 text-primary shrink-0" />
-                  <span className="font-mono text-sm text-primary">{caseData.case_number}</span>
+                  <span className="font-mono text-sm text-accent-strong">{caseData.case_number}</span>
                   <StatusBadge status={caseData.status} />
                 </div>
                 <h1 className="break-words font-heading text-xl font-bold leading-tight md:text-2xl">{caseData.title}</h1>
@@ -175,7 +177,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
               id="tab-overview"
               className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all duration-200 ${
                 activeTab === ""
-                  ? "bg-primary/15 text-primary border border-primary/30"
+                  ? "bg-primary/15 text-accent-strong border border-primary/30"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
               }`}
             >
@@ -197,7 +199,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                     id={`tab-${tab.href}`}
                     className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-all duration-200 ${
                       isActive
-                        ? "bg-primary/10 text-primary border border-primary/20"
+                        ? "bg-primary/10 text-accent-strong border border-primary/20"
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary/30"
                     }`}
                   >
@@ -222,7 +224,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                     id={`tab-${tab.href}`}
                     className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-all duration-200 ${
                       isActive
-                        ? "bg-primary/10 text-primary border border-primary/20"
+                        ? "bg-primary/10 text-accent-strong border border-primary/20"
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary/30"
                     }`}
                   >
@@ -247,7 +249,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                     id={`tab-${tab.href}`}
                     className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-all duration-200 ${
                       isActive
-                        ? "bg-primary/10 text-primary border border-primary/20"
+                        ? "bg-primary/10 text-accent-strong border border-primary/20"
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary/30"
                     }`}
                   >

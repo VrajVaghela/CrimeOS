@@ -41,7 +41,7 @@ export function NextBestAction({
         <div className="space-y-2 max-w-2xl">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-primary" />
-            <h3 className="text-sm font-semibold font-heading uppercase tracking-wider text-primary">
+            <h3 className="text-sm font-semibold font-heading uppercase tracking-wider text-accent-strong">
               {t('command_center.next_action' as any) || 'Prioritized Next Action'}
             </h3>
           </div>

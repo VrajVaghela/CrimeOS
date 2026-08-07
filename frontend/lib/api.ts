@@ -24,7 +24,7 @@ import type {
 } from "@/lib/types";
 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "crime_os_token";
 
 interface ApiErrorBody {
@@ -294,8 +294,9 @@ export async function syncCctns(caseId: string): Promise<{
 
 // Phase 6: Legal Advisor section reviews
 export async function updateSectionStatus(sectionId: string, status: string): Promise<CaseSectionOut> {
-  return request<CaseSectionOut>(`/paths/sections/${sectionId}/status?status=${encodeURIComponent(status)}`, {
+  return request<CaseSectionOut>(`/paths/sections/${sectionId}/status`, {
     method: "PATCH",
+    body: JSON.stringify({ status }),
   });
 }
 

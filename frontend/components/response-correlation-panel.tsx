@@ -66,7 +66,7 @@ export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCo
     <div className="space-y-4">
       <div className="flex items-center gap-1.5 mb-2">
         <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-        <span className="text-sm font-semibold font-heading text-primary uppercase tracking-wider">
+        <span className="text-sm font-semibold font-heading text-accent-strong uppercase tracking-wider">
           AI Correlation Engine
         </span>
       </div>

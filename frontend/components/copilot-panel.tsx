@@ -154,7 +154,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
               </CardDescription>
             </div>
           </div>
-          <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs px-2 py-0.5 rounded-full font-mono">
+          <Badge className="bg-primary/10 text-accent-strong border border-primary/20 text-xs px-2 py-0.5 rounded-full font-mono">
             Read-Only State
           </Badge>
         </div>

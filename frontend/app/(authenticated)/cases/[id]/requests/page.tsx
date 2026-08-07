@@ -249,7 +249,7 @@ export default function RequestsPage() {
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 * In demo mode, emails route to{" "}
-                <span className="font-mono text-primary">vrajv83@gmail.com</span> to preserve sandboxing,
+                <span className="font-mono text-accent-strong">vrajv83@gmail.com</span> to preserve sandboxing,
                 while displaying target provider details in logs.
               </p>
             </CardContent>
@@ -432,7 +432,7 @@ export default function RequestsPage() {
                         <Button
                           size="sm"
                           onClick={() => void handleDispatch(req.id)}
-                          disabled={isLoading || readinessMap[req.id]?.is_ready === false}
+                          disabled={isLoading || !readinessMap[req.id]?.is_ready}
                           loading={isLoading}
                         >
                           {!isLoading && <Send className="h-3.5 w-3.5" />}

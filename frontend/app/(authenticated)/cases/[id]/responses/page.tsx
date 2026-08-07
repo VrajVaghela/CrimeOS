@@ -18,7 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { getCaseResponses, regenerateInsights, getResponseCorrelations, promoteResponseRow, ApiError } from "@/lib/api";
+import { getCaseResponses, regenerateInsights, getResponseCorrelations, promoteResponseRow, ApiError, API_URL } from "@/lib/api";
 import { useLanguage } from "@/lib/language-context";
 import { TranslatedTextBlock } from "@/components/translated-text-block";
 import { ResponseCorrelationPanel } from "@/components/response-correlation-panel";
@@ -219,7 +219,7 @@ export default function ResponsesPage() {
                     {selectedResponse.file_path && (
                       <Button variant="outline" size="sm" asChild>
                         <a
-                          href={`http://localhost:8000/${selectedResponse.file_path}`}
+                          href={`${API_URL}/${selectedResponse.file_path}`}
                           download
                           target="_blank"
                           rel="noreferrer"

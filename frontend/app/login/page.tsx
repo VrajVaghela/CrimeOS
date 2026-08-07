@@ -43,7 +43,7 @@ export default function LoginPage() {
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-heading text-sm font-semibold tracking-wide text-foreground">CRIME OS <span className="text-primary">AI</span></p>
+                <p className="font-heading text-sm font-semibold tracking-wide text-foreground">CRIME OS <span className="text-accent-strong">AI</span></p>
                 <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Investigation workspace</p>
               </div>
             </div>
@@ -67,7 +67,7 @@ export default function LoginPage() {
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <p className="font-heading text-sm font-semibold tracking-wide text-foreground">CRIME OS <span className="text-primary">AI</span></p>
+              <p className="font-heading text-sm font-semibold tracking-wide text-foreground">CRIME OS <span className="text-accent-strong">AI</span></p>
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Secure casework</p>
             </div>
           </div>

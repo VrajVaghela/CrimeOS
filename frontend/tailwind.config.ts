@@ -27,6 +27,10 @@ const config: Config = {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        danger: {
+          DEFAULT: "hsl(var(--danger))",
+          foreground: "hsl(var(--danger-foreground))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
@@ -34,6 +38,10 @@ const config: Config = {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+        },
+        "accent-strong": {
+          DEFAULT: "hsl(var(--accent-strong))",
+          foreground: "hsl(var(--accent-strong-foreground))",
         },
         card: {
           DEFAULT: "hsl(var(--card))",
