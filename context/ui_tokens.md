@@ -13,11 +13,9 @@ Theme intent: **high-tech, secure, trustworthy — Ferrari cyber-command aesthet
 
   /* Text */
   --fg: #fffaf0;                  /* Warm off-white primary text */
-  --fg-2: #e8dcc8;                /* Warm off-white secondary text */
   --muted: #a89f91;               /* Labels, metadata, placeholders */
 
   /* Accent colors */
-  --meta: #ffd200;                /* Yellow metadata highlights */
   --accent: #dc0000;              /* Ferrari Red primary accent */
   --accent-on: #ffffff;
   --accent-hover: color-mix(in oklab, var(--accent), black 8%);
@@ -38,33 +36,6 @@ Theme intent: **high-tech, secure, trustworthy — Ferrari cyber-command aesthet
   --font-display: "Ferrari Sans", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Ferrari Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "SF Mono", ui-monospace, Menlo, monospace;
-
-  /* Type scale */
-  --text-xs: 12px;
-  --text-sm: 14px;
-  --text-base: 16px;
-  --text-lg: 19px;
-  --text-xl: 26px;
-  --text-2xl: 40px;
-  --text-3xl: 62px;
-  --text-4xl: 88px;
-
-  /* Line heights */
-  --leading-body: 1.5;
-  --leading-tight: 0.98;
-
-  /* Letter spacing */
-  --tracking-display: -0.03em;
-
-  /* Spacing scale */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-12: 48px;
 
   /* Border radius */
   --radius-sm: 4px;
@@ -128,13 +99,13 @@ To support tailwind base, the following variables will be defined in HSL format 
 
 ```css
 .glow-primary {
-  box-shadow: 0 0 20px -4px rgba(220, 0, 0, 0.3);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent);
 }
 .glow-success {
-  box-shadow: 0 0 16px -4px rgba(15, 157, 88, 0.4);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--success) 35%, transparent);
 }
 .glow-destructive {
-  box-shadow: 0 0 16px -4px rgba(255, 59, 48, 0.4);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--danger) 35%, transparent);
 }
 .glass {
   background: var(--glass-bg);

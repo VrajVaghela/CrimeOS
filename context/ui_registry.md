@@ -43,7 +43,7 @@ Last updated: 2026-07-05
 
 ### AiContentCard — BUILT (Phase 3)
 - Path: components/ai-content-card.tsx
-- Purpose: wrapper marking AI-generated content with glowing left border and Sparkles badge
+- Purpose: wrapper marking AI-generated content with a full info-blue border, tinted surface, and Sparkles badge
 - Props: `children: React.ReactNode`, `title?: string`
 - Used in: `app/cases/[id]/path/page.tsx`
 
@@ -209,12 +209,12 @@ These entries define the intended reusable surfaces. Mark them BUILT and add con
 ### CitationDialog — UPGRADED (Phase 9D/9E)
 - Trigger uses info-blue border/text
 - Dialog content uses `.glass-strong` panel with `rounded-[12px]`
-- Content block uses info-blue left border
+- Content block uses a full info-blue border with a tinted surface
 
 ### SummaryPage — UPGRADED (Phase 9E)
 - Summary card uses `var(--surface-warm)` (#23130f) background
 - Blue AI icon header with rounded-[8px] container
-- Red primary CTA button with scale-105 hover + glow
+- Red primary CTA button; hover darkens to primary/90, no scale or glow
 - Info-blue left-bordered content block
 
 ### Dialog (UI) — UPGRADED (Phase 9E)

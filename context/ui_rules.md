@@ -42,11 +42,11 @@ Audience: **non-technical police officers** — but the presentation is a **dark
 - **Topbar**: Height `68px`. Contains breadcrumbs, full case search bar (max width `280px`), notifications, and help icons.
 
 ### 3.2 Case Hero & Signal Cards
-- **Case Hero**: Rounded card showing Case ID, category, complainants, and an AI summary inside a left-bordered info blue block.
+- **Case Hero**: Rounded card showing Case ID, category, complainants, and an AI summary inside a full info-blue bordered block.
 - **Signal Cards**: Metric cards showing values (e.g. Case Confidence `86/100`, Extracted Entities `18 fields`). Values animate from 0 on viewport entry.
 
 ### 3.3 Buttons
-- **Primary**: Red background, white text, `rounded-squircle-sm`. Scales to 1.05 and adds a red glow on hover.
+- **Primary**: Red background, white text, `rounded-squircle-sm`. Hover darkens to 90% opacity, active to 80%.
 - **Secondary**: Surface bg with soft border (`#241f1b`), hover border transitions to strong border (`#342a24`).
 - **Destructive / Danger**: Danger Red (`#ff3b30`) background, used for critical deletions/rejections.
 

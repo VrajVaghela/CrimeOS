@@ -1,8 +1,17 @@
-# Memory — Phase 10D Integration Verification Complete
+# Memory — Phase 13 End-to-End Audit & Remediation Complete
 
-Last updated: 2026-07-18 02:05 IST
+Last updated: 2026-08-06 23:35 IST
 
-## What was built
+## Latest Update — Phase 13 End-to-End Audit & Remediation (2026-08-06)
+- **Hardcoded Localhost API Download URL**: Exported `API_URL` from `lib/api.ts` and replaced hardcoded `http://localhost:8000` download link in `responses/page.tsx`.
+- **Premature Dispatch Button Enablement**: Fixed readiness condition in `requests/page.tsx` using `!readinessMap[req.id]?.is_ready`.
+- **RAM Exhaustion on Ingestion & Evidence Uploads**: Refactored `ingestion.py`, `evidence.py`, `ingestion_service.py`, and `evidence_service.py` to stream files directly to disk using `shutil.copyfileobj`.
+- **Brittle Active Tab Matching**: Updated `layout.tsx` to extract sub-route segments using exact case ID splitting (`pathname.split('/cases/${caseId}')[1]`).
+- **Non-RESTful State Mutator Query Parameters**: Converted `PATCH /paths/sections/{section_id}/status` to accept a proper JSON request body (`SectionStatusUpdateIn`).
+- **Missing Validation on Legal Request Draft Edits**: Added Pydantic `Field(..., min_length=10)` validation to `LegalRequestUpdateIn`.
+- **Dangling Search Debounce Promises**: Added `AbortController` request cancellation and unmount cleanup to `cases/page.tsx`.
+- **Fragile Mock CCTNS FIR Number Parsing**: Refactored FIR number generation in `mock_cctns.py` using regex numeric extraction.
+- **Verification**: `next build` compiled 14 static/dynamic routes cleanly with zero errors, and `python -m compileall app` passed cleanly.
 
 **Phase 10D — Integration Verification and Handoff.** All tasks completed:
 

@@ -104,34 +104,34 @@ Update IMMEDIATELY upon completing any feature: `[ ]` → `[x]`. If a feature is
 - [x] ✅ CHECKPOINT: golden path plus one Phase 8 intelligence moment completes in under 7 minutes
 
 ## Phase 10 — UI/UX Improvement Pass
-- [ ] P0-1: Normalize tab bar — remove per-tab accent colors, standardize to muted/primary only
-- [ ] P0-2: Simplify case header — remove activeTabMeta label, consolidate meta row, move CCTNS button
-- [ ] P0-3: Fix eyebrow label overuse in command center signal cards and hero metadata rows
-- [ ] P0-4: Move bilingual text out of headings — English headings only, Hindi as subtitle
-- [ ] P0-5: Remove decorative gradient stripes and gradient icon backgrounds (ingestion + requests)
-- [ ] P0-6: Remove demo scaffolding from officer-facing UI (requests page email note + mock button)
-- [ ] P1-1: Dashboard role badge — move out of h1 into subtitle row
-- [ ] P1-2: Limit AnimatedMetric count-up to one card (Case Confidence only)
-- [ ] P1-3: Replace tab group text labels (Work/Evidence/Record) with dividers
-- [ ] P1-4: Reduce workflow spine node size w-11→w-8, fix focus ring
-- [ ] P1-5: Restore subtle scrollbars — remove global scrollbar-width:none from *
-- [ ] P1-6: Split dual-purpose command center card (requests + response) into two cards
-- [ ] P1-7: Remove duplicate AI-suggested badges on ingestion page
-- [ ] P1-8: Shorten stat card labels on dashboard
-- [ ] P1-9: Remove per-item stagger delays from all list rows
-- [ ] P1-10: Replace hover:glow-primary + translate on case list rows with subtle tint
-- [ ] P1-11: Remove animate-pulse-glow from dispatched request cards
-- [ ] P1-12: Path stepper — remove triple animation (glow-pulse + glass + pulse dot) on active step
-- [ ] P1-13: Replace native <select> for step status with DropdownMenu
-- [ ] P1-14: Add aria-current="page" to active tabs
-- [ ] P1-15: Fix touch targets on tab bar (py-2 px-3) and search clear button (h-9 w-9 wrapper)
-- [ ] P2-1: Login page — remove duplicate LockKeyhole icon from card header
-- [ ] P2-2: Remove "Navigation" eyebrow label from sidebar
-- [ ] P2-3: Wire or disable Settings/Help topbar buttons (add aria-disabled + tooltip)
-- [ ] P2-4: Fix broken indentation in path-stepper.tsx
-- [ ] P2-5: Remove all dead imports and dead constants (dashboard, cases, requests, workflow-spine)
-- [ ] P2-6: Audit copilot drawer z-index against semantic scale
-- [ ] ✅ CHECKPOINT: Golden Path demo with clean, professional, clutter-free UI
+- [x] P0-1: Normalize tab bar — remove per-tab accent colors, standardize to muted/primary only
+- [x] P0-2: Simplify case header — remove activeTabMeta label, consolidate meta row, move CCTNS button
+- [x] P0-3: Fix eyebrow label overuse in command center signal cards and hero metadata rows
+- [x] P0-4: Move bilingual text out of headings — English headings only, Hindi as subtitle
+- [x] P0-5: Remove decorative gradient stripes and gradient icon backgrounds (ingestion + requests)
+- [x] P0-6: Remove demo scaffolding from officer-facing UI (requests page email note + mock button)
+- [x] P1-1: Dashboard role badge — move out of h1 into subtitle row
+- [x] P1-2: Limit AnimatedMetric count-up to one card (Case Confidence only)
+- [x] P1-3: Replace tab group text labels (Work/Evidence/Record) with dividers
+- [x] P1-4: Reduce workflow spine node size w-11→w-8, fix focus ring
+- [x] P1-5: Restore subtle scrollbars — remove global scrollbar-width:none from *
+- [x] P1-6: Split dual-purpose command center card (requests + response) into two cards
+- [x] P1-7: Remove duplicate AI-suggested badges on ingestion page
+- [x] P1-8: Shorten stat card labels on dashboard
+- [x] P1-9: Remove per-item stagger delays from all list rows
+- [x] P1-10: Replace hover:glow-primary + translate on case list rows with subtle tint
+- [x] P1-11: Remove animate-pulse-glow from dispatched request cards
+- [x] P1-12: Path stepper — remove triple animation (glow-pulse + glass + pulse dot) on active step
+- [x] P1-13: Replace native <select> for step status with DropdownMenu
+- [x] P1-14: Add aria-current="page" to active tabs
+- [x] P1-15: Fix touch targets on tab bar (py-2 px-3) and search clear button (h-9 w-9 wrapper)
+- [x] P2-1: Login page — remove duplicate LockKeyhole icon from card header
+- [x] P2-2: Remove "Navigation" eyebrow label from sidebar
+- [x] P2-3: Wire or disable Settings/Help topbar buttons (add aria-disabled + tooltip)
+- [x] P2-4: Fix broken indentation in path-stepper.tsx
+- [x] P2-5: Remove all dead imports and dead constants (dashboard, cases, requests, workflow-spine)
+- [x] P2-6: Audit copilot drawer z-index against semantic scale
+- [x] ✅ CHECKPOINT: Golden Path demo with clean, professional, clutter-free UI
 
 ## Phase 9 — Ferrari Design System Overhaul
 - [x] Phase 9A — Global Styles & Core Tokens Setup (CSS variables, tailwind.config mapping, backgrounds, layout fonts)
@@ -276,3 +276,16 @@ merge — the branch predates Phase 8–11 and uses an older flat route structur
     tsc exit 0, next build exit 0. NOTE: Phase 8–11 UI strings not yet keyed in
     en/hi/gu dictionaries — they render English via `useT()` fallback until a
     follow-up pass adds their keys (documented in merge plan as out-of-scope).
+
+## Phase 13 — End-to-End Audit & Remediation (COMPLETED 2026-08-06)
+Planning source: `context/END_TO_END_TESTING_REPORT.md` (2026-08-06). Multi-agent audit and full systemic remediation across 14 frontend routes & 19 FastAPI routers.
+
+- [x] 13.1 Fix hardcoded localhost API URL in `responses/page.tsx` and export `API_URL` constant from `lib/api.ts`
+- [x] 13.2 Fix premature Dispatch button enablement in `requests/page.tsx` by using `!readinessMap[req.id]?.is_ready`
+- [x] 13.3 Refactor ingestion and evidence file upload routers to stream files directly to disk (`shutil.copyfileobj`) to eliminate memory exhaustion (OOM) risks
+- [x] 13.4 Refactor tab sub-route matching in `layout.tsx` to extract sub-route segment using case ID split
+- [x] 13.5 Convert section status update endpoint to RESTful JSON payload body using `SectionStatusUpdateIn` schema
+- [x] 13.6 Add Pydantic `Field(..., min_length=10)` validation constraints to `LegalRequestUpdateIn` schema
+- [x] 13.7 Add `AbortController` cancellation and unmount cleanup to search debouncing in `cases/page.tsx`
+- [x] 13.8 Implement robust numeric FIR suffix extraction in `mock_cctns.py`
+- [x] ✅ CHECKPOINT: Full system verification passed — Next.js build (`next build`) and Python compilation (`python -m compileall app`) pass with zero errors.
