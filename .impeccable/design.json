@@ -1,27 +1,137 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-07T19:29:49Z",
-  "title": "Design System: Crime OS AI",
+  "generatedAt": "2026-08-06T00:00:00Z",
+  "title": "Design System: eRakshak Crime OS AI (Ferrari Edition)",
   "extensions": {
     "colorMeta": {
-      "primary": { "role": "primary", "displayName": "Electric Command Blue", "canonical": "oklch(60.15% 0.203 252)", "tonalRamp": ["#061a3c", "#0f2f6f", "#1845a2", "#2962cf", "#3b82f6", "#6ea2f8", "#a2c3fa", "#d6e5fd"] },
-      "background": { "role": "neutral", "displayName": "Midnight Canvas", "canonical": "oklch(14.05% 0.024 235)", "tonalRamp": ["#020407", "#05090f", "#080c14", "#0b0f19", "#161d2d", "#28344e", "#4b5b7f", "#8092ba"] },
-      "card": { "role": "neutral", "displayName": "Command Card", "canonical": "oklch(20.45% 0.022 235)", "tonalRamp": ["#07080b", "#0d0f14", "#13161d", "#1a1f2c", "#2b3246", "#444e6c", "#6a769d", "#9aadc7"] }
+      "primary": {
+        "role": "primary",
+        "displayName": "Ferrari Red",
+        "canonical": "oklch(52.3% 0.219 29.2)",
+        "tonalRamp": ["#2a0000", "#4d0000", "#7a0000", "#a80000", "#dc0000", "#ff3b32", "#ff8177", "#ffc4bf"]
+      },
+      "info": {
+        "role": "secondary",
+        "displayName": "Info Blue",
+        "canonical": "oklch(60.4% 0.169 255.6)",
+        "tonalRamp": ["#061a3c", "#0d2f6b", "#14479f", "#1d63c8", "#2d7ee9", "#6aa5f0", "#a3c6f6", "#d6e5fd"]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Secured Emerald",
+        "canonical": "oklch(60.2% 0.155 155.9)",
+        "tonalRamp": ["#02200f", "#04371c", "#07542c", "#0b7940", "#0f9d58", "#35c47e", "#79dcaa", "#c0f0d5"]
+      },
+      "warn": {
+        "role": "tertiary",
+        "displayName": "Warning Amber",
+        "canonical": "oklch(87.4% 0.181 96.2)",
+        "tonalRamp": ["#2b2300", "#4d3f00", "#7a6500", "#b39400", "#e6bd00", "#ffd200", "#ffe266", "#fff4bf"]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Alert Red",
+        "canonical": "oklch(64.5% 0.223 30.1)",
+        "tonalRamp": ["#3d0703", "#660d07", "#94170f", "#c9231a", "#ff3b30", "#ff7a72", "#ffada8", "#ffd9d6"]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Carbon Black Canvas",
+        "canonical": "oklch(9.4% 0 0)",
+        "tonalRamp": ["#000000", "#0b0b0b", "#171717", "#232323", "#3a3a3a", "#5c5c5c", "#8f8f8f", "#d4d4d4"]
+      },
+      "sidebar": {
+        "role": "neutral",
+        "displayName": "Sidebar Black",
+        "canonical": "oklch(12.1% 0 0)",
+        "tonalRamp": ["#000000", "#0b0b0b", "#0f0f0f", "#1f1f1f", "#333333", "#575757", "#8b8b8b", "#d0d0d0"]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Surface Card",
+        "canonical": "oklch(17.8% 0 0)",
+        "tonalRamp": ["#000000", "#0b0b0b", "#171717", "#1f1f1f", "#333333", "#575757", "#8b8b8b", "#d0d0d0"]
+      },
+      "surface-elevated": {
+        "role": "neutral",
+        "displayName": "Surface Elevated",
+        "canonical": "oklch(22.6% 0 0)",
+        "tonalRamp": ["#050505", "#111111", "#1f1f1f", "#2d2d2d", "#454545", "#6b6b6b", "#9c9c9c", "#dadada"]
+      },
+      "surface-warm": {
+        "role": "neutral",
+        "displayName": "Surface Warm",
+        "canonical": "oklch(19.1% 0.037 33.4)",
+        "tonalRamp": ["#0d0705", "#170c09", "#23130f", "#331c16", "#4a2a20", "#6b3d2f", "#9c5a45", "#d18b73"]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Primary Warm Text",
+        "canonical": "oklch(98.3% 0.017 91.6)",
+        "tonalRamp": ["#2b2823", "#4d483f", "#736c5f", "#9c9384", "#c4bcae", "#e0d9cc", "#f2ece1", "#fffaf0"]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Secondary Warm Text",
+        "canonical": "oklch(89.3% 0.031 87.5)",
+        "tonalRamp": ["#26221c", "#443e33", "#665d4d", "#8c8069", "#b0a48c", "#cfc4ae", "#e8dcc8", "#f7f1e6"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Gray Ink",
+        "canonical": "oklch(69.1% 0.021 78.6)",
+        "tonalRamp": ["#211f1c", "#3b3833", "#57524a", "#756e64", "#918a7d", "#a89f91", "#c7c0b5", "#e3dfd8"]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Strong Border",
+        "canonical": "oklch(24.9% 0.017 48.3)",
+        "tonalRamp": ["#0d0a09", "#1a1512", "#241f1b", "#342a24", "#4a3c33", "#665345", "#8a7263", "#b39c8b"]
+      },
+      "border-soft": {
+        "role": "neutral",
+        "displayName": "Soft Border",
+        "canonical": "oklch(19.2% 0.013 47.1)",
+        "tonalRamp": ["#0a0807", "#14100e", "#1c1815", "#241f1b", "#3a302a", "#54453c", "#755f52", "#a08574"]
+      }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display Space Grotesk", "purpose": "Main page titles and command deck headings." },
-      "body": { "displayName": "Body Inter", "purpose": "Form fields, list text, and general prose." }
+      "display": { "displayName": "Display", "purpose": "Page titles only. Fixed 2.25rem; never a fluid clamp." },
+      "headline": { "displayName": "Headline", "purpose": "Card and container headers, via CardTitle." },
+      "title": { "displayName": "Title", "purpose": "Section headings and grouping labels." },
+      "body": { "displayName": "Body", "purpose": "Base size, set on body. General descriptive copy." },
+      "label": { "displayName": "Label", "purpose": "Uppercase mono for status badges, audit trails, data tags." }
+    },
+    "fontLoading": {
+      "note": "Ferrari Sans and SF Mono are declared but NOT bundled: no font files in the repo, no next/font import. Latin text renders as Helvetica Neue on macOS and Arial on Windows. Only Noto Sans Devanagari and Noto Sans Gujarati are genuinely loaded, via next/font/google in app/layout.tsx.",
+      "loaded": ["Noto Sans Devanagari", "Noto Sans Gujarati"],
+      "declaredNotLoaded": ["Ferrari Sans", "SF Mono"]
     },
     "shadows": [
-      { "name": "glow-primary", "value": "0 0 20px -4px rgba(59, 130, 246, 0.5)", "purpose": "Primary active element/hover feedback." }
+      { "name": "ring", "value": "0 0 0 1px var(--border)", "purpose": "Default outline for a resting surface." },
+      { "name": "glow-primary", "value": "0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent)", "purpose": "Hairline red ring marking an active surface. Not a blur." },
+      { "name": "glow-success", "value": "0 0 0 1px color-mix(in oklab, var(--success) 35%, transparent)", "purpose": "Hairline emerald ring marking a verified surface." },
+      { "name": "glow-warning", "value": "0 0 0 1px color-mix(in oklab, var(--warn) 35%, transparent)", "purpose": "Hairline amber ring marking a pending surface." },
+      { "name": "glow-destructive", "value": "0 0 0 1px color-mix(in oklab, var(--danger) 35%, transparent)", "purpose": "Hairline alert ring marking a failed surface." },
+      { "name": "glow-info", "value": "0 0 0 1px color-mix(in oklab, var(--info) 35%, transparent)", "purpose": "Hairline blue ring marking an AI-generated surface." },
+      { "name": "focus-ring", "value": "0 0 0 4px rgba(220, 0, 0, 0.30)", "purpose": "Keyboard focus token. Components currently express this via Tailwind ring utilities." },
+      { "name": "elev-raised", "value": "0 26px 80px rgba(0, 0, 0, 0.48)", "purpose": "Full-screen overlays only. A card must never take it." },
+      { "name": "pulse-glow", "value": "0 0 12px -2px hsl(0 100% 43% / 0.4) to 0 0 28px 2px hsl(0 100% 43% / 0.7)", "purpose": "The one true blurred shadow, reserved for live status indicators." }
     ],
     "motion": [
-      { "name": "fade-up", "value": "fade-up 300ms ease-out both", "purpose": "Card entrance animation." }
+      { "name": "motion-fast", "value": "130ms", "purpose": "Button color shifts and immediate feedback." },
+      { "name": "motion-base", "value": "220ms", "purpose": "Card border transitions and panel state changes." },
+      { "name": "ease-standard", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Exponential ease-out. The only easing curve in the system." },
+      { "name": "fade-up", "value": "fade-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both", "purpose": "Section entrance, 8px rise." },
+      { "name": "scale-in", "value": "scale-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both", "purpose": "Popover and menu entrance from 0.97." },
+      { "name": "skeleton", "value": "skeleton-load 1.5s ease-in-out infinite", "purpose": "Content loading sweep between #171717 and #23130f." },
+      { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce) 0.01ms, iteration-count 1", "purpose": "Global safety net in globals.css; skeletons flatten to solid #171717." }
     ],
     "breakpoints": [
       { "name": "sm", "value": "640px" },
       { "name": "md", "value": "768px" },
-      { "name": "lg", "value": "1024px" }
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
     ]
   },
   "components": [
@@ -29,39 +139,101 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Standard action button with responsive scale and primary command glow on hover.",
-      "html": "<button class=\"ds-btn-primary\">CONFIRM COMPLAINT</button>",
-      "css": ".ds-btn-primary { background-color: #3b82f6; color: #ffffff; padding: 10px 16px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 500; border: none; border-radius: 8px; transition: all 0.2s ease-out; cursor: pointer; } .ds-btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 20px -4px rgba(59, 130, 246, 0.5); background-color: #1d4ed8; }"
+      "description": "The single highest-signal action on a screen. Ferrari Red, capped at two red elements per screen.",
+      "html": "<button class=\"ds-btn-primary\">Dispatch Request</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: none; border-radius: 8px; background: #dc0000; color: #ffffff; font-family: 'Ferrari Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; user-select: none; transition: background 130ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: #c60000; } .ds-btn-primary:active { background: #b00000; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #0b0b0b, 0 0 0 4px #dc0000; } .ds-btn-primary:disabled { opacity: 0.5; pointer-events: none; }"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Outline button for non-primary options.",
-      "html": "<button class=\"ds-btn-secondary\">CANCEL ACTION</button>",
-      "css": ".ds-btn-secondary { background-color: transparent; color: #ffffff; padding: 10px 16px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 500; border: 1px solid rgba(59, 130, 246, 0.6); border-radius: 8px; transition: all 0.2s ease-out; cursor: pointer; } .ds-btn-secondary:hover { background-color: rgba(59, 130, 246, 0.1); }"
+      "description": "Outlined red-bordered action for the second-most-important control in a toolbar.",
+      "html": "<button class=\"ds-btn-secondary\">Review Evidence</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid rgba(220, 0, 0, 0.6); border-radius: 8px; background: transparent; color: #fffaf0; font-family: 'Ferrari Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 130ms cubic-bezier(0.16, 1, 0.3, 1), border-color 130ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-secondary:hover { background: rgba(220, 0, 0, 0.1); border-color: rgba(220, 0, 0, 0.8); } .ds-btn-secondary:active { background: rgba(220, 0, 0, 0.15); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 2px #0b0b0b, 0 0 0 4px #dc0000; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card-container",
+      "description": "The default panel. Flat at rest; hover transitions border-color only, with no lift and no glow.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><h3 class=\"ds-card-title\">Case CYB-2291</h3></div><p class=\"ds-card-desc\">Reported 14 minutes ago via multilingual intake.</p></div>",
+      "css": ".ds-card { border: 1px solid rgba(52, 42, 36, 0.8); border-radius: 12px; background: #171717; color: #fffaf0; padding: 20px; transition: border-color 220ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-card:hover { border-color: #342a24; } .ds-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; } .ds-card-title { margin: 0; font-family: 'Ferrari Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 600; line-height: 1.333; } .ds-card-desc { margin: 0; font-size: 14px; line-height: 1.5; color: #a89f91; }"
+    },
+    {
+      "name": "AI Content Card",
+      "kind": "custom",
+      "refersTo": "ai-content-card",
+      "description": "Signature component. Wraps every AI suggestion in a FULL Info Blue border (never a left stripe) with a Sparkles mark and citation.",
+      "html": "<div class=\"ds-ai-card\"><div class=\"ds-ai-head\"><svg class=\"ds-ai-icon\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z\"/></svg><span class=\"ds-ai-badge\">AI-Suggested</span></div><p class=\"ds-ai-body\">BNS 318(4) - Cheating by personation. Grounded in SOP 4.2.</p></div>",
+      "css": ".ds-ai-card { border: 1px solid rgba(45, 126, 233, 0.3); border-radius: 12px; background: rgba(45, 126, 233, 0.04); padding: 20px; transition: border-color 200ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-ai-card:hover { border-color: rgba(45, 126, 233, 0.5); } .ds-ai-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; } .ds-ai-icon { color: #2d7ee9; flex-shrink: 0; } .ds-ai-badge { display: inline-flex; align-items: center; border: 1px solid rgba(45, 126, 233, 0.2); border-radius: 8px; background: rgba(45, 126, 233, 0.1); color: #2d7ee9; padding: 2px 8px; font-family: 'Ferrari Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 500; } .ds-ai-body { margin: 0; font-size: 14px; line-height: 1.5; color: #fffaf0; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "label",
+      "description": "Maps a raw status string to the semantic palette. Uppercase mono at 10px, with a pulsing dot for in-flight states.",
+      "html": "<span class=\"ds-status ds-status-warn\"><span class=\"ds-status-dot\"></span>AWAITING RESPONSE</span>",
+      "css": ".ds-status { display: inline-flex; align-items: center; gap: 6px; border-radius: 9999px; padding: 2px 8px; font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.025em; text-transform: uppercase; } .ds-status-warn { border: 1px solid rgba(255, 210, 0, 0.3); background: rgba(255, 210, 0, 0.1); color: #ffd200; } .ds-status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: ds-pulse 2s ease-in-out infinite; } @keyframes ds-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } } @media (prefers-reduced-motion: reduce) { .ds-status-dot { animation: none; } }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Soft-border fill with a red focus ring. Placeholder uses Muted Gray Ink, which clears 4.5:1.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search case number or IP\" />",
+      "css": ".ds-input { height: 40px; width: 100%; box-sizing: border-box; border: 1px solid rgba(52, 42, 36, 0.6); border-radius: 12px; background: #241f1b; color: #fffaf0; padding: 8px 12px; font-family: 'Ferrari Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 14px; transition: border-color 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-input::placeholder { color: #a89f91; } .ds-input:focus-visible { outline: none; box-shadow: 0 0 0 1px #0b0b0b, 0 0 0 3px #dc0000; } .ds-input:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Skeleton",
+      "kind": "custom",
+      "refersTo": "card-container",
+      "description": "Content-region loading state. Skeletons, never spinners, outside of buttons.",
+      "html": "<div class=\"ds-skeleton\"></div>",
+      "css": ".ds-skeleton { height: 16px; width: 100%; border-radius: 4px; background: linear-gradient(90deg, #171717 25%, #23130f 50%, #171717 75%); background-size: 200% 100%; animation: ds-skeleton-load 1.5s ease-in-out infinite; } @keyframes ds-skeleton-load { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } } @media (prefers-reduced-motion: reduce) { .ds-skeleton { animation: none; background: #171717; } }"
     }
   ],
   "narrative": {
-    "northStar": "The Cyber-Command Console",
-    "overview": "Crime OS AI is styled as a state-of-the-art threat intelligence console rather than a traditional government database form. It balances high-tech cyber-command aesthetics with immediate, low-friction task interfaces.",
+    "northStar": "The Ferrari Cyber-Command Console",
+    "overview": "eRakshak is styled as a state-of-the-art threat intelligence console rather than a traditional government database form. It balances a high-tech command-center aesthetic with immediate, low-friction task interfaces for law enforcement officers working under time pressure. The canvas is carbon black (#0b0b0b), the text is warm off-white (#fffaf0), and Ferrari Red (#dc0000) is the single high-signal accent.\n\nThe system evokes authority, security, precision, and efficiency. It explicitly rejects the three anti-references named in PRODUCT.md: legacy government search forms and cluttered database portals, saturated cream/sand/beige SaaS palettes, and weak flat hierarchies built on low-contrast gray text.\n\nBecause officers are in a task rather than reading a page, this is a product register system. Type is a fixed rem scale (never fluid clamps), motion is 130-260 ms and conveys state only, and consistency across screens outranks surprise.",
     "keyCharacteristics": [
-      "Dark-Mode-First Environment: Deploys a deep navy/slate canvas (#0B0F19)",
-      "AI Transparency & Grounding: Partition AI suggestions visually",
-      "Command Density: High density layout"
+      "Dark-mode-only environment. color-scheme: dark is declared globally; there is no light theme.",
+      "Ferrari Red as scarcity. Used at most twice per screen, for primary actions and active indicators.",
+      "AI transparency. AI-generated content is partitioned in Info Blue with a Sparkles mark and citations back to the source SOP or legal text.",
+      "Command density. Lists, timelines, and action queues are compact and scannable rather than airy.",
+      "Shell-owned scroll. The app shell owns the only page-level scroll position; scrollbars are visually suppressed."
     ],
     "rules": [
-      { "name": "The One Voice Rule", "body": "The primary Electric Command Blue is used on <=10% of any screen.", "section": "colors" },
-      { "name": "The Glow-on-Demand Rule", "body": "Surfaces are flat by default. Glow effects appear only on hover/active states or AI items.", "section": "elevation" }
+      { "name": "The Twice-Per-Screen Rule", "body": "Ferrari Red appears at most twice on any given screen. Never as a background wash, never as decoration. If a third red element wants to exist, one of the first two was not important.", "section": "colors" },
+      { "name": "The Blue Means Machine Rule", "body": "Info Blue is load-bearing semantics, not a color choice. Every blue-bordered surface is AI-generated and must carry a Sparkles mark plus a citation. Never style a human-authored or raw-evidence surface in blue.", "section": "colors" },
+      { "name": "The Red-Text Floor Rule", "body": "Ferrari Red on carbon black measures 3.8:1. It clears AA for large text and fails it for small body copy. Red text is permitted only at heading scale or bold; for small red status labels, use Alert Red (#ff3b30, 5.9:1) instead.", "section": "colors" },
+      { "name": "The Chroma-Toward-Red Rule", "body": "Every tinted neutral leans toward the brand's own hue. Never tint toward a generic warm beige. Cream, sand, and parchment canvases are prohibited by name.", "section": "colors" },
+      { "name": "The Mono-for-Comparison Rule", "body": "Case numbers, timestamps, IP addresses, account numbers, hashes, and status codes are set in the mono stack. Anything an officer might scan down a column to compare must have fixed-width digits.", "section": "typography" },
+      { "name": "The Fixed-Scale Rule", "body": "Product type does not flex with the viewport. Responsive behavior here is structural - collapse the sidebar, restack the grid, scroll the table - never fluid type.", "section": "typography" },
+      { "name": "The Flat-at-Rest Rule", "body": "Surfaces are flat when idle. Color and outline respond to state - hover, active, focus, AI-authored, threat - and to nothing else. If a card is glowing for decoration, delete the glow.", "section": "elevation" },
+      { "name": "The 2014 Test", "body": "If a surface looks like a 2014 app, the shadow is too dark and the blur is too small. This system's answer is to use no shadow at all and shift the border instead.", "section": "elevation" }
     ],
     "dos": [
-      "Do wrap every AI recommendation or prediction in an AiContentCard with an explicit Sparkle badge.",
-      "Do format all dates, account details, and numeric markers in JetBrains Mono."
+      "Do wrap every AI recommendation, prediction, or drafted request in AiContentCard with its Sparkles mark and a citation to the source SOP or legal section.",
+      "Do set every case number, timestamp, account detail, and status code in the mono stack so columns compare cleanly.",
+      "Do keep Ferrari Red to two appearances per screen, and reach for Alert Red (#ff3b30) when a small red label needs to clear 4.5:1.",
+      "Do author type against the Tailwind scale (text-xs through text-4xl), not the legacy --text-* variables.",
+      "Do give every interactive element all seven states, and pair every animation with a prefers-reduced-motion fallback.",
+      "Do use skeletons for content loading and spinners only inside buttons.",
+      "Do keep transitions in the 130-260 ms band on transform and opacity, using cubic-bezier(0.16, 1, 0.3, 1)."
     ],
     "donts": [
-      "Don't use side-stripe borders on non-AI cards.",
-      "Don't use gradient text.",
-      "Don't use warm, sand-colored, or beige backgrounds."
+      "Don't use red as a background wash or a decorative highlight.",
+      "Don't use gradient text under any circumstances. Gradients belong on data paths - timeline connectors, chart strokes, progress lines - and nowhere else.",
+      "Don't use warm, sand-, cream-, or beige-colored backgrounds as a canvas.",
+      "Don't build anything that reads like a legacy government search form or a cluttered database portal.",
+      "Don't ship low-contrast gray body text. Muted Gray Ink (#a89f91) is the floor, not a starting point to lighten from.",
+      "Don't use border-left or border-right above 1px as a colored accent stripe on any card, list item, callout, or alert.",
+      "Don't add drop shadows. Shift the border or apply a semantic ring instead.",
+      "Don't apply Info Blue to anything a human authored, and don't ship an AI surface without a citation.",
+      "Don't scale or lift components on hover. This system's hover vocabulary is color and border, not geometry.",
+      "Don't use fluid clamp() type. Responsiveness here is structural.",
+      "Don't reach for a modal first. Exhaust inline and progressive alternatives.",
+      "Don't introduce a second typeface, and don't set UI labels or data in a display face."
     ]
   }
 }
