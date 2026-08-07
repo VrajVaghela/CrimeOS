@@ -78,8 +78,9 @@ async def upload_complaint(
             detail="Unsupported file type. Accepted: PDF, JPG/PNG image, MP3/WAV/M4A/WebM audio.",
         )
 
-    content = await file.read()
-    saved_path = ingestion_service.save_upload(case_id, file.filename or "upload", content)
+    saved_path, size_bytes = ingestion_service.save_upload_stream(
+        case_id, file.filename or "upload", file.file
+    )
 
     complaint = Complaint(
         case_id=case_id,
@@ -95,7 +96,7 @@ async def upload_complaint(
         detail={
             "filename": file.filename,
             "source_type": source_type.value,
-            "size_bytes": len(content),
+            "size_bytes": size_bytes,
         },
     )
     db.commit()

@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.models.enums import ProviderType, RequestStatus
 
 class LegalRequestCreateIn(BaseModel):
@@ -10,9 +10,9 @@ class LegalRequestCreateIn(BaseModel):
     recipient_email: str
 
 class LegalRequestUpdateIn(BaseModel):
-    generated_body: str
-    provider_name: str
-    recipient_email: str
+    generated_body: str = Field(..., min_length=10, description="Draft body must be at least 10 characters long")
+    provider_name: str = Field(..., min_length=2, description="Provider name must be at least 2 characters long")
+    recipient_email: str = Field(..., min_length=3, description="Recipient email must be at least 3 characters long")
 
 class LegalRequestOut(BaseModel):
     id: uuid.UUID

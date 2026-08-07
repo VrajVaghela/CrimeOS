@@ -44,8 +44,13 @@ async def sync_cctns(
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
 
-    # Generate a mock CCTNS FIR Number
-    cctns_fir_number = f"FIR-{datetime.now().year}-{case.case_number.split('-')[-1]}"
+    # Generate a mock CCTNS FIR Number with robust suffix extraction
+    import re
+    case_num = case.case_number or ""
+    parts = case_num.split("-")
+    last_part = parts[-1] if parts else ""
+    num_suffix = "".join(filter(str.isdigit, last_part)) or re.sub(r"\D", "", str(case.id))[:6] or "000001"
+    cctns_fir_number = f"FIR-{datetime.now().year}-{num_suffix.zfill(6)}"
 
     # Record Audit Event
     audit_service.record(

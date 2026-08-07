@@ -193,6 +193,63 @@ def analyze_file(
         )
 
 
+def create_evidence_stream(
+    db: Session,
+    case_id: uuid.UUID,
+    file_name: str,
+    content_type: str,
+    file_obj: Any,
+    current_user_id: uuid.UUID,
+) -> EvidenceFile:
+    """
+    Saves file stream to disk first, then analyzes and creates an EvidenceFile record.
+    """
+    import shutil
+    evidence_dir = os.path.join(settings.UPLOAD_DIR, "evidence", str(case_id))
+    os.makedirs(evidence_dir, exist_ok=True)
+    stored_name = f"{uuid.uuid4()}_{file_name}"
+    file_path = os.path.join(evidence_dir, stored_name)
+    with open(file_path, "wb") as f:
+        shutil.copyfileobj(file_obj, f)
+
+    relative_path = os.path.join("uploads", "evidence", str(case_id), stored_name).replace("\\", "/")
+
+    # Read saved file from disk for Gemini analysis
+    with open(file_path, "rb") as f:
+        content = f.read()
+
+    file_type, transcript, translation, ai_tags = analyze_file(
+        db, file_name, content_type, content
+    )
+
+    evidence_record = EvidenceFile(
+        case_id=case_id,
+        file_path=relative_path,
+        file_type=file_type,
+        transcript=transcript,
+        translation=translation,
+        ai_tags=ai_tags,
+    )
+    db.add(evidence_record)
+    db.flush()
+
+    audit_service.record(
+        db,
+        case_id=case_id,
+        user_id=current_user_id,
+        action="evidence_uploaded",
+        detail={
+            "evidence_id": str(evidence_record.id),
+            "filename": file_name,
+            "file_type": file_type,
+            "tags": ai_tags.get("tags", []),
+            "description": ai_tags.get("description", "Analyzed evidence file")
+        }
+    )
+
+    return evidence_record
+
+
 def create_evidence(
     db: Session,
     case_id: uuid.UUID,

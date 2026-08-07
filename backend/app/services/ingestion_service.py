@@ -53,6 +53,9 @@ def _detect_language_from_text(text: str) -> str:
     return "en"
 
 
+import shutil
+from typing import BinaryIO
+
 def save_upload(case_id: uuid.UUID, filename: str, content: bytes) -> Path:
     """Save uploaded bytes to uploads/{case_id}/filename.
 
@@ -65,6 +68,22 @@ def save_upload(case_id: uuid.UUID, filename: str, content: bytes) -> Path:
     dest.write_bytes(content)
     logger.info("saved_upload case=%s file=%s size=%d", case_id, safe_name, len(content))
     return dest
+
+
+def save_upload_stream(case_id: uuid.UUID, filename: str, file_obj: BinaryIO) -> tuple[Path, int]:
+    """Stream uploaded file directly to disk in uploads/{case_id}/filename.
+
+    Returns (absolute_path, size_bytes).
+    """
+    dest_dir = UPLOAD_ROOT / str(case_id)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = Path(filename).name or "upload"
+    dest = dest_dir / safe_name
+    with dest.open("wb") as buffer:
+        shutil.copyfileobj(file_obj, buffer)
+    size_bytes = dest.stat().st_size
+    logger.info("saved_upload_stream case=%s file=%s size=%d", case_id, safe_name, size_bytes)
+    return dest, size_bytes
 
 
 def process_complaint(complaint_id: uuid.UUID, user_id: uuid.UUID) -> None:

@@ -24,15 +24,13 @@ async def upload_evidence(
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
 
-    content = await file.read()
-
     # 2. Delegate creation & analysis to service — AppError propagates to global handler
-    evidence_record = evidence_service.create_evidence(
+    evidence_record = evidence_service.create_evidence_stream(
         db=db,
         case_id=case_id,
-        file_name=file.filename,
+        file_name=file.filename or "evidence",
         content_type=file.content_type or "application/octet-stream",
-        content=content,
+        file_obj=file.file,
         current_user_id=current_user.id,
     )
     db.commit()

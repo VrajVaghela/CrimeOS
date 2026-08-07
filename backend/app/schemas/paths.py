@@ -65,3 +65,8 @@ class PathRevisionTriggerIn(BaseModel):
     trigger_type: str  # "complaint", "entities_verified", "evidence", "provider_response", "manual"
     change_reason: str
 
+
+class SectionStatusUpdateIn(BaseModel):
+    status: str
+
+
