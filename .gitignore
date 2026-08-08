@@ -41,3 +41,7 @@ Thumbs.db
 # Dynamic upload directories
 backend/uploads/
 
+# Local test datasets — large (23 MB geojson) and regenerable via
+# data/test_datasets/download_datasets.py + generate_audio_complaints.py
+data/test_datasets/
+
