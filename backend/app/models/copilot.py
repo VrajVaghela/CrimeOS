@@ -31,7 +31,14 @@ class CopilotMessage(UuidPkMixin, Base):
     case_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("cases.id", ondelete="CASCADE"), nullable=False)
     user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     role: Mapped[str] = mapped_column(String(50), nullable=False)  # 'user', 'assistant'
+    # Authoritative English text. The audit trail and any downstream legal record
+    # read this column, never the localized one (Phase 14D decision A2).
     message: Mapped[str] = mapped_column(String(10000), nullable=False)
+    # Display copy in the officer's selected language. NULL when lang == 'en' or
+    # when the model returned only English. Never fed back into case artifacts.
+    message_localized: Mapped[str | None] = mapped_column(String(10000), nullable=True)
+    # Language the message was produced for: 'en' | 'hi' | 'gu'.
+    lang: Mapped[str] = mapped_column(String(2), default="en", server_default="en", nullable=False)
     cited_source_ids: Mapped[list[str]] = mapped_column(JSONB, default=list, nullable=False)  # list of ai_citation IDs
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

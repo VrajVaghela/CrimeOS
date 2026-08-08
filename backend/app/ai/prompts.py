@@ -225,8 +225,25 @@ You are Crime OS AI, an expert investigative assistant for Indian police. You ar
 Your responses must be grounded strictly in the provided case context: complaint, extracted entities, SOPs, legal sections, evidence, provider responses, and case history.
 Do not make up facts or external information. If the context does not contain the answer, say "No grounded answer found" and explain what evidence or step is missing.
 
+OUTPUT LANGUAGE — MANDATORY:
+The officer is working in {target_language}. You must return BOTH of these:
+- "answer": the response in ENGLISH. This is the authoritative record written to the case audit trail.
+- "answer_localized": the SAME response rendered in {target_language}. If {target_language} is English, repeat the English answer verbatim.
+The localized answer must be a complete, natural translation — not a summary, and not a mix of languages. Write it in the native script of {target_language} (Devanagari for Hindi, Gujarati script for Gujarati).
+
+NEVER translate, transliterate, or alter the following in either field — reproduce them VERBATIM in Latin script/digits:
+- Case and FIR identifiers (e.g. COS-2026-0042, FIR No. 123/2026)
+- Legal section references (e.g. Section 318 BNS, Section 175 BNSS, Section 63 BSA)
+- Evidence IDs, request IDs, file references
+- Names of persons, organizations, and police stations
+- Phone numbers, bank account numbers, IP addresses, URLs, email addresses, IMEI numbers, transaction IDs
+- Dates, times, monetary amounts, and currency symbols
+
+The officer may ask the question in English, Hindi, or Gujarati. Understand the question in whatever language it is written.
+
 Your response must be a JSON object with:
-- "answer": A clear, professional markdown response. Always start with a direct answer or summary.
+- "answer": A clear, professional markdown response in English. Always start with a direct answer or summary.
+- "answer_localized": The same response in {target_language}.
 - "citations": A list of sources from the context that support your answer. Each citation must have:
   - "source_type": one of 'complaint', 'entity', 'sop_chunk', 'legal_section', 'provider_row', 'evidence_marker', 'audit_event'.
   - "source_id": the unique ID of the source item provided in the context.
@@ -294,6 +311,44 @@ Case Context:
 
 User's Question: {question}
 """.strip()
+
+
+# Deterministic copilot fallbacks (Phase 14D).
+# Used when Gemini is unavailable. Keyed intent → language so a Gemini outage still
+# answers in the officer's language instead of silently reverting to English.
+# Legal identifiers (BNS, LERS) stay verbatim in every language, per prompt rules.
+COPILOT_FALLBACKS: dict[str, dict[str, str]] = {
+    "next_action": {
+        "en": "Based on the standard operating procedures for this crime type, the recommended next step is to obtain authorization for legal requests. If a telecom or banking entity is involved, draft the request using the LERS templates.",
+        "hi": "इस अपराध श्रेणी की मानक संचालन प्रक्रिया (SOP) के अनुसार, अगला सुझाया गया कदम कानूनी अनुरोधों के लिए स्वीकृति प्राप्त करना है। यदि कोई टेलीकॉम या बैंकिंग संस्था शामिल है, तो LERS टेम्पलेट का उपयोग करके अनुरोध तैयार करें।",
+        "gu": "આ ગુના પ્રકારની માનક કાર્યપ્રણાલી (SOP) અનુસાર, આગળનું સૂચવેલું પગલું કાનૂની વિનંતીઓ માટે મંજૂરી મેળવવાનું છે. જો કોઈ ટેલિકોમ અથવા બેંકિંગ સંસ્થા સંકળાયેલી હોય, તો LERS ટેમ્પલેટનો ઉપયોગ કરીને વિનંતી તૈયાર કરો.",
+    },
+    "missing_facts": {
+        "en": "The system suggests verifying the following facts: (1) Confirming the exact transaction timestamp from bank records, (2) Verifying the identity of the complainant via secondary documentation.",
+        "hi": "सिस्टम इन तथ्यों की पुष्टि करने का सुझाव देता है: (1) बैंक रिकॉर्ड से लेनदेन का सही समय पुष्ट करना, (2) द्वितीयक दस्तावेज़ों से शिकायतकर्ता की पहचान सत्यापित करना।",
+        "gu": "સિસ્ટમ આ તથ્યોની ચકાસણી કરવાનું સૂચવે છે: (1) બેંક રેકોર્ડમાંથી વ્યવહારનો સચોટ સમય પુષ્ટ કરવો, (2) ગૌણ દસ્તાવેજો દ્વારા ફરિયાદીની ઓળખ ચકાસવી.",
+    },
+    "evidence": {
+        "en": "There are evidence files in the case workspace. Please review the transcripts and OCR files under the Evidence tab to establish connection to the suspect entities.",
+        "hi": "केस वर्कस्पेस में साक्ष्य फ़ाइलें मौजूद हैं। संदिग्ध से संबंध स्थापित करने के लिए कृपया साक्ष्य टैब में प्रतिलेख और OCR फ़ाइलें देखें।",
+        "gu": "કેસ વર્કસ્પેસમાં પુરાવા ફાઇલો હાજર છે. શંકાસ્પદ સાથે સંબંધ સ્થાપિત કરવા માટે કૃપા કરીને પુરાવા ટેબમાં લખાણ પ્રત અને OCR ફાઇલો તપાસો.",
+    },
+    "legal_basis": {
+        "en": "The investigation is registered under BNS (Bharatiya Nyaya Sanhita) sections as suggested. These sections apply due to the description of unauthorized access and financial loss in the complaint.",
+        "hi": "जांच सुझाई गई BNS (भारतीय न्याय संहिता) धाराओं के अंतर्गत दर्ज है। शिकायत में वर्णित अनधिकृत पहुँच और आर्थिक नुकसान के कारण ये धाराएँ लागू होती हैं।",
+        "gu": "તપાસ સૂચવેલી BNS (ભારતીય ન્યાય સંહિતા) કલમો હેઠળ નોંધાયેલી છે. ફરિયાદમાં વર્ણવેલ અનધિકૃત પ્રવેશ અને આર્થિક નુકસાનના કારણે આ કલમો લાગુ પડે છે.",
+    },
+    "provider_response": {
+        "en": "We have received provider responses. Check the parsed transactions for rapid transfers and flagged destination accounts.",
+        "hi": "प्रदाता प्रतिक्रियाएँ प्राप्त हो चुकी हैं। तेज़ हस्तांतरण और चिह्नित गंतव्य खातों के लिए विश्लेषित लेनदेन जाँचें।",
+        "gu": "પ્રદાતા જવાબો પ્રાપ્ત થયા છે. ઝડપી નાણાં હસ્તાંતરણ અને ચિહ્નિત લક્ષ્ય ખાતાઓ માટે વિશ્લેષિત વ્યવહારો તપાસો.",
+    },
+    "generic": {
+        "en": "I could not find a grounded answer for your question. Please verify your query or consult the case files.",
+        "hi": "आपके प्रश्न का कोई प्रमाणित उत्तर नहीं मिला। कृपया अपना प्रश्न जाँचें या केस फ़ाइलें देखें।",
+        "gu": "તમારા પ્રશ્નનો કોઈ પ્રમાણિત જવાબ મળ્યો નથી. કૃપા કરીને તમારો પ્રશ્ન તપાસો અથવા કેસ ફાઇલો જુઓ.",
+    },
+}
 
 
 CCTV_ANALYSIS_PROMPT = """

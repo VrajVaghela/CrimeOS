@@ -301,7 +301,9 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "Recipient Email",
             "status": "passed",
             "message": f"Valid recipient email: {request.recipient_email}",
-            "fix": None
+            "fix": None,
+            "message_key": "recipient_passed",
+            "message_params": {"email": request.recipient_email or ""},
         })
     else:
         is_ready = False
@@ -310,18 +312,25 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "Recipient Email",
             "status": "failed",
             "message": "Missing or invalid recipient email address",
-            "fix": "Enter a valid nodal officer email address (e.g. nodal.officer@provider.com)."
+            "fix": "Enter a valid nodal officer email address (e.g. nodal.officer@provider.com).",
+            "message_key": "recipient_failed",
+            "fix_key": "recipient_fix",
         })
 
     # 2. Entities check
     has_entities = False
     entity_reason = ""
     entity_fix = ""
+    # Phase 14C: dictionary-key suffix mirroring entity_reason/entity_fix.
+    entity_reason_key = ""
+    entity_fix_key = ""
 
     if "No complaints found" in body or "mentioned in complaint" in body:
         has_entities = False
         entity_reason = "Contains default placeholder text for data requested"
         entity_fix = "Edit the draft to replace placeholder text with actual case identifiers (e.g. Phone Number, Bank Account)."
+        entity_reason_key = "entities_placeholder"
+        entity_fix_key = "entities_placeholder_fix"
     else:
         if request.provider_type == ProviderType.TELECOM:
             phone_match = re.search(r"\b\d{10}\b|\b\d{5}\s?\d{5}\b|\+91\d{10}", body)
@@ -331,6 +340,8 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             else:
                 entity_reason = "No phone number or IP address detected in the draft body"
                 entity_fix = "Edit the draft to include the target Phone Number(s) or IP address(es) for CDR request."
+                entity_reason_key = "entities_telecom"
+                entity_fix_key = "entities_telecom_fix"
         elif request.provider_type == ProviderType.BANK:
             acc_match = re.search(r"AC-\d+|account|Acc|ACC|AC\s?\d+|\b\d{9,18}\b", body, re.IGNORECASE)
             txn_match = re.search(r"TXN\d+|transaction|txn|transfer", body, re.IGNORECASE)
@@ -339,6 +350,8 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             else:
                 entity_reason = "No bank account number or transaction ID detected in the draft body"
                 entity_fix = "Edit the draft to include the target Bank Account(s) or Transaction ID(s) to freeze."
+                entity_reason_key = "entities_bank"
+                entity_fix_key = "entities_bank_fix"
         elif request.provider_type == ProviderType.PLATFORM:
             email_match = re.search(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", body)
             url_match = re.search(r"https?://|www\.|@\w+", body)
@@ -347,6 +360,8 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             else:
                 entity_reason = "No email address, URL, handle or username detected in the draft body"
                 entity_fix = "Edit the draft to include the target handle, profile URL, or email address."
+                entity_reason_key = "entities_platform"
+                entity_fix_key = "entities_platform_fix"
 
     if has_entities:
         items.append({
@@ -354,7 +369,8 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "Target Identifiers",
             "status": "passed",
             "message": "Target identifiers (phone/account/email) verified in draft body",
-            "fix": None
+            "fix": None,
+            "message_key": "entities_passed",
         })
     else:
         is_ready = False
@@ -363,7 +379,9 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "Target Identifiers",
             "status": "failed",
             "message": entity_reason or "No target identifiers found in the draft",
-            "fix": entity_fix or "Specify the target identifiers in the draft."
+            "fix": entity_fix or "Specify the target identifiers in the draft.",
+            "message_key": entity_reason_key or "entities_failed",
+            "fix_key": entity_fix_key or "entities_fix",
         })
 
     # 3. Legal Basis check
@@ -378,7 +396,8 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "Legal Basis",
             "status": "passed",
             "message": "Valid legal sections/acts cited in draft body",
-            "fix": None
+            "fix": None,
+            "message_key": "legal_basis_passed",
         })
     else:
         is_ready = False
@@ -387,7 +406,9 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "Legal Basis",
             "status": "failed",
             "message": "No legal basis specified (e.g. BNSS/CrPC/BSA/BNS section)",
-            "fix": "Cite the legal provision under which information is sought (e.g., 'Section 94 of BNSS' or 'Section 106 of BNSS')."
+            "fix": "Cite the legal provision under which information is sought (e.g., 'Section 94 of BNSS' or 'Section 106 of BNSS').",
+            "message_key": "legal_basis_failed",
+            "fix_key": "legal_basis_fix",
         })
 
     # 4. Date Range check
@@ -402,7 +423,8 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "Date Range / Period",
             "status": "passed",
             "message": "Date range or time period verified in draft body",
-            "fix": None
+            "fix": None,
+            "message_key": "date_range_passed",
         })
     else:
         is_ready = False
@@ -411,7 +433,9 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "Date Range / Period",
             "status": "failed",
             "message": "No specific date range or time period specified",
-            "fix": "Specify the exact date range for the requested logs (e.g., 'CDR for the period 2026-07-01 to 2026-07-07')."
+            "fix": "Specify the exact date range for the requested logs (e.g., 'CDR for the period 2026-07-01 to 2026-07-07').",
+            "message_key": "date_range_failed",
+            "fix_key": "date_range_fix",
         })
 
     # 5. Approval check
@@ -428,7 +452,8 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "SHO Approval Status",
             "status": "passed",
             "message": "Approved by SHO or eligible for instant dispatch",
-            "fix": None
+            "fix": None,
+            "message_key": "approval_passed",
         })
     else:
         is_ready = False
@@ -437,7 +462,9 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "SHO Approval Status",
             "status": "failed",
             "message": "Request is in DRAFT status and requires SHO approval",
-            "fix": "Ask the Station House Officer (SHO) to log in and approve this request draft."
+            "fix": "Ask the Station House Officer (SHO) to log in and approve this request draft.",
+            "message_key": "approval_failed",
+            "fix_key": "approval_fix",
         })
 
     # 6. Citation check
@@ -447,7 +474,8 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "SOP Pathway Link",
             "status": "passed",
             "message": "Linked to active investigation step and SOP citation",
-            "fix": None
+            "fix": None,
+            "message_key": "citation_passed",
         })
     else:
         items.append({
@@ -455,7 +483,9 @@ def check_request_readiness(db: Session, request_id: uuid.UUID, current_user: Us
             "label": "SOP Pathway Link",
             "status": "warning",
             "message": "Draft is not linked to any specific step in the investigation pathway",
-            "fix": "For complete audit trail, create this request from a suggested step in the Investigation Path tab."
+            "fix": "For complete audit trail, create this request from a suggested step in the Investigation Path tab.",
+            "message_key": "citation_warning",
+            "fix_key": "citation_fix",
         })
 
     return {

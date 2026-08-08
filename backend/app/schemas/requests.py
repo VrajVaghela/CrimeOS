@@ -35,6 +35,13 @@ class ReadinessItem(BaseModel):
     status: str  # "passed", "failed", "warning"
     message: str
     fix: str | None = None
+    # Phase 14C: stable dictionary-key suffixes so the frontend can render the
+    # checklist in the officer's selected language. `label`/`message`/`fix` stay
+    # English — they remain the authoritative audit-log text.
+    message_key: str | None = None
+    fix_key: str | None = None
+    # Interpolation values for message_key (e.g. {"email": "nodal@provider.com"}).
+    message_params: dict[str, str] | None = None
 
 
 class RequestReadinessOut(BaseModel):
