@@ -18,6 +18,7 @@ import type {
   CaseSectionOut,
   CommandCenterOut,
   CopilotMessageOut,
+  CopilotIntent,
   VideoUploadResponse,
   VideoStatusResponse,
   VideoReportResponse,
@@ -26,6 +27,23 @@ import type {
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "crime_os_token";
+
+// ---------------------------------------------------------------------------
+// Active language (Phase 14A)
+// ---------------------------------------------------------------------------
+// The selected UI language travels to the backend on every request as an
+// `X-Lang` header. LanguageProvider calls setActiveLang() on mount and on every
+// change, so AI endpoints can localize their output without any call site
+// having to thread a `lang` argument through.
+let _activeLang = "en";
+
+export function setActiveLang(lang: string): void {
+  _activeLang = lang;
+}
+
+export function getActiveLang(): string {
+  return _activeLang;
+}
 
 interface ApiErrorBody {
   error?: {
@@ -65,6 +83,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!(init.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
+  headers.set("X-Lang", _activeLang);
   const token = getStoredToken();
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
@@ -394,10 +413,16 @@ export async function getCopilotChat(caseId: string): Promise<CopilotMessageOut[
   return request<CopilotMessageOut[]>(`/copilot/cases/${caseId}/chat`);
 }
 
-export async function askCopilot(caseId: string, question: string): Promise<CopilotMessageOut> {
+export async function askCopilot(
+  caseId: string,
+  question: string,
+  intent?: CopilotIntent
+): Promise<CopilotMessageOut> {
+  // The active language rides on the X-Lang header (see setActiveLang), so the
+  // backend can answer in the officer's language without a body field.
   return request<CopilotMessageOut>(`/copilot/cases/${caseId}/chat`, {
     method: "POST",
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, intent: intent ?? null }),
   });
 }
 
@@ -590,5 +615,29 @@ export async function translateText(
     method: "POST",
     body: JSON.stringify({ text, target_lang: targetLang }),
   });
+}
+
+export interface TranslateBatchItemOut {
+  id: string;
+  translated: string;
+  fallback: boolean;
+}
+
+/**
+ * Batch counterpart to translateText (Phase 14E).
+ *
+ * Auto-translation means one page can hold a dozen AI blocks; this collapses
+ * them into a single round trip. Backend caps a batch at 25 items. Each item
+ * falls back independently, so one failure does not blank the whole page.
+ */
+export async function translateBatch(
+  items: { id: string; text: string }[],
+  targetLang: "en" | "hi" | "gu"
+): Promise<TranslateBatchItemOut[]> {
+  const res = await request<{ results: TranslateBatchItemOut[] }>("/translate/batch", {
+    method: "POST",
+    body: JSON.stringify({ items, target_lang: targetLang }),
+  });
+  return res.results;
 }
 

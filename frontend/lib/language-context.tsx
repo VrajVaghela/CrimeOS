@@ -23,12 +23,33 @@ import React, {
 import en, { type Dictionary } from "@/lib/i18n/en";
 import hi from "@/lib/i18n/hi";
 import gu from "@/lib/i18n/gu";
+import { setActiveLang } from "@/lib/api";
 
 export type Lang = "en" | "hi" | "gu";
 
 const DICTIONARIES: Record<Lang, Dictionary> = { en, hi, gu };
 const STORAGE_KEY = "crime_os_lang";
 const DEFAULT_LANG: Lang = "en";
+
+/** BCP 47 locale used for Intl date/number formatting (see lib/format.ts). */
+export const LOCALES: Record<Lang, string> = {
+  en: "en-IN",
+  hi: "hi-IN",
+  gu: "gu-IN",
+};
+
+// Dev-only: warn once per missing key so half-translated surfaces are visible
+// during development instead of silently falling back to English forever.
+const _warnedKeys = new Set<string>();
+
+function warnMissing(lang: Lang, key: string): void {
+  if (process.env.NODE_ENV === "production") return;
+  const id = `${lang}:${key}`;
+  if (_warnedKeys.has(id)) return;
+  _warnedKeys.add(id);
+  // eslint-disable-next-line no-console
+  console.warn(`[i18n] missing key "${key}" for lang "${lang}" — falling back to English`);
+}
 
 // ---------------------------------------------------------------------------
 // Dot-notation key resolver
@@ -64,6 +85,8 @@ function resolve(dict: Dictionary, key: string): string {
 // ---------------------------------------------------------------------------
 interface LanguageContextValue {
   lang: Lang;
+  /** BCP 47 locale for the active language — pass to Intl formatters. */
+  locale: string;
   setLang: (lang: Lang) => void;
   /** Translates a dot-notation key. Falls back to English, then to the raw key. */
   t: (key: TranslationKey) => string;
@@ -89,6 +112,18 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Keep the API client and the document in sync with the active language.
+  // - setActiveLang: every request carries `X-Lang` so AI endpoints localize.
+  // - documentElement.lang: correct screen-reader pronunciation + text handling.
+  // - data-lang: globals.css switches the body font to the matching Indic face.
+  useEffect(() => {
+    setActiveLang(lang);
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = lang;
+      document.documentElement.dataset.lang = lang;
+    }
+  }, [lang]);
+
   const setLang = useCallback((newLang: Lang) => {
     setLangState(newLang);
     try {
@@ -105,15 +140,19 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       if (active) return active;
       // 2. Fall back to English (missing key in hi/gu dictionary)
       const fallback = resolve(en, key as string);
-      if (fallback) return fallback;
+      if (fallback) {
+        if (lang !== "en") warnMissing(lang, key as string);
+        return fallback;
+      }
       // 3. Last resort: return the key itself (should never happen if en.ts is complete)
+      warnMissing(lang, key as string);
       return key as string;
     },
     [lang]
   );
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={{ lang, locale: LOCALES[lang], setLang, t }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -128,4 +167,20 @@ export function useLanguage(): LanguageContextValue {
     throw new Error("useLanguage must be used inside <LanguageProvider>");
   }
   return ctx;
+}
+
+/**
+ * Substitutes `{name}` placeholders in a translated string.
+ *
+ * Dictionary values keep their placeholders inline (e.g. "Valid email: {email}")
+ * so translators can move them to wherever the target grammar needs them.
+ */
+export function interpolate(
+  template: string,
+  params?: Record<string, string | number> | null
+): string {
+  if (!params) return template;
+  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
+    key in params ? String(params[key]) : match
+  );
 }

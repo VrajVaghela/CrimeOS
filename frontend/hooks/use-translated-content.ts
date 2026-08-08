@@ -4,10 +4,13 @@
  * useTranslatedContent — Tier 2 AI output translation hook.
  *
  * Design decisions (per user review):
- * - MANUAL TRIGGER ONLY: translation does not fire automatically when the
- *   language changes. The component must call translate() explicitly (via a
- *   "Translate" button). This avoids live Gemini calls firing at the instant
- *   a judge flips the language toggle — preventing latency/throttling risk.
+ * - AUTO-TRIGGERED as of Phase 14E: TranslatedTextBlock calls translate() from
+ *   an effect, so AI output follows the selected language like every other
+ *   surface. The throttling risk that motivated manual-only triggering is now
+ *   handled three ways instead: a per-tick batch coalescer (one HTTP request
+ *   per page render), the module cache below, and a durable backend cache.
+ *   The raw complaint pane still opts out (autoTranslate={false}) because the
+ *   officer must be able to read the original verbatim.
  *
  * - Returns original English text immediately (no blank flicker), even before
  *   translation is complete or while a translation request is in flight.
@@ -27,7 +30,7 @@
 
 import { useCallback, useState } from "react";
 import { useLanguage, type Lang } from "@/lib/language-context";
-import { translateText } from "@/lib/api";
+import { translateBatch } from "@/lib/api";
 
 // Module-level cache: survives re-renders, resets only on full page reload.
 // Key: `${shortHash(text)}_${lang}`
@@ -37,6 +40,77 @@ function _cacheKey(text: string, lang: Lang): string {
   // Simple hash: first 120 chars + length. Good enough for demo deduplication.
   const sample = text.slice(0, 120).replace(/\s+/g, " ");
   return `${sample.length}_${text.length}_${lang}`;
+}
+
+/**
+ * Request coalescer (Phase 14E).
+ *
+ * Auto-translation fires from every AI block's effect in the same tick. Without
+ * coalescing that is N HTTP requests — and N concurrent Gemini calls. Instead we
+ * collect the tick's texts and flush them as ONE /translate/batch call.
+ * Identical texts on the same page share a single entry and a single result.
+ */
+const BACKEND_BATCH_LIMIT = 25;
+
+interface PendingEntry {
+  text: string;
+  resolvers: ((r: { translated: string; fallback: boolean }) => void)[];
+}
+
+let _queue = new Map<string, PendingEntry>();
+let _flushScheduled = false;
+
+async function _flush(lang: Lang) {
+  const batch = _queue;
+  _queue = new Map();
+  _flushScheduled = false;
+  if (batch.size === 0) return;
+
+  const entries = [...batch.entries()];
+  // Respect the backend cap; anything beyond it goes in follow-up chunks.
+  for (let i = 0; i < entries.length; i += BACKEND_BATCH_LIMIT) {
+    const chunk = entries.slice(i, i + BACKEND_BATCH_LIMIT);
+    try {
+      const results = await translateBatch(
+        chunk.map(([key, entry]) => ({ id: key, text: entry.text })),
+        lang
+      );
+      const byId = new Map(results.map((r) => [r.id, r]));
+      for (const [key, entry] of chunk) {
+        const hit = byId.get(key);
+        if (hit && !hit.fallback && hit.translated) {
+          _frontendCache.set(key, hit.translated);
+          entry.resolvers.forEach((fn) => fn({ translated: hit.translated, fallback: false }));
+        } else {
+          entry.resolvers.forEach((fn) => fn({ translated: entry.text, fallback: true }));
+        }
+      }
+    } catch {
+      for (const [, entry] of chunk) {
+        entry.resolvers.forEach((fn) => fn({ translated: entry.text, fallback: true }));
+      }
+    }
+  }
+}
+
+function _enqueue(
+  key: string,
+  text: string,
+  lang: Lang
+): Promise<{ translated: string; fallback: boolean }> {
+  return new Promise((resolve) => {
+    const existing = _queue.get(key);
+    if (existing) {
+      existing.resolvers.push(resolve);
+    } else {
+      _queue.set(key, { text, resolvers: [resolve] });
+    }
+    if (!_flushScheduled) {
+      _flushScheduled = true;
+      // Microtask-ish delay: lets every block mounted in this tick join in.
+      setTimeout(() => void _flush(lang), 0);
+    }
+  });
 }
 
 export interface TranslatedContentState {
@@ -91,9 +165,9 @@ export function useTranslatedContent(
 
     setIsTranslating(true);
     try {
-      const result = await translateText(englishText, lang);
+      // Joins this tick's batch instead of firing its own request.
+      const result = await _enqueue(key, englishText, lang);
       if (!result.fallback && result.translated) {
-        _frontendCache.set(key, result.translated);
         setTranslatedText(result.translated);
         setIsFallback(false);
       } else {

@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "lint": "next lint"
+    "lint": "next lint",
+    "i18n:audit": "node scripts/i18n-audit.mjs",
+    "verify": "npm run i18n:audit && tsc --noEmit && next build"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.1",

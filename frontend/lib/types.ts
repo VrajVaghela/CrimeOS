@@ -291,18 +291,39 @@ export interface CopilotMessageOut {
   case_id: string;
   user_id: string | null;
   role: "user" | "assistant";
+  /** Display text — localized when the answer was generated in hi/gu. */
   message: string;
+  /** Authoritative English text, always present. */
+  message_en: string;
+  /** Language `message` is rendered in. */
+  lang: "en" | "hi" | "gu";
   cited_source_ids: string[];
   citations: AiCitationOut[];
   created_at: string;
 }
 
+/** Canonical copilot intents — quick-question chips send these instead of English text. */
+export type CopilotIntent =
+  | "next_action"
+  | "missing_facts"
+  | "evidence"
+  | "legal_basis"
+  | "provider_response";
+
 export interface ReadinessItem {
   key: string;
+  /** Authoritative English label — render `readiness.item_<key>` instead. */
   label: string;
   status: "passed" | "failed" | "warning";
+  /** Authoritative English message — render `readiness.msg.<message_key>` instead. */
   message: string;
   fix: string | null;
+  /** Dictionary-key suffix under `readiness.msg.*` (Phase 14C). */
+  message_key: string | null;
+  /** Dictionary-key suffix under `readiness.msg.*` for the fix hint. */
+  fix_key: string | null;
+  /** Interpolation values for `message_key` (e.g. `{ email: "…" }`). */
+  message_params: Record<string, string> | null;
 }
 
 export interface RequestReadinessOut {
