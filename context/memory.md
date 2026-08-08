@@ -1,8 +1,92 @@
-# Memory — Phase 13 End-to-End Audit & Remediation Complete
+# Memory — Phase 14 Full Localization Implemented
 
-Last updated: 2026-08-06 23:35 IST
+Last updated: 2026-08-08
 
-## Latest Update — Phase 13 End-to-End Audit & Remediation (2026-08-06)
+## Latest Update — Phase 14 Full Localization IMPLEMENTED (2026-08-08)
+
+All six work packages (14A–14F) landed. The reported bug is fixed: selecting
+Gujarati now makes the whole UI **and the copilot's answers** Gujarati.
+
+What shipped:
+- **Copilot speaks the selected language.** One Gemini call returns `answer`
+  (English, authoritative → `copilot_messages.message_en`) plus
+  `answer_localized` (display → `message_localized`, with `lang`). Migration
+  `c3d4e5f6a7b8` applied. Verified live: `X-Lang: gu` → Gujarati script,
+  `hi` → Devanagari, `en` → Latin; legal identifiers (`Section 94 of BNSS`,
+  IP `103.88.22.14`) survive translation verbatim. History replays each message
+  in the language it was generated for.
+- **Language travels via an `X-Lang` header** (`setActiveLang()` in `lib/api.ts`
+  → `get_lang()` FastAPI dependency). No per-call-site plumbing.
+- **Canonical `intent`** on `CopilotAskIn` replaced English keyword sniffing, so
+  Gujarati/Hindi free text routes correctly. 6 intents × 3 langs of localized
+  deterministic fallbacks keep a Gemini outage answering in the right language.
+- **709 keys × 3 languages, exact parity, zero untranslated values.** New
+  sections: copilot, notifications, osint, video, evidence_workspace, workflow,
+  status, roles, readiness, revisions, citations, entity, shell.
+- **All hardcoded `"English / हिंदी"` pairs removed** — that concatenation was the
+  screenshot bug. Native language names now live only in `lib/i18n/endonyms.ts`,
+  which lets the audit forbid Indic literals in `.tsx` outright.
+- **Tier-2 auto-translation is now the default.** `TranslatedTextBlock`
+  auto-translates; the manual button survives only on the verbatim raw-complaint
+  pane. `POST /translate/batch` + durable `fallback_cache` read/write-through.
+  A per-tick coalescer in `use-translated-content.ts` collapses a page of AI
+  blocks into one HTTP call (chosen over the planned `useTranslatedContents`
+  because it needs no call-site changes).
+- **Guardrail:** `npm run i18n:audit` checks key parity, untranslated values,
+  Indic literals outside `lib/i18n/`, and hardcoded locales. `npm run verify`
+  chains audit + tsc + build.
+
+Verified: `i18n:audit` passes, `tsc --noEmit` clean, `next build` clean (14
+routes), `python -m compileall app` clean, `import app.main` OK, `alembic
+current` at head.
+
+Known gaps: repo has no ESLint config and no pytest suite, so neither could gate
+this (both pre-existing). The manual 14-route × 3-language click-through has not
+been done — worth a human pass before the demo.
+
+## Planning record — Phase 14 (2026-08-07)
+
+User report: selecting Gujarati still shows Hindi labels and the AI copilot always
+answers in English. Requirement: the selected language must govern **everything**,
+including the assistant's voice.
+
+Audit findings (12 defects, all verified in code — see
+`context/i18n_full_localization_plan.md` for the table with file:line evidence):
+- `copilot_service.ask_copilot()` takes no `lang`; no copilot prompt states an output language.
+- 9 hardcoded `"English / हिंदी"` concatenations (copilot panel header/sources,
+  command center, entity pivot, evidence workspace, path revisions, cases page,
+  evidence page) — Hindi leaks into Gujarati sessions. This is the screenshot bug.
+- 17 components never call `t()`; dictionaries only cover Phase 1–7 sections.
+- `hi.ts`/`gu.ts` ARE key-complete against `en.ts` today — the gap is missing
+  sections for Phase 8–13 UI, not missing translations.
+- `status-badge` renders raw DB enums; several files hardcode the `en-IN` locale;
+  `<html lang>` is static and the body font never switches to an Indic face.
+- Tier-2 AI translation is inconsistent (`autoTranslate` set on some blocks only).
+- Translate cache is process-memory only; `fallback_cache` table exists but is unused.
+- English keyword routing in the copilot breaks for Hindi/Gujarati free text.
+
+Key design decisions:
+- **Three tiers**: static UI → dictionaries; stored AI artifacts → display-time
+  `/translate`; conversational copilot → generated directly in the target language.
+- **One Gemini call returns both** `answer` (English, authoritative → audit +
+  `copilot_messages.message`) and `answer_localized` (display → new
+  `message_localized` + `lang` columns). English stays authoritative in the DB.
+- **Language travels via an `X-Lang` header** set from `lib/api.ts`, read by a
+  `get_lang()` dependency — no per-call-site plumbing.
+- **Canonical `intent` param** replaces English keyword sniffing so Gujarati/Hindi
+  free text routes correctly.
+- **Localized deterministic fallbacks** so a Gemini outage still answers in Gujarati.
+- `ui_rules.md` rule 7 was rewritten: the old "Bilingual Labels" rule is what caused
+  the bug and is now an explicit prohibition.
+
+Work breakdown: 14A plumbing → 14B dictionaries → (14C component sweep ∥ 14D copilot)
+→ 14E Tier-2 consistency → 14F verification incl. a new `npm run i18n:audit` guardrail.
+
+Status: superseded — implemented 2026-08-08, see the section above. Docs:
+`context/i18n_full_localization_plan.md`, Phase 14 in `progress_tracker.md`,
+rule 7 in `ui_rules.md`.
+
+## Previous — Phase 13 End-to-End Audit & Remediation (2026-08-06)
 - **Hardcoded Localhost API Download URL**: Exported `API_URL` from `lib/api.ts` and replaced hardcoded `http://localhost:8000` download link in `responses/page.tsx`.
 - **Premature Dispatch Button Enablement**: Fixed readiness condition in `requests/page.tsx` using `!readinessMap[req.id]?.is_ready`.
 - **RAM Exhaustion on Ingestion & Evidence Uploads**: Refactored `ingestion.py`, `evidence.py`, `ingestion_service.py`, and `evidence_service.py` to stream files directly to disk using `shutil.copyfileobj`.
@@ -63,7 +147,11 @@ Last updated: 2026-08-06 23:35 IST
 
 ## Next session starts with
 
-Nothing required — the project is complete. If continuing:
+**Implement Phase 14** per `context/i18n_full_localization_plan.md`, in order:
+14A plumbing → 14B dictionaries (`copilot` section first) → 14D copilot localization
+(the user's stated priority) → 14C component sweep → 14E → 14F.
+
+If continuing demo work instead:
 - Run `python -m app.seeds.run` from `backend/` to reset seed
 - Run both servers and rehearse the golden path + intelligence moments per `DEMO_SCRIPT.md`
 - If any Phase 10 component is missing from the UI (unlikely), check `frontend/components/` for `timeline-workspace.tsx`, `osint-enrichment-panel.tsx`, and `video-evidence-workspace.tsx`

@@ -10,7 +10,7 @@ Audience: **non-technical police officers** — but the presentation is a **dark
 4. **The Emerald Done Rule**: Green (`--success`) indicates completed steps, high confidence, and positive status.
 5. **Neutral Dominance**: Neutrals (carbon black `#0b0b0b`, card surface `#171717`, warm gray) make up 85%+ of the visual surface.
 6. **No Blank Screens**: Every list has an empty state (icon + CTA on dot-pattern), every async view has skeletons, every failure shows a retry alert.
-7. **Bilingual Labels**: Primary actions show Hindi/Gujarati helper text where cheap (e.g., `New Complaint / नई शिकायत`).
+7. **Single Active Language (supersedes the old "Bilingual Labels" rule, Phase 14)**: Exactly one language is displayed at a time — the one selected in the language toggle. Hardcoded bilingual pairs such as `New Complaint / नई शिकायत` are **forbidden**: they showed Hindi to officers working in Gujarati. Every user-facing string — including `aria-label`, `title`, and `placeholder` — resolves through `t()`; dates and numbers go through `lib/format.ts`; AI-generated content is translated or generated in the active language. No Devanagari or Gujarati literal may appear in a `.tsx` file outside `lib/i18n/`.
 8. **Dark Mode Only**: No theme toggle.
 
 ---

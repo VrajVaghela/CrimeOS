@@ -289,3 +289,65 @@ Planning source: `context/END_TO_END_TESTING_REPORT.md` (2026-08-06). Multi-agen
 - [x] 13.7 Add `AbortController` cancellation and unmount cleanup to search debouncing in `cases/page.tsx`
 - [x] 13.8 Implement robust numeric FIR suffix extraction in `mock_cctns.py`
 - [x] ✅ CHECKPOINT: Full system verification passed — Next.js build (`next build`) and Python compilation (`python -m compileall app`) pass with zero errors.
+
+## Phase 14 — Full Localization (UI + AI Voice) — COMPLETED 2026-08-08
+Planning source: `context/i18n_full_localization_plan.md`. Closes the gap Phase 12
+left open: the selected language now governs **everything**, including the
+copilot's spoken language.
+
+Root defects (all fixed): copilot had no `lang` input and always answered English;
+hardcoded `"English / हिंदी"` labels leaked Hindi into a Gujarati session (the
+reported bug); 17 components never called `t()`; dictionaries covered only Phase
+1–7 sections; status enums, dates and numbers were unlocalized; Tier-2 AI
+translation was inconsistent.
+
+### 14A — Language plumbing
+- [x] `setActiveLang()` in `lib/api.ts` + `X-Lang` header on the shared `request()` wrapper
+- [x] `LanguageProvider` sets `documentElement.lang` / `data-lang` and warns on missing keys in dev
+- [x] `[data-lang]` Indic body-font rules in `app/globals.css`
+- [x] New `lib/format.ts` (locale-aware date/time/number) and `lib/i18n/enums.ts` (enum → key)
+- [x] `get_lang()` FastAPI dependency in `backend/app/dependencies.py`
+
+### 14B — Dictionary expansion
+- [x] Add `copilot`, `notifications`, `osint`, `video`, `evidence_workspace`, `workflow`, `status`, `roles`, `readiness`, `revisions`, `citations`, `entity`, `shell` sections to `en.ts`
+- [x] Extend `common` and `command_center` with the missing leaves
+- [x] Mirror every new key into `hi.ts` and `gu.ts` — **709 keys × 3 languages, exact parity, zero English leftovers** (only `IMEI`/`URL` intentionally identical)
+
+### 14C — Component sweep
+- [x] Key the components that never called `t()` (`notifications-popover`, `osint-enrichment-panel`, `video-evidence-workspace`, `evidence-review-workspace`, `status-badge`, `workflow-spine`, `citation-dialog`, `request-readiness-checklist`, `entity-review-field`, `ai-content-card`, `processing-card`, `path-revision-list`, `language-toggle`, `ui/dialog`, plus 8 route pages and the app shell)
+- [x] Remove all hardcoded bilingual `"English / हिंदी"` concatenations
+- [x] Replace hardcoded `"en-IN"` locale literals with `lib/format.ts` helpers (11 sites)
+- [x] Localize `aria-label`, `title`, and `placeholder` attributes
+- [x] New `lib/i18n/endonyms.ts` — the single sanctioned home for native language names, so the audit can forbid Indic literals everywhere else
+
+### 14D — Copilot speaks the selected language (headline fix)
+- [x] `lang` + optional canonical `intent` on `CopilotAskIn`; intent-based prompt routing replaces English keyword sniffing
+- [x] `answer_localized` on the Gemini structured schema — one call returns authoritative English + localized display text
+- [x] Output-language instruction + do-not-translate identifier list in `COPILOT_SYSTEM_PROMPT`
+- [x] `COPILOT_FALLBACKS` (6 intents × 3 langs) so Gemini outages still answer in the selected language
+- [x] Alembic migration `c3d4e5f6a7b8`: `copilot_messages.message_localized` (nullable) + `lang` (default `"en"`) — applied to the dev database
+- [x] `copilot-panel.tsx` fully keyed: header, chips (send `intent`), placeholder, loading/error, citation source labels, timestamps
+
+### 14E — Tier-2 auto-translation consistency
+- [x] `TranslatedTextBlock` defaults to `autoTranslate`; manual button retained only for the verbatim raw-complaint pane
+- [x] Auto-translate the missed surfaces (`responses/page.tsx` `ai_insights`, command-center AI summary, summary page)
+- [x] `POST /translate/batch` (25-item cap) + durable `fallback_cache` read/write-through in `translate_service`
+- [x] Per-tick request coalescer in `use-translated-content.ts` — a page of AI blocks makes **one** HTTP call, not N
+
+### 14F — Verification
+- [x] `frontend/scripts/i18n-audit.mjs` (`npm run i18n:audit`) — key parity, no untranslated values, no Indic literals outside `lib/i18n/`, no hardcoded locales. Also added `npm run verify` (audit + tsc + build).
+- [x] `tsc --noEmit` clean; `next build` clean (14 routes); `python -m compileall app` clean; `import app.main` OK; migration applied and `alembic current` at head
+- [x] ✅ CHECKPOINT PASSED — verified live against the running backend with seeded Case 1:
+  - `X-Lang: en` → answer in Latin script, `lang="en"`
+  - `X-Lang: hi` → answer in **Devanagari**, `lang="hi"`
+  - `X-Lang: gu` → answer in **Gujarati script**, `lang="gu"`
+  - `message_en` always carries the authoritative English for the audit trail
+  - Chat history replays each message in the language it was generated for (`langs persisted: ['en','gu','hi']`)
+  - Legal identifiers preserved verbatim through translation: `"Section 94 of BNSS હેઠળ કાનૂની નોટિસ મોકલો."` — BNSS and the IP `103.88.22.14` survive intact
+  - `POST /translate/batch` returns per-item results (`मामले का सारांश`, `कानूनी आधार`)
+
+**Known gaps (pre-existing, not introduced by Phase 14):** the repo has no ESLint
+config (`next lint` prompts for setup) and no pytest suite, so neither could be
+run as a gate. The manual 14-route × 3-language click-through has not been
+performed — the automated audit covers key parity and literal leakage, but a
+human pass is still worth doing before the demo.
