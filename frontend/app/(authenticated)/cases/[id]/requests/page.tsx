@@ -43,6 +43,7 @@ import {
 import { RequestReadinessChecklist } from "@/components/request-readiness-checklist";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
 import type { LegalRequestOut, ProviderType, RequestReadinessOut } from "@/lib/types";
 
 const PROVIDER_DEFAULTS = {
@@ -54,6 +55,7 @@ const PROVIDER_DEFAULTS = {
 export default function RequestsPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { formatDateTime } = useFormatters();
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -259,7 +261,7 @@ export default function RequestsPage() {
                 variant="ghost"
                 onClick={() => router.replace(`/cases/${caseId}/requests`)}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={creating} loading={creating}>
                 {!creating && <FileText className="h-4 w-4" />}
@@ -273,13 +275,13 @@ export default function RequestsPage() {
       {loading ? (
         <div className="flex flex-col items-center gap-3 py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading legal requests...</p>
+          <p className="text-sm text-muted-foreground">{t("requests.loading")}</p>
         </div>
       ) : error ? (
         <div className="flex flex-col items-center gap-4 rounded-xl border border-destructive/30 bg-destructive/10 p-8 text-center animate-fade-down">
           <AlertCircle className="h-10 w-10 text-destructive" />
           <div>
-            <h3 className="font-heading text-lg font-semibold text-destructive">Error Loading Data</h3>
+            <h3 className="font-heading text-lg font-semibold text-destructive">{t("requests.load_error")}</h3>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
           </div>
           <Button onClick={loadRequests} variant="secondary">
@@ -363,19 +365,14 @@ export default function RequestsPage() {
                     <div className="space-y-4">
                       <div className="bg-background/40 border border-border/40 rounded-lg p-3 space-y-2 text-xs font-mono">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Template:</span>
+                          <span className="text-muted-foreground">{t("requests.template_label")}</span>
                           <span>{req.template_used}</span>
                         </div>
                         {req.dispatched_at && (
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Dispatched:</span>
+                            <span className="text-muted-foreground">{t("requests.dispatched_label")}</span>
                             <span>
-                              {new Date(req.dispatched_at).toLocaleString("en-IN", {
-                                day: "numeric",
-                                month: "short",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              {formatDateTime(req.dispatched_at)}
                             </span>
                           </div>
                         )}
@@ -491,7 +488,7 @@ export default function RequestsPage() {
           <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="edit_provider_name">Nodal Institution</Label>
+                <Label htmlFor="edit_provider_name">{t("requests.nodal_institution")}</Label>
                 <Input
                   id="edit_provider_name"
                   value={editName}
@@ -500,7 +497,7 @@ export default function RequestsPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="edit_recipient_email">Nodal Email</Label>
+                <Label htmlFor="edit_recipient_email">{t("requests.nodal_email")}</Label>
                 <Input
                   id="edit_recipient_email"
                   type="email"
@@ -512,7 +509,7 @@ export default function RequestsPage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="edit_body">Draft Body</Label>
+              <Label htmlFor="edit_body">{t("requests.draft_body")}</Label>
               <textarea
                 id="edit_body"
                 value={editBody}
@@ -530,7 +527,7 @@ export default function RequestsPage() {
             </Button>
             {selectedRequest?.status === "draft" && user?.role === "IO" && (
               <Button onClick={handleSaveEdit} disabled={savingEdit} loading={savingEdit}>
-                Save Changes
+                {t("requests.save_changes")}
               </Button>
             )}
           </DialogFooter>

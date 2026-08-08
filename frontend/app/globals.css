@@ -123,6 +123,21 @@
     --overlay: 0 0% 4% / 0.85;
   }
 
+  /* Phase 14A — active-language font switch.
+     LanguageProvider writes data-lang on <html>. Promoting the matching Noto face
+     to the FRONT of the heading/body stacks keeps Latin identifiers (case numbers,
+     BNS sections, emails) legible while Indic text renders in its proper face.
+     Monospace is untouched: identifiers stay in IBM Plex Mono in every language. */
+  html[data-lang="hi"] {
+    --font-heading: var(--font-noto-devanagari), var(--font-plex-sans), sans-serif;
+    --font-body: var(--font-noto-devanagari), var(--font-plex-sans), sans-serif;
+  }
+
+  html[data-lang="gu"] {
+    --font-heading: var(--font-noto-gujarati), var(--font-plex-sans), sans-serif;
+    --font-body: var(--font-noto-gujarati), var(--font-plex-sans), sans-serif;
+  }
+
   html {
     height: 100%;
     color-scheme: dark;

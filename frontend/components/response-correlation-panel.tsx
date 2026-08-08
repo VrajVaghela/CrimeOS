@@ -67,7 +67,7 @@ export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCo
       <div className="flex items-center gap-1.5 mb-2">
         <Sparkles className="h-4 w-4 text-primary animate-pulse" />
         <span className="text-sm font-semibold font-heading text-accent-strong uppercase tracking-wider">
-          AI Correlation Engine
+          {t("responses.correlation_engine")}
         </span>
       </div>
 
@@ -79,16 +79,16 @@ export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCo
                 Row
               </TableHead>
               <TableHead className="w-[30%] text-xs font-heading font-semibold text-muted-foreground uppercase">
-                Raw Provider Data
+                {t("responses.raw_provider_data")}
               </TableHead>
               <TableHead className="w-[35%] text-xs font-heading font-semibold text-muted-foreground uppercase">
-                AI Correlation & Grounding
+                {t("responses.correlation_title")}
               </TableHead>
               <TableHead className="w-[15%] text-xs font-heading font-semibold text-muted-foreground uppercase">
-                Linked Path Step
+                {t("responses.linked_path_step")}
               </TableHead>
               <TableHead className="w-[10%] text-xs font-heading font-semibold text-muted-foreground uppercase text-right">
-                Actions
+                {t("responses.actions")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -96,7 +96,7 @@ export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCo
             {correlations.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-sm text-muted-foreground">
-                  No records to display.
+                  {t("responses.no_records")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -162,7 +162,7 @@ export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCo
                       {corr.is_promoted ? (
                         <div className="flex items-center justify-end gap-1 text-success text-[10px] font-bold font-heading uppercase mr-2">
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          Promoted
+                          {t("responses.promoted")}
                         </div>
                       ) : (
                         <Button
@@ -173,7 +173,7 @@ export function ResponseCorrelationPanel({ correlations, onPromote }: ResponseCo
                           className="h-8 text-xs gap-1 border-primary/50 text-foreground hover:bg-primary/10 hover:glow-primary"
                         >
                           <Bookmark className="h-3 w-3 text-primary" />
-                          Promote to Case
+                          {t("responses.promote_to_case")}
                         </Button>
                       )}
                     </TableCell>

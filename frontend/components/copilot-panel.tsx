@@ -7,14 +7,20 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { SourceChip } from "@/components/source-chip";
 import { getCopilotChat, askCopilot, ApiError } from "@/lib/api";
-import type { CopilotMessageOut } from "@/lib/types";
+import type { CopilotIntent, CopilotMessageOut } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
+import { useEnumLabel } from "@/lib/i18n/enums";
 
 interface CopilotPanelProps {
   caseId: string;
 }
 
 export function CopilotPanel({ caseId }: CopilotPanelProps) {
+  const { t, lang } = useLanguage();
+  const { formatTime } = useFormatters();
+  const { label } = useEnumLabel();
   const [messages, setMessages] = useState<CopilotMessageOut[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,7 +70,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
     };
   }, [loading]);
 
-  const handleAsk = async (text: string) => {
+  const handleAsk = async (text: string, intent?: CopilotIntent) => {
     if (!text.trim() || loading) return;
     setInput("");
     setError(null);
@@ -77,6 +83,8 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
       user_id: null,
       role: "user",
       message: text,
+      message_en: text,
+      lang,
       cited_source_ids: [],
       citations: [],
       created_at: new Date().toISOString(),
@@ -84,16 +92,18 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
     setMessages((prev) => [...prev, optUserMsg]);
 
     try {
-      const resp = await askCopilot(caseId, text);
+      const resp = await askCopilot(caseId, text, intent);
       setMessages((prev) => [...prev, resp]);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to get response from copilot");
+      setError(err instanceof ApiError ? err.message : t("copilot.error_generic"));
       const errAssistantMsg: CopilotMessageOut = {
         id: Math.random().toString(),
         case_id: caseId,
         user_id: null,
         role: "assistant",
-        message: "No grounded answer found. Please verify your query or check back later.",
+        message: t("copilot.error_no_answer"),
+        message_en: t("copilot.error_no_answer"),
+        lang,
         cited_source_ids: [],
         citations: [],
         created_at: new Date().toISOString(),
@@ -104,12 +114,18 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
     }
   };
 
-  const quickQuestions = [
-    { label: "Suggested Next Actions", query: "What is the next best action for this case?" },
-    { label: "Check Missing Facts", query: "What facts or information are currently missing or unverified?" },
-    { label: "Explain Case Evidence", query: "Can you explain the evidence in this case?" },
-    { label: "Review Legal Basis", query: "What is the legal basis for the applied sections?" },
-    { label: "Analyze Provider Responses", query: "What do the provider responses reveal?" },
+  // Chips send a canonical intent so prompt routing never depends on the label's
+  // language; the `query` is the natural-language question the officer "asked".
+  const quickQuestions: { intent: CopilotIntent; label: string; query: string }[] = [
+    { intent: "next_action", label: t("copilot.chip_next_action"), query: t("copilot.chip_next_action") },
+    { intent: "missing_facts", label: t("copilot.chip_missing_facts"), query: t("copilot.chip_missing_facts") },
+    { intent: "evidence", label: t("copilot.chip_evidence"), query: t("copilot.chip_evidence") },
+    { intent: "legal_basis", label: t("copilot.chip_legal_basis"), query: t("copilot.chip_legal_basis") },
+    {
+      intent: "provider_response",
+      label: t("copilot.chip_provider_response"),
+      query: t("copilot.chip_provider_response"),
+    },
   ];
 
   const formatMessageText = (text: string) => {
@@ -147,15 +163,15 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
             <Sparkles className="h-5 w-5 text-primary animate-pulse" />
             <div>
               <CardTitle className="text-base font-semibold font-heading flex items-center gap-2 text-white">
-                Case Intelligence Copilot / केस इंटेलिजेंस कोपायलट
+                {t("copilot.title")}
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                Case-scoped AI assistant grounded in complaint files, legal sections, and SOPs.
+                {t("copilot.subtitle")}
               </CardDescription>
             </div>
           </div>
           <Badge className="bg-primary/10 text-accent-strong border border-primary/20 text-xs px-2 py-0.5 rounded-full font-mono">
-            Read-Only State
+            {t("copilot.read_only")}
           </Badge>
         </div>
       </CardHeader>
@@ -164,15 +180,15 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
         {loadingHistory ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground space-y-2">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <span className="text-xs font-mono text-muted-foreground">Loading case intelligence chat...</span>
+            <span className="text-xs font-mono text-muted-foreground">{t("copilot.loading_history")}</span>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-3">
             <HelpCircle className="h-10 w-10 text-muted-foreground opacity-50" />
             <div>
-              <p className="text-sm font-semibold font-heading text-white">Ask anything about this case</p>
+              <p className="text-sm font-semibold font-heading text-white">{t("copilot.empty_title")}</p>
               <p className="text-xs text-muted-foreground max-w-sm mt-1 leading-relaxed">
-                The copilot has access to complaint translations, extracted entities, SOP grounding, legal sections, and provider answers.
+                {t("copilot.empty_sub")}
               </p>
             </div>
           </div>
@@ -198,7 +214,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
                   <div className="mt-3 pt-2.5 border-t border-border/20">
                     <p className="text-[10px] uppercase font-mono tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1">
                       <Sparkles className="h-3 w-3 text-primary animate-pulse" />
-                      Grounded Sources / प्रमाणित स्रोत
+                      {t("copilot.grounded_sources")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {msg.citations.map((cit) => (
@@ -206,21 +222,9 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
                           key={cit.id}
                           sourceType={cit.source_type}
                           sourceLabel={
-                            cit.source_type === "sop_chunk"
-                              ? "SOP Document"
-                              : cit.source_type === "legal_section"
-                              ? `Legal Section ${cit.locator || ""}`
-                              : cit.source_type === "complaint"
-                              ? "Complaint Text"
-                              : cit.source_type === "entity"
-                              ? "Case Entity"
-                              : cit.source_type === "provider_row"
-                              ? "Provider Response"
-                              : cit.source_type === "evidence_marker"
-                              ? "Evidence Marker"
-                              : cit.source_type === "audit_event"
-                              ? "Case History log"
-                              : cit.source_type
+                            cit.source_type === "legal_section"
+                              ? `${label("citations", "legal_section")} ${cit.locator || ""}`.trim()
+                              : label("citations", cit.source_type)
                           }
                           locator={cit.locator || undefined}
                           confidence={cit.confidence || undefined}
@@ -231,7 +235,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
                 )}
               </div>
               <span className="text-[10px] text-muted-foreground/60 font-mono mt-1 px-1">
-                {new Date(msg.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                {formatTime(msg.created_at)}
               </span>
             </div>
           ))
@@ -243,7 +247,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
               <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary/70 rounded-l" />
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
               <span className="text-xs font-mono text-muted-foreground">
-                Copilot is analyzing case details ({elapsedTime}s)...
+                {t("copilot.analyzing").replace("{seconds}", String(elapsedTime))}
               </span>
             </div>
           </div>
@@ -261,10 +265,10 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
 
       {!loading && (
         <div className="px-4 py-2 border-t border-border/20 bg-secondary/10 flex gap-2 overflow-x-auto scrollbar-none whitespace-nowrap">
-          {quickQuestions.map((qq, idx) => (
+          {quickQuestions.map((qq) => (
             <Button
-              key={idx}
-              onClick={() => void handleAsk(qq.query)}
+              key={qq.intent}
+              onClick={() => void handleAsk(qq.query, qq.intent)}
               variant="outline"
               size="sm"
               className="text-xs border-border/30 hover:border-primary/40 hover:bg-primary/10 rounded-full flex-shrink-0 text-muted-foreground hover:text-foreground h-7"
@@ -284,7 +288,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
               void handleAsk(input);
             }
           }}
-          placeholder="Ask about SOP steps, legal basis, provider data, missing facts..."
+          placeholder={t("copilot.placeholder")}
           className="flex-1 bg-input border border-border/40 text-sm focus-visible:ring-primary rounded-lg text-white"
           disabled={loading || loadingHistory}
         />
@@ -292,6 +296,8 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
           onClick={() => void handleAsk(input)}
           disabled={loading || loadingHistory || !input.trim()}
           size="icon"
+          aria-label={t("copilot.send")}
+          title={t("copilot.send")}
           className="bg-primary hover:bg-primary/80 glow-primary h-10 w-10 flex items-center justify-center rounded-lg transition-transform hover:scale-105"
         >
           <Send className="h-4 w-4 text-white" />

@@ -7,6 +7,7 @@ import { FileSearch, Loader2, Plus, Search, Shield, X, ArrowLeft, FolderOpen } f
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -30,6 +31,7 @@ export default function CasesPage() {
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
   const { t } = useLanguage();
+  const { formatDate } = useFormatters();
   const [cases, setCases] = useState<CaseOut[]>([]);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -159,11 +161,10 @@ export default function CasesPage() {
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono mb-1">
             <Shield className="h-3 w-3 text-primary" />
-            {t("login.title" as any) || "Crime OS AI"} · {t("cases.title" as any) || "Case Registry"}
+            {t("login.title")} · {t("cases.title")}
           </div>
           <h1 className="font-heading text-2xl font-bold md:text-3xl flex items-center gap-3">
-            {t("cases.title" as any) || "Cases"}
-            <span className="text-muted-foreground text-lg font-normal font-sans">/ शिकायतें</span>
+            {t("cases.title")}
           </h1>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -260,7 +261,7 @@ export default function CasesPage() {
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="text-xs text-muted-foreground font-mono">
-                        {new Date(item.created_at).toLocaleDateString("en-IN")}
+                        {formatDate(item.created_at)}
                       </span>
                       <StatusBadge status={item.status} />
                     </div>

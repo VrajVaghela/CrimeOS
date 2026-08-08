@@ -10,18 +10,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useLanguage } from "@/lib/language-context";
 
 interface CitationDialogProps {
   title: string;
   sourceText: string;
+  /** Overrides the default localized "View SOP Grounding" trigger label. */
   triggerLabel?: string;
 }
 
 export function CitationDialog({
   title,
   sourceText,
-  triggerLabel = "View SOP Grounding",
+  triggerLabel,
 }: CitationDialogProps) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
 
   return (
@@ -35,7 +38,7 @@ export function CitationDialog({
         id="btn-view-sop"
       >
         <BookOpen className="h-3 w-3" />
-        {triggerLabel}
+        {triggerLabel ?? t("citations.view_sop")}
       </Button>
 
       {/* Glass panel dialog over darkened blurred backdrop per Phase 9E spec */}
@@ -47,7 +50,7 @@ export function CitationDialog({
               <div className="rounded-squircle-sm bg-info/10 border border-info/30 p-1.5 flex items-center justify-center">
                 <BookOpen className="h-4 w-4 text-info" />
               </div>
-              SOP Grounding Source
+              {t("citations.sop_grounding_title")}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground font-mono">
               {title}

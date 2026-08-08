@@ -28,14 +28,11 @@ import {
   uploadComplaint,
 } from "@/lib/api";
 import { useLanguage } from "@/lib/language-context";
+import { endonymFor } from "@/lib/i18n/endonyms";
 import { TranslatedTextBlock } from "@/components/translated-text-block";
 import type { CaseDetailOut, ComplaintOut } from "@/lib/types";
 
-const LANGUAGE_LABELS: Record<string, string> = {
-  gu: "Gujarati (ગુજરાતી)",
-  hi: "Hindi (हिंदी)",
-  en: "English",
-};
+
 
 const SOURCE_LABELS: Record<string, string> = {
   pdf: "PDF Document",
@@ -196,11 +193,12 @@ export default function IngestionPage() {
             </Badge>
             <Badge variant="outline" className="gap-1.5 text-xs">
               <Languages className="h-3 w-3" />
-              Detected: {LANGUAGE_LABELS[complaint.detected_language ?? ""] ?? complaint.detected_language ?? "Unknown"}
+              {t("ingestion.detected_language")}:{" "}
+              {endonymFor(complaint.detected_language) ?? t("common.unknown")}
             </Badge>
             <Badge variant="info" className="gap-1.5 text-xs">
               <Sparkles className="h-3 w-3" />
-              AI-generated via Gemini
+              {t("ingestion.ai_generated_via")}
             </Badge>
           </div>
 
@@ -218,7 +216,7 @@ export default function IngestionPage() {
               </CardHeader>
               <CardContent>
                 {complaint.raw_text ? (
-                  <TranslatedTextBlock content={complaint.raw_text} />
+                  <TranslatedTextBlock content={complaint.raw_text} autoTranslate={false} />
                 ) : (
                   <div className="flex flex-col gap-2">
                     {[90, 75, 80, 60, 70].map((w, i) => (
@@ -235,7 +233,7 @@ export default function IngestionPage() {
                   <Sparkles className="h-3.5 w-3.5" />
                   {t("ingestion.english_translation")}
                   <Badge variant="info" className="text-[10px] px-1.5 py-0 ml-1">
-                    AI-suggested
+                    {t("ingestion.ai_suggested")}
                   </Badge>
                 </CardTitle>
               </CardHeader>
@@ -263,7 +261,7 @@ export default function IngestionPage() {
               </div>
               <h3 className="font-heading font-semibold">{t("ingestion.review_correct")}</h3>
               <Badge variant="info" className="text-xs">
-                AI-suggested
+                {t("ingestion.ai_suggested")}
               </Badge>
               <span className="text-xs text-muted-foreground ml-auto hidden sm:inline">
                 {t("ingestion.review_hint")}

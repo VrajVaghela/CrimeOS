@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Activity, Loader2, Sparkles } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 
 interface ProcessingCardProps {
   label: string;
@@ -9,6 +10,7 @@ interface ProcessingCardProps {
 }
 
 export function ProcessingCard({ label, startedAt }: ProcessingCardProps) {
+  const { t } = useLanguage();
   const [elapsed, setElapsed] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -35,17 +37,22 @@ export function ProcessingCard({ label, startedAt }: ProcessingCardProps) {
           <p className="font-heading font-semibold text-sm">{label}</p>
           {elapsed >= 5 ? (
             <p className="text-xs text-muted-foreground font-mono">
-              {elapsed}s elapsed — AI is processing…
+              {elapsed}s {t("ingestion.elapsed_suffix")} — {t("ingestion.ai_processing")}
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground">Starting AI analysis…</p>
+            <p className="text-xs text-muted-foreground">{t("ingestion.analyzing")}</p>
           )}
         </div>
         <Loader2 className="h-4 w-4 text-primary animate-spin ml-auto" />
       </div>
 
       <div className="flex flex-col gap-2">
-        {["Transcribing / OCR-ing complaint", "Detecting language", "Translating to English", "Extracting entities"].map(
+        {[
+          t("ingestion.step_transcribing"),
+          t("ingestion.step_detecting"),
+          t("ingestion.step_translating"),
+          t("ingestion.step_extracting"),
+        ].map(
           (step, i) => (
             <div key={step} className="flex items-center gap-2">
               <div
@@ -78,7 +85,7 @@ export function ProcessingCard({ label, startedAt }: ProcessingCardProps) {
 
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Activity className="h-3 w-3" />
-        Gemini AI · multimodal analysis · Gujarati/Hindi/English
+        {t("ingestion.gemini_info")}
       </div>
     </div>
   );

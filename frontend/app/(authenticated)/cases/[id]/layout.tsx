@@ -34,6 +34,7 @@ import {
 import { ApiError, getCase, syncCctns } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
 import type { CaseDetailOut } from "@/lib/types";
 import { CopilotLauncher } from "@/components/copilot-drawer";
 
@@ -56,6 +57,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const { user, loading } = useAuth();
   const { t } = useLanguage();
+  const { formatDate } = useFormatters();
   const caseId = params.id as string;
 
   const [caseData, setCaseData] = useState<CaseDetailOut | null>(null);
@@ -151,7 +153,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {caseData.crime_type ?? t("dashboard.awaiting_classification")}
                   <span className="font-mono mx-1.5">·</span>
-                  {new Date(caseData.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                  {formatDate(caseData.created_at)}
                 </p>
               </div>
               <div className="shrink-0 sm:pt-1">
@@ -163,7 +165,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
                 ) : (
                   <div className="flex items-center gap-1.5 rounded-squircle-sm border border-success/30 bg-success/15 px-3 py-1.5 font-mono text-xs text-success">
                     <CheckCircle2 className="h-4 w-4 text-success" />
-                    CCTNS Synced
+                    {t("cases.cctns_synced")}
                   </div>
                 )}
               </div>
@@ -171,7 +173,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
           ) : null}
 
           {/* Tabs with distinct colors */}
-          <nav className="flex items-center gap-4 overflow-x-auto pb-1.5 scrollbar-none text-xs font-mono select-none" aria-label="Case sections">
+          <nav className="flex items-center gap-4 overflow-x-auto pb-1.5 scrollbar-none text-xs font-mono select-none" aria-label={t("cases.case_sections")}>
             <Link
               href={`/cases/${caseId}`}
               id="tab-overview"
@@ -213,7 +215,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
             <div className="h-4 w-[1px] bg-border/40 shrink-0" />
 
             <div className="flex items-center gap-1 shrink-0">
-              <span className="text-[10px] text-muted-foreground/60 uppercase font-semibold mr-1.5">Evidence:</span>
+              <span className="text-[10px] text-muted-foreground/60 uppercase font-semibold mr-1.5">{t("cases.evidence_label")}</span>
               {TABS.filter((t) => t.group === "Evidence").map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.href;
@@ -238,7 +240,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
             <div className="h-4 w-[1px] bg-border/40 shrink-0" />
 
             <div className="flex items-center gap-1 shrink-0">
-              <span className="text-[10px] text-muted-foreground/60 uppercase font-semibold mr-1.5">Record:</span>
+              <span className="text-[10px] text-muted-foreground/60 uppercase font-semibold mr-1.5">{t("cases.record_label")}</span>
               {TABS.filter((t) => t.group === "Record").map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.href;
@@ -273,7 +275,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
           <DialogHeader>
             <DialogTitle className="font-heading text-lg font-bold flex items-center gap-2">
               <Globe className="h-5 w-5 text-primary" />
-              Sync Case with CCTNS / eGujcop Portal
+              {t("cases.sync_dialog_title")}
             </DialogTitle>
             <DialogDescription className="text-muted-foreground text-xs">
               Confirm case details and legal sections before pushing the payload to the national police records portal.
@@ -281,7 +283,7 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
           </DialogHeader>
           <div className="space-y-4 py-2">
             <p className="text-xs text-muted-foreground">
-              Payload Preview (JSON pushed to <code className="font-mono text-info">/mock/cctns/sync</code>):
+              {t("cases.payload_preview")} (JSON → <code className="font-mono text-info">/mock/cctns/sync</code>):
             </p>
             <div className="rounded-lg bg-surface-alt p-4 text-xs font-mono border border-border/60 max-h-64 overflow-y-auto leading-relaxed text-muted-foreground">
               <pre>{JSON.stringify(syncPayload, null, 2)}</pre>
@@ -292,8 +294,8 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setSyncDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSync} disabled={syncing} loading={syncing}>Confirm Sync & Push</Button>
+            <Button variant="ghost" onClick={() => setSyncDialogOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={handleSync} disabled={syncing} loading={syncing}>{t("cases.confirm_sync")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

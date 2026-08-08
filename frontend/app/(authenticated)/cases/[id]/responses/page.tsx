@@ -20,6 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { getCaseResponses, regenerateInsights, getResponseCorrelations, promoteResponseRow, ApiError, API_URL } from "@/lib/api";
 import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
 import { TranslatedTextBlock } from "@/components/translated-text-block";
 import { ResponseCorrelationPanel } from "@/components/response-correlation-panel";
 import type { ProviderResponseOut, ResponseCorrelationOut } from "@/lib/types";
@@ -28,6 +29,7 @@ export default function ResponsesPage() {
   const params = useParams();
   const caseId = params.id as string;
   const { t } = useLanguage();
+  const { formatDate } = useFormatters();
 
   const [responses, setResponses] = useState<ProviderResponseOut[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,13 +104,13 @@ export default function ResponsesPage() {
       {loading ? (
         <div className="flex flex-col items-center gap-3 py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading provider responses...</p>
+          <p className="text-sm text-muted-foreground">{t("responses.loading")}</p>
         </div>
       ) : error ? (
         <div className="flex flex-col items-center gap-4 rounded-xl border border-destructive/30 bg-destructive/10 p-8 text-center animate-fade-down">
           <AlertCircle className="h-10 w-10 text-destructive" />
           <div>
-            <h3 className="font-heading text-lg font-semibold text-destructive">Error Loading Data</h3>
+            <h3 className="font-heading text-lg font-semibold text-destructive">{t("responses.load_error")}</h3>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
           </div>
           <Button onClick={loadResponses} variant="secondary">Retry</Button>
@@ -159,7 +161,7 @@ export default function ResponsesPage() {
                     <div className="truncate">File: {res.file_path?.split("/").pop()}</div>
                     <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                       <Clock className="h-3 w-3" />
-                      {new Date(res.received_at).toLocaleDateString("en-IN")}
+                      {formatDate(res.received_at)}
                     </div>
                   </button>
                 );
@@ -234,7 +236,7 @@ export default function ResponsesPage() {
                     {loadingCorrelations ? (
                       <div className="flex flex-col items-center justify-center py-12 gap-2 text-muted-foreground text-xs font-mono">
                         <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        Running correlation engine...
+                        {t("responses.running_correlation")}
                       </div>
                     ) : (
                       <ResponseCorrelationPanel

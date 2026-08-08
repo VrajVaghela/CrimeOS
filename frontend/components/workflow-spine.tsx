@@ -1,7 +1,10 @@
+"use client";
+
 import React from "react";
 import { Check, Loader2, Circle, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { WorkflowStageOut } from "@/lib/types";
+import { useEnumLabel } from "@/lib/i18n/enums";
 
 interface WorkflowSpineProps {
   stages: WorkflowStageOut[];
@@ -10,6 +13,8 @@ interface WorkflowSpineProps {
 }
 
 export function WorkflowSpine({ stages, currentStage, onStageSelect }: WorkflowSpineProps) {
+  const { label } = useEnumLabel();
+
   return (
     <div className="w-full py-4 px-2">
       <div className="relative flex flex-col md:flex-row items-center justify-between w-full gap-4 md:gap-2">
@@ -61,7 +66,8 @@ export function WorkflowSpine({ stages, currentStage, onStageSelect }: WorkflowS
                 {icon}
               </div>
 
-              {/* Text Labels */}
+              {/* Text Labels — one language only; the backend `label_hi` field is
+                  intentionally not rendered (Phase 14C, ui_rules rule 7). */}
               <div className="mt-2 text-center md:absolute md:top-12 md:left-1/2 md:-translate-x-1/2 md:w-32">
                 <span
                   className={cn(
@@ -70,10 +76,7 @@ export function WorkflowSpine({ stages, currentStage, onStageSelect }: WorkflowS
                     isCompleted && "text-success/90"
                   )}
                 >
-                  {stage.label}
-                </span>
-                <span className="block text-[10px] text-muted-foreground/80 leading-normal">
-                  {stage.label_hi}
+                  {label("workflow.stage", stage.stage)}
                 </span>
               </div>
             </button>

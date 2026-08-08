@@ -1,5 +1,6 @@
 "use client";
 import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import {
@@ -28,6 +29,7 @@ import { VideoEvidenceWorkspace } from "@/components/video-evidence-workspace";
 
 export default function EvidencePage() {
   const { t } = useLanguage();
+  const { formatDate } = useFormatters();
   const params = useParams();
   const caseId = params.id as string;
 
@@ -141,7 +143,7 @@ export default function EvidencePage() {
           onClick={() => setSelectedEvidence(null)}
           className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
         >
-          <ChevronLeft className="h-4 w-4" /> Back to Evidence Gallery / गैलरी पर वापस जाएं
+          <ChevronLeft className="h-4 w-4" /> {t("evidence.back_to_gallery")}
         </Button>
 
         {selectedEvidence.file_type === "video" ? (
@@ -193,7 +195,7 @@ export default function EvidencePage() {
             id="upload-evidence-btn"
           >
             {!uploading && <Upload className="h-4 w-4" />}
-            {uploading ? "Analyzing File via Gemini..." : "Upload Evidence File / फ़ाइल अपलोड करें"}
+            {uploading ? t("evidence.analyzing_file") : t("evidence.upload_file")}
           </Button>
         </div>
       </div>
@@ -208,7 +210,7 @@ export default function EvidencePage() {
       {loading ? (
         <div className="flex flex-col items-center gap-3 py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading evidence workspace...</p>
+          <p className="text-sm text-muted-foreground">{t("evidence.loading_workspace")}</p>
         </div>
       ) : evidenceList.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
@@ -223,7 +225,7 @@ export default function EvidencePage() {
           </div>
           <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
             <Upload className="h-4 w-4" />
-            Select Evidence File
+            {t("evidence.select_file")}
           </Button>
         </div>
       ) : (
@@ -279,7 +281,7 @@ export default function EvidencePage() {
                         <div className="rounded-full bg-violet/15 p-1 shrink-0">
                           <Sparkles className="h-3.5 w-3.5 text-violet" />
                         </div>
-                        <span className="truncate">AI Forensic Insights</span>
+                        <span className="truncate">{t("evidence.ai_insights")}</span>
                       </CardTitle>
                       <CardDescription className="text-xs text-foreground mt-1.5 line-clamp-3 leading-relaxed">
                         {ev.ai_tags.description}
@@ -312,7 +314,7 @@ export default function EvidencePage() {
                   {/* Timestamp */}
                   <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-mono pt-1.5 border-t border-border/30">
                     <Calendar className="h-3 w-3" />
-                    Uploaded: {new Date(ev.uploaded_at).toLocaleDateString("en-IN")}
+                    Uploaded: {formatDate(ev.uploaded_at)}
                   </div>
                 </CardContent>
               </Card>

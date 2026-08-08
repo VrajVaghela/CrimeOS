@@ -10,10 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 
 export default function LoginPage() {
   const router = useRouter();
   const { signIn } = useAuth();
+  const { t } = useLanguage();
   const [username, setUsername] = useState("io");
   const [password, setPassword] = useState("demo123");
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export default function LoginPage() {
       await signIn(username, password);
       router.push("/dashboard");
     } catch (caught: unknown) {
-      setError(caught instanceof ApiError ? caught.message : "Unable to sign in");
+      setError(caught instanceof ApiError ? caught.message : t("login.error_generic"));
     } finally {
       setSubmitting(false);
     }
@@ -44,20 +46,20 @@ export default function LoginPage() {
               </div>
               <div>
                 <p className="font-heading text-sm font-semibold tracking-wide text-foreground">CRIME OS <span className="text-accent-strong">AI</span></p>
-                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Investigation workspace</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{t("login.workspace_heading")}</p>
               </div>
             </div>
-            <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.16em] text-info">Evidence-led operations</p>
+            <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.16em] text-info">{t("login.feature_evidence")}</p>
             <h1 className="max-w-md font-heading text-3xl font-semibold leading-tight tracking-[-0.02em] text-foreground xl:text-4xl">
-              Move a complaint from intake to action.
+              {t("login.workspace_sub")}
             </h1>
             <p className="mt-5 max-w-md text-sm leading-6 text-muted-foreground">
-              Review extracted facts, follow grounded investigation paths, and keep every decision visible in one secure case workspace.
+              {t("login.workspace_body")}
             </p>
           </div>
           <div className="space-y-3 border-t border-border pt-5 text-xs text-muted-foreground">
-            <p className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-success" /> Role-based access for station teams</p>
-            <p className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-info" /> AI suggestions show their source</p>
+            <p className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-success" /> {t("login.feature_secure_sub")}</p>
+            <p className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-info" /> {t("login.feature_evidence_sub")}</p>
           </div>
         </div>
 
@@ -68,7 +70,7 @@ export default function LoginPage() {
             </div>
             <div>
               <p className="font-heading text-sm font-semibold tracking-wide text-foreground">CRIME OS <span className="text-accent-strong">AI</span></p>
-              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Secure casework</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{t("login.feature_secure")}</p>
             </div>
           </div>
 
@@ -76,8 +78,8 @@ export default function LoginPage() {
             <CardHeader className="mb-7 p-0">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <CardTitle className="font-heading text-2xl">Sign in</CardTitle>
-                  <CardDescription className="mt-1">Open your officer workspace</CardDescription>
+                  <CardTitle className="font-heading text-2xl">{t("login.submit")}</CardTitle>
+                  <CardDescription className="mt-1">{t("login.open_workspace")}</CardDescription>
                 </div>
                 <div className="grid h-9 w-9 shrink-0 place-items-center rounded-squircle-sm border border-border bg-surface-alt text-muted-foreground">
                   <LockKeyhole className="h-4 w-4" />
@@ -87,25 +89,25 @@ export default function LoginPage() {
 
           <form className="flex flex-col gap-5" onSubmit={onSubmit}>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t("login.username_label")}</Label>
               <Input
                 id="username"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
-                placeholder="Enter your credentials"
+                placeholder={t("login.enter_credentials")}
                 autoComplete="username"
                 autoFocus
               />
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("login.password_label")}</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter password"
+                placeholder={t("login.password_placeholder")}
                 autoComplete="current-password"
               />
             </div>
@@ -125,12 +127,12 @@ export default function LoginPage() {
               className="mt-1 w-full"
             >
               <LockKeyhole className="h-4 w-4" />
-              {submitting ? "Authenticating..." : "Enter dashboard"}
+              {submitting ? t("login.authenticating") : t("login.enter_dashboard")}
               {!submitting && <ArrowRight className="ml-auto h-4 w-4 opacity-70" />}
             </Button>
 
             <p className="text-center font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              Demo environment · session protected by role access
+              {t("login.demo_footer")}
             </p>
           </form>
           </Card>

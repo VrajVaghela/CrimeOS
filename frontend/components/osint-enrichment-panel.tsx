@@ -27,6 +27,7 @@ import {
   ApiError,
 } from "@/lib/api";
 import type { OsintScanResult, CaseEntityOut } from "@/lib/types";
+import { useLanguage } from "@/lib/language-context";
 
 interface OsintEnrichmentPanelProps {
   caseId: string;
@@ -39,6 +40,7 @@ export function OsintEnrichmentPanel({
   entity,
   onPivotAction,
 }: OsintEnrichmentPanelProps) {
+  const { t } = useLanguage();
   const [scanResult, setScanResult] = useState<OsintScanResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [triggering, setTriggering] = useState(false);
@@ -219,7 +221,7 @@ export function OsintEnrichmentPanel({
       {/* Header with status */}
       <div className="flex items-center justify-between pb-2 border-b border-border/40">
         <span className="text-[11px] font-bold font-mono text-muted-foreground uppercase tracking-wider block">
-          OSINT Digital Footprint
+          {t("osint.title")}
         </span>
         {scanResult && (
           <span
@@ -248,15 +250,15 @@ export function OsintEnrichmentPanel({
       {loading && !scanResult ? (
         <div className="flex flex-col items-center justify-center py-8 text-center text-xs text-muted-foreground gap-2">
           <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-          <span>Fetching intelligence data…</span>
+          <span>{t("osint.fetching")}</span>
         </div>
       ) : !scanResult ? (
         <div className="p-6 rounded-squircle-sm border border-border bg-surface-alt text-center space-y-4">
           <Search className="h-10 w-10 mx-auto text-muted-foreground/30 animate-pulse" />
           <div className="space-y-1">
-            <h5 className="text-sm font-semibold text-foreground">No OSINT Enrichment Found</h5>
+            <h5 className="text-sm font-semibold text-foreground">{t("osint.none_found")}</h5>
             <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-              This entity has not been scanned yet. Run a deterministic OSINT lookup to map its footprints.
+              {t("osint.none_found_sub")}
             </p>
           </div>
           <button
@@ -265,7 +267,7 @@ export function OsintEnrichmentPanel({
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-squircle bg-primary text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${triggering ? "animate-spin" : ""}`} />
-            Run OSINT Lookup
+            {t("osint.run_lookup")}
           </button>
         </div>
       ) : (
@@ -285,17 +287,17 @@ export function OsintEnrichmentPanel({
               )}
               <div className="space-y-0.5">
                 <div className="text-[10px] uppercase font-mono tracking-wider font-semibold opacity-85">
-                  Intelligence Risk Level
+                  {t("osint.risk_level")}
                 </div>
                 <div className="text-base font-bold font-mono">
-                  {scanResult.risk_summary.overall_risk_level} RISK
+                  {scanResult.risk_summary.overall_risk_level} {t("osint.risk_suffix")}
                 </div>
               </div>
             </div>
             <button
               onClick={handleExport}
               disabled={exporting}
-              title="Download intelligence dossier report"
+              title={t("osint.download_dossier")}
               className="p-2 rounded bg-foreground/5 hover:bg-foreground/15 border border-border text-foreground transition-all disabled:opacity-50 shrink-0"
             >
               {exporting ? (
@@ -318,9 +320,9 @@ export function OsintEnrichmentPanel({
 
           {scanResult.scan.status === "FAILED" && (
 <div className="p-4 rounded-squircle bg-destructive/10 border border-destructive/30 space-y-3">
-<div className="text-xs font-semibold text-destructive">OSINT scan failed</div>
+<div className="text-xs font-semibold text-destructive">{t("osint.scan_failed")}</div>
 <div className="text-xs text-foreground font-mono break-all bg-destructive/10 p-2 rounded">
-                {scanResult.scan.error_message ?? "Unknown scanner error occurred"}
+                {scanResult.scan.error_message ?? t("osint.unknown_error")}
               </div>
               <button
                 onClick={handleTrigger}
@@ -328,7 +330,7 @@ export function OsintEnrichmentPanel({
 className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border border-destructive/40 text-destructive bg-destructive/5 hover:bg-destructive/10 text-xs font-medium transition-all"
               >
                 <RefreshCw className={`h-3 w-3 ${triggering ? "animate-spin" : ""}`} />
-                Retry OSINT Lookup
+                {t("osint.retry_lookup")}
               </button>
             </div>
           )}
@@ -413,7 +415,7 @@ className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border
                         )}
                         {profile.bio_changed && (
                           <span className="bg-warn/15 text-warn px-1 py-0.5 rounded border border-warn/25 animate-pulse">
-                            Bio Changed
+                            {t("osint.bio_changed")}
                           </span>
                         )}
                       </div>
@@ -453,17 +455,17 @@ className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border
                     <div className="text-[10px] text-muted-foreground font-mono grid grid-cols-2 gap-x-2 gap-y-0.5">
                       {breach.breach_domain && (
                         <div>
-                          Domain: <span className="text-foreground">{breach.breach_domain}</span>
+                          {t("osint.domain")} <span className="text-foreground">{breach.breach_domain}</span>
                         </div>
                       )}
                       {breach.leak_date && (
                         <div>
-                          Date: <span className="text-foreground">{breach.leak_date}</span>
+                          {t("osint.date")} <span className="text-foreground">{breach.leak_date}</span>
                         </div>
                       )}
                       {breach.record_count !== null && (
                         <div>
-                          Records: <span className="text-foreground">{breach.record_count.toLocaleString()}</span>
+                          {t("osint.records")} <span className="text-foreground">{breach.record_count.toLocaleString()}</span>
                         </div>
                       )}
                     </div>
@@ -494,7 +496,7 @@ className="bg-destructive/10 text-foreground border border-destructive/20 text-[
           {scanResult.discovered_footprints.length > 0 && (
             <div className="space-y-2 pt-2 border-t border-border/40">
               <span className="text-[10px] font-bold font-mono text-muted-foreground uppercase tracking-wider block">
-                AI Discovered Footprints (Pivots)
+                {t("osint.pivots")}
               </span>
               <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
                 {scanResult.discovered_footprints.map((pivot, index) => (
@@ -529,7 +531,7 @@ className="p-3 rounded bg-warn/5 border border-warn/20 text-xs flex flex-col gap
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-border hover:bg-foreground/5 text-[10px] font-medium text-muted-foreground transition-all disabled:opacity-50"
                       >
                         <X className="h-3 w-3" />
-                        Ignore
+                        {t("osint.ignore")}
                       </button>
                       <button
                         onClick={() => handleConfirmPivot(pivot.entity_id)}
@@ -558,7 +560,7 @@ className="p-3 rounded bg-warn/5 border border-warn/20 text-xs flex flex-col gap
               className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border border-border hover:bg-foreground/5 text-xs text-muted-foreground font-medium transition-all"
             >
               <RefreshCw className={`h-3 w-3 ${triggering ? "animate-spin" : ""}`} />
-              Re-run OSINT Scan
+              {t("osint.rerun_scan")}
             </button>
           </div>
         </div>

@@ -79,13 +79,13 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div className="space-y-1">
                   <div className="font-heading text-base font-semibold text-foreground flex items-center gap-2">
-                    <TranslatedTextBlock content={step.title} autoTranslate={true} />
+                    <TranslatedTextBlock content={step.title} />
                     {isActive && (
                       <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
                     )}
                   </div>
                   <div className="text-sm text-muted-foreground leading-relaxed">
-                    <TranslatedTextBlock content={step.description} autoTranslate={true} />
+                    <TranslatedTextBlock content={step.description} />
                   </div>
                 </div>
 

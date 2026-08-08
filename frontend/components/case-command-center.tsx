@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
 import { useRouter } from "next/navigation";
 import {
   Shield,
@@ -40,6 +41,7 @@ import type {
   CaseSummaryOut,
 } from "@/lib/types";
 import { EntityPivotPanel } from "@/components/entity-pivot-panel";
+import { TranslatedTextBlock } from "@/components/translated-text-block";
 
 function AnimatedMetric({ value, suffix = "" }: { value: number; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -83,6 +85,7 @@ interface CaseCommandCenterProps {
 
 export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
   const { t } = useLanguage();
+  const { formatDateTime, formatTime } = useFormatters();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -220,10 +223,10 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
         <div>
           <h2 className="text-2xl font-bold font-heading flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
-            Case Command Center / केस कमांड सेंटर
+            {t("command_center.title")}
           </h2>
           <p className="text-xs text-muted-foreground mt-1 font-sans">
-            Real-time workflow monitoring, prioritized steps, and entity intelligence lookup.
+            {t("command_center.subtitle")}
           </p>
         </div>
         <Button
@@ -232,7 +235,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
           size="sm"
           className="border-border/40 text-muted-foreground hover:text-foreground font-mono"
         >
-          Refresh Control
+          {t("command_center.refresh_control")}
         </Button>
       </div>
 
@@ -273,9 +276,11 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                 {t('command_center.ai_summary' as any) || 'AI Incident Executive Summary'}
               </span>
               <div className="border border-info/30 bg-info/[0.04] p-4 rounded-squircle-sm text-xs leading-relaxed text-foreground/90 font-sans">
-                {summaries.length > 0
-                  ? summaries[0].content
-                  : t('command_center.ai_summary_empty' as any) || 'AI Executive Summary is not generated yet. Run the case analyzer or update details to generate the initial summary.'}
+                {summaries.length > 0 ? (
+                  <TranslatedTextBlock content={summaries[0].content} />
+                ) : (
+                  t("command_center.ai_summary_empty")
+                )}
               </div>
             </div>
           </div>
@@ -291,7 +296,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                   <StatusBadge status={caseData?.status || "open"} />
                   {caseData?.status === "synced" && (
                     <span className="text-[10px] bg-success/10 text-success border border-success/20 px-1.5 py-0.5 rounded font-mono">
-                      CCTNS Synced
+                      {t("command_center.cctns_synced")}
                     </span>
                   )}
                 </div>
@@ -303,10 +308,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                 </span>
                 <span className="text-xs font-mono font-semibold text-foreground">
                   {caseData?.created_at
-                    ? new Date(caseData.created_at).toLocaleString("en-IN", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })
+                    ? formatDateTime(caseData.created_at)
                     : "—"}
                 </span>
               </div>
@@ -316,7 +318,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                   {t('command_center.officer_in_charge' as any) || 'Officer In Charge'}
                 </span>
                 <span className="text-xs font-semibold text-foreground">
-                  Investigating Officer (IO)
+                  {t("command_center.io_role")}
                 </span>
               </div>
             </div>
@@ -324,7 +326,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
             {/* Quick stats or minor visualization inside the hero right column */}
             <div className="bg-secondary/40 border border-border/30 rounded-squircle-sm p-3 space-y-2">
               <div className="flex justify-between text-xs font-mono">
-                <span className="text-muted-foreground">Completion</span>
+                <span className="text-muted-foreground">{t("command_center.completion")}</span>
                 <span className="text-accent-strong font-bold">{workflow.completion_percentage}%</span>
               </div>
               <div className="w-full bg-secondary/80 rounded-full h-1.5 overflow-hidden">
@@ -478,7 +480,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                   size="sm"
                   className="text-xs text-accent-strong hover:text-accent-strong/80 gap-1"
                 >
-                  Manage Requests <ArrowRight className="h-3 w-3" />
+                  {t("command_center.manage_requests")} <ArrowRight className="h-3 w-3" />
                 </Button>
               )}
             </CardHeader>
@@ -517,13 +519,13 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
               {responses.length > 0 && (
                 <div className="border-t border-border/30 pt-3">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 font-mono">
-                    Latest Provider Response Insight
+                    {t("command_center.latest_insight")}
                   </h4>
                   <div className="p-3 bg-success/5 border border-success/20 rounded-lg">
                     <div className="flex items-center gap-2 mb-1.5">
                       <Sparkles className="h-3.5 w-3.5 text-success" />
                       <span className="text-xs font-semibold font-heading text-success">
-                        AI correlation flags
+                        {t("command_center.ai_correlation_flags")}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed italic">
@@ -537,7 +539,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                         size="sm"
                         className="h-7 px-2 text-[10px] text-success hover:bg-success/10 gap-1 font-mono"
                       >
-                        View Full Insights <ArrowRight className="h-2.5 w-2.5" />
+                        {t("command_center.view_full_insights")} <ArrowRight className="h-2.5 w-2.5" />
                       </Button>
                     </div>
                   </div>
@@ -562,7 +564,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
             <CardContent>
               {workflow.recent_activity.length === 0 ? (
                 <div className="text-center py-6">
-                  <p className="text-xs text-muted-foreground">No events recorded in the audit trail.</p>
+                  <p className="text-xs text-muted-foreground">{t("command_center.no_audit_events")}</p>
                 </div>
               ) : (
                 <div className="relative pl-4 border-l border-border/40 space-y-4">
@@ -579,10 +581,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
                           <span>{activity.actor_name || "System"}</span>
                           <span>•</span>
                           <span>
-                            {new Date(activity.timestamp).toLocaleTimeString("en-IN", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {formatTime(activity.timestamp)}
                           </span>
                         </div>
                       </div>

@@ -19,11 +19,9 @@ import {
   Shield,
   Users,
   Database,
-  LogOut,
 } from "lucide-react";
 
 import { StatusBadge } from "@/components/status-badge";
-import { LanguageToggle } from "@/components/language-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,12 +29,14 @@ import { Separator } from "@/components/ui/separator";
 import { ApiError, getDashboard, getPendingRequests, approveRequest } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
 import type { DashboardOut, LegalRequestOut } from "@/lib/types";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const { t } = useLanguage();
+  const { formatDate } = useFormatters();
   const [dashboard, setDashboard] = useState<DashboardOut | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -132,13 +132,6 @@ export default function DashboardPage() {
             <span className="font-mono text-info text-[10px]">({user.role})</span>
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <LanguageToggle />
-          <Button variant="ghost" size="sm" onClick={() => { signOut(); router.push("/login"); }} className="text-muted-foreground">
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("common.sign_out" as any) || "Sign Out"}</span>
-          </Button>
-        </div>
       </div>
 
       <section className="flex flex-col gap-6">
@@ -174,7 +167,7 @@ export default function DashboardPage() {
               {loadingRequests ? (
                 <div className="py-6 flex items-center justify-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin text-accent" />
-                  <span className="text-sm text-muted-foreground">Loading pending requests...</span>
+                  <span className="text-sm text-muted-foreground">{t("dashboard.loading_pending")}</span>
                 </div>
               ) : pendingRequests.length === 0 ? (
                 <div className="py-8 text-center border border-dashed border-border/40 rounded-xl bg-success/5">
@@ -298,7 +291,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="text-xs text-muted-foreground font-mono">
-                        {new Date(item.created_at).toLocaleDateString("en-IN")}
+                        {formatDate(item.created_at)}
                       </span>
                       <StatusBadge status={item.status} />
                     </div>

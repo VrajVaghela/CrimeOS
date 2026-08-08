@@ -201,7 +201,7 @@ export function EntityPivotPanel({
             {/* Entity relationships */}
             <div className="space-y-2">
               <span className="text-[10px] font-bold font-mono text-muted-foreground uppercase block">
-                Relationships / संबंध ({entityRelationships.length})
+                {t("entity.relationships")} ({entityRelationships.length})
               </span>
               <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
                 {entityRelationships.map((r) => {
@@ -259,7 +259,7 @@ export function EntityPivotPanel({
 
                 {entityRelationships.length === 0 && (
                   <div className="text-center py-4 text-muted-foreground text-xs">
-                    No relationships mapped for this entity.
+                    {t("entity.no_relationships_mapped")}
                   </div>
                 )}
               </div>
@@ -269,10 +269,10 @@ export function EntityPivotPanel({
             <div className="space-y-2 pt-2 border-t border-border/60">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold font-mono text-muted-foreground uppercase block">
-                  Related Cases / संबंधित मामले
+                  {t("entity.related_cases")}
                 </span>
                   <span className="text-[10px] font-bold bg-warn/10 text-warn border border-warn/20 px-1.5 py-0.5 rounded">
-                  POSSIBLE MATCH
+                  {t("entity.possible_match")}
                 </span>
               </div>
               <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
@@ -300,7 +300,7 @@ export function EntityPivotPanel({
 
                 {matchingRelatedCases.length === 0 && (
                   <div className="text-center py-4 text-muted-foreground text-xs">
-                    No other cases share this entity.
+                    {t("entity.no_shared_cases")}
                   </div>
                 )}
               </div>

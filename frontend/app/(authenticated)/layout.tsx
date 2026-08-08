@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage, type TranslationKey } from "@/lib/language-context";
 import { LanguageToggle } from "@/components/language-toggle";
 import { NotificationsPopover } from "@/components/notifications-popover";
 
@@ -48,6 +49,7 @@ function AuthenticatedLayoutContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading, signOut } = useAuth();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -87,24 +89,43 @@ function AuthenticatedLayoutContent({
   const isDashboardActive = pathname === "/dashboard";
   const isCasesActive = pathname.startsWith("/cases");
 
-  // Dynamic breadcrumb computation
+  // Case tab segments that have a matching `nav.*` dictionary entry.
+  const NAV_TABS = [
+    "overview",
+    "ingestion",
+    "path",
+    "requests",
+    "responses",
+    "summary",
+    "audit",
+    "timeline",
+    "evidence",
+  ];
+
+  // Dynamic breadcrumb computation. Labels are localized; the case ID is an
+  // identifier and stays verbatim.
   const getBreadcrumbs = () => {
     const parts = pathname.split("/").filter(Boolean);
-    const breadcrumbs = [{ label: "Workspace", href: "/dashboard" }];
+    const breadcrumbs = [{ label: t("shell.workspace"), href: "/dashboard" }];
 
     if (parts[0] === "dashboard") {
-      breadcrumbs.push({ label: "Dashboard", href: "/dashboard" });
+      breadcrumbs.push({ label: t("nav.dashboard"), href: "/dashboard" });
     } else if (parts[0] === "cases") {
-      breadcrumbs.push({ label: "Cases", href: "/cases" });
+      breadcrumbs.push({ label: t("nav.cases"), href: "/cases" });
       if (parts[1]) {
         // We are on a specific case page: /cases/[id]
         const caseIdShort = parts[1].substring(0, 8).toUpperCase();
-        breadcrumbs.push({ label: `Case #${caseIdShort}`, href: `/cases/${parts[1]}` });
+        breadcrumbs.push({
+          label: `${t("shell.case_crumb")} #${caseIdShort}`,
+          href: `/cases/${parts[1]}`,
+        });
 
         if (parts[2]) {
           // Inner section: /cases/[id]/[tab]
-          const tabName = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
-          breadcrumbs.push({ label: tabName, href: `/cases/${parts[1]}/${parts[2]}` });
+          const tabLabel = NAV_TABS.includes(parts[2])
+            ? t(`nav.${parts[2]}` as TranslationKey)
+            : parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
+          breadcrumbs.push({ label: tabLabel, href: `/cases/${parts[1]}/${parts[2]}` });
         }
       }
     }
@@ -121,7 +142,7 @@ function AuthenticatedLayoutContent({
         className={`h-dvh shrink-0 border-r border-border/70 bg-sidebar flex flex-col select-none overflow-hidden transition-[width] duration-200 ease-out ${
           sidebarCollapsed ? "w-16" : "w-[248px] lg:w-[214px]"
         }`}
-        aria-label="Primary navigation"
+        aria-label={t("shell.primary_nav")}
       >
         <div className="min-h-0 flex-1">
           {/* Brand lockup and sidebar control */}
@@ -134,7 +155,7 @@ function AuthenticatedLayoutContent({
                 <span className="font-heading font-bold text-sm tracking-wider text-foreground">CRIME OS</span>
                 <span className="font-heading font-bold text-sm tracking-wider text-accent-strong ml-1">AI</span>
               </div>
-              <span className="text-[9px] font-mono tracking-widest text-muted-foreground uppercase mt-0.5">Tactical Portal</span>
+              <span className="text-[9px] font-mono tracking-widest text-muted-foreground uppercase mt-0.5">{t("shell.tactical_portal")}</span>
             </div>}
             <Button
               type="button"
@@ -142,8 +163,8 @@ function AuthenticatedLayoutContent({
               size="icon"
               onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
               className="h-8 w-8 shrink-0 rounded-squircle-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
-              aria-label={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
-              title={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
+              aria-label={sidebarCollapsed ? t("shell.expand_nav") : t("shell.collapse_nav")}
+              title={sidebarCollapsed ? t("shell.expand_nav") : t("shell.collapse_nav")}
             >
               {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </Button>
@@ -152,7 +173,7 @@ function AuthenticatedLayoutContent({
           {/* Navigation Stack */}
           <nav className={`space-y-1.5 ${sidebarCollapsed ? "p-2" : "p-4"}`}>
             {!sidebarCollapsed && <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground px-3 mb-2 block">
-              Navigation
+              {t("shell.navigation")}
             </span>}
 
             {/* Dashboard Link */}
@@ -165,7 +186,7 @@ function AuthenticatedLayoutContent({
               }`}
             >
               <LayoutDashboard className="h-4 w-4" />
-              {!sidebarCollapsed && <span>Dashboard</span>}
+              {!sidebarCollapsed && <span>{t("nav.dashboard")}</span>}
               {isDashboardActive && !sidebarCollapsed && (
                 <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               )}
@@ -181,7 +202,7 @@ function AuthenticatedLayoutContent({
               }`}
             >
               <FolderOpen className="h-4 w-4" />
-              {!sidebarCollapsed && <span>Case Registry</span>}
+              {!sidebarCollapsed && <span>{t("shell.case_registry")}</span>}
               {isCasesActive && !sidebarCollapsed && (
                 <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               )}
@@ -209,11 +230,11 @@ function AuthenticatedLayoutContent({
               router.push("/login");
             }}
             className={`w-full gap-2 text-xs text-muted-foreground hover:text-danger hover:bg-danger/10 px-3 rounded-squircle-sm ${sidebarCollapsed ? "justify-center" : "justify-start"}`}
-            aria-label="Sign out"
-            title={sidebarCollapsed ? "Sign out" : undefined}
+            aria-label={t("common.sign_out")}
+            title={sidebarCollapsed ? t("common.sign_out") : undefined}
           >
             <LogOut className="h-3.5 w-3.5" />
-            {!sidebarCollapsed && <span>Sign Out</span>}
+            {!sidebarCollapsed && <span>{t("common.sign_out")}</span>}
           </Button>
         </div>
       </aside>
@@ -221,7 +242,7 @@ function AuthenticatedLayoutContent({
       {/* Main Workspace Frame */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {/* Command Topbar (68px) */}
-        <header className="h-16 shrink-0 border-b border-border bg-toolbar px-4 lg:px-6 flex items-center justify-between gap-4 select-none overflow-hidden">
+        <header className="h-16 shrink-0 border-b border-border bg-toolbar px-4 lg:px-6 flex items-center justify-between gap-4 select-none relative z-30">
           {/* Breadcrumb Navigation */}
           <div className="min-w-0 flex-1 flex items-center gap-1.5 text-xs font-mono text-muted-foreground overflow-hidden whitespace-nowrap">
             {breadcrumbs.map((crumb, idx) => {
@@ -251,7 +272,7 @@ function AuthenticatedLayoutContent({
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
               <Input
                 type="text"
-                placeholder="Search case registry..."
+                placeholder={t("shell.search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-background border-border text-xs pl-8 pr-3 h-9 rounded-squircle-sm focus-visible:ring-accent focus-visible:border-accent/40"

@@ -6,20 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { ExtractedEntityOut } from "@/lib/types";
-
-const ENTITY_LABELS: Record<string, string> = {
-  person: "Person",
-  phone: "Phone",
-  bank_account: "Bank Account",
-  amount: "Amount",
-  date: "Date",
-  location: "Location",
-  email: "Email",
-  url: "URL",
-  organization: "Organization",
-  ip_address: "IP Address",
-  transaction_id: "Transaction ID",
-};
+import { useLanguage } from "@/lib/language-context";
+import { useEnumLabel } from "@/lib/i18n/enums";
 
 interface EntityReviewFieldProps {
   entity: ExtractedEntityOut;
@@ -27,6 +15,8 @@ interface EntityReviewFieldProps {
 }
 
 export function EntityReviewField({ entity, onChange }: EntityReviewFieldProps) {
+  const { t } = useLanguage();
+  const { label } = useEnumLabel();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(entity.value);
   const [saving, setSaving] = useState(false);
@@ -62,7 +52,7 @@ export function EntityReviewField({ entity, onChange }: EntityReviewFieldProps) 
         <div className="flex items-center gap-1.5">
           <Sparkles className="h-3 w-3 text-primary flex-shrink-0" />
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            {ENTITY_LABELS[entity.entity_type] ?? entity.entity_type}
+            {label("entity.type", entity.entity_type)}
           </span>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -71,7 +61,7 @@ export function EntityReviewField({ entity, onChange }: EntityReviewFieldProps) 
               "font-mono text-xs font-bold",
               isHigh ? "text-success" : "text-warn",
             ].join(" ")}
-            title={`Confidence: ${Math.round(entity.confidence * 100)}%`}
+            title={`${t("common.confidence")}: ${Math.round(entity.confidence * 100)}%`}
           >
             {Math.round(entity.confidence * 100)}%
           </span>
@@ -80,21 +70,21 @@ export function EntityReviewField({ entity, onChange }: EntityReviewFieldProps) 
               className="bg-warn/15 text-warn border-warn/20 text-[10px] px-1.5 py-0 hover:bg-warn/20 rounded-squircle-sm"
               variant="outline"
             >
-              Review
+              {t("entity.badge_review")}
             </Badge>
           ) : isMedium ? (
             <Badge
               className="bg-warn/10 text-warn border-warn/20 text-[10px] px-1.5 py-0 hover:bg-warn/15 rounded-squircle-sm"
               variant="outline"
             >
-              Medium
+              {t("entity.badge_medium")}
             </Badge>
           ) : (
             <Badge
               className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0 hover:bg-success/15 rounded-squircle-sm"
               variant="outline"
             >
-              Verify
+              {t("entity.badge_verify")}
             </Badge>
           )}
         </div>
@@ -134,11 +124,11 @@ export function EntityReviewField({ entity, onChange }: EntityReviewFieldProps) 
             size="sm"
             onClick={() => setEditing(true)}
             className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-            title="Edit entity value"
+            title={t("entity.edit_value")}
             id={`entity-edit-${entity.id}`}
           >
             <Edit3 className="h-3 w-3" />
-            <span className="sr-only">Edit</span>
+            <span className="sr-only">{t("common.edit")}</span>
           </Button>
         </div>
       )}

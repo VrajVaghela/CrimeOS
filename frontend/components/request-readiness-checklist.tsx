@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { RequestReadinessOut, ReadinessItem } from "@/lib/types";
+import { interpolate, useLanguage, type TranslationKey } from "@/lib/language-context";
+import { useEnumLabel } from "@/lib/i18n/enums";
 
 interface RequestReadinessChecklistProps {
   readiness: RequestReadinessOut;
@@ -18,9 +20,25 @@ export function RequestReadinessChecklist({
   onEditClick,
   onRoleApprovalClick
 }: RequestReadinessChecklistProps) {
+  const { t } = useLanguage();
+  const { statusLabel } = useEnumLabel();
   const failedItems = readiness.items.filter((item) => item.status === "failed");
-  const warningItems = readiness.items.filter((item) => item.status === "warning");
-  const passedItems = readiness.items.filter((item) => item.status === "passed");
+
+  // The backend sends English `label`/`message`/`fix` (the authoritative audit text)
+  // plus stable `*_key` suffixes. Render the keyed version and fall back to the
+  // English string only when a key is absent or missing from the dictionaries.
+  const keyed = (suffix: string | null, fallback: string, params?: Record<string, string> | null) => {
+    if (!suffix) return fallback;
+    const key = `readiness.msg.${suffix}`;
+    const resolved = t(key as TranslationKey);
+    return resolved === key ? fallback : interpolate(resolved, params);
+  };
+
+  const itemLabel = (item: ReadinessItem) => {
+    const key = `readiness.item_${item.key}`;
+    const resolved = t(key as TranslationKey);
+    return resolved === key ? item.label : resolved;
+  };
 
   return (
     <Card className="border border-border bg-card">
@@ -28,22 +46,22 @@ export function RequestReadinessChecklist({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg font-heading font-bold text-foreground">
-              Pre-Dispatch Quality Gate
+              {t("readiness.title")}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
-              Verifies entities, legal basis, and credentials before SMTP dispatch
+              {t("readiness.subtitle")}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {readiness.is_ready ? (
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/30 glow-success font-heading">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                READY FOR DISPATCH
+                {t("readiness.ready_badge")}
               </span>
             ) : (
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-destructive/15 text-destructive border border-destructive/30 glow-destructive font-heading">
                 <ShieldAlert className="h-3.5 w-3.5" />
-                DISPATCH BLOCKED
+                {t("readiness.blocked_badge")}
               </span>
             )}
           </div>
@@ -54,9 +72,11 @@ export function RequestReadinessChecklist({
         {!readiness.is_ready && (
           <Alert variant="destructive" className="border-destructive/30 bg-destructive/5 text-destructive-foreground">
             <ShieldAlert className="h-4 w-4 text-destructive" />
-            <AlertTitle className="font-heading font-semibold text-sm">Quality Checklist Incomplete</AlertTitle>
+            <AlertTitle className="font-heading font-semibold text-sm">
+              {t("readiness.incomplete_title")}
+            </AlertTitle>
             <AlertDescription className="text-xs mt-1">
-              Dispatch is disabled. Please resolve the {failedItems.length} failing issue(s) in the draft request before sending.
+              {interpolate(t("readiness.incomplete_desc"), { count: failedItems.length })}
             </AlertDescription>
           </Alert>
         )}
@@ -78,7 +98,7 @@ export function RequestReadinessChecklist({
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-foreground font-heading">
-                        {item.label}
+                        {itemLabel(item)}
                       </span>
                       <span
                         className={`text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded ${
@@ -89,15 +109,19 @@ export function RequestReadinessChecklist({
                             : "bg-destructive/10 text-destructive"
                         }`}
                       >
-                        {item.status}
+                        {statusLabel(item.status)}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{item.message}</p>
-                    
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {keyed(item.message_key, item.message, item.message_params)}
+                    </p>
+
                     {item.fix && (
                       <div className="mt-1.5 p-2 rounded-lg bg-muted/30 border border-border/50 max-w-xl">
-                        <span className="text-[10px] font-bold text-accent uppercase block font-heading">Recommended Fix</span>
-                        <p className="text-xs text-foreground mt-0.5">{item.fix}</p>
+                        <span className="text-[10px] font-bold text-accent uppercase block font-heading">
+                          {t("readiness.recommended_fix")}
+                        </span>
+                        <p className="text-xs text-foreground mt-0.5">{keyed(item.fix_key, item.fix)}</p>
                       </div>
                     )}
                   </div>
@@ -114,7 +138,7 @@ export function RequestReadinessChecklist({
                           onClick={onRoleApprovalClick}
                         >
                           <Users className="h-3 w-3" />
-                          Approve Draft
+                          {t("readiness.approve_draft")}
                         </Button>
                       ) : (
                         <Button
@@ -124,7 +148,7 @@ export function RequestReadinessChecklist({
                           onClick={onEditClick}
                         >
                           <Edit className="h-3 w-3" />
-                          Fix Draft
+                          {t("readiness.fix_draft")}
                         </Button>
                       )}
                     </>

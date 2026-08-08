@@ -36,6 +36,7 @@ import type {
   TimelineEventType,
 } from "@/lib/types";
 import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
 import { TranslatedTextBlock } from "@/components/translated-text-block";
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -109,6 +110,7 @@ const EVENT_META: Record<
 // ──────────────────────────────────────────────────────────────────────────────
 
 function ConfidenceBadge({ value }: { value: number | null }) {
+  const { t } = useLanguage();
   if (value === null) return null;
   const pct = Math.round(value * 100);
   const cls =
@@ -118,28 +120,21 @@ function ConfidenceBadge({ value }: { value: number | null }) {
       ? "text-accent"
       : "text-destructive";
   return (
-    <span className={`font-mono text-xs ${cls}`} title="AI confidence">
+    <span className={`font-mono text-xs ${cls}`} title={t("timeline.ai_confidence")}>
       {pct}% conf.
     </span>
   );
 }
 
-function TimelineNode({ event, lang }: { event: TimelineEventOut, lang: string }) {
+function TimelineNode({ event }: { event: TimelineEventOut }) {
+  const { t } = useLanguage();
+  const { formatDateTime: formatTime } = useFormatters();
   const [expanded, setExpanded] = useState(false);
   const meta = EVENT_META[event.event_type] ?? EVENT_META.officer_note;
   const Icon = meta.icon;
   const isAi = event.ai_generated;
   const isCctv = event.event_type === "cctv_frame";
   const cctv = event.cctv_analysis as CctvAnalysisDetail | null;
-
-  const formatTime = (iso: string) =>
-    new Date(iso).toLocaleString(lang === "hi" ? "hi-IN" : (lang === "gu" ? "gu-IN" : "en-IN"), {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
 
   return (
     <div className="relative flex gap-4 group animate-fade-up">
@@ -173,7 +168,7 @@ function TimelineNode({ event, lang }: { event: TimelineEventOut, lang: string }
             {isAi && (
               <span className="inline-flex items-center gap-1 text-xs text-primary font-medium">
                 <Sparkles className="h-3 w-3" />
-                AI-generated
+                {t("timeline.ai_generated")}
               </span>
             )}
             <ConfidenceBadge value={event.confidence} />
@@ -184,7 +179,7 @@ function TimelineNode({ event, lang }: { event: TimelineEventOut, lang: string }
         </div>
 
         {/* Title */}
-        <div className="mt-2 text-sm font-semibold font-heading"><TranslatedTextBlock content={event.title} autoTranslate={true} /></div>
+        <div className="mt-2 text-sm font-semibold font-heading"><TranslatedTextBlock content={event.title} /></div>
 
         {/* Location chip */}
         {event.location && (
@@ -196,7 +191,7 @@ function TimelineNode({ event, lang }: { event: TimelineEventOut, lang: string }
 
         {/* Description */}
         <div className="mt-2 text-xs text-muted-foreground leading-relaxed">
-          <TranslatedTextBlock content={event.description} autoTranslate={true} />
+          <TranslatedTextBlock content={event.description} />
         </div>
 
         {/* CCTV details — expand/collapse */}
@@ -213,11 +208,11 @@ function TimelineNode({ event, lang }: { event: TimelineEventOut, lang: string }
               <div className="mt-3 rounded-lg border border-rose/20 bg-rose/5 p-3 space-y-2 animate-fade-up">
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <p className="text-muted-foreground mb-0.5">OSD Timestamp</p>
+                    <p className="text-muted-foreground mb-0.5">{t("timeline.osd_timestamp")}</p>
                     <p className="font-mono text-foreground">{cctv.detected_timestamp}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground mb-0.5">Confidence</p>
+                    <p className="text-muted-foreground mb-0.5">{t("timeline.confidence")}</p>
                     <ConfidenceBadge value={cctv.confidence} />
                   </div>
                 </div>
@@ -225,7 +220,7 @@ function TimelineNode({ event, lang }: { event: TimelineEventOut, lang: string }
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">
                       <User className="h-3 w-3 inline mr-1" />
-                      Persons Detected
+                      {t("timeline.persons_detected")}
                     </p>
                     <ul className="space-y-0.5">
                       {cctv.persons_detected.map((p, i) => (
@@ -236,7 +231,7 @@ function TimelineNode({ event, lang }: { event: TimelineEventOut, lang: string }
                 )}
                 {cctv.vehicles_detected.length > 0 && (
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Vehicles</p>
+                    <p className="text-xs text-muted-foreground mb-1">{t("timeline.vehicles")}</p>
                     <ul className="space-y-0.5">
                       {cctv.vehicles_detected.map((v, i) => (
                         <li key={i} className="text-xs text-foreground">• {v}</li>
@@ -248,7 +243,7 @@ function TimelineNode({ event, lang }: { event: TimelineEventOut, lang: string }
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">
                       <AlertTriangle className="h-3 w-3 inline mr-1 text-accent" />
-                      Forensic Flags
+                      {t("timeline.forensic_flags")}
                     </p>
                     <ul className="space-y-0.5">
                       {cctv.forensic_flags.map((f, i) => (
@@ -349,7 +344,7 @@ function CctvPanel({
             {uploading ? (
               <span className="flex items-center gap-2 text-primary">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Analyzing CCTV frame via Gemini Vision…
+                {t("timeline.analyzing_cctv")}
               </span>
             ) : (
               t("timeline.cctv_drop_hint" as any)
@@ -378,17 +373,17 @@ function CctvPanel({
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <p className="text-muted-foreground mb-0.5">OSD Timestamp</p>
+              <p className="text-muted-foreground mb-0.5">{t("timeline.osd_timestamp")}</p>
               <p className="font-mono">{lastResult.analysis.detected_timestamp}</p>
             </div>
             <div>
-              <p className="text-muted-foreground mb-0.5">Location</p>
+              <p className="text-muted-foreground mb-0.5">{t("timeline.location")}</p>
               <p className="leading-snug">{lastResult.analysis.location_description}</p>
             </div>
           </div>
           {lastResult.analysis.forensic_flags.length > 0 && (
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Forensic Flags</p>
+              <p className="text-xs text-muted-foreground mb-1">{t("timeline.forensic_flags")}</p>
               {lastResult.analysis.forensic_flags.map((f, i) => (
                 <p key={i} className="text-xs text-accent">▲ {f}</p>
               ))}
@@ -417,6 +412,7 @@ function OfficerNoteForm({
   caseId: string;
   onAdded: (event: TimelineEventOut) => void;
 }) {
+  const { t } = useLanguage();
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [location, setLocation] = useState("");
@@ -459,7 +455,7 @@ function OfficerNoteForm({
           id="note-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Officer visited crime scene"
+          placeholder={t("timeline.note_title_placeholder")}
           className="h-9 text-sm text-foreground bg-background"
           required
         />
@@ -472,7 +468,7 @@ function OfficerNoteForm({
           id="note-desc"
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
-          placeholder="Describe the observation or action taken…"
+          placeholder={t("timeline.note_desc_placeholder")}
           className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none text-foreground"
           required
         />
@@ -480,7 +476,7 @@ function OfficerNoteForm({
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label htmlFor="note-time" className="text-xs text-muted-foreground mb-1 block">
-            Date & Time *
+            {t("timeline.note_datetime_label")}
           </Label>
           <Input
             id="note-time"
@@ -493,13 +489,13 @@ function OfficerNoteForm({
         </div>
         <div>
           <Label htmlFor="note-location" className="text-xs text-muted-foreground mb-1 block">
-            Location (optional)
+            {t("timeline.note_location")}
           </Label>
           <Input
             id="note-location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            placeholder="e.g. Vastrapur, Ahmedabad"
+            placeholder={t("timeline.note_location_placeholder")}
             className="h-9 text-sm text-foreground bg-background"
           />
         </div>
@@ -516,7 +512,7 @@ function OfficerNoteForm({
         {saving ? (
           <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…</>
         ) : (
-          <><MessageSquarePlus className="h-3.5 w-3.5" /> Add Note to Timeline</>
+          <><MessageSquarePlus className="h-3.5 w-3.5" /> {t("timeline.add_note_submit")}</>
         )}
       </Button>
     </form>
@@ -566,7 +562,7 @@ export function TimelineWorkspace({
             </h1>
             <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-xs text-primary font-medium">
               <Sparkles className="h-3 w-3" />
-              AI-Synthesized
+              {t("timeline.ai_synthesized")}
             </span>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -645,7 +641,7 @@ export function TimelineWorkspace({
             <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               <AlertTriangle className="h-4 w-4 shrink-0" />
               <div>
-                <p className="font-medium">Failed to load timeline</p>
+                <p className="font-medium">{t("timeline.load_failed")}</p>
                 <p className="text-xs text-destructive/70 mt-0.5">{error}</p>
               </div>
               <Button
@@ -668,7 +664,7 @@ export function TimelineWorkspace({
           ) : (
             <div>
               {events.map((event) => (
-                <TimelineNode key={event.id} event={event} lang={lang} />
+                <TimelineNode key={event.id} event={event} />
               ))}
             </div>
           )}

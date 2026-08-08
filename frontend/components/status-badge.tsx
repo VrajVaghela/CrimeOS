@@ -1,11 +1,15 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useEnumLabel } from "@/lib/i18n/enums";
 
 interface StatusBadgeProps {
   status: string;
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
+  const { statusLabel } = useEnumLabel();
   const normalized = status.toLowerCase();
 
   let variant: "success" | "warning" | "info" | "destructive" | "secondary" = "secondary";
@@ -30,9 +34,11 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       variant={variant}
       dot={showDot}
       pulse={showPulse}
+      // `uppercase` is a no-op for Devanagari/Gujarati, so the badge keeps its
+      // console styling for Latin statuses without mangling Indic text.
       className={cn("font-mono uppercase px-2 py-0.5 text-[10px] font-semibold tracking-wide")}
     >
-      {status.replace(/_/g, " ")}
+      {statusLabel(status)}
     </Badge>
   );
 }

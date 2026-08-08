@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { TranslatedTextBlock } from "@/components/translated-text-block";
 import { getAuditEvents, ApiError } from "@/lib/api";
 import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
 import type { AuditEventOut } from "@/lib/types";
 
 const ACTION_CONFIG: Record<string, { icon: React.ElementType; color: string; label: string }> = {
@@ -57,23 +58,12 @@ function getActionColor(action: string): string {
   return "bg-muted";
 }
 
-function formatRelativeTime(dateStr: string, t: any, lang: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60) return `${diffSec}${t("common.s")} ${t("common.ago")}`;
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}${t("common.m")} ${t("common.ago")}`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}${t("common.h")} ${t("common.ago")}`;
-  return date.toLocaleDateString(lang === "hi" ? "hi-IN" : (lang === "gu" ? "gu-IN" : "en-IN"), { day: "2-digit", month: "short", year: "numeric" });
-}
 
 export default function AuditPage() {
   const params = useParams();
   const caseId = params.id as string;
   const { t, lang } = useLanguage();
+  const { formatRelative, formatDateTime } = useFormatters();
 
   const [events, setEvents] = useState<AuditEventOut[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,7 +121,7 @@ export default function AuditPage() {
       {loading ? (
         <div className="flex flex-col items-center gap-3 py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading audit events...</p>
+          <p className="text-sm text-muted-foreground">{t("audit.loading")}</p>
         </div>
       ) : events.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
@@ -190,7 +180,7 @@ export default function AuditPage() {
                       <div className="flex items-center gap-2 min-w-0">
                         <Icon className={`h-4 w-4 shrink-0 ${config.color}`} />
                         <div className="font-heading text-sm font-semibold text-foreground truncate">
-                          <TranslatedTextBlock content={config.label} autoTranslate={true} />
+                          <TranslatedTextBlock content={config.label} />
                         </div>
                         {idx === 0 && (
                           <Badge variant="info" className="text-[10px] font-mono shrink-0">
@@ -200,15 +190,12 @@ export default function AuditPage() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
                         {event.user_id && <User className="h-3 w-3" />}
-                        <span className="font-mono whitespace-nowrap">{formatRelativeTime(event.created_at, t, lang)}</span>
+                        <span className="font-mono whitespace-nowrap">{formatRelative(event.created_at)}</span>
                       </div>
                     </div>
 
                     <p className="text-xs text-muted-foreground font-mono mt-1">
-                      {new Date(event.created_at).toLocaleString("en-IN", {
-                        dateStyle: "medium",
-                        timeStyle: "medium",
-                      })}
+                      {formatDateTime(event.created_at)}
                     </p>
 
                     {/* Detail expansion */}
@@ -251,7 +238,7 @@ export default function AuditPage() {
           {/* Timeline footer */}
           <div className="flex items-center gap-2 pl-12 mt-2">
             <div className="h-3 w-3 rounded-full bg-muted border border-border/60" />
-            <p className="text-xs text-muted-foreground font-mono">Case opened</p>
+            <p className="text-xs text-muted-foreground font-mono">{t("audit.case_opened")}</p>
           </div>
         </div>
       )}

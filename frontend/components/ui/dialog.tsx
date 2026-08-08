@@ -1,6 +1,9 @@
+"use client";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 
 interface DialogProps {
   open: boolean;
@@ -67,6 +70,8 @@ export function DialogContent({
   children,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
+  const { t } = useLanguage();
+
   return (
     <div
       className={cn(
@@ -84,7 +89,7 @@ export function DialogContent({
           backdrop?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
         }}
         className="absolute right-4 top-4 rounded-lg p-1 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-        aria-label="Close"
+        aria-label={t("common.close")}
       >
         <X className="h-4 w-4" />
       </button>

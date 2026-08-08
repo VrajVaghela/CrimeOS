@@ -25,6 +25,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getVideoReport, pollVideoStatus } from "@/lib/api";
+import { useLanguage } from "@/lib/language-context";
 import type { EvidenceOut, VideoReportResponse, VideoTimelineEntry } from "@/lib/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -46,6 +47,7 @@ const PHASE_LABELS: Record<string, string> = {
 };
 
 export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWorkspaceProps) {
+  const { t } = useLanguage();
   const [report, setReport] = useState<VideoReportResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -227,7 +229,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] py-16 gap-3">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Retrieving forensic report data...</p>
+        <p className="text-sm text-muted-foreground">{t("video.retrieving_report")}</p>
       </div>
     );
   }
@@ -239,10 +241,10 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
         <CardHeader>
           <CardTitle className="text-destructive flex items-center gap-2">
             <ShieldAlert className="h-5 w-5" />
-            Forensic Analysis Failed
+            {t("video.analysis_failed")}
           </CardTitle>
           <CardDescription>
-            The video file could not be fully analyzed.
+            {t("video.analysis_failed_sub")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -250,7 +252,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
             {error}
           </p>
           <Button variant="outline" className="w-full" onClick={onRefresh}>
-            Reload Workspace
+            {t("video.reload_workspace")}
           </Button>
         </CardContent>
       </Card>
@@ -273,7 +275,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
             <Loader2 className="h-8 w-8 animate-spin text-info" />
           </div>
           <CardTitle className="font-heading text-lg font-bold">
-            Forensic Incident Analyzer
+            {t("video.analyzer_title")}
           </CardTitle>
           <CardDescription className="text-info font-mono text-xs mt-1 animate-pulse">
             {label}
@@ -282,7 +284,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
         <CardContent className="px-8 pb-8 space-y-6">
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Analysis Progress</span>
+              <span>{t("video.analysis_progress")}</span>
               <span>{progress}%</span>
             </div>
             <div className="w-full bg-background rounded-full h-2.5 overflow-hidden border border-border/40">
@@ -367,7 +369,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 text-violet">
                 <Sparkles className="h-4.5 w-4.5" />
-                <span className="font-heading text-xs font-bold uppercase tracking-wider">Forensic Report</span>
+                <span className="font-heading text-xs font-bold uppercase tracking-wider">{t("video.forensic_report")}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Badge className={`text-[10px] font-bold py-0.5 px-2 border ${riskColors.bg}`}>
@@ -391,7 +393,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
               <div className="bg-destructive/10 border border-destructive/20 p-3 rounded-lg animate-pulse">
                 <div className="flex items-center gap-1.5 text-destructive text-xs font-bold uppercase">
                   <ShieldAlert className="h-4 w-4" />
-                  Detected Premise Incident
+                  {t("video.detected_incident")}
                 </div>
                 <p className="text-xs text-foreground/80 mt-1.5 leading-relaxed">
                   {report.crime_summary}

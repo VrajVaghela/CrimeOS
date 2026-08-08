@@ -101,7 +101,7 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
       <div
         role="button"
         tabIndex={disabled ? -1 : 0}
-        aria-label="Upload complaint file"
+        aria-label={t("common.upload_complaint_file")}
         onClick={() => !disabled && inputRef.current?.click()}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -153,7 +153,7 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
               className="absolute top-3 right-3 h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">Remove file</span>
+              <span className="sr-only">{t("common.remove_file")}</span>
             </Button>
           </>
         ) : (

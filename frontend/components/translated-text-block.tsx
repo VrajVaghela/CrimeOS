@@ -4,15 +4,22 @@ import { useEffect } from "react";
 import { Sparkles, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/language-context";
+import { ENDONYM_SHORT } from "@/lib/i18n/endonyms";
 import { useTranslatedContent } from "@/hooks/use-translated-content";
 
 interface TranslatedTextBlockProps {
   content: string;
   className?: string;
+  /**
+   * Phase 14E: defaults to true — when a language is selected, AI-generated
+   * content follows it automatically, like every other surface. Pass `false`
+   * only where the officer must see the original verbatim (the raw complaint
+   * pane), which keeps a manual "Translate" button instead.
+   */
   autoTranslate?: boolean;
 }
 
-export function TranslatedTextBlock({ content, className = "", autoTranslate = false }: TranslatedTextBlockProps) {
+export function TranslatedTextBlock({ content, className = "", autoTranslate = true }: TranslatedTextBlockProps) {
   const { lang, t } = useLanguage();
   const {
     text: displayContent,
@@ -54,7 +61,7 @@ export function TranslatedTextBlock({ content, className = "", autoTranslate = f
           )}
           {isTranslated && !isFallback && (
             <span className="text-[10px] bg-primary/15 border border-primary/25 text-primary px-2 py-0.5 rounded-full font-mono">
-              {lang === "hi" ? "हिंदी" : "ગુજ"}
+              {ENDONYM_SHORT[lang]}
             </span>
           )}
           {isFallback && (

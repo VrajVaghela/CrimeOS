@@ -1,6 +1,10 @@
+"use client";
+
 import React from "react";
 import { GitBranch, Clock, ChevronRight } from "lucide-react";
 import type { InvestigationPathOut } from "@/lib/types";
+import { useLanguage } from "@/lib/language-context";
+import { useFormatters } from "@/lib/format";
 
 interface PathRevisionListProps {
   revisions: InvestigationPathOut[];
@@ -15,12 +19,15 @@ export function PathRevisionList({
   onSelectRevision,
   selectedRevisionId,
 }: PathRevisionListProps) {
+  const { t } = useLanguage();
+  const { formatDateTime } = useFormatters();
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 mb-2">
         <GitBranch className="h-4 w-4 text-primary animate-pulse" />
         <h3 className="text-sm font-semibold font-heading text-foreground">
-          Revision History / संशोधन इतिहास
+          {t("revisions.title")}
         </h3>
       </div>
       <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
@@ -51,11 +58,11 @@ export function PathRevisionList({
                   )}
                 </div>
                 <div className="text-xs font-medium text-foreground truncate">
-                  {rev.change_reason || "Initial complaint path suggestion"}
+                  {rev.change_reason || t("revisions.initial")}
                 </div>
                 <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
                   <Clock className="h-3 w-3" />
-                  {new Date(rev.generated_at).toLocaleString()}
+                  {formatDateTime(rev.generated_at)}
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />

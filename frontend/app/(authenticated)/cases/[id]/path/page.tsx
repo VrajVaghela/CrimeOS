@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { AlertCircle, Crosshair, Gavel, Scale, Sparkles, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
@@ -277,7 +279,7 @@ export default function PathPage() {
               {t("path.blueprint")}
             </h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Model: <span className="font-mono text-accent-strong">{currentPath?.model_used || path?.model_used}</span> · Grounded in seeded police SOPs
+              {t("path.model_label")} <span className="font-mono text-accent-strong">{currentPath?.model_used || path?.model_used}</span> · Grounded in seeded police SOPs
             </p>
           </div>
           <Button
@@ -338,7 +340,7 @@ export default function PathPage() {
             caseSections.map((sec) => {
               const highConfidence = sec.confidence >= 0.85;
               return (
-                <AiContentCard key={sec.id} title="AI-Suggested Section">
+                <AiContentCard key={sec.id} title={t("common.ai_suggested_section")}>
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
@@ -367,7 +369,7 @@ export default function PathPage() {
                       <span className="font-bold text-[10px] text-accent-strong block uppercase tracking-wider mb-1">
                         {t("path.ai_reasoning")}
                       </span>
-                      <TranslatedTextBlock content={sec.ai_reasoning} autoTranslate={true} />
+                      <TranslatedTextBlock content={sec.ai_reasoning} />
                     </div>
 
                     {/* Status */}
@@ -376,13 +378,13 @@ export default function PathPage() {
                         {t("path.review_status")}
                       </span>
                       {sec.status === "approved" && (
-                        <Badge variant="success">Verified Charge</Badge>
+                        <Badge variant="success">{t("path.verified_charge")}</Badge>
                       )}
                       {sec.status === "rejected" && (
-                        <Badge variant="destructive">Flagged / Inapplicable</Badge>
+                        <Badge variant="destructive">{t("path.flagged_inapplicable")}</Badge>
                       )}
                       {sec.status === "pending" && (
-                        <Badge variant="warning" dot pulse>Awaiting Audit</Badge>
+                        <Badge variant="warning" dot pulse>{t("path.awaiting_audit")}</Badge>
                       )}
                     </div>
 

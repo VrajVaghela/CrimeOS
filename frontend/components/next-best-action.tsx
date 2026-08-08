@@ -80,7 +80,7 @@ export function NextBestAction({
             className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 py-2 h-11 rounded-squircle-sm flex items-center gap-2"
           >
             <Play className="h-4 w-4 fill-current" />
-            <span>Execute Action</span>
+            <span>{t("common.execute_action")}</span>
             <ArrowRight className="h-4 w-4" />
           </Button>
         )}
