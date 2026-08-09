@@ -1,0 +1,37 @@
+{
+  "note": "Identifiers lifted from data/03_complaints_multilingual. Feed these to the OSINT digital-footprint scan.",
+  "emails": [
+    "priyanka.desai27@outlook.com",
+    "growthteam.amz@protonmail.com",
+    "hrteam.amzgrowth@gmail.com",
+    "bhavesh.patel38@gmail.com",
+    "sureshjoshi1965@gmail.com"
+  ],
+  "phones": [
+    "+916351288104",
+    "+917096833217",
+    "+918655099881",
+    "+917021145566",
+    "+919624877345",
+    "+917894561230"
+  ],
+  "upi_ids": [
+    "growthteam.pay@okaxis",
+    "merchant.settle@ibl",
+    "rkverify.pay@ybl",
+    "quickcash.help@paytm",
+    "vksharma.verify@okicici"
+  ],
+  "usernames": [
+    "rahul_mentor01",
+    "priya_hr_team"
+  ],
+  "domains": [
+    "amz-growth-wallet.top",
+    "sbi-kyc-update.online-verify.in"
+  ],
+  "ip_addresses": [
+    "103.240.172.44",
+    "45.118.132.19"
+  ]
+}

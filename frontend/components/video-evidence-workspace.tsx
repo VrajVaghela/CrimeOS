@@ -18,6 +18,11 @@ import {
   ExternalLink,
   Copy,
   Check,
+  Cpu,
+  ShieldCheck,
+  RefreshCw,
+  Activity,
+  FileText,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -262,45 +267,178 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
   // State: Active background processing
   if (isStillProcessing) {
     const label = PHASE_LABELS[status] || "Processing video...";
+
+    const steps = [
+      {
+        id: "ingest",
+        label: "Video Validation & Gemini Ingestion",
+        detail: "Stream verified & encrypted for AI multimodal review",
+        icon: Cpu,
+        activeAt: 0,
+        doneAt: 25,
+      },
+      {
+        id: "cv",
+        label: "Computer Vision & Object Tracking",
+        detail: "Scanning frames for threat signatures & timestamp anchors",
+        icon: Sparkles,
+        activeAt: 25,
+        doneAt: 60,
+      },
+      {
+        id: "legal",
+        label: "BNS / BNSS Criminal Statute Mapping",
+        detail: "Cross-referencing legal codes and drafting SOP report",
+        icon: FileText,
+        activeAt: 60,
+        doneAt: 85,
+      },
+      {
+        id: "ledger",
+        label: "Tamper-Evident Ledger Commit",
+        detail: "Hashing audit trail to immutable blockchain record",
+        icon: ShieldCheck,
+        activeAt: 85,
+        doneAt: 100,
+      },
+    ];
+
     return (
-      <Card className="max-w-xl mx-auto mt-8 border-info/30 glow-info overflow-hidden">
-        <div className="h-1.5 w-full bg-info/20 overflow-hidden relative">
-          <div 
-            className="h-full bg-gradient-to-r from-info to-primary transition-all duration-500 ease-out"
-            style={{ width: `${progress}%` }}
-          />
+      <Card className="max-w-2xl mx-auto my-8 border-info/30 bg-gradient-to-b from-info/[0.05] via-card to-card rounded-squircle p-6 md:p-8 space-y-6 shadow-2xl transition-colors duration-300 hover:border-info/50">
+        {/* Top Header Badge Row */}
+        <div className="flex items-center justify-between gap-3 border-b border-border/40 pb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-squircle-sm bg-info/10 border border-info/20 text-info">
+              <Sparkles className="h-4 w-4 animate-pulse" />
+            </div>
+            <Badge
+              variant="secondary"
+              className="bg-info/10 text-info border-info/20 text-[11px] font-mono font-medium tracking-wide uppercase px-2.5 py-0.5 rounded-squircle-sm"
+            >
+              AI Forensic Engine
+            </Badge>
+          </div>
+
+          <div className="inline-flex items-center gap-2 text-xs font-mono text-info bg-info/10 border border-info/25 px-3 py-1 rounded-full">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-info opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-info"></span>
+            </span>
+            <span className="uppercase tracking-wider text-[11px] font-semibold">
+              {status}
+            </span>
+          </div>
         </div>
-        <CardHeader className="text-center pt-8">
-          <div className="mx-auto bg-info/10 rounded-full p-4 w-16 h-16 border border-info/20 flex items-center justify-center mb-4">
-            <Loader2 className="h-8 w-8 animate-spin text-info" />
+
+        {/* Title & Current Phase */}
+        <div className="space-y-1">
+          <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground tracking-tight flex items-center justify-between">
+            <span>{t("video.analyzer_title")}</span>
+            <span className="text-xs font-mono text-muted-foreground font-normal">
+              ID: {evidence.id.slice(0, 8)}
+            </span>
+          </h2>
+          <p className="text-xs font-mono text-info flex items-center gap-2 pt-0.5">
+            <Activity className="h-3.5 w-3.5 text-info animate-pulse shrink-0" />
+            <span>{label}</span>
+          </p>
+        </div>
+
+        {/* High-Precision Progress Meter */}
+        <div className="space-y-2 bg-border-soft/50 p-4 rounded-xl border border-border/40">
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-secondary font-medium uppercase tracking-wider text-[11px]">
+              {t("video.analysis_progress")}
+            </span>
+            <span className="font-mono font-bold text-info text-sm bg-info/10 border border-info/20 px-2.5 py-0.5 rounded-squircle-sm">
+              {progress}%
+            </span>
           </div>
-          <CardTitle className="font-heading text-lg font-bold">
-            {t("video.analyzer_title")}
-          </CardTitle>
-          <CardDescription className="text-info font-mono text-xs mt-1 animate-pulse">
-            {label}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-8 pb-8 space-y-6">
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{t("video.analysis_progress")}</span>
-              <span>{progress}%</span>
-            </div>
-            <div className="w-full bg-background rounded-full h-2.5 overflow-hidden border border-border/40">
-              <div 
-                className="bg-gradient-to-r from-info to-primary h-full rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+
+          <div className="w-full bg-background rounded-full h-2.5 p-0.5 border border-border/60 relative overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-info/80 to-info h-full rounded-full transition-all duration-500 ease-out relative"
+              style={{ width: `${progress}%` }}
+            />
           </div>
-          <Separator className="bg-border/30" />
-          <div className="text-xs text-muted-foreground space-y-1.5 bg-black/25 p-3 rounded-lg border border-border/20">
-            <div>💡 Video is being securely validated and sent to Gemini.</div>
-            <div>💡 Incident logs are logged in a tamper-evident blockchain ledger.</div>
-            <div>💡 You may wait here; page will update automatically.</div>
+        </div>
+
+        {/* Live Step Checklist Matrix */}
+        <div className="space-y-2.5">
+          <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground font-semibold px-0.5">
+            Live Telemetry Pipeline
+          </p>
+          <div className="grid grid-cols-1 gap-2">
+            {steps.map((step) => {
+              const isDone = progress >= step.doneAt;
+              const isActive = progress >= step.activeAt && !isDone;
+              const StepIcon = step.icon;
+
+              return (
+                <div
+                  key={step.id}
+                  className={`p-3 rounded-lg border text-xs transition-all duration-300 flex items-center justify-between gap-3 ${
+                    isDone
+                      ? "bg-success/[0.04] border-success/30 text-foreground"
+                      : isActive
+                      ? "bg-info/[0.08] border-info/40 text-foreground"
+                      : "bg-border-soft/30 border-border/20 text-muted-foreground opacity-60"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`p-2 rounded-md shrink-0 border ${
+                        isDone
+                          ? "bg-success/15 border-success/30 text-success"
+                          : isActive
+                          ? "bg-info/15 border-info/30 text-info"
+                          : "bg-muted/10 border-border/20 text-muted-foreground"
+                      }`}
+                    >
+                      <StepIcon className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-heading font-medium truncate text-foreground text-xs">
+                        {step.label}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate font-mono mt-0.5">
+                        {step.detail}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 font-mono text-[10px]">
+                    {isDone ? (
+                      <span className="inline-flex items-center gap-1 text-success font-semibold bg-success/10 border border-success/20 px-2 py-0.5 rounded">
+                        <CheckCircle2 className="h-3 w-3" /> DONE
+                      </span>
+                    ) : isActive ? (
+                      <span className="inline-flex items-center gap-1 text-info font-semibold bg-info/10 border border-info/20 px-2 py-0.5 rounded">
+                        <Loader2 className="h-3 w-3 animate-spin" /> RUNNING
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground/60 px-2 py-0.5">
+                        QUEUED
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </CardContent>
+        </div>
+
+        {/* Immutable Audit & Auto-Refresh Footer */}
+        <div className="pt-2 flex items-center justify-between text-[11px] font-mono text-muted-foreground border-t border-border/30">
+          <div className="flex items-center gap-1.5 text-secondary">
+            <Lock className="h-3.5 w-3.5 text-info shrink-0" />
+            <span>Tamper-evident blockchain ledger active</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Clock className="h-3.5 w-3.5 shrink-0" />
+            <span>Auto-refreshing</span>
+          </div>
+        </div>
       </Card>
     );
   }

@@ -156,21 +156,21 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
   };
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden rounded-none border-0 bg-card/40 backdrop-blur-md">
-      <CardHeader className="border-b border-border/40 bg-card/25 pb-4 pr-14">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-            <div>
-              <CardTitle className="text-base font-semibold font-heading flex items-center gap-2 text-white">
+    <Card className="flex h-full flex-col overflow-hidden rounded-none border-0 bg-card/90 backdrop-blur-md">
+      <CardHeader className="border-b border-border/40 bg-card/60 pb-3.5 pt-4 pl-4 pr-14">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Sparkles className="h-5 w-5 text-info shrink-0 animate-pulse" />
+            <div className="min-w-0">
+              <CardTitle className="text-base font-semibold font-heading text-white truncate">
                 {t("copilot.title")}
               </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground">
+              <CardDescription className="text-xs text-muted-foreground truncate">
                 {t("copilot.subtitle")}
               </CardDescription>
             </div>
           </div>
-          <Badge className="bg-primary/10 text-accent-strong border border-primary/20 text-xs px-2 py-0.5 rounded-full font-mono">
+          <Badge className="shrink-0 whitespace-nowrap bg-secondary/60 text-muted-foreground border border-border/50 text-[10px] px-2.5 py-0.5 rounded-full font-mono uppercase tracking-wider select-none">
             {t("copilot.read_only")}
           </Badge>
         </div>
@@ -179,12 +179,12 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
       <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 bg-transparent">
         {loadingHistory ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground space-y-2">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <Loader2 className="h-6 w-6 animate-spin text-info" />
             <span className="text-xs font-mono text-muted-foreground">{t("copilot.loading_history")}</span>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-3">
-            <HelpCircle className="h-10 w-10 text-muted-foreground opacity-50" />
+            <HelpCircle className="h-10 w-10 text-muted-foreground/40" />
             <div>
               <p className="text-sm font-semibold font-heading text-white">{t("copilot.empty_title")}</p>
               <p className="text-xs text-muted-foreground max-w-sm mt-1 leading-relaxed">
@@ -199,21 +199,18 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
               className={`flex flex-col max-w-[85%] ${msg.role === "user" ? "ml-auto items-end" : "mr-auto items-start"}`}
             >
               <div
-                className={`p-3.5 rounded-xl text-sm border transition-all duration-200 ${
+                className={`p-3.5 rounded-xl text-sm border transition-colors duration-200 ${
                   msg.role === "user"
-                    ? "bg-primary/15 border-primary/30 text-white rounded-tr-none glow-primary"
-                    : "bg-secondary/40 border-border/40 text-slate-300 rounded-tl-none relative pl-4"
+                    ? "bg-primary/10 border-primary/30 text-white rounded-tr-none"
+                    : "bg-info/5 border-info/30 text-slate-200 rounded-tl-none relative"
                 }`}
               >
-                {msg.role === "assistant" && (
-                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary/70 rounded-l" />
-                )}
                 {formatMessageText(msg.message)}
 
                 {msg.role === "assistant" && msg.citations && msg.citations.length > 0 && (
-                  <div className="mt-3 pt-2.5 border-t border-border/20">
-                    <p className="text-[10px] uppercase font-mono tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1">
-                      <Sparkles className="h-3 w-3 text-primary animate-pulse" />
+                  <div className="mt-3 pt-2.5 border-t border-info/20">
+                    <p className="text-[10px] uppercase font-mono tracking-wider text-info mb-1.5 flex items-center gap-1">
+                      <Sparkles className="h-3 w-3 text-info" />
                       {t("copilot.grounded_sources")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -243,9 +240,8 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
 
         {loading && (
           <div className="flex flex-col max-w-[85%] mr-auto items-start">
-            <div className="p-3.5 bg-secondary/40 border border-border/40 text-slate-400 rounded-xl rounded-tl-none relative pl-4 flex items-center gap-3">
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary/70 rounded-l" />
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            <div className="p-3.5 bg-info/5 border border-info/30 text-slate-300 rounded-xl rounded-tl-none flex items-center gap-3">
+              <Loader2 className="h-4 w-4 animate-spin text-info" />
               <span className="text-xs font-mono text-muted-foreground">
                 {t("copilot.analyzing").replace("{seconds}", String(elapsedTime))}
               </span>
@@ -271,7 +267,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
               onClick={() => void handleAsk(qq.query, qq.intent)}
               variant="outline"
               size="sm"
-              className="text-xs border-border/30 hover:border-primary/40 hover:bg-primary/10 rounded-full flex-shrink-0 text-muted-foreground hover:text-foreground h-7"
+              className="text-xs border-border/30 hover:border-info/40 hover:bg-info/10 hover:text-info rounded-full flex-shrink-0 text-muted-foreground h-7 transition-colors"
             >
               {qq.label}
             </Button>
@@ -289,7 +285,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
             }
           }}
           placeholder={t("copilot.placeholder")}
-          className="flex-1 bg-input border border-border/40 text-sm focus-visible:ring-primary rounded-lg text-white"
+          className="flex-1 bg-input border border-border/40 text-sm focus-visible:ring-primary rounded-squircle-sm text-white"
           disabled={loading || loadingHistory}
         />
         <Button
@@ -298,7 +294,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
           size="icon"
           aria-label={t("copilot.send")}
           title={t("copilot.send")}
-          className="bg-primary hover:bg-primary/80 glow-primary h-10 w-10 flex items-center justify-center rounded-lg transition-transform hover:scale-105"
+          className="bg-primary hover:bg-primary/90 h-10 w-10 flex items-center justify-center rounded-squircle-sm transition-colors text-white"
         >
           <Send className="h-4 w-4 text-white" />
         </Button>

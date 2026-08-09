@@ -41,7 +41,19 @@ Thumbs.db
 # Dynamic upload directories
 backend/uploads/
 
-# Local test datasets — large (23 MB geojson) and regenerable via
-# data/test_datasets/download_datasets.py + generate_audio_complaints.py
+# Local test datasets — superseded by data/fetch_datasets.py (see data/README.md)
 data/test_datasets/
+
+# Fetched test data — large and fully regenerable via `python data/fetch_datasets.py`.
+# The small text artifacts (complaint .txt, provider response CSVs, OSINT pivot
+# targets) stay committed so the golden-path demo works without a network call.
+data/01_legal_corpus/
+data/02_fir_scans/
+data/04_cctv_video/
+data/07_regional_geospatial/
+data/03_complaints_multilingual/_fonts/
+data/03_complaints_multilingual/*.mp3
+data/03_complaints_multilingual/*.pdf
+data/06_osint/hibp_breach_catalogue.json
+data/06_osint/hibp_breaches_india_subset.json
 
