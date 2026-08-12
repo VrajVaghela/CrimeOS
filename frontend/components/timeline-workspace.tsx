@@ -20,89 +20,45 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  addTimelineNote,
-  ApiError,
-  uploadCctvFrame,
-} from "@/lib/api";
+import { Textarea } from "@/components/ui/textarea";
+import { addTimelineNote, ApiError, uploadCctvFrame } from "@/lib/api";
 import type {
   CctvAnalysisDetail,
   CctvPinOut,
   TimelineEventOut,
   TimelineEventType,
 } from "@/lib/types";
-import { useLanguage } from "@/lib/language-context";
+import { useLanguage, type TranslationKey } from "@/lib/language-context";
 import { useFormatters } from "@/lib/format";
 import { TranslatedTextBlock } from "@/components/translated-text-block";
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Token maps — all colours via token classes, never raw hex
+// Event vocabulary
+//
+// Event type is a fact, so every type gets the same neutral badge and only the
+// icon changes. The previous map gave each of the eight types its own hue and
+// tinted badge, which turned a chronological record into a colour legend the
+// reader had to learn, and spent Info Blue, Emerald, and Alert Red on rows where
+// none of them meant anything.
+//
+// Provenance is the distinction that matters on this surface, and it is carried
+// once — by the "AI generated" mark.
 // ──────────────────────────────────────────────────────────────────────────────
 
-const EVENT_META: Record<
-  TimelineEventType,
-  { label: string; icon: React.ElementType; dotClass: string; borderClass: string; badgeClass: string }
-> = {
-  complaint_filed: {
-    label: "Complaint Filed",
-    icon: FileText,
-    dotClass: "bg-info",
-    borderClass: "border-info/40",
-    badgeClass: "bg-info/15 text-info border-info/30",
-  },
-  entity_extracted: {
-    label: "Entities Extracted",
-    icon: Radar,
-    dotClass: "bg-primary",
-    borderClass: "border-primary/40",
-    badgeClass: "bg-primary/15 text-accent-strong border-primary/30",
-  },
-  path_generated: {
-    label: "Path Generated",
-    icon: Zap,
-    dotClass: "bg-violet",
-    borderClass: "border-violet/40",
-    badgeClass: "bg-violet/15 text-violet border-violet/30",
-  },
-  step_completed: {
-    label: "Step Completed",
-    icon: CheckCircle2,
-    dotClass: "bg-success",
-    borderClass: "border-success/40",
-    badgeClass: "bg-success/15 text-success border-success/30",
-  },
-  request_dispatched: {
-    label: "Request Dispatched",
-    icon: Radar,
-    dotClass: "bg-accent",
-    borderClass: "border-accent/40",
-    badgeClass: "bg-accent/15 text-accent border-accent/30",
-  },
-  response_received: {
-    label: "Response Received",
-    icon: CheckCircle2,
-    dotClass: "bg-success",
-    borderClass: "border-success/40",
-    badgeClass: "bg-success/15 text-success border-success/30",
-  },
-  cctv_frame: {
-    label: "CCTV Frame",
-    icon: Camera,
-    dotClass: "bg-rose animate-pulse",
-    borderClass: "border-rose/40",
-    badgeClass: "bg-rose/15 text-rose border-rose/30",
-  },
-  officer_note: {
-    label: "Officer Note",
-    icon: MessageSquarePlus,
-    dotClass: "bg-muted-foreground",
-    borderClass: "border-border",
-    badgeClass: "bg-muted text-muted-foreground border-border",
-  },
+const EVENT_ICON: Record<TimelineEventType, React.ElementType> = {
+  complaint_filed: FileText,
+  entity_extracted: Radar,
+  path_generated: Zap,
+  step_completed: CheckCircle2,
+  request_dispatched: Radar,
+  response_received: CheckCircle2,
+  cctv_frame: Camera,
+  officer_note: MessageSquarePlus,
 };
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -113,15 +69,10 @@ function ConfidenceBadge({ value }: { value: number | null }) {
   const { t } = useLanguage();
   if (value === null) return null;
   const pct = Math.round(value * 100);
-  const cls =
-    pct >= 85
-      ? "text-success"
-      : pct >= 70
-      ? "text-accent"
-      : "text-destructive";
+  const cls = pct >= 85 ? "text-success" : pct >= 70 ? "text-warn" : "text-destructive";
   return (
     <span className={`font-mono text-xs ${cls}`} title={t("timeline.ai_confidence")}>
-      {pct}% conf.
+      {pct}% {t("path.conf_short")}
     </span>
   );
 }
@@ -130,82 +81,78 @@ function TimelineNode({ event }: { event: TimelineEventOut }) {
   const { t } = useLanguage();
   const { formatDateTime: formatTime } = useFormatters();
   const [expanded, setExpanded] = useState(false);
-  const meta = EVENT_META[event.event_type] ?? EVENT_META.officer_note;
-  const Icon = meta.icon;
+  const Icon = EVENT_ICON[event.event_type] ?? MessageSquarePlus;
   const isAi = event.ai_generated;
   const isCctv = event.event_type === "cctv_frame";
   const cctv = event.cctv_analysis as CctvAnalysisDetail | null;
+  const typeLabel = t(`timeline.event.${event.event_type}` as TranslationKey);
 
   return (
-    <div className="relative flex gap-4 group animate-fade-up">
-      {/* Connector dot */}
-      <div className="flex flex-col items-center shrink-0">
-        <div
-          className={`h-3 w-3 rounded-full mt-1 ring-2 ring-background z-10 ${meta.dotClass}`}
+    <li className="group relative flex gap-4">
+      {/* Rail: a machine-authored event gets an Info Blue node, a human-authored
+          one a neutral node. That is the only colour distinction on the rail. */}
+      <div className="flex shrink-0 flex-col items-center">
+        <span
+          aria-hidden="true"
+          className={`z-10 mt-1.5 h-2.5 w-2.5 rounded-full ring-4 ring-background ${
+            isAi ? "bg-info" : "bg-muted-foreground"
+          }`}
         />
-        <div className="w-px flex-1 bg-border/50 group-last:hidden mt-1" />
+        <span aria-hidden="true" className="mt-1 w-px flex-1 bg-border group-last:hidden" />
       </div>
 
-      {/* Card */}
       <div
-        className={`flex-1 mb-6 rounded-xl border bg-card p-4 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 ${
-          isCctv
-            ? "border-rose/40 hover:border-rose/70"
-            : isAi
-            ? "border-primary/25 hover:border-primary/50"
-            : "border-border hover:border-border/80"
+        className={`mb-6 flex-1 rounded-squircle border bg-card p-4 transition-colors duration-200 ${
+          isAi ? "border-info/25" : "border-border"
         }`}
       >
-        {/* Header row */}
-        <div className="flex items-start justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${meta.badgeClass}`}
-            >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
               <Icon className="h-3 w-3" />
-              {meta.label}
+              {typeLabel}
             </span>
             {isAi && (
-              <span className="inline-flex items-center gap-1 text-xs text-primary font-medium">
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-info">
                 <Sparkles className="h-3 w-3" />
                 {t("timeline.ai_generated")}
               </span>
             )}
             <ConfidenceBadge value={event.confidence} />
           </div>
-          <span className="font-mono text-xs text-muted-foreground shrink-0">
+          <span className="shrink-0 font-mono text-xs text-muted-foreground">
             {formatTime(event.occurred_at)}
           </span>
         </div>
 
-        {/* Title */}
-        <div className="mt-2 text-sm font-semibold font-heading"><TranslatedTextBlock content={event.title} /></div>
+        <div className="mt-2 font-heading text-sm font-semibold">
+          <TranslatedTextBlock content={event.title} />
+        </div>
 
-        {/* Location chip */}
         {event.location && (
-          <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs text-primary">
+          <div className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-0.5 text-xs text-secondary-foreground">
             <MapPin className="h-3 w-3" />
             {event.location}
           </div>
         )}
 
-        {/* Description */}
-        <div className="mt-2 text-xs text-muted-foreground leading-relaxed">
+        <div className="mt-2 max-w-[70ch] text-xs leading-relaxed text-muted-foreground">
           <TranslatedTextBlock content={event.description} />
         </div>
 
-        {/* CCTV details — expand/collapse */}
         {isCctv && cctv && (
           <div className="mt-3">
             <button
+              type="button"
               onClick={() => setExpanded((v) => !v)}
-              className="flex items-center gap-1 text-xs text-accent-strong hover:text-accent-strong/80 transition-colors"
+              aria-expanded={expanded}
+              className="flex items-center gap-1 text-xs text-info transition-colors hover:text-info/80"
             >
               {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-              {expanded ? "Hide" : "Show"} CCTV Intelligence
+              {expanded ? t("timeline.cctv_hide_detail") : t("timeline.cctv_show_detail")}
             </button>
             {expanded && (
-              <div className="mt-3 rounded-lg border border-rose/20 bg-rose/5 p-3 space-y-2 animate-fade-up">
+              <div className="mt-3 flex flex-col gap-2 rounded-squircle-sm border border-border/60 bg-surface-alt p-3">
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <p className="text-muted-foreground mb-0.5">{t("timeline.osd_timestamp")}</p>
@@ -241,13 +188,15 @@ function TimelineNode({ event }: { event: TimelineEventOut }) {
                 )}
                 {cctv.forensic_flags.length > 0 && (
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      <AlertTriangle className="h-3 w-3 inline mr-1 text-accent" />
+                    <p className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
+                      <AlertTriangle className="h-3 w-3 text-warn" />
                       {t("timeline.forensic_flags")}
                     </p>
-                    <ul className="space-y-0.5">
-                      {cctv.forensic_flags.map((f, i) => (
-                        <li key={i} className="text-xs text-accent">▲ {f}</li>
+                    <ul className="flex flex-col gap-0.5">
+                      {cctv.forensic_flags.map((f) => (
+                        <li key={f} className="text-xs text-warn">
+                          {f}
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -257,7 +206,7 @@ function TimelineNode({ event }: { event: TimelineEventOut }) {
           </div>
         )}
       </div>
-    </div>
+    </li>
   );
 }
 
@@ -282,7 +231,7 @@ function CctvPanel({
   const handleFile = useCallback(
     async (file: File) => {
       if (!file.type.startsWith("image/")) {
-        setError("Only JPEG, PNG, or WebP images are supported.");
+        setError(t("timeline.cctv_unsupported"));
         return;
       }
       setError(null);
@@ -292,12 +241,12 @@ function CctvPanel({
         setLastResult(result);
         onPinned(result);
       } catch (e) {
-        setError(e instanceof ApiError ? e.message : "Upload failed. Try again.");
+        setError(e instanceof ApiError ? e.message : t("timeline.cctv_upload_failed"));
       } finally {
         setUploading(false);
       }
     },
-    [caseId, onPinned]
+    [caseId, onPinned, t],
   );
 
   const onDrop = useCallback(
@@ -307,28 +256,39 @@ function CctvPanel({
       const file = e.dataTransfer.files[0];
       if (file) void handleFile(file);
     },
-    [handleFile]
+    [handleFile],
   );
 
   return (
-    <div className="space-y-4">
-      {/* Drop zone */}
+    <div className="flex flex-col gap-4">
       <div
-        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        role="button"
+        tabIndex={0}
+        aria-label={t("timeline.upload_cctv")}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         onClick={() => inputRef.current?.click()}
-        className={`relative cursor-pointer rounded-xl border-2 border-dashed transition-all duration-200 flex flex-col items-center justify-center gap-3 py-10 px-6 text-center ${
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
+        className={`relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-squircle border border-dashed px-6 py-10 text-center transition-colors duration-200 ${
           dragging
-            ? "border-rose/70 bg-rose/10"
-            : "border-border hover:border-rose/40 hover:bg-rose/5"
+            ? "border-primary bg-primary/[0.06]"
+            : "border-border bg-surface-alt/40 hover:border-border/60"
         }`}
       >
         <input
           ref={inputRef}
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          className="hidden"
+          className="sr-only"
           onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) void handleFile(f);
@@ -336,61 +296,60 @@ function CctvPanel({
           }}
           id="cctv-upload-input"
         />
-        <div className={`rounded-full p-3 ${dragging ? "bg-rose/20" : "bg-muted"}`}>
-          <Camera className={`h-6 w-6 ${dragging ? "text-rose" : "text-muted-foreground"}`} />
-        </div>
+        <Camera className="h-6 w-6 text-muted-foreground" />
         <div>
           <p className="text-sm font-medium">
             {uploading ? (
-              <span className="flex items-center gap-2 text-primary">
+              <span className="flex items-center gap-2 text-info">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 {t("timeline.analyzing_cctv")}
               </span>
             ) : (
-              t("timeline.cctv_drop_hint" as any)
+              t("timeline.cctv_drop_hint")
             )}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {t("timeline.cctv_drop_sub" as any)}
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("timeline.cctv_drop_sub")}</p>
         </div>
       </div>
 
-      {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+        <div
+          role="alert"
+          className="flex items-center gap-2 rounded-squircle-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+        >
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           {error}
         </div>
       )}
 
-      {/* Last analysis result preview */}
       {lastResult && !uploading && (
-        <div className="rounded-xl border border-success/30 bg-success/5 p-4 space-y-3 animate-fade-up">
-          <div className="flex items-center gap-2 text-success text-sm font-semibold">
+        <div className="flex flex-col gap-3 rounded-squircle border border-success/30 bg-success/[0.04] p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-success">
             <CheckCircle2 className="h-4 w-4" />
-            {t("timeline.pin_success" as any)}
+            {t("timeline.pin_success")}
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <p className="text-muted-foreground mb-0.5">{t("timeline.osd_timestamp")}</p>
+              <p className="mb-0.5 text-muted-foreground">{t("timeline.osd_timestamp")}</p>
               <p className="font-mono">{lastResult.analysis.detected_timestamp}</p>
             </div>
             <div>
-              <p className="text-muted-foreground mb-0.5">{t("timeline.location")}</p>
+              <p className="mb-0.5 text-muted-foreground">{t("timeline.location")}</p>
               <p className="leading-snug">{lastResult.analysis.location_description}</p>
             </div>
           </div>
           {lastResult.analysis.forensic_flags.length > 0 && (
             <div>
-              <p className="text-xs text-muted-foreground mb-1">{t("timeline.forensic_flags")}</p>
-              {lastResult.analysis.forensic_flags.map((f, i) => (
-                <p key={i} className="text-xs text-accent">▲ {f}</p>
+              <p className="mb-1 text-xs text-muted-foreground">{t("timeline.forensic_flags")}</p>
+              {lastResult.analysis.forensic_flags.map((f) => (
+                <p key={f} className="text-xs text-warn">
+                  {f}
+                </p>
               ))}
             </div>
           )}
           {lastResult.event.location && (
-            <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs text-primary">
+            <div className="inline-flex items-center gap-1 self-start rounded-full border border-border bg-secondary px-2.5 py-0.5 text-xs text-secondary-foreground">
               <MapPin className="h-3 w-3" />
               {lastResult.event.location}
             </div>
@@ -439,81 +398,76 @@ function OfficerNoteForm({
       setDesc("");
       setLocation("");
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Failed to save note.");
+      setError(e instanceof ApiError ? e.message : t("timeline.note_save_failed"));
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div>
-        <Label htmlFor="note-title" className="text-xs text-muted-foreground mb-1 block">
-          Note Title *
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="note-title" required>
+          {t("timeline.note_title_label")}
         </Label>
         <Input
           id="note-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={t("timeline.note_title_placeholder")}
-          className="h-9 text-sm text-foreground bg-background"
           required
         />
       </div>
-      <div>
-        <Label htmlFor="note-desc" className="text-xs text-muted-foreground mb-1 block">
-          Description *
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="note-desc" required>
+          {t("timeline.note_desc_label")}
         </Label>
-        <textarea
+        <Textarea
           id="note-desc"
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
           placeholder={t("timeline.note_desc_placeholder")}
-          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none text-foreground"
+          className="resize-none"
           required
         />
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <div>
-          <Label htmlFor="note-time" className="text-xs text-muted-foreground mb-1 block">
-            {t("timeline.note_datetime_label")}
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="note-time" required>
+            {t("timeline.note_occurred_at")}
           </Label>
           <Input
             id="note-time"
             type="datetime-local"
             value={occurredAt}
             onChange={(e) => setOccurredAt(e.target.value)}
-            className="h-9 text-sm text-foreground bg-background"
             required
           />
         </div>
-        <div>
-          <Label htmlFor="note-location" className="text-xs text-muted-foreground mb-1 block">
-            {t("timeline.note_location")}
-          </Label>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="note-location">{t("timeline.note_location")}</Label>
           <Input
             id="note-location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder={t("timeline.note_location_placeholder")}
-            className="h-9 text-sm text-foreground bg-background"
           />
         </div>
       </div>
       {error && (
-        <p className="text-xs text-destructive">{error}</p>
+        <p className="text-xs text-destructive" role="alert">
+          {error}
+        </p>
       )}
       <Button
         type="submit"
         disabled={saving || !title.trim() || !desc.trim()}
-        className="w-full h-9 gap-2"
+        loading={saving}
+        className="w-full"
         id="add-officer-note-btn"
       >
-        {saving ? (
-          <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…</>
-        ) : (
-          <><MessageSquarePlus className="h-3.5 w-3.5" /> {t("timeline.add_note_submit")}</>
-        )}
+        {!saving && <MessageSquarePlus className="h-3.5 w-3.5" />}
+        {saving ? t("common.saving") : t("timeline.add_note_submit")}
       </Button>
     </form>
   );
@@ -544,189 +498,180 @@ export function TimelineWorkspace({
   onPinned,
   onNoteAdded,
 }: TimelineWorkspaceProps) {
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
   const cctvCount = events.filter((e) => e.event_type === "cctv_frame").length;
-  const locationsSet = new Set(
-    events.map((e) => e.location).filter((l) => Boolean(l))
-  );
+  const locationsSet = new Set(events.map((e) => e.location).filter((l) => Boolean(l)));
 
   return (
-    <div className="space-y-6 animate-fade-up">
-      {/* Header Panel */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Clock className="h-5 w-5 text-violet" />
-            <h1 className="font-heading text-xl font-bold">
-              {t("timeline.title")}
-            </h1>
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-xs text-primary font-medium">
+    <div className="flex animate-fade-up flex-col gap-6">
+      <PageHeader
+        level="section"
+        title={
+          <span className="flex flex-wrap items-center gap-2">
+            {t("timeline.title")}
+            <span className="inline-flex items-center gap-1 rounded-full border border-info/30 bg-info/10 px-2 py-0.5 text-xs font-medium text-info">
               <Sparkles className="h-3 w-3" />
               {t("timeline.ai_synthesized")}
             </span>
-          </div>
-          <p className="text-xs text-muted-foreground">
+          </span>
+        }
+        description={
+          <>
             {t("timeline.subtitle")}
-          </p>
-          {/* Stats */}
-          {!loading && events.length > 0 && (
-            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground font-mono">
-              <span>{events.length} {t("timeline.events" as any) ?? "events"}</span>
-              {cctvCount > 0 && <span className="text-rose">{cctvCount} CCTV frames</span>}
-              {locationsSet.size > 0 && (
-                <span className="flex items-center gap-1 text-primary">
-                  <MapPin className="h-3 w-3" />
-                  {locationsSet.size} location{locationsSet.size !== 1 ? "s" : ""} identified
+            {!loading && events.length > 0 && (
+              // Label before count, so the line stays grammatical at one as well
+              // as many. "1 CCTV frames" was wrong in English and unfixable in
+              // Hindi and Gujarati without full plural rules for a stat line.
+              <span className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs">
+                <span>
+                  {t("timeline.events_counted")} <span className="text-foreground">{events.length}</span>
                 </span>
-              )}
-            </div>
-          )}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onRefresh}
-          disabled={loading}
-          className="gap-2 border-primary/40 text-primary hover:bg-primary/10"
-          id="refresh-timeline-btn"
-        >
-          {loading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Zap className="h-3.5 w-3.5" />
-          )}
-          {t("timeline.re_synthesize")}
-        </Button>
-      </div>
+                {cctvCount > 0 && (
+                  <span>
+                    {t("timeline.cctv_frames_counted")}{" "}
+                    <span className="text-foreground">{cctvCount}</span>
+                  </span>
+                )}
+                {locationsSet.size > 0 && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {t("timeline.locations_counted")}{" "}
+                    <span className="text-foreground">{locationsSet.size}</span>
+                  </span>
+                )}
+              </span>
+            )}
+          </>
+        }
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            disabled={loading}
+            loading={loading}
+            id="refresh-timeline-btn"
+          >
+            {!loading && <Zap className="h-3.5 w-3.5" />}
+            {t("timeline.re_synthesize")}
+          </Button>
+        }
+      />
 
-      {/* Synthesizing banner */}
       {synthesizing && (
-        <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary animate-pulse">
-          <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center gap-3 rounded-squircle border border-info/30 bg-info/[0.04] px-4 py-3 text-sm"
+        >
+          <Loader2 className="h-4 w-4 shrink-0 animate-spin text-info" />
           <div>
-            <p className="font-medium">{t("timeline.synthesizing")}</p>
-            <p className="text-xs text-primary/70 mt-0.5">
+            <p className="font-medium text-foreground">{t("timeline.synthesizing")}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
               {t("timeline.synthesizing_sub")}
             </p>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6 items-start">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[1fr_360px]">
         {/* ── Left: Timeline nodes ── */}
         <div>
-          {/* AI provenance info */}
           {!loading && events.length > 0 && (
-            <div className="mb-5 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
-              <Sparkles className="h-3.5 w-3.5 shrink-0" />
-              <span>
-                {t("timeline.ai_provenance")}
-              </span>
+            <div className="mb-5 flex items-start gap-2 rounded-squircle-sm border border-info/25 bg-info/[0.04] px-3 py-2 text-xs leading-relaxed text-secondary-foreground">
+              <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
+              <span>{t("timeline.ai_provenance")}</span>
             </div>
           )}
 
           {loading ? (
-            <div className="space-y-4">
-              {[...Array(4)].map((_, i) => (
+            <div className="flex flex-col gap-4">
+              {[0, 1, 2, 3].map((i) => (
                 <div key={i} className="flex gap-4">
                   <div className="flex flex-col items-center">
-                    <Skeleton className="h-3 w-3 rounded-full" />
-                    <Skeleton className="w-px flex-1 mt-1" />
+                    <Skeleton className="h-2.5 w-2.5 rounded-full" />
+                    <Skeleton className="mt-1 w-px flex-1" />
                   </div>
-                  <Skeleton className="flex-1 rounded-xl h-24" />
+                  <Skeleton className="h-24 flex-1 rounded-squircle" />
                 </div>
               ))}
             </div>
           ) : error ? (
-            <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <div
+              role="alert"
+              className="flex items-center gap-3 rounded-squircle border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+            >
               <AlertTriangle className="h-4 w-4 shrink-0" />
-              <div>
+              <div className="min-w-0">
                 <p className="font-medium">{t("timeline.load_failed")}</p>
-                <p className="text-xs text-destructive/70 mt-0.5">{error}</p>
+                <p className="mt-0.5 text-xs text-destructive/70">{error}</p>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onRefresh}
-                className="ml-auto text-destructive hover:bg-destructive/10"
+                className="ml-auto shrink-0 text-destructive hover:bg-destructive/10"
               >
-                Retry
+                {t("common.retry")}
               </Button>
             </div>
           ) : events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border py-16 text-center">
-              <Clock className="h-10 w-10 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">{t("timeline.no_events")}</p>
-              <p className="text-xs text-muted-foreground/60 max-w-xs">
-                {t("timeline.no_events_sub")}
-              </p>
-            </div>
+            <EmptyState
+              icon={Clock}
+              title={t("timeline.no_events")}
+              description={t("timeline.no_events_sub")}
+            />
           ) : (
-            <div>
+            <ol>
               {events.map((event) => (
                 <TimelineNode key={event.id} event={event} />
               ))}
-            </div>
+            </ol>
           )}
         </div>
 
-        {/* ── Right: Panels ── */}
-        <div className="space-y-5 xl:sticky xl:top-24">
-          {/* CCTV Intelligence Card */}
-          <Card className="p-5 border border-rose/20 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-rose/15 p-1.5">
-                <Camera className="h-4 w-4 text-rose" />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold font-heading">{t("timeline.cctv_title")}</h2>
-                <p className="text-xs text-muted-foreground">{t("timeline.cctv_subtitle")}</p>
-              </div>
+        {/* ── Right: input panels ── */}
+        <div className="flex flex-col gap-5 xl:sticky xl:top-6">
+          <Card className="flex flex-col gap-4">
+            <div>
+              <h2 className="font-heading text-sm font-semibold">{t("timeline.cctv_title")}</h2>
+              <p className="text-xs text-muted-foreground">{t("timeline.cctv_subtitle")}</p>
             </div>
             <CctvPanel caseId={caseId} onPinned={onPinned} />
-            <div className="rounded-lg bg-muted/30 border border-border/50 p-3 space-y-1.5 text-xs text-muted-foreground">
-              <p className="font-medium text-foreground">{t("timeline.how_it_works" as any) || "How it works"}</p>
-              <p>{t("timeline.cctv_step1" as any) || "1. Upload any CCTV still frame (JPEG/PNG)"}</p>
-              <p>{t("timeline.cctv_step2" as any) || "2. Gemini Vision extracts OSD timestamp, visible location cues, persons, vehicles, and forensic flags"}</p>
-              <p>{t("timeline.cctv_step3" as any) || "3. The event is pinned on the timeline at the detected real-world time"}</p>
-            </div>
+            <ol className="flex flex-col gap-1.5 rounded-squircle-sm border border-border/60 bg-surface-alt p-3 text-xs leading-relaxed text-muted-foreground">
+              <li className="font-medium text-foreground">{t("timeline.how_it_works")}</li>
+              <li>{t("timeline.cctv_step1")}</li>
+              <li>{t("timeline.cctv_step2")}</li>
+              <li>{t("timeline.cctv_step3")}</li>
+            </ol>
           </Card>
 
-          <Separator className="opacity-30" />
-
-          {/* Officer Note Card */}
-          <Card className="p-5 border border-border space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-muted p-1.5">
-                <MessageSquarePlus className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold font-heading">{t("timeline.officer_note")}</h2>
-                <p className="text-xs text-muted-foreground">{t("timeline.officer_note_sub")}</p>
-              </div>
+          <Card className="flex flex-col gap-4">
+            <div>
+              <h2 className="font-heading text-sm font-semibold">{t("timeline.officer_note")}</h2>
+              <p className="text-xs text-muted-foreground">{t("timeline.officer_note_sub")}</p>
             </div>
             <OfficerNoteForm caseId={caseId} onAdded={onNoteAdded} />
           </Card>
 
-          {/* Locations summary card */}
           {locationsSet.size > 0 && (
-            <Card className="p-4 border border-primary/20 bg-primary/5 space-y-3 animate-fade-up">
-              <div className="flex items-center gap-2 text-sm font-semibold font-heading">
-                <MapPin className="h-4 w-4 text-primary" />
+            <Card className="flex flex-col gap-3">
+              <h2 className="flex items-center gap-2 font-heading text-sm font-semibold">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
                 {t("timeline.locations")}
-              </div>
+              </h2>
               <div className="flex flex-wrap gap-2">
-                {[...locationsSet].map((loc, i) => (
+                {[...locationsSet].map((loc) => (
                   <span
-                    key={i}
-                    className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs text-primary"
+                    key={loc}
+                    className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-0.5 text-xs text-secondary-foreground"
                   >
                     <MapPin className="h-2.5 w-2.5" />
                     {loc}
                   </span>
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs leading-relaxed text-muted-foreground">
                 {t("timeline.locations_sub")}
               </p>
             </Card>

@@ -37,8 +37,7 @@ export function SourceChip({
       {locator && <span className="text-muted-foreground/50 ml-1">:{locator}</span>}
       {confidence !== undefined && (
         <span
-          className={`ml-1.5 font-bold ${
-            confidence >= 0.85
+          className={`ml-1.5 font-bold ${ confidence >= 0.85
             ? "text-success"
             : confidence >= 0.7
               ? "text-warn"

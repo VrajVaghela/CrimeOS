@@ -18,6 +18,7 @@ import { ProcessingCard } from "@/components/processing-card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -133,24 +134,17 @@ export default function IngestionPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-up">
-      {/* Step header */}
-      <div>
-        <h2 className="font-heading text-xl font-bold flex items-center gap-2">
-          <div className="rounded-lg bg-gradient-to-br from-info to-violet p-1.5">
-            <FileText className="h-5 w-5 text-white" />
-          </div>
-          {t("ingestion.title")}
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-          {t("ingestion.subtitle")}
-        </p>
-      </div>
+    <div className="flex animate-fade-up flex-col gap-6">
+      <PageHeader
+        level="section"
+        title={t("ingestion.title")}
+        description={t("ingestion.subtitle")}
+      />
 
       {error ? (
-        <Alert variant="destructive" className="animate-fade-down">
+        <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t("common.error")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
@@ -158,15 +152,9 @@ export default function IngestionPage() {
       {processing && processingStarted ? (
         <ProcessingCard label={t("ingestion.analyzing")} startedAt={processingStarted} />
       ) : complaint ? null : (
-        <Card hover className="animate-fade-up delay-100 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-info via-violet to-primary" />
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <div className="rounded-lg bg-gradient-to-br from-info/20 to-violet/20 p-1.5">
-                <Upload className="h-4 w-4 text-info" />
-              </div>
-              {t("ingestion.upload_btn")}
-            </CardTitle>
+            <CardTitle className="text-base">{t("ingestion.upload_btn")}</CardTitle>
           </CardHeader>
           <CardContent>
             <FileUploadZone onUpload={handleUpload} disabled={processing} />
@@ -176,8 +164,7 @@ export default function IngestionPage() {
 
       {complaint && (
         <div className="flex flex-col gap-6">
-          {/* Success banner */}
-          <Alert variant="success" className="animate-fade-down">
+          <Alert variant="success">
             <CheckCircle2 className="h-4 w-4" />
             <AlertTitle className="text-success">{t("ingestion.success_title")}</AlertTitle>
             <AlertDescription className="text-muted-foreground">
@@ -185,8 +172,7 @@ export default function IngestionPage() {
             </AlertDescription>
           </Alert>
 
-          {/* Meta badges */}
-          <div className="flex flex-wrap gap-2 animate-fade-up delay-100">
+          <div className="flex flex-wrap gap-2">
             <Badge variant="outline" className="gap-1.5 font-mono text-xs">
               <Globe className="h-3 w-3" />
               {SOURCE_LABELS[complaint.source_type] ?? complaint.source_type}
@@ -202,14 +188,15 @@ export default function IngestionPage() {
             </Badge>
           </div>
 
-          {/* Side-by-side: original vs translated */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 animate-fade-up delay-200">
+          {/* Original beside translation. The right pane is Info Blue because a
+              machine produced it; the left is neutral because a human filed it.
+              That contrast is the whole point of the pairing. */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full bg-muted-foreground" />
+                <CardTitle className="flex items-center gap-2 text-sm text-muted-foreground">
                   {t("ingestion.original_text")}
-                  <span className="text-xs font-mono text-muted-foreground ml-1">
+                  <span className="font-mono text-xs">
                     ({complaint.detected_language?.toUpperCase() ?? "—"})
                   </span>
                 </CardTitle>
@@ -219,60 +206,53 @@ export default function IngestionPage() {
                   <TranslatedTextBlock content={complaint.raw_text} autoTranslate={false} />
                 ) : (
                   <div className="flex flex-col gap-2">
-                    {[90, 75, 80, 60, 70].map((w, i) => (
-                      <Skeleton key={i} className="h-3 rounded-full" style={{ width: `${w}%` }} />
+                    {[90, 75, 80, 60, 70].map((w) => (
+                      <Skeleton key={w} className="h-3 rounded-full" style={{ width: `${w}%` }} />
                     ))}
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            <Card accent="primary" className="border-info/40">
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2 text-info">
-                  <Sparkles className="h-3.5 w-3.5" />
+            <div className="rounded-squircle border border-info/30 bg-info/[0.04] p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <Sparkles className="h-3.5 w-3.5 shrink-0 text-info" />
+                <h3 className="font-heading text-sm font-semibold text-info">
                   {t("ingestion.english_translation")}
-                  <Badge variant="info" className="text-[10px] px-1.5 py-0 ml-1">
-                    {t("ingestion.ai_suggested")}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {complaint.translated_text ? (
-                  <TranslatedTextBlock content={complaint.translated_text} />
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    {[85, 70, 90, 55, 75].map((w, i) => (
-                      <Skeleton key={i} className="h-3 rounded-full" style={{ width: `${w}%` }} />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </h3>
+                <Badge variant="info" className="ml-auto text-[10px]">
+                  {t("ingestion.ai_suggested")}
+                </Badge>
+              </div>
+              {complaint.translated_text ? (
+                <TranslatedTextBlock content={complaint.translated_text} />
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {[85, 70, 90, 55, 75].map((w) => (
+                    <Skeleton key={w} className="h-3 rounded-full" style={{ width: `${w}%` }} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <Separator label={t("ingestion.extracted_entities")} />
 
-          {/* Extracted entities */}
-          <div className="animate-fade-up delay-300">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="rounded-lg bg-violet/15 p-1.5">
-                <Sparkles className="h-4 w-4 text-violet" />
-              </div>
+          <div>
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <Sparkles className="h-4 w-4 shrink-0 text-info" />
               <h3 className="font-heading font-semibold">{t("ingestion.review_correct")}</h3>
               <Badge variant="info" className="text-xs">
                 {t("ingestion.ai_suggested")}
               </Badge>
-              <span className="text-xs text-muted-foreground ml-auto hidden sm:inline">
+              <span className="ml-auto hidden text-xs text-muted-foreground sm:inline">
                 {t("ingestion.review_hint")}
               </span>
             </div>
 
             {complaint.entities.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border/40 bg-muted/30 p-8 text-center">
-                <p className="text-sm text-muted-foreground">
-                  {t("ingestion.no_entities")}
-                </p>
+              <div className="rounded-squircle border border-dashed border-border bg-surface-alt/40 p-8 text-center">
+                <p className="text-sm text-muted-foreground">{t("ingestion.no_entities")}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -287,14 +267,13 @@ export default function IngestionPage() {
             )}
           </div>
 
-          {/* Re-upload option */}
           <Separator />
           <details className="group text-sm">
-            <summary className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors font-medium flex items-center gap-2">
-              <Upload className="h-4 w-4 group-open:rotate-180 transition-transform" />
+            <summary className="flex cursor-pointer items-center gap-2 font-medium text-muted-foreground transition-colors hover:text-foreground">
+              <Upload className="h-4 w-4 transition-transform group-open:rotate-180" />
               {t("ingestion.upload_different")}
             </summary>
-            <div className="mt-4 animate-fade-down">
+            <div className="mt-4">
               <FileUploadZone onUpload={handleUpload} disabled={processing} />
             </div>
           </details>

@@ -1,4 +1,4 @@
-import { useLanguage } from "@/lib/language-context";
+import { interpolate, useLanguage } from "@/lib/language-context";
 import React, { useState } from "react";
 import {
   Users,
@@ -17,6 +17,8 @@ import type {
   EntityRelationshipOut,
   RelatedCaseOut,
 } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { useEnumLabel } from "@/lib/i18n/enums";
 import { OsintEnrichmentPanel } from "@/components/osint-enrichment-panel";
 
 interface EntityPivotPanelProps {
@@ -33,6 +35,7 @@ export function EntityPivotPanel({
   onSync,
 }: EntityPivotPanelProps) {
   const { t } = useLanguage();
+  const { label: enumLabel } = useEnumLabel();
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
 
@@ -95,76 +98,70 @@ export function EntityPivotPanel({
     : [];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Entity Lists Grouped */}
-      <div className="lg:col-span-2 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Layers className="h-5 w-5 text-primary" />
-            <h3 className="text-base font-semibold font-heading text-foreground">
-              {t('command_center.pivot_panel' as any) || 'Intelligence Pivot Panel'}
-            </h3>
-          </div>
-          <button
-            onClick={handleSync}
-            disabled={syncing}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded border border-primary/40 text-xs font-medium text-accent-strong bg-primary/10 hover:bg-primary/20 transition-all disabled:opacity-50"
-          >
+    // The panel owns its own surfaces because it is rendered directly on the page
+    // rather than wrapped in a Card. Left column is the entity index; right column
+    // is the intelligence on whichever entity is selected.
+    <div className="grid grid-cols-1 gap-6 rounded-squircle border border-border/80 bg-card p-5 lg:grid-cols-3">
+      <div className="flex flex-col gap-4 lg:col-span-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="font-heading text-base font-semibold text-foreground">
+            {t("command_center.pivot_panel")}
+          </h3>
+          <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>
             <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} />
-            {t('command_center.sync_entities' as any) || 'Sync Entities'}
-          </button>
+            {t("command_center.sync_entities")}
+          </Button>
         </div>
 
-        <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+        <div className="flex max-h-[500px] flex-col gap-4 overflow-y-auto pr-1">
           {Object.entries(entityGroups).map(([type, list]) => (
-            <div key={type} className="space-y-2">
-              <span className="text-[11px] font-bold font-mono text-muted-foreground uppercase tracking-wider block">
-                {type.replace("_", " ")}s ({list.length})
+            <div key={type} className="flex flex-col gap-2">
+              <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                {enumLabel("entity.type", type)} · {list.length}
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
                 {list.map((ent) => {
                   const isSelected = ent.id === selectedEntityId;
                   const isLowConfidence = ent.confidence < 0.7;
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={ent.id}
                       onClick={() => setSelectedEntityId(ent.id)}
-                      className={`p-3 rounded-squircle-sm border cursor-pointer transition-all flex items-center justify-between ${
+                      aria-pressed={isSelected}
+                      className={`flex items-center justify-between gap-2 rounded-squircle-sm border p-3 text-left transition-colors duration-200 ${
                         isSelected
-                          ? "border-primary bg-primary/10 glow-primary"
+                          ? "border-primary/50 bg-primary/10"
                           : isLowConfidence
-                          ? "border-warn/40 bg-warn/5 hover:bg-warn/10 text-warn"
-                          : "border-border bg-secondary/60 hover:bg-secondary/90 text-foreground"
+                            ? "border-warn/40 bg-warn/[0.04] hover:border-warn/60"
+                            : "border-border bg-surface-alt hover:border-border/60"
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div className="flex min-w-0 items-center gap-2.5">
                         {getEntityIcon(type)}
-                        <span className="font-mono text-xs font-semibold text-foreground truncate">
+                        <span className="truncate font-mono text-xs font-semibold text-foreground">
                           {ent.display_value}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex shrink-0 items-center gap-1.5">
                         {isLowConfidence && (
-                          <span title={`${t('command_center.low_confidence' as any) || 'Low Confidence'}`}>
-                            <ShieldAlert
-                              className="h-3.5 w-3.5 text-warn animate-pulse"
-                            />
-                          </span>
+                          <ShieldAlert
+                            className="h-3.5 w-3.5 text-warn"
+                            aria-label={t("command_center.low_confidence")}
+                          />
                         )}
                         <span
-                          className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-squircle-sm ${
+                          className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${
                             ent.confidence >= 0.85
                               ? "bg-success/10 text-success"
-                              : ent.confidence >= 0.7
-                              ? "bg-warn/10 text-warn"
-                              : "bg-warn/25 text-warn font-semibold"
+                              : "bg-warn/10 text-warn"
                           }`}
                         >
                           {Math.round(ent.confidence * 100)}%
                         </span>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -172,28 +169,28 @@ export function EntityPivotPanel({
           ))}
 
           {entities.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground text-xs bg-surface-alt/40 rounded-xl border border-dashed border-border">
-              {t('command_center.no_synced_entities' as any) || 'No normalized entities synced yet. Trigger sync to build.'}
+            <div className="rounded-squircle border border-dashed border-border bg-surface-alt/40 px-4 py-8 text-center text-xs text-muted-foreground">
+              {t("command_center.no_synced_entities")}
             </div>
           )}
         </div>
       </div>
 
       {/* Selected Entity Intelligence panel */}
-      <div className="lg:col-span-1 border border-border rounded-squircle bg-surface-alt p-4 space-y-4 min-h-[300px]">
+      <div className="flex min-h-[300px] flex-col gap-4 rounded-squircle border border-border bg-surface-alt p-4 lg:col-span-1">
         {selectedEntity ? (
           <>
             <div className="space-y-1 pb-3 border-b border-border">
               <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase font-mono">
                 {getEntityIcon(selectedEntity.entity_type)}
-                <span>{selectedEntity.entity_type.replace("_", " ")}</span>
+                <span>{enumLabel("entity.type", selectedEntity.entity_type)}</span>
               </div>
               <h4 className="text-base font-bold font-mono text-foreground break-all">
                 {selectedEntity.display_value}
               </h4>
               {selectedEntity.canonical_value !== selectedEntity.display_value && (
                 <div className="text-[10px] font-mono text-muted-foreground break-all">
-                  Canonical: {selectedEntity.canonical_value}
+                  {t("entity.canonical")}: {selectedEntity.canonical_value}
                 </div>
               )}
             </div>
@@ -214,11 +211,11 @@ export function EntityPivotPanel({
                   return (
                     <div
                       key={r.id}
-                      className="p-2 rounded bg-surface-alt border border-border text-xs flex flex-col gap-1"
+                      className="rounded-squircle-sm border border-border bg-background p-2 text-xs flex flex-col gap-1"
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-muted-foreground capitalize">
-                          {r.relationship_type.replace("_", " ")}
+                          {enumLabel("entity.type", r.relationship_type)}
                         </span>
                         <span className="text-[10px] text-muted-foreground font-mono">
                           {Math.round(r.confidence * 100)}%
@@ -227,19 +224,19 @@ export function EntityPivotPanel({
                       <div className="flex items-center gap-1.5 font-mono text-foreground text-[11px] min-w-0">
                         {isSource ? (
                           <>
-                            <span className="truncate">This</span>
-                            <ArrowRight className="h-3 w-3 text-primary shrink-0" />
-                            <span className="truncate text-accent-strong">
+                            <span className="truncate">{t("entity.this_entity")}</span>
+                            <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+                            <span className="truncate text-foreground">
                               {otherEnt.display_value}
                             </span>
                           </>
                         ) : (
                           <>
-                            <span className="truncate text-accent-strong">
+                            <span className="truncate text-foreground">
                               {otherEnt.display_value}
                             </span>
-                            <ArrowRight className="h-3 w-3 text-primary shrink-0" />
-                            <span className="truncate">This</span>
+                            <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+                            <span className="truncate">{t("entity.this_entity")}</span>
                           </>
                         )}
                       </div>
@@ -279,7 +276,7 @@ export function EntityPivotPanel({
                 {matchingRelatedCases.map((rc) => (
                   <div
                     key={rc.case_id}
-                    className="p-2 rounded bg-surface-alt border border-border text-xs space-y-1"
+                    className="rounded-squircle-sm border border-border bg-background p-2 text-xs space-y-1"
                   >
                     <div className="flex items-center justify-between font-mono text-[11px]">
                       <span className="font-bold text-foreground">
@@ -292,8 +289,8 @@ export function EntityPivotPanel({
                     <div className="text-muted-foreground text-[11px] font-medium truncate">
                       {rc.title}
                     </div>
-                    <div className="text-[10px] text-accent-strong italic font-mono pt-0.5">
-                      Via matching {selectedEntity.entity_type} '{selectedEntity.display_value}'
+                    <div className="pt-0.5 font-mono text-[10px] text-muted-foreground">
+                      {interpolate(t("entity.via_match"), { type: enumLabel("entity.type", selectedEntity.entity_type), value: selectedEntity.display_value })}
                     </div>
                   </div>
                 ))}
@@ -319,7 +316,7 @@ export function EntityPivotPanel({
           <div className="h-full flex flex-col items-center justify-center text-center p-4">
             <GitCommit className="h-8 w-8 text-muted-foreground/30 mb-2" />
             <p className="text-xs text-muted-foreground">
-              {t('command_center.select_entity' as any) || 'Select an entity to view relationships, transaction links, and possible case matches.'}
+              {t('command_center.select_entity')}
             </p>
           </div>
         )}

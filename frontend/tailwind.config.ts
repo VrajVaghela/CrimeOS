@@ -51,14 +51,6 @@ const config: Config = {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(var(--info-foreground))",
         },
-        violet: {
-          DEFAULT: "hsl(var(--violet))",
-          foreground: "hsl(var(--violet-foreground))",
-        },
-        rose: {
-          DEFAULT: "hsl(var(--rose))",
-          foreground: "hsl(var(--rose-foreground))",
-        },
         warn: {
           DEFAULT: "hsl(var(--warn))",
           foreground: "hsl(var(--warn-foreground))",
@@ -66,13 +58,19 @@ const config: Config = {
         surface: {
           alt: "hsl(var(--surface-alt))",
           elevated: "hsl(var(--surface-elevated))",
+          warm: "var(--surface-warm)",
         },
       },
+      // Three steps and a pill. `lg`/`xl`/`md` are kept as aliases onto the same
+      // values so a stray shadcn default still lands on-system, but authored code
+      // should say `squircle` (surfaces) or `squircle-sm` (controls).
       borderRadius: {
-        lg: "var(--radius)",
-        xl: "var(--radius)",
-        squircle: "12px",
-        "squircle-sm": "8px",
+        sm: "4px",
+        md: "var(--radius-squircle-sm)",
+        lg: "var(--radius-squircle)",
+        xl: "var(--radius-squircle)",
+        squircle: "var(--radius-squircle)",
+        "squircle-sm": "var(--radius-squircle-sm)",
       },
       fontFamily: {
         heading: ["var(--font-heading)", "var(--font-noto-devanagari)", "var(--font-noto-gujarati)", "sans-serif"],
@@ -113,36 +111,6 @@ const config: Config = {
           from: { opacity: "0", transform: "translate3d(100%, 0, 0)" },
           to: { opacity: "1", transform: "translate3d(0, 0, 0)" },
         },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 12px -2px hsl(0 100% 43% / 0.4)" },
-          "50%": { boxShadow: "0 0 28px 2px hsl(0 100% 43% / 0.7)" },
-        },
-        "glow-pulse": {
-          "0%, 100%": {
-            boxShadow: "0 0 12px -2px hsl(0 100% 43% / 0.4)",
-            borderColor: "hsl(0 100% 43% / 0.5)",
-          },
-          "50%": {
-            boxShadow: "0 0 24px 2px hsl(0 100% 43% / 0.8)",
-            borderColor: "hsl(0 100% 43% / 1)",
-          },
-        },
-        breathe: {
-          "0%, 100%": { transform: "scale(1)" },
-          "50%": { transform: "scale(1.04)" },
-        },
-        "data-flow": {
-          "0%": { backgroundPosition: "0 0" },
-          "100%": { backgroundPosition: "40px 0" },
-        },
-        "spin-slow": {
-          from: { transform: "rotate(0deg)" },
-          to: { transform: "rotate(360deg)" },
-        },
         "ping-slow": {
           "0%": { transform: "scale(1)", opacity: "0.8" },
           "100%": { transform: "scale(2)", opacity: "0" },
@@ -154,12 +122,6 @@ const config: Config = {
         "fade-down": "fade-down 220ms cubic-bezier(0.16, 1, 0.3, 1) both",
         "scale-in": "scale-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both",
         "slide-in-right": "slide-in-right 260ms cubic-bezier(0.16, 1, 0.3, 1) both",
-        "shimmer": "shimmer 2s ease-in-out infinite",
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
-        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
-        "breathe": "breathe 2s ease-in-out infinite",
-        "data-flow": "data-flow 3s linear infinite",
-        "spin-slow": "spin-slow 3s linear infinite",
         "ping-slow": "ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite",
       },
     },

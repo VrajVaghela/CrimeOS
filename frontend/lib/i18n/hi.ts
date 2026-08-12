@@ -33,6 +33,7 @@ const hi: Dictionary = {
 
     // Phase 14B additions
     retry: "फिर कोशिश करें",
+    saving: "सहेजा जा रहा है…",
     download: "डाउनलोड करें",
     upload: "अपलोड करें",
     uploading: "अपलोड हो रहा है…",
@@ -111,6 +112,18 @@ const hi: Dictionary = {
     evidence: "साक्ष्य",
   },
 
+  tab: {
+    overview: "सारांश",
+    ingestion: "शिकायत",
+    path: "पथ",
+    requests: "अनुरोध",
+    responses: "प्रतिक्रियाएँ",
+    evidence: "साक्ष्य",
+    timeline: "समयरेखा",
+    summary: "सारांश रिपोर्ट",
+    audit: "ऑडिट",
+  },
+
   // App frame: sidebar, topbar, breadcrumbs.
   shell: {
     tactical_portal: "सामरिक पोर्टल",
@@ -122,6 +135,9 @@ const hi: Dictionary = {
     search_placeholder: "केस रजिस्ट्री खोजें…",
     workspace: "कार्यस्थान",
     case_crumb: "केस",
+    open_nav: "नेविगेशन खोलें",
+    close_nav: "नेविगेशन बंद करें",
+    breadcrumb: "ब्रेडक्रम्ब",
   },
 
   login: {
@@ -181,6 +197,9 @@ const hi: Dictionary = {
       "स्टेशन कानूनी सलाहकार के रूप में, आपकी भूमिका Crime OS AI द्वारा उत्पन्न कानूनी धारा अनुशंसाओं को सत्यापित करना है। नीचे थाने में सूचीबद्ध केस हैं। ऑडिट करने के लिए केस चुनें।",
     new_case: "केस",
     loading_pending: "लंबित अनुरोध लोड हो रहे हैं…",
+    load_error: "थाना डैशबोर्ड लोड नहीं हो सका।",
+    queue_error: "अनुमोदन कतार लोड नहीं हो सकी।",
+    approve_error: "अनुरोध स्वीकृत नहीं हो सका। फिर कोशिश करें।",
   },
 
   cases: {
@@ -204,12 +223,19 @@ const hi: Dictionary = {
     legal_request_for: "केस ID के लिए कानूनी अनुरोध ड्राफ्ट",
     target: "लक्ष्य",
     sync_dialog_title: "केस को CCTNS / eGujcop पोर्टल से सिंक करें",
+    sync_dialog_subtitle:
+      "राष्ट्रीय पुलिस रिकॉर्ड पोर्टल पर पेलोड भेजने से पहले केस विवरण और कानूनी धाराओं की पुष्टि करें।",
+    sync_dialog_effect:
+      "पुष्टि होने पर केस की स्थिति सिंक हो जाती है और पोर्टल एक राष्ट्रीय FIR संख्या आवंटित करता है।",
     payload_preview: "पेलोड पूर्वावलोकन",
     confirm_sync: "सिंक की पुष्टि करें",
     cctns_synced: "CCTNS सिंक हुआ",
-    record_label: "रिकॉर्ड:",
-    evidence_label: "साक्ष्य:",
     case_sections: "केस धाराएँ",
+    empty_sub: "उस खोज से कोई केस नंबर, शीर्षक या अपराध प्रकार मेल नहीं खाता। छोटा शब्द आज़माएँ।",
+    search_results: "“{query}” के लिए {count} परिणाम",
+    load_error: "केस रजिस्ट्री लोड नहीं हो सकी।",
+    create_error: "केस नहीं बन सका। फिर कोशिश करें।",
+    title_required: "आगे बढ़ने के लिए केस शीर्षक दर्ज करें।",
   },
 
   command_center: {
@@ -256,6 +282,14 @@ const hi: Dictionary = {
     view_full_insights: "पूरी अंतर्दृष्टि देखें",
     ai_correlation_flags: "AI सहसंबंध संकेत",
     no_audit_events: "ऑडिट ट्रेल में कोई घटना दर्ज नहीं।",
+    workflow_complete: "हर कार्यप्रवाह चरण पूर्ण है और केस सारांश तैयार हो गया है।",
+    next_action_fallback: "अगले जांच चरण के साथ आगे बढ़ें।",
+    workflow_heading: "कार्यप्रवाह प्रगति",
+    case_facts: "केस तथ्य",
+    system_actor: "सिस्टम",
+    no_requests_sub: "प्रदाता डेटा जुटाना शुरू करने के लिए किसी जांच चरण से कानूनी अनुरोध का ड्राफ्ट बनाएं।",
+    load_error: "केस सारांश लोड नहीं हो सका।",
+    sync_error: "केस इकाइयाँ सिंक नहीं हो सकीं। फिर कोशिश करें।",
   },
 
   ingestion: {
@@ -293,6 +327,10 @@ const hi: Dictionary = {
     gemini_info: "जेमिनी AI · मल्टीमॉडल विश्लेषण · गुजराती/हिंदी/अंग्रेजी",
     ai_generated_via: "Gemini द्वारा तैयार",
     ai_suggested: "AI सुझाव",
+    browse_files: "फ़ाइल चुनें",
+    start_analysis: "अपलोड कर विश्लेषण करें",
+    file_too_large: "यह फ़ाइल सीमा से {max} MB बड़ी है। इसे संपीड़ित करें या छोटी रिकॉर्डिंग अपलोड करें।",
+    unsupported_type: "इस फ़ाइल प्रकार का विश्लेषण नहीं हो सकता। PDF, JPG या PNG, या MP3, WAV या M4A उपयोग करें।",
   },
 
   path: {
@@ -308,10 +346,13 @@ const hi: Dictionary = {
     no_path_sub: "शिकायत दर्ज करने के बाद पथ तैयार करें।",
     confidence: "विश्वसनीयता",
     ai_reasoning: "AI तर्क",
+    grounded_in_sops: "बीजित पुलिस SOP पर आधारित",
+    conf_short: "विश्वास",
     view_citation: "SOP उद्धरण देखें",
     analyze_btn: "विश्लेषण करें और पथ बनाएं",
     generating_sub: "SOP प्राप्त करना, संस्थाओं का विश्लेषण करना, और BNS धाराओं को संरेखित करना।",
     failed: "पीढ़ी विफल रही",
+    failed_sub: "पथ सुझाव पूरा नहीं हो सका। फिर कोशिश करने के लिए पुनः तैयार करें।",
     regenerate: "पथ पुन: उत्पन्न करें",
     blueprint: "जांच खाका",
     legal_grounding: "कानूनी आधार",
@@ -350,6 +391,8 @@ const hi: Dictionary = {
     template: "उपयोग किया गया टेम्पलेट",
     generate_draft: "{provider} अनुरोध ड्राफ्ट उत्पन्न करें",
     provider_name: "नोडल प्रदाता / संस्था का नाम",
+    provider_name_placeholder: "जैसे भारती एयरटेल, HDFC बैंक",
+    provider_email_placeholder: "जैसे nodal.officer@airtel.com",
     provider_email: "नोडल अधिकारी ईमेल पता",
     generate_btn: "ड्राफ्ट उत्पन्न करें",
     edit_draft: "ड्राफ्ट संपादित करें",
@@ -360,6 +403,8 @@ const hi: Dictionary = {
     received: "प्राप्त",
     edit_dialog_title: "कानूनी अनुरोध ड्राफ्ट संपादित करें",
     view_dialog_title: "प्रेषित कानूनी अनुरोध देखें",
+    request_to: "{provider} को अनुरोध",
+    demo_note: "डेमो मोड में हर प्रेषण सैंडबॉक्स इनबॉक्स में जाता है; लक्षित प्रदाता ऑडिट लॉग में दर्ज रहता है।",
     dialog_subtitle: "LERS-शैली पत्र सामग्री, लक्षित प्राप्तकर्ता ईमेल और प्रदाता संस्था मेटाडेटा का पूर्वावलोकन और संशोधन करें।",
     load_error: "डेटा लोड करने में त्रुटि",
     loading: "कानूनी अनुरोध लोड हो रहे हैं…",
@@ -369,6 +414,9 @@ const hi: Dictionary = {
     save_changes: "बदलाव सहेजें",
     template_label: "टेम्पलेट:",
     dispatched_label: "भेजा गया:",
+    generate_telecom: "टेलीकॉम अनुरोध बनाएं",
+    generate_bank: "बैंक अनुरोध बनाएं",
+    generate_platform: "प्लेटफ़ॉर्म अनुरोध बनाएं",
   },
 
   responses: {
@@ -389,6 +437,8 @@ const hi: Dictionary = {
     trigger_mock: "मॉक रिस्पांस ट्रिगर करें",
     correlation_title: "AI सहसंबंध और आधार",
     correlation_engine: "AI सहसंबंध इंजन",
+    response_label: "प्रतिक्रिया {index}",
+    file_label: "फ़ाइल",
     running_correlation: "सहसंबंध इंजन चल रहा है…",
     raw_provider_data: "मूल प्रदाता डेटा",
     linked_path_step: "जुड़ा जांच चरण",
@@ -398,6 +448,13 @@ const hi: Dictionary = {
     no_records: "दिखाने के लिए कोई रिकॉर्ड नहीं।",
     load_error: "डेटा लोड करने में त्रुटि",
     loading: "प्रदाता प्रतिक्रियाएँ लोड हो रही हैं…",
+    load_error_msg: "प्रदाता प्रतिक्रियाएँ लोड नहीं हो सकीं।",
+    row_label: "पंक्ति",
+    entity_match: "इकाई मेल",
+    promoted_title: "रिकॉर्ड जोड़ा गया",
+    promoted_desc: "रिकॉर्ड अब केस डायरी और ऑडिट समयरेखा में है।",
+    promote_failed_title: "जोड़ना विफल",
+    promote_failed_desc: "रिकॉर्ड जोड़ा नहीं जा सका। फिर कोशिश करें।",
   },
 
   summary: {
@@ -411,6 +468,10 @@ const hi: Dictionary = {
     no_summary_sub: "जांच चल जाने पर सारांश तैयार करें।",
     version_history: "संस्करण इतिहास",
     latest: "नवीनतम",
+    version_label: "संस्करण {version}",
+    generated_by: "{timestamp} पर तैयार",
+    load_error: "केस सारांश लोड नहीं हो सके।",
+    generate_error: "सारांश तैयार नहीं हो सका। फिर कोशिश करें।",
   },
 
   audit: {
@@ -424,8 +485,23 @@ const hi: Dictionary = {
     detail: "विवरण",
     expand: "विस्तार करें",
     case_opened: "केस खोला गया",
+    append_only: "केवल-जोड़ ऑडिट लॉग",
     events_recorded: "{count} घटना(एँ) दर्ज · केवल-संलग्न ऑडिट लॉग",
     loading: "ऑडिट घटनाएँ लोड हो रही हैं…",
+    actions: {
+      case_created: "केस बनाया गया",
+      complaint_ingested: "शिकायत दर्ज हुई",
+      extraction_complete: "इकाइयाँ निकाली गईं",
+      path_generated: "जांच पथ तैयार हुआ",
+      step_status_changed: "चरण स्थिति अद्यतन",
+      request_created: "कानूनी अनुरोध बनाया गया",
+      request_approved: "अनुरोध स्वीकृत",
+      request_dispatched: "अनुरोध भेजा गया",
+      response_received: "प्रदाता प्रतिक्रिया प्राप्त",
+      insights_regenerated: "अंतर्दृष्टि पुनः तैयार",
+      summary_generated: "केस सारांश तैयार हुआ",
+    },
+    load_error: "ऑडिट ट्रेल लोड नहीं हो सका।",
   },
 
   timeline: {
@@ -479,6 +555,26 @@ const hi: Dictionary = {
 
     osd_timestamp: "OSD समय-चिह्न",
     persons_detected: "पहचाने गए व्यक्ति",
+    events_counted: "घटनाएँ",
+    cctv_show_detail: "CCTV विश्लेषण दिखाएँ",
+    cctv_hide_detail: "CCTV विश्लेषण छिपाएँ",
+    note_title_label: "नोट शीर्षक",
+    note_desc_label: "विवरण",
+    event: {
+      complaint_filed: "शिकायत दर्ज",
+      entity_extracted: "इकाइयाँ निकाली गईं",
+      path_generated: "पथ तैयार",
+      step_completed: "चरण पूर्ण",
+      request_dispatched: "अनुरोध भेजा गया",
+      response_received: "प्रतिक्रिया प्राप्त",
+      cctv_frame: "CCTV फ़्रेम",
+      officer_note: "अधिकारी नोट",
+    },
+    locations_counted: "स्थान",
+    cctv_frames_counted: "CCTV फ़्रेम",
+    cctv_unsupported: "केवल JPEG, PNG या WebP छवियों का विश्लेषण हो सकता है।",
+    cctv_upload_failed: "फ़्रेम अपलोड विफल। फिर कोशिश करें।",
+    note_save_failed: "नोट सहेजा नहीं जा सका। फिर कोशिश करें।",
   },
 
   evidence: {
@@ -495,6 +591,19 @@ const hi: Dictionary = {
     back_to_gallery: "साक्ष्य गैलरी पर वापस जाएँ",
     upload_file: "साक्ष्य फ़ाइल अपलोड करें",
     analyzing_file: "Gemini से फ़ाइल का विश्लेषण हो रहा है…",
+    markers_pinned: "{count} पिन किए गए तथ्य चिह्न",
+    uploaded_label: "अपलोड किया गया",
+    load_error: "इस केस के साक्ष्य लोड नहीं हो सके।",
+    upload_error: "साक्ष्य अपलोड विफल। फिर कोशिश करें।",
+    confidence_short: "विश्वास",
+    unsupported_upload: "इस फ़ाइल का विश्लेषण नहीं हो सकता। छवि, ऑडियो, वीडियो, PDF या टेक्स्ट फ़ाइल उपयोग करें।",
+    type: {
+      image: "छवि",
+      audio: "ऑडियो",
+      video: "वीडियो",
+      document: "दस्तावेज़",
+      media: "मीडिया",
+    },
   },
 
   copilot: {
@@ -786,6 +895,7 @@ const hi: Dictionary = {
     created_by: "बनाया गया",
     no_revisions: "अभी कोई संशोधन नहीं — मूल पथ ही वर्तमान है।",
     initial: "प्रारंभिक शिकायत पथ सुझाव",
+    active: "वर्तमान संशोधन",
   },
 
   entity: {
@@ -821,6 +931,9 @@ const hi: Dictionary = {
     no_relationships: "इस जानकारी के लिए कोई संबंध नहीं मिला।",
     no_relationships_mapped: "इस जानकारी के लिए कोई संबंध मैप नहीं किया गया।",
     no_shared_cases: "कोई अन्य केस इस जानकारी को साझा नहीं करता।",
+    this_entity: "यह इकाई",
+    canonical: "मानक रूप",
+    via_match: "{type} {value} से मेल",
   },
 
   provider: {
@@ -828,6 +941,21 @@ const hi: Dictionary = {
     bank: "बैंक",
     platform: "प्लेटफ़ॉर्म सेवा",
   },
+  blockers: {
+    missing_complaint:
+      "अभी कोई शिकायत अपलोड नहीं हुई। शुरू करने के लिए PDF, छवि या ऑडियो फ़ाइल अपलोड करें।",
+    unverified_entities:
+      "इकाइयाँ निकाली गईं पर सत्यापित नहीं हुईं। हर मान की समीक्षा करें और सुधार सहेजें।",
+    missing_path:
+      "शिकायत दर्ज है पर कोई जांच पथ नहीं है। पथ तैयार करें।",
+    no_requests_dispatched:
+      "पथ चरण तैयार हैं पर कोई कानूनी अनुरोध नहीं बना। किसी चरण से ड्राफ्ट बनाएं।",
+    awaiting_provider_response:
+      "अनुरोध भेजे जा चुके हैं। विश्लेषण से पहले प्रदाता प्रतिक्रियाएँ आवश्यक हैं।",
+    missing_summary:
+      "प्रतिक्रिया विश्लेषण पूर्ण है। केस बंद करने के लिए अंतिम सारांश तैयार करें।",
+  },
+
 } as const;
 
 export default hi;

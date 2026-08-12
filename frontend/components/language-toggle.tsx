@@ -23,7 +23,7 @@ export function LanguageToggle() {
 
   return (
     <div
-      className="flex items-center gap-0.5 rounded-lg border border-border/60 bg-surface-alt/80 p-0.5"
+      className="flex items-center gap-0.5 rounded-squircle border border-border/60 bg-surface-alt/80 p-0.5"
       role="group"
       aria-label={t("common.select_language")}
     >
@@ -39,11 +39,11 @@ export function LanguageToggle() {
             aria-pressed={isActive}
             aria-label={interpolate(t("common.switch_to"), { language: t(`common.language_${code}`) })}
             className={[
-              "rounded-md px-2.5 py-1 text-[11px] font-semibold tracking-wide transition-all duration-150",
+              "rounded-squircle-sm px-2.5 py-1 text-[11px] font-semibold tracking-wide transition-all duration-150",
               fontClass,
               isActive
-                ? "bg-primary/15 border border-primary/30 text-primary shadow-sm"
-                : "border border-transparent text-muted-foreground hover:text-foreground hover:bg-white/5",
+                ? "border border-border bg-surface-elevated text-foreground"
+                : "border border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary",
             ]
               .filter(Boolean)
               .join(" ")}

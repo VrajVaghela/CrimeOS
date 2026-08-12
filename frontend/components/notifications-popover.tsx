@@ -165,24 +165,23 @@ export function NotificationsPopover() {
         variant="outline"
         size="icon"
         onClick={() => setOpen((prev) => !prev)}
-        className={`h-9 w-9 rounded-squircle-sm border-border bg-background transition-colors text-muted-foreground relative ${
-          open ? "bg-secondary text-foreground border-primary/50" : "hover:bg-secondary hover:text-foreground"
+        className={`h-9 w-9 rounded-squircle-sm border-border bg-background transition-colors text-muted-foreground relative ${ open ? "bg-secondary text-foreground border-primary/50" : "hover:bg-secondary hover:text-foreground"
         }`}
         aria-label={t("notifications.bell_label")}
         title={t("notifications.title")}
       >
         <Bell className="h-4 w-4" />
+        {/* Unread notifications are an attention marker, which is Warning Amber
+            in this palette. Red here competed with the rail's active-route mark
+            and the page's primary action on every screen. */}
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-          </span>
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-warn" />
         )}
       </Button>
 
       {/* Popover Dropdown Panel */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-squircle border border-border bg-card shadow-2xl z-50 overflow-hidden animate-scale-in">
+        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-squircle border border-border bg-card elev-overlay z-50 overflow-hidden animate-scale-in">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-sidebar">
             <div className="flex items-center gap-2">
@@ -228,8 +227,7 @@ export function NotificationsPopover() {
             <button
               type="button"
               onClick={() => setFilter("all")}
-              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors ${
-                filter === "all"
+              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors ${ filter === "all"
                   ? "bg-primary/15 text-accent-strong border border-primary/30"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               }`}
@@ -239,8 +237,7 @@ export function NotificationsPopover() {
             <button
               type="button"
               onClick={() => setFilter("unread")}
-              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors ${
-                filter === "unread"
+              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors ${ filter === "unread"
                   ? "bg-primary/15 text-accent-strong border border-primary/30"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               }`}
@@ -250,8 +247,7 @@ export function NotificationsPopover() {
             <button
               type="button"
               onClick={() => setFilter("alert")}
-              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors ${
-                filter === "alert"
+              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors ${ filter === "alert"
                   ? "bg-primary/15 text-accent-strong border border-primary/30"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               }`}
@@ -275,8 +271,7 @@ export function NotificationsPopover() {
                 <div
                   key={notif.id}
                   onClick={() => handleNotificationClick(notif)}
-                  className={`p-3 transition-colors cursor-pointer group flex items-start gap-3 relative ${
-                    !notif.read
+                  className={`p-3 transition-colors cursor-pointer group flex items-start gap-3 relative ${ !notif.read
                       ? "bg-primary/5 hover:bg-primary/10"
                       : "hover:bg-secondary/60"
                   }`}
@@ -289,8 +284,7 @@ export function NotificationsPopover() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-0.5">
                       <p
-                        className={`text-xs font-semibold truncate ${
-                          !notif.read ? "text-foreground" : "text-muted-foreground"
+                        className={`text-xs font-semibold truncate ${ !notif.read ? "text-foreground" : "text-muted-foreground"
                         }`}
                       >
                         {t(`notifications.seed.${notif.titleKey}` as TranslationKey)}

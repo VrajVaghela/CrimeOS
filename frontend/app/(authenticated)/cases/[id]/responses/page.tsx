@@ -2,24 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import {
-  Activity,
-  FileText,
-  Clock,
-  Sparkles,
-  Download,
-  AlertCircle,
-  Loader2,
-  RefreshCw,
-  Table as TableIcon,
-} from "lucide-react";
+import { Activity, AlertCircle, Clock, Download, FileText, Loader2, RefreshCw } from "lucide-react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { getCaseResponses, regenerateInsights, getResponseCorrelations, promoteResponseRow, ApiError, API_URL } from "@/lib/api";
-import { useLanguage } from "@/lib/language-context";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  getCaseResponses,
+  regenerateInsights,
+  getResponseCorrelations,
+  promoteResponseRow,
+  ApiError,
+  API_URL,
+} from "@/lib/api";
+import { interpolate, useLanguage } from "@/lib/language-context";
 import { useFormatters } from "@/lib/format";
 import { TranslatedTextBlock } from "@/components/translated-text-block";
 import { ResponseCorrelationPanel } from "@/components/response-correlation-panel";
@@ -44,9 +42,7 @@ export default function ResponsesPage() {
   }, [caseId]);
 
   useEffect(() => {
-    if (selectedResponseId) {
-      void loadCorrelations(selectedResponseId);
-    }
+    if (selectedResponseId) void loadCorrelations(selectedResponseId);
   }, [selectedResponseId]);
 
   async function loadResponses() {
@@ -57,7 +53,7 @@ export default function ResponsesPage() {
       setResponses(data);
       if (data.length > 0) setSelectedResponseId(data[0].id);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Failed to load responses");
+      setError(e instanceof ApiError ? e.message : t("responses.load_error_msg"));
     } finally {
       setLoading(false);
     }
@@ -66,8 +62,7 @@ export default function ResponsesPage() {
   async function loadCorrelations(responseId: string) {
     setLoadingCorrelations(true);
     try {
-      const data = await getResponseCorrelations(responseId);
-      setCorrelations(data);
+      setCorrelations(await getResponseCorrelations(responseId));
     } catch (e) {
       console.error("Failed to load correlations", e);
     } finally {
@@ -82,7 +77,7 @@ export default function ResponsesPage() {
       const updated = await regenerateInsights(selectedResponseId);
       setResponses((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Failed to regenerate insights");
+      setError(e instanceof ApiError ? e.message : t("responses.load_error_msg"));
     } finally {
       setRegenerating(false);
     }
@@ -94,164 +89,158 @@ export default function ResponsesPage() {
     await loadCorrelations(selectedResponseId);
   }
 
-
   const selectedResponse = responses.find((r) => r.id === selectedResponseId);
-  const records = selectedResponse?.parsed_data?.records || [];
-  const recordHeaders = records.length > 0 ? Object.keys(records[0]) : [];
+
+  if (loading) {
+    return (
+      <div className="grid animate-fade-up gap-6 lg:grid-cols-4">
+        <Skeleton className="h-48 rounded-squircle lg:col-span-1" />
+        <div className="flex flex-col gap-6 lg:col-span-3">
+          <Skeleton className="h-40 rounded-squircle" />
+          <Skeleton className="h-72 rounded-squircle" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="animate-fade-up">
+        <EmptyState
+          icon={AlertCircle}
+          title={t("responses.load_error")}
+          description={error}
+          action={{ label: t("common.retry"), onClick: loadResponses }}
+        />
+      </div>
+    );
+  }
+
+  if (responses.length === 0) {
+    return (
+      <div className="animate-fade-up">
+        <EmptyState
+          icon={Activity}
+          title={t("responses.no_responses")}
+          description={t("responses.no_responses_sub")}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 animate-fade-up">
-      {loading ? (
-        <div className="flex flex-col items-center gap-3 py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">{t("responses.loading")}</p>
-        </div>
-      ) : error ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-destructive/30 bg-destructive/10 p-8 text-center animate-fade-down">
-          <AlertCircle className="h-10 w-10 text-destructive" />
-          <div>
-            <h3 className="font-heading text-lg font-semibold text-destructive">{t("responses.load_error")}</h3>
-            <p className="text-sm text-muted-foreground mt-1">{error}</p>
-          </div>
-          <Button onClick={loadResponses} variant="secondary">Retry</Button>
-        </div>
-      ) : responses.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
-          <div className="rounded-full bg-primary/10 p-4 border border-primary/20">
-            <Activity className="h-8 w-8 text-primary" />
-          </div>
-          <div className="max-w-sm space-y-1">
-            <h3 className="font-heading font-semibold text-lg">{t("responses.no_responses")}</h3>
-            <p className="text-sm text-muted-foreground">
-              {t("responses.no_responses_sub")}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar selector */}
-          <div className="lg:col-span-1 space-y-3">
-            <h3 className="font-heading text-xs font-bold text-muted-foreground uppercase tracking-wider px-1 flex items-center gap-2">
-              <FileText className="h-3.5 w-3.5" />
-              {t("responses.title")}
-              <Badge variant="secondary" className="ml-auto font-mono text-xs">
-                {responses.length}
-              </Badge>
-            </h3>
-            <div className="flex flex-col gap-2">
-              {responses.map((res, index) => {
-                const isSelected = res.id === selectedResponseId;
-                return (
-                  <button
-                    key={res.id}
-                    onClick={() => setSelectedResponseId(res.id)}
-                    className={[
-                      "w-full text-left rounded-xl p-4 border transition-all text-xs font-mono flex flex-col gap-1.5",
-                      "animate-fade-up",
-                      isSelected
-                        ? "bg-primary/10 border-primary text-foreground"
-                        : "bg-card/50 border-border/60 text-muted-foreground hover:bg-secondary hover:text-foreground",
-                    ].join(" ")}
-                    style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
-                  >
-                    <div className="flex items-center gap-1.5 font-heading text-sm font-bold text-foreground">
-                      <FileText className="h-4 w-4 text-primary" />
-                      Response #{index + 1}
-                    </div>
-                    <div className="truncate">File: {res.file_path?.split("/").pop()}</div>
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {formatDate(res.received_at)}
-                    </div>
-                  </button>
-                );
-              })}
+    <div className="grid animate-fade-up grid-cols-1 gap-6 lg:grid-cols-4">
+      {/* Response rail */}
+      <div className="flex flex-col gap-3 lg:col-span-1">
+        <h3 className="flex items-center gap-2 px-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+          <FileText className="h-3.5 w-3.5" />
+          {t("responses.title")}
+          <Badge variant="secondary" className="ml-auto font-mono text-xs">
+            {responses.length}
+          </Badge>
+        </h3>
+        <ul className="flex flex-col gap-2">
+          {responses.map((res, index) => {
+            const isSelected = res.id === selectedResponseId;
+            return (
+              <li key={res.id}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedResponseId(res.id)}
+                  aria-current={isSelected ? "true" : undefined}
+                  className={`flex w-full flex-col gap-1.5 rounded-squircle-sm border p-3 text-left transition-colors duration-200 ${
+                    isSelected
+                      ? "border-primary/50 bg-primary/10"
+                      : "border-border bg-card hover:border-border/60"
+                  }`}
+                >
+                  <span className="font-heading text-sm font-semibold text-foreground">
+                    {interpolate(t("responses.response_label"), { index: index + 1 })}
+                  </span>
+                  <span className="truncate font-mono text-[11px] text-muted-foreground">
+                    {t("responses.file_label")}: {res.file_path?.split("/").pop()}
+                  </span>
+                  <span className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    {formatDate(res.received_at)}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* Detail */}
+      <div className="flex flex-col gap-6 lg:col-span-3">
+        {selectedResponse && (
+          <>
+            {/* AI insight, in the Info Blue partition every machine-authored
+                surface in this app shares. */}
+            <div className="rounded-squircle border border-info/30 bg-info/[0.04] p-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <h2 className="font-heading text-base font-semibold text-foreground">
+                    {t("responses.subtitle")}
+                  </h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {t("responses.subtitle_desc")}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRegenerateInsights}
+                  disabled={regenerating}
+                  loading={regenerating}
+                >
+                  {!regenerating && <RefreshCw className="h-3.5 w-3.5" />}
+                  {t("common.regenerate")}
+                </Button>
+              </div>
+
+              <div className="mt-4 rounded-squircle-sm border border-border/60 bg-background p-4 text-sm leading-relaxed text-foreground">
+                <TranslatedTextBlock content={selectedResponse.ai_insights} />
+              </div>
             </div>
-          </div>
 
-          {/* Detailed Response View */}
-          <div className="lg:col-span-3 space-y-6">
-            {selectedResponse && (
-              <>
-                {/* AI Insights Card */}
-                <Card className="relative overflow-hidden animate-fade-up border-info/30">
-                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-info via-primary to-info/30" />
-                  <CardHeader className="pb-3 flex flex-row items-center justify-between gap-4">
-                    <div>
-                      <CardTitle className="font-heading text-base font-bold flex items-center gap-2 text-info">
-                        <div className="rounded-lg bg-info/15 p-1.5">
-                          <Sparkles className="h-4 w-4 text-info" />
-                        </div>
-                        {t("responses.subtitle")}
-                      </CardTitle>
-                      <CardDescription className="text-xs text-muted-foreground">
-                        {t("responses.subtitle_desc")}
-                      </CardDescription>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleRegenerateInsights}
-                      disabled={regenerating}
-                      loading={regenerating}
+            <Card>
+              <CardHeader>
+                <div className="min-w-0">
+                  <CardTitle className="text-base">{t("responses.parsed_records")}</CardTitle>
+                  <CardDescription>{t("responses.parsed_records_desc")}</CardDescription>
+                </div>
+                {selectedResponse.file_path && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a
+                      href={`${API_URL}/${selectedResponse.file_path}`}
+                      download
+                      target="_blank"
+                      rel="noreferrer"
                     >
-                      {!regenerating && <RefreshCw className="h-3.5 w-3.5" />}
-                      {t("common.regenerate")}
-                    </Button>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-sm leading-relaxed text-foreground bg-primary/5 border border-primary/20 rounded-lg p-4 font-sans whitespace-pre-wrap">
-                      <TranslatedTextBlock content={selectedResponse.ai_insights} />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Parsed Data Table with AI Correlations */}
-                <Card className="animate-fade-up delay-200">
-                  <CardHeader className="pb-3 flex flex-row items-center justify-between gap-4">
-                    <div>
-                      <CardTitle className="font-heading text-base font-bold flex items-center gap-2">
-                        <TableIcon className="h-4 w-4 text-primary" />
-                        {t("responses.parsed_records" as any) || "Response Correlations & Evidence Linker"}
-                      </CardTitle>
-                      <CardDescription className="text-xs text-muted-foreground">
-                        {t("responses.parsed_records_desc" as any) || "Explains flagged records and links them to case entities and path steps. Promote rows to add to Case Diary."}
-                      </CardDescription>
-                    </div>
-                    {selectedResponse.file_path && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a
-                          href={`${API_URL}/${selectedResponse.file_path}`}
-                          download
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <Download className="h-3.5 w-3.5" />
-                          {t("responses.download")}
-                        </a>
-                      </Button>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    {loadingCorrelations ? (
-                      <div className="flex flex-col items-center justify-center py-12 gap-2 text-muted-foreground text-xs font-mono">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        {t("responses.running_correlation")}
-                      </div>
-                    ) : (
-                      <ResponseCorrelationPanel
-                        correlations={correlations}
-                        onPromote={handlePromoteRow}
-                      />
-                    )}
-                  </CardContent>
-                </Card>
-
-              </>
-            )}
-          </div>
-        </div>
-      )}
+                      <Download className="h-3.5 w-3.5" />
+                      {t("responses.download")}
+                    </a>
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent>
+                {loadingCorrelations ? (
+                  <div className="flex flex-col items-center justify-center gap-2 py-12 font-mono text-xs text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    {t("responses.running_correlation")}
+                  </div>
+                ) : (
+                  <ResponseCorrelationPanel
+                    correlations={correlations}
+                    onPromote={handlePromoteRow}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { TranslatedTextBlock } from "@/components/translated-text-block";
-import { useLanguage } from "@/lib/language-context";
 import { CitationDialog } from "@/components/citation-dialog";
+import { TranslatedTextBlock } from "@/components/translated-text-block";
 import { useAuth } from "@/lib/auth-context";
+import { useEnumLabel } from "@/lib/i18n/enums";
+import { useLanguage, type TranslationKey } from "@/lib/language-context";
 import type { PathStepOut, StepStatus } from "@/lib/types";
 
 interface PathStepperProps {
@@ -15,130 +17,124 @@ interface PathStepperProps {
   onStatusChange: (stepId: string, status: StepStatus) => Promise<void>;
 }
 
+const STEP_STATUSES: StepStatus[] = ["pending", "in_progress", "done", "skipped"];
 
-const STATUS_CLASSES = {
-  pending: "border-border text-muted-foreground bg-card",
-  in_progress: "border-primary text-accent-strong bg-primary/10 animate-glow-pulse glow-primary",
-  done: "border-success text-success bg-success/10 glow-success",
-  skipped: "border-muted-foreground/30 text-muted-foreground bg-card",
+/** Node ring per status. Colour is the state; there is no pulse and no blur. */
+const NODE_CLASSES: Record<StepStatus, string> = {
+  pending: "border-border bg-card text-muted-foreground",
+  // `in_progress` is Info Blue here, in the workflow spine, and in StatusBadge.
+  // It used to be red in the stepper and blue in the badge, so the same state
+  // read as two different things on one screen.
+  in_progress: "border-info/60 bg-info/10 text-info",
+  done: "border-success bg-success/10 text-success",
+  skipped: "border-border bg-card text-muted-foreground/60",
+};
+
+/** Card border per status. The border shifts; the card never lifts or glows. */
+const CARD_CLASSES: Record<StepStatus, string> = {
+  pending: "border-border bg-card hover:border-border/60",
+  in_progress: "border-info/40 bg-card",
+  done: "border-success/30 bg-success/[0.03]",
+  skipped: "border-border/60 bg-card opacity-75",
 };
 
 export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { label: enumLabel } = useEnumLabel();
 
-  // Sort steps by step_order just in case
   const sortedSteps = [...steps].sort((a, b) => a.step_order - b.step_order);
 
   return (
-    <div className="relative ml-4 space-y-8">
+    <ol className="relative ml-4 flex flex-col gap-6">
       {sortedSteps.map((step, idx) => {
-        const statusClass = STATUS_CLASSES[step.status] || STATUS_CLASSES.pending;
+        const status = (step.status ?? "pending") as StepStatus;
         const isLast = idx === sortedSteps.length - 1;
-        const isActive = step.status === "in_progress";
-        const isDone = step.status === "done";
+        const isDone = status === "done";
 
         return (
-          <div key={step.id} className="relative pl-12 group">
-            {/* Connector Line — red-to-blue gradient for done/active, muted for pending */}
+          <li key={step.id} className="relative pl-12">
+            {/* Connector: the red-to-blue gradient marks a traversed path, which
+                is a data path — the one place this system allows a gradient. */}
             {!isLast && (
-              <div
-                className="absolute left-[15px] top-9 bottom-[-32px] w-[2px] transition-all duration-500"
+              <span
+                aria-hidden="true"
+                className="absolute bottom-[-24px] left-[15px] top-9 w-0.5"
                 style={{
-                  background: isDone
-                    ? "var(--gradient-accent-info-v)"
-                    : isActive
-          ? "var(--gradient-accent-info-v)"
-                    : "hsl(0 0% 100% / 0.12)",
+                  background: isDone ? "var(--gradient-accent-info-v)" : "hsl(var(--border))",
                 }}
               />
             )}
 
-            {/* Step status node indicator */}
             <span
-              className={[
-                "absolute left-0 top-1 flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs transition-all duration-300 font-mono z-10",
-                statusClass,
-              ].join(" ")}
+              aria-hidden="true"
+              className={`absolute left-0 top-1 z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 font-mono text-xs transition-colors duration-200 ${NODE_CLASSES[status]}`}
             >
               {isDone ? <Check className="h-4 w-4" /> : step.step_order}
             </span>
 
-            {/* Step Card — glass bg + red accent border for active step */}
             <div
-              className={[
-                "rounded-[12px] border p-5 transition-all duration-220",
-                isActive
-                  ? "glass border-primary/60 glow-primary"
-                  : isDone
-      ? "bg-success/10 border-success/30"
-      : "bg-card border-border hover:border-primary/30",
-              ].join(" ")}
+              className={`rounded-squircle border p-5 transition-colors duration-200 ${CARD_CLASSES[status]}`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="font-heading text-base font-semibold text-foreground flex items-center gap-2">
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                <div className="min-w-0 space-y-1">
+                  <div className="font-heading text-base font-semibold text-foreground">
                     <TranslatedTextBlock content={step.title} />
-                    {isActive && (
-                      <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-                    )}
                   </div>
-                  <div className="text-sm text-muted-foreground leading-relaxed">
+                  <div className="max-w-[70ch] text-sm leading-relaxed text-muted-foreground">
                     <TranslatedTextBlock content={step.description} />
                   </div>
                 </div>
 
-                {/* Status Selector dropdown */}
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   {user?.role === "IO" ? (
                     <select
-                      value={t(`path.${step.status}` as any) || step.status}
+                      value={status}
                       onChange={(e) => void onStatusChange(step.id, e.target.value as StepStatus)}
-                      className="h-8 rounded-[8px] bg-input border border-border px-2 text-xs font-mono text-foreground focus-visible:ring-1 focus-visible:ring-primary w-32 cursor-pointer"
+                      className="h-8 w-36 cursor-pointer rounded-squircle-sm border border-border bg-input px-2 font-mono text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       id={`select-status-${step.id}`}
+                      aria-label={t("path.step_status")}
                     >
-                      <option value="pending">{t("path.pending" as any)}</option>
-                      <option value="in_progress">{t("path.in_progress" as any)}</option>
-                      <option value="done">{t("path.done" as any)}</option>
-                      <option value="skipped">{t("path.skipped" as any)}</option>
+                      {STEP_STATUSES.map((value) => (
+                        <option key={value} value={value}>
+                          {enumLabel("status", value)}
+                        </option>
+                      ))}
                     </select>
                   ) : (
-                    <span className="font-mono text-xs uppercase px-2 py-1 rounded-[8px] bg-secondary border border-border text-muted-foreground">
-                      {t(`path.${step.status}` as any) || step.status}
+                    <span className="rounded-squircle-sm border border-border bg-secondary px-2 py-1 font-mono text-xs uppercase text-muted-foreground">
+                      {enumLabel("status", status)}
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Citations and actions row */}
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-border/30">
-                {/* Info blue citation button */}
-                <CitationDialog
-                  title={`SOP Grounding for: ${step.title}`}
-                  sourceText={step.sop_citation}
-                />
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-3">
+                <CitationDialog title={step.title} sourceText={step.sop_citation} />
 
-                {/* Action button for money moment */}
                 {step.suggested_action_type && user?.role === "IO" && (
                   <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() =>
                       router.push(
-                        `/cases/${caseId}/requests?step_id=${step.id}&provider_type=${step.suggested_action_type}`
+                        `/cases/${caseId}/requests?step_id=${step.id}&provider_type=${step.suggested_action_type}`,
                       )
                     }
-          className="bg-primary text-primary-foreground font-medium text-xs h-8 px-3 rounded-squircle-sm hover:scale-105 hover:bg-primary/90 glow-primary transition-all duration-[130ms] flex items-center gap-1.5"
                     id={`btn-action-${step.id}`}
                   >
-                    <span>{t(`requests.generate_${step.suggested_action_type.toLowerCase()}` as any)}</span>
+                    {t(
+                      `requests.generate_${step.suggested_action_type.toLowerCase()}` as TranslationKey,
+                    )}
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
                 )}
               </div>
             </div>
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 }

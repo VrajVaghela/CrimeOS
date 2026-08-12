@@ -31,7 +31,8 @@ export type EnumNamespace =
   | "roles"
   | "entity.type"
   | "citations"
-  | "provider";
+  | "provider"
+  | "audit.actions";
 
 export interface EnumLabeller {
   /** Resolves `<namespace>.<slug>`, falling back to a humanized raw value. */

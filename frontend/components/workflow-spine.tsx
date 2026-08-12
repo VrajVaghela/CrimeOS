@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Check, Loader2, Circle, AlertCircle } from "lucide-react";
+import { Check, Circle, Loader2 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import type { WorkflowStageOut } from "@/lib/types";
 import { useEnumLabel } from "@/lib/i18n/enums";
@@ -12,79 +13,94 @@ interface WorkflowSpineProps {
   onStageSelect?: (stage: string) => void;
 }
 
+/**
+ * Where the case sits in its lifecycle.
+ *
+ * The rail is laid out in flow, not with absolutely-positioned labels over a
+ * spacer div — the previous version put the labels in `absolute` boxes of a fixed
+ * `w-32` and reserved room for them with a blank `h-10`, so a long stage name in
+ * Hindi or Gujarati overlapped its neighbour and nothing about the container
+ * reported the collision.
+ */
 export function WorkflowSpine({ stages, currentStage, onStageSelect }: WorkflowSpineProps) {
   const { label } = useEnumLabel();
+  const interactive = Boolean(onStageSelect);
 
   return (
-    <div className="w-full py-4 px-2">
-      <div className="relative flex flex-col md:flex-row items-center justify-between w-full gap-4 md:gap-2">
-        {/* Connection Line Behind (desktop only) */}
-        <div className="absolute top-[22px] left-0 right-0 h-[2px] bg-border/40 hidden md:block z-0" />
-        
-        {stages.map((stage, index) => {
-          const isActive = stage.stage === currentStage;
-          const isCompleted = stage.is_completed;
-          const status = stage.status;
+    <ol className="flex w-full flex-col gap-4 py-2 md:flex-row md:items-start md:gap-1">
+      {stages.map((stage, index) => {
+        const isActive = stage.stage === currentStage;
+        const isCompleted = stage.is_completed;
+        const isInProgress = stage.status === "in_progress" || isActive;
+        const isSkipped = stage.status === "skipped";
+        const isLast = index === stages.length - 1;
 
-          // Connectors colors
-          const nextStage = stages[index + 1];
-          const hasConnectedLine = nextStage !== undefined;
+        let icon = <Circle className="h-2.5 w-2.5" />;
+        let nodeClass = "border-border bg-card text-muted-foreground";
 
-          // Determine node icon/style
-          let icon = <Circle className="h-3 w-3" />;
-          let nodeBg = "bg-muted text-muted-foreground border-border/40";
-          
-          if (isCompleted) {
-            icon = <Check className="h-4 w-4 stroke-[3px]" />;
-            nodeBg = "bg-success/10 text-success border-success/40";
-          } else if (status === "in_progress" || isActive) {
-            icon = <Loader2 className="h-4 w-4 animate-spin text-primary" />;
-            nodeBg = "bg-primary/10 text-primary border-primary/40";
-          } else if (status === "skipped") {
-            icon = <Check className="h-4 w-4 text-muted-foreground" />;
-            nodeBg = "bg-secondary text-muted-foreground border-border/20";
-          }
+        if (isCompleted) {
+          icon = <Check className="h-4 w-4 stroke-[3]" />;
+          nodeClass = "border-success/50 bg-success/10 text-success";
+        } else if (isInProgress) {
+          icon = <Loader2 className="h-4 w-4 animate-spin" />;
+          nodeClass = "border-info/60 bg-info/10 text-info";
+        } else if (isSkipped) {
+          icon = <Check className="h-3.5 w-3.5" />;
+          nodeClass = "border-border bg-card text-muted-foreground/50";
+        }
 
-          return (
-            <button
-              key={stage.stage}
-              disabled={!onStageSelect}
-              onClick={() => onStageSelect?.(stage.stage)}
-              className={cn(
-                "relative z-10 flex flex-col items-center group focus:outline-none w-full md:w-auto",
-                onStageSelect ? "cursor-pointer" : "cursor-default"
-              )}
-            >
-              {/* Node Circle */}
-              <div
+        return (
+          <li
+            key={stage.stage}
+            className="flex min-w-0 flex-1 items-center gap-3 md:flex-col md:items-center md:gap-2"
+          >
+            <div className="flex items-center gap-0 md:w-full md:flex-1">
+              {/* Leading half-connector, so the line meets the node from both
+                  sides and the row stays symmetrical at every column count. */}
+              <span
+                aria-hidden="true"
                 className={cn(
-                  "flex items-center justify-center w-11 h-11 rounded-full border-2 transition-all duration-300",
-                  nodeBg,
-                  isActive && "border-primary"
+                  "hidden h-px flex-1 md:block",
+                  index === 0 ? "invisible" : isCompleted || isInProgress ? "bg-border" : "bg-border/50",
+                )}
+              />
+              <button
+                type="button"
+                disabled={!interactive}
+                onClick={() => onStageSelect?.(stage.stage)}
+                aria-current={isActive ? "step" : undefined}
+                className={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200",
+                  nodeClass,
+                  interactive ? "cursor-pointer" : "cursor-default",
                 )}
               >
                 {icon}
-              </div>
+              </button>
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "hidden h-px flex-1 md:block",
+                  isLast ? "invisible" : isCompleted ? "bg-border" : "bg-border/50",
+                )}
+              />
+            </div>
 
-              {/* Text Labels — one language only; the backend `label_hi` field is
-                  intentionally not rendered (Phase 14C, ui_rules rule 7). */}
-              <div className="mt-2 text-center md:absolute md:top-12 md:left-1/2 md:-translate-x-1/2 md:w-32">
-                <span
-                  className={cn(
-                    "block text-xs font-semibold font-heading tracking-wide transition-colors duration-200",
-                    isActive ? "text-primary" : "text-foreground/80",
-                    isCompleted && "text-success/90"
-                  )}
-                >
-                  {label("workflow.stage", stage.stage)}
-                </span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-      {/* Spacer for absolute positioned labels on desktop */}
-      <div className="hidden md:block h-10" />
-    </div>
+            <span
+              className={cn(
+                "min-w-0 text-sm font-medium leading-snug transition-colors duration-200 md:text-center md:text-xs",
+                isActive
+                  ? "text-foreground"
+                  : isCompleted
+                    ? "text-secondary-foreground"
+                    : "text-muted-foreground",
+              )}
+            >
+              {label("workflow.stage", stage.stage)}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

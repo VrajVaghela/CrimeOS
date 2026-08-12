@@ -3,66 +3,60 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  FileText,
   Network,
   Plus,
-  FileText,
-  Send,
-  CheckCircle2,
-  Sparkles,
-  ShieldCheck,
-  AlertCircle,
-  Loader2,
   RefreshCw,
-  User,
   Search,
-  Clock,
+  Send,
+  ShieldCheck,
+  Sparkles,
+  User,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TranslatedTextBlock } from "@/components/translated-text-block";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getAuditEvents, ApiError } from "@/lib/api";
-import { useLanguage } from "@/lib/language-context";
+import { useEnumLabel } from "@/lib/i18n/enums";
+import { interpolate, useLanguage } from "@/lib/language-context";
 import { useFormatters } from "@/lib/format";
 import type { AuditEventOut } from "@/lib/types";
 
-const ACTION_CONFIG: Record<string, { icon: React.ElementType; color: string; label: string }> = {
-  case_created: { icon: Plus, color: "text-primary", label: "Case Created" },
-  complaint_ingested: { icon: FileText, color: "text-accent", label: "Complaint Ingested" },
-  extraction_complete: { icon: Search, color: "text-accent", label: "Entities Extracted" },
-  path_generated: { icon: Network, color: "text-primary", label: "Investigation Path Generated" },
-  step_status_changed: { icon: CheckCircle2, color: "text-success", label: "Step Status Updated" },
-  request_created: { icon: FileText, color: "text-muted-foreground", label: "Legal Request Created" },
-  request_approved: { icon: ShieldCheck, color: "text-success", label: "Request Approved" },
-  request_dispatched: { icon: Send, color: "text-primary", label: "Request Dispatched" },
-  response_received: { icon: CheckCircle2, color: "text-success", label: "Provider Response Received" },
-  insights_regenerated: { icon: Sparkles, color: "text-primary", label: "Insights Regenerated" },
-  summary_generated: { icon: Sparkles, color: "text-primary", label: "Case Summary Generated" },
+/**
+ * Icon per action. Labels come from the `audit.actions.*` dictionary namespace,
+ * shared with the case overview's activity log — this file previously carried its
+ * own English-only label map, so the audit trail stayed in English for Hindi and
+ * Gujarati users while every heading around it translated.
+ *
+ * The colour column that used to live here is gone. An append-only log is read
+ * top-down for sequence, not scanned for category, and five hues across eleven
+ * action types read as a legend nobody has.
+ */
+const ACTION_ICON: Record<string, React.ElementType> = {
+  case_created: Plus,
+  complaint_ingested: FileText,
+  extraction_complete: Search,
+  path_generated: Network,
+  step_status_changed: CheckCircle2,
+  request_created: FileText,
+  request_approved: ShieldCheck,
+  request_dispatched: Send,
+  response_received: CheckCircle2,
+  insights_regenerated: Sparkles,
+  summary_generated: Sparkles,
 };
-
-function getActionConfig(action: string) {
-  return (
-    ACTION_CONFIG[action] ?? {
-      icon: Clock,
-      color: "text-muted-foreground",
-      label: action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-    }
-  );
-}
-
-function getActionColor(action: string): string {
-  if (["case_created", "request_dispatched", "insights_regenerated", "summary_generated", "path_generated"].includes(action)) return "bg-primary";
-  if (["complaint_ingested", "extraction_complete"].includes(action)) return "bg-info";
-  if (["step_status_changed", "request_approved", "response_received"].includes(action)) return "bg-success";
-  if (["request_created"].includes(action)) return "bg-accent";
-  return "bg-muted";
-}
-
 
 export default function AuditPage() {
   const params = useParams();
   const caseId = params.id as string;
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
+  const { label: enumLabel } = useEnumLabel();
   const { formatRelative, formatDateTime } = useFormatters();
 
   const [events, setEvents] = useState<AuditEventOut[]>([]);
@@ -78,174 +72,161 @@ export default function AuditPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getAuditEvents(caseId);
-      setEvents(data);
+      setEvents(await getAuditEvents(caseId));
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Failed to load audit events");
+      setError(e instanceof ApiError ? e.message : t("audit.load_error"));
     } finally {
       setLoading(false);
     }
   }
 
+  const ordered = [...events].reverse();
+
   return (
-    <div className="space-y-6 animate-fade-up">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h2 className="font-heading text-lg font-bold flex items-center gap-2">
-            <Network className="h-5 w-5 text-primary" />
-            {t("audit.title")}
-          </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {t("audit.subtitle")}
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={loadEvents}
-          disabled={loading}
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          {t("common.refresh")}
-        </Button>
-      </div>
+    <div className="flex animate-fade-up flex-col gap-6">
+      <PageHeader
+        level="section"
+        title={t("audit.title")}
+        description={t("audit.subtitle")}
+        actions={
+          <Button variant="outline" size="sm" onClick={loadEvents} disabled={loading}>
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            {t("common.refresh")}
+          </Button>
+        }
+      />
 
       {error && (
-        <div className="animate-fade-down rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive flex items-center gap-3">
+        <div
+          role="alert"
+          className="flex items-center gap-3 rounded-squircle border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
+        >
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="flex flex-col items-center gap-3 py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">{t("audit.loading")}</p>
+        <div className="flex flex-col gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-20 rounded-squircle" />
+          ))}
         </div>
       ) : events.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl bg-card border border-border/60 p-12 text-center">
-          <div className="rounded-full bg-primary/10 p-4 border border-primary/20">
-            <Network className="h-8 w-8 text-primary" />
-          </div>
-          <div className="max-w-sm space-y-1">
-            <h3 className="font-heading font-semibold text-lg">{t("audit.no_events")}</h3>
-            <p className="text-sm text-muted-foreground">
-              {t("audit.no_events_sub")}
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          icon={Network}
+          title={t("audit.no_events")}
+          description={t("audit.no_events_sub")}
+        />
       ) : (
         <div className="relative">
-          {/* Timeline vertical line — red-to-blue gradient */}
+          {/* The rail runs the length of the record: ingestion at the bottom,
+              latest action at the top. Red-to-blue marks a traversed path, which
+              is the one thing gradients are for in this system. */}
           <div
-            className="absolute left-5 top-0 bottom-0 w-px"
+            aria-hidden="true"
+            className="absolute bottom-0 left-[11px] top-0 w-px"
             style={{ background: "var(--gradient-accent-info-v)" }}
           />
 
-          <div className="flex flex-col gap-0">
-            {[...events].reverse().map((event, idx) => {
-              const config = getActionConfig(event.action);
-              const Icon = config.icon;
+          <ol className="flex flex-col">
+            {ordered.map((event, idx) => {
+              const Icon = ACTION_ICON[event.action] ?? Clock;
               const isExpanded = expandedId === event.id;
+              const isLatest = idx === 0;
               const detailKeys = Object.keys(event.detail);
+              const hasDetail = detailKeys.length > 0;
 
               return (
-                <div
-                  key={event.id}
-                  className="relative flex gap-4 pb-6 pl-12 animate-fade-up"
-                  style={{ animationDelay: `${Math.min(idx, 8) * 30}ms` }}
-                >
-                  {/* Timeline node — color-coded by action type */}
-                  <div
-                    className={[
-                      "absolute left-2.5 top-1 h-5 w-5 rounded-full border-2 border-background flex items-center justify-center z-10 transition-all duration-300",
-                      idx === 0 ? getActionColor(event.action) + " shadow-[0_0_0_4px] shadow-primary/20" : "bg-card",
-                    ].join(" ")}
+                <li key={event.id} className="relative pb-4 pl-10">
+                  <span
+                    aria-hidden="true"
+                    className={`absolute left-0 top-3 z-10 flex h-[23px] w-[23px] items-center justify-center rounded-full border ${
+                      isLatest
+                        ? "border-primary/50 bg-primary/15 text-foreground"
+                        : "border-border bg-card text-muted-foreground"
+                    }`}
                   >
-                    <Icon className={`h-2.5 w-2.5 ${config.color}`} />
-                  </div>
+                    <Icon className="h-3 w-3" />
+                  </span>
 
-                  {/* Event card */}
                   <div
-                    className={[
-                      "flex-1 rounded-[12px] border p-4 transition-all cursor-pointer",
-                      idx === 0
-                        ? "bg-primary/5 border-primary/40 glow-primary"
-                        : "bg-card border-border hover:border-primary/30 hover:bg-primary/5",
-                    ].join(" ")}
-                    onClick={() => setExpandedId(isExpanded ? null : event.id)}
+                    className={`rounded-squircle border p-4 transition-colors duration-200 ${
+                      isLatest ? "border-primary/30 bg-card" : "border-border bg-card"
+                    }`}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Icon className={`h-4 w-4 shrink-0 ${config.color}`} />
-                        <div className="font-heading text-sm font-semibold text-foreground truncate">
-                          <TranslatedTextBlock content={config.label} />
-                        </div>
-                        {idx === 0 && (
-                          <Badge variant="info" className="text-[10px] font-mono shrink-0">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <p className="font-heading text-sm font-semibold text-foreground">
+                          {enumLabel("audit.actions", event.action)}
+                        </p>
+                        {isLatest && (
+                          <Badge variant="secondary" className="font-mono text-[10px]">
                             {t("summary.latest")}
                           </Badge>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
+                      <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
                         {event.user_id && <User className="h-3 w-3" />}
-                        <span className="font-mono whitespace-nowrap">{formatRelative(event.created_at)}</span>
+                        <span className="whitespace-nowrap font-mono">
+                          {formatRelative(event.created_at)}
+                        </span>
                       </div>
                     </div>
 
-                    <p className="text-xs text-muted-foreground font-mono mt-1">
+                    <p className="mt-1 font-mono text-xs text-muted-foreground">
                       {formatDateTime(event.created_at)}
                     </p>
 
-                    {/* Detail expansion */}
-                    {detailKeys.length > 0 && (
-                      <div
-                        className={[
-                          "overflow-hidden transition-all duration-300",
-                          isExpanded ? "max-h-96 mt-3" : "max-h-0",
-                        ].join(" ")}
-                      >
-                        <div className="bg-muted/50 border border-border/60 rounded-lg p-3 space-y-1">
-                          <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2">
-                            {t("audit.detail")}
-                          </p>
-                          {detailKeys.map((key) => (
-                            <div key={key} className="flex gap-2 text-xs">
-                              <span className="text-muted-foreground font-mono min-w-24 shrink-0">
-                                {key}
-                              </span>
-                              <span className="text-foreground font-mono break-all">
-                                {String(event.detail[key])}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    {hasDetail && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedId(isExpanded ? null : event.id)}
+                          aria-expanded={isExpanded}
+                          className="mt-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          {isExpanded ? t("common.collapse") : t("audit.expand")}
+                        </button>
 
-                    {detailKeys.length > 0 && !isExpanded && (
-                      <p className="text-[10px] text-muted-foreground mt-2 hover:text-primary transition-colors">
-                        {t("audit.expand")} →
-                      </p>
+                        {isExpanded && (
+                          <dl className="mt-3 flex flex-col gap-1 rounded-squircle-sm border border-border/60 bg-surface-alt p-3">
+                            <p className="mb-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                              {t("audit.detail")}
+                            </p>
+                            {detailKeys.map((key) => (
+                              <div key={key} className="flex gap-2 text-xs">
+                                <dt className="min-w-24 shrink-0 font-mono text-muted-foreground">
+                                  {key}
+                                </dt>
+                                <dd className="break-all font-mono text-foreground">
+                                  {String(event.detail[key])}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        )}
+                      </>
                     )}
                   </div>
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ol>
 
-          {/* Timeline footer */}
-          <div className="flex items-center gap-2 pl-12 mt-2">
-            <div className="h-3 w-3 rounded-full bg-muted border border-border/60" />
-            <p className="text-xs text-muted-foreground font-mono">{t("audit.case_opened")}</p>
+          <div className="relative flex items-center gap-3 pl-10">
+            <span
+              aria-hidden="true"
+              className="absolute left-[6px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-border bg-background"
+            />
+            <p className="font-mono text-xs text-muted-foreground">{t("audit.case_opened")}</p>
           </div>
         </div>
       )}
 
       {events.length > 0 && (
-        <p className="text-xs text-muted-foreground text-center font-mono">
-          {events.length} event{events.length !== 1 ? "s" : ""} recorded · Append-only audit log
+        <p className="text-center font-mono text-xs text-muted-foreground">
+          {interpolate(t("audit.events_recorded"), { count: events.length })}
         </p>
       )}
     </div>

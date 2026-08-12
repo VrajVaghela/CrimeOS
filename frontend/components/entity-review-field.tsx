@@ -44,7 +44,7 @@ export function EntityReviewField({ entity, onChange }: EntityReviewFieldProps) 
       className={[
         "rounded-[8px] border bg-secondary p-3 transition-all duration-200",
         isLow
-          ? "border-warn/80 ring-2 ring-warn/25 shadow-[0_0_12px_rgba(255,210,0,0.15)]"
+          ? "border-warn/50 bg-warn/[0.04]"
           : "border-border",
       ].join(" ")}
     >

@@ -24,13 +24,13 @@ export function PathRevisionList({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 mb-2">
-        <GitBranch className="h-4 w-4 text-primary animate-pulse" />
-        <h3 className="text-sm font-semibold font-heading text-foreground">
+      <div className="flex items-center gap-2">
+        <GitBranch className="h-4 w-4 text-muted-foreground" />
+        <h3 className="font-heading text-sm font-semibold text-foreground">
           {t("revisions.title")}
         </h3>
       </div>
-      <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+      <div className="max-h-[400px] space-y-2 overflow-y-auto pr-1">
         {revisions.map((rev) => {
           const isActive = rev.id === activeRevisionId;
           const isSelected = rev.id === selectedRevisionId;
@@ -38,34 +38,39 @@ export function PathRevisionList({
           return (
             <button
               key={rev.id}
+              type="button"
               onClick={() => onSelectRevision(rev)}
-              className={`w-full text-left p-3 rounded-lg border transition-all duration-200 flex items-center justify-between ${
+              aria-current={isSelected ? "true" : undefined}
+              className={`flex w-full items-center justify-between rounded-squircle-sm border p-3 text-left transition-colors duration-200 ${
                 isSelected
-                  ? "border-primary bg-primary/10 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
-                  : "border-border bg-slate-900/60 hover:bg-slate-800/80 hover:border-slate-700"
+                  ? "border-primary/50 bg-primary/10"
+                  : "border-border bg-surface-alt hover:border-border/60"
               }`}
             >
-              <div className="space-y-1 pr-2 min-w-0">
+              <div className="min-w-0 space-y-1 pr-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-accent-strong">
+                  <span className="font-mono text-xs font-semibold text-foreground">
                     v{rev.revision_number}
                   </span>
-                  <span className="text-[10px] font-mono text-muted-foreground uppercase bg-slate-800 px-1.5 py-0.5 rounded">
+                  <span className="rounded border border-border/60 bg-secondary px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
                     {rev.trigger_type}
                   </span>
                   {isActive && (
-                    <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span
+                      className="inline-flex h-1.5 w-1.5 rounded-full bg-success"
+                      title={t("revisions.active")}
+                    />
                   )}
                 </div>
-                <div className="text-xs font-medium text-foreground truncate">
+                <div className="truncate text-xs font-medium text-foreground">
                   {rev.change_reason || t("revisions.initial")}
                 </div>
-                <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
+                <div className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   {formatDateTime(rev.generated_at)}
                 </div>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
             </button>
           );
         })}

@@ -253,7 +253,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-foreground/80 font-mono bg-black/40 p-3 rounded-lg border border-border/40">
+          <p className="text-sm text-foreground/80 font-mono bg-black/40 p-3 rounded-squircle border border-border/40">
             {error}
           </p>
           <Button variant="outline" className="w-full" onClick={onRefresh}>
@@ -304,7 +304,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
     ];
 
     return (
-      <Card className="max-w-2xl mx-auto my-8 border-info/30 bg-gradient-to-b from-info/[0.05] via-card to-card rounded-squircle p-6 md:p-8 space-y-6 shadow-2xl transition-colors duration-300 hover:border-info/50">
+      <Card className="max-w-2xl mx-auto my-8 border-info/30 bg-info/[0.04] rounded-squircle p-6 md:p-8 space-y-6">
         {/* Top Header Badge Row */}
         <div className="flex items-center justify-between gap-3 border-b border-border/40 pb-4">
           <div className="flex items-center gap-2">
@@ -345,7 +345,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
         </div>
 
         {/* High-Precision Progress Meter */}
-        <div className="space-y-2 bg-border-soft/50 p-4 rounded-xl border border-border/40">
+        <div className="space-y-2 bg-border-soft/50 p-4 rounded-squircle border border-border/40">
           <div className="flex justify-between items-center text-xs">
             <span className="text-secondary font-medium uppercase tracking-wider text-[11px]">
               {t("video.analysis_progress")}
@@ -357,7 +357,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
 
           <div className="w-full bg-background rounded-full h-2.5 p-0.5 border border-border/60 relative overflow-hidden">
             <div
-              className="bg-gradient-to-r from-info/80 to-info h-full rounded-full transition-all duration-500 ease-out relative"
+              className="bg-info h-full rounded-full transition-[width] duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -377,8 +377,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
               return (
                 <div
                   key={step.id}
-                  className={`p-3 rounded-lg border text-xs transition-all duration-300 flex items-center justify-between gap-3 ${
-                    isDone
+                  className={`p-3 rounded-squircle border text-xs transition-all duration-300 flex items-center justify-between gap-3 ${ isDone
                       ? "bg-success/[0.04] border-success/30 text-foreground"
                       : isActive
                       ? "bg-info/[0.08] border-info/40 text-foreground"
@@ -387,8 +386,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className={`p-2 rounded-md shrink-0 border ${
-                        isDone
+                      className={`p-2 rounded-squircle-sm shrink-0 border ${ isDone
                           ? "bg-success/15 border-success/30 text-success"
                           : isActive
                           ? "bg-info/15 border-info/30 text-info"
@@ -463,8 +461,8 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
           <CardContent className="p-4 space-y-3 bg-card/40">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="min-w-0">
-                <h3 className="text-sm font-bold truncate text-violet flex items-center gap-1.5">
-                  <FileVideo className="h-4.5 w-4.5 text-violet shrink-0" />
+                <h3 className="text-sm font-bold truncate text-info flex items-center gap-1.5">
+                  <FileVideo className="h-4.5 w-4.5 text-info shrink-0" />
                   {report.filename}
                 </h3>
                 <p className="text-[10px] text-muted-foreground mt-0.5 font-mono truncate max-w-[320px]">
@@ -481,7 +479,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
               </div>
             </div>
             <Separator className="bg-border/30" />
-            <div className="flex items-center justify-between gap-4 bg-black/40 p-2.5 rounded-lg border border-border/40 text-xs">
+            <div className="flex items-center justify-between gap-4 bg-black/40 p-2.5 rounded-squircle border border-border/40 text-xs">
               <span className="font-mono text-muted-foreground select-none">SHA-256 Hash:</span>
               <div className="flex items-center gap-2 min-w-0">
                 <span className="font-mono truncate max-w-[200px] text-foreground/80">{report.original_sha256}</span>
@@ -502,10 +500,10 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
       {/* RIGHT COLUMN: Report & Timeline (40% width on large screens) */}
       <div className="lg:col-span-5 space-y-4">
         {/* Overview card */}
-        <Card className="border-border/60 shadow-lg bg-card/60 overflow-hidden">
+        <Card className="border-border/60 bg-card overflow-hidden">
           <CardHeader className="pb-3 pt-4 px-4 bg-surface-alt/40 border-b border-border/40">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-violet">
+              <div className="flex items-center gap-1.5 text-info">
                 <Sparkles className="h-4.5 w-4.5" />
                 <span className="font-heading text-xs font-bold uppercase tracking-wider">{t("video.forensic_report")}</span>
               </div>
@@ -528,7 +526,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
 
             {/* Crime Summary callout */}
             {report.crime_summary && (
-              <div className="bg-destructive/10 border border-destructive/20 p-3 rounded-lg animate-pulse">
+              <div className="bg-destructive/10 border border-destructive/20 p-3 rounded-squircle animate-pulse">
                 <div className="flex items-center gap-1.5 text-destructive text-xs font-bold uppercase">
                   <ShieldAlert className="h-4 w-4" />
                   {t("video.detected_incident")}
@@ -542,10 +540,10 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
         </Card>
 
         {/* Timeline card */}
-        <Card className="border-border/60 shadow-lg bg-card/60 flex flex-col h-[380px] overflow-hidden">
+        <Card className="border-border/60 bg-card flex flex-col h-[380px] overflow-hidden">
           <CardHeader className="pb-2 pt-3 px-4 bg-surface-alt/40 border-b border-border/40 shrink-0">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Clock className="h-4 w-4 text-violet" />
+              <Clock className="h-4 w-4 text-info" />
               Incident Timeline ({report.timeline.length} logs)
             </CardTitle>
           </CardHeader>
@@ -559,8 +557,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
                   key={`${entry.sequence_order}-${entry.timestamp_seconds}`}
                   data-timeline-row
                   onClick={() => handleRowClick(entry, index)}
-                  className={`px-4 py-3 border-b border-border/30 cursor-pointer transition-all duration-200 ${
-                    isActive
+                  className={`px-4 py-3 border-b border-border/30 cursor-pointer transition-all duration-200 ${ isActive
                       ? "bg-info/10 border-l-2 border-l-info"
                       : "hover:bg-surface-alt/20 border-l-2 border-l-transparent"
                   }`}
@@ -569,7 +566,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
                     <span className={`font-mono text-xs font-bold ${isActive ? "text-info" : "text-foreground"}`}>
                       ⏱️ {entry.timestamp_in_video}
                     </span>
-                    <Badge className={`text-[9px] uppercase font-mono px-1.5 ${entryRisk.bg}`}>
+                    <Badge className={`text-[10px] uppercase font-mono px-1.5 ${entryRisk.bg}`}>
                       {entry.risk_level}
                     </Badge>
                   </div>
@@ -581,7 +578,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
                   {entry.entities_detected && entry.entities_detected.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {entry.entities_detected.map((ent, entIdx) => (
-                        <Badge key={entIdx} variant="secondary" className="text-[9px] font-mono text-[10px] py-0 px-1 border border-border/50 uppercase">
+                        <Badge key={entIdx} variant="secondary" className="text-[10px] font-mono text-[10px] py-0 px-1 border border-border/50 uppercase">
                           {ent}
                         </Badge>
                       ))}

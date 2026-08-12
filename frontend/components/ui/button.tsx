@@ -46,35 +46,53 @@ export interface ButtonProps
   loading?: boolean;
 }
 
+const Spinner = () => (
+  <svg
+    className="h-4 w-4 animate-spin"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+    />
+  </svg>
+);
+
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading, disabled, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
+    const classes = cn(buttonVariants({ variant, size, className }));
+
+    // Radix Slot forwards props onto exactly one child and counts a falsy
+    // expression as a child of its own, so in `asChild` mode nothing may sit
+    // beside `children` — not even `{false && <Spinner />}`. Rendering the two
+    // modes separately is what keeps that guarantee structural rather than
+    // incidental. `asChild` is used for links, which navigate rather than await,
+    // so they have no loading state to show anyway.
+    if (asChild) {
+      return (
+        <Slot className={classes} ref={ref} {...props}>
+          {children}
+        </Slot>
+      );
+    }
+
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+      <button
+        className={classes}
         ref={ref}
         disabled={disabled || loading}
+        aria-busy={loading ? true : undefined}
         data-loading={loading ? "true" : undefined}
         {...props}
       >
-        {loading && (
-          <svg
-            className="h-4 w-4 animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-        )}
+        {loading ? <Spinner /> : null}
         {children}
-      </Comp>
+      </button>
     );
   },
 );

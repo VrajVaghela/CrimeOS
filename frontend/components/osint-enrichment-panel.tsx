@@ -225,8 +225,7 @@ export function OsintEnrichmentPanel({
         </span>
         {scanResult && (
           <span
-            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-              scanResult.scan.status === "COMPLETED"
+            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${ scanResult.scan.status === "COMPLETED"
                 ? "bg-success/10 text-success border-success/30"
                 : scanResult.scan.status === "FAILED"
                 ? "bg-danger/10 text-danger border-danger/30 animate-pulse"
@@ -274,8 +273,7 @@ export function OsintEnrichmentPanel({
         <div className="space-y-4">
           {/* Risk Level Banner */}
           <div
-            className={`p-4 rounded-squircle border flex items-center justify-between ${getRiskColor(
-              scanResult.risk_summary.overall_risk_level
+            className={`p-4 rounded-squircle border flex items-center justify-between ${getRiskColor( scanResult.risk_summary.overall_risk_level
             )}`}
           >
             <div className="flex items-center gap-2.5">
@@ -361,8 +359,7 @@ className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span
-                          className={`text-[9px] font-mono px-1 rounded ${
-                            profile.exists_confidence === "CONFIRMED"
+                          className={`text-[10px] font-mono px-1 rounded ${ profile.exists_confidence === "CONFIRMED"
                               ? "bg-success/15 text-success"
                               : profile.exists_confidence === "LIKELY"
                               ? "bg-primary/10 text-accent-strong"
@@ -376,8 +373,7 @@ className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border
                             <span>{profile.follower_count.toLocaleString()} fans</span>
                             {profile.follower_count_delta !== null && (
                               <span
-                                className={`text-[9px] ${
-                                  profile.follower_count_delta > 0
+                                className={`text-[10px] ${ profile.follower_count_delta > 0
                                     ? "text-success font-semibold"
                                     : "text-danger"
                                 }`}
@@ -398,7 +394,7 @@ className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border
                     )}
 
                     {(profile.location_hint || profile.timezone_hint) && (
-                      <div className="flex flex-wrap gap-1.5 text-[9px] font-mono text-muted-foreground">
+                      <div className="flex flex-wrap gap-1.5 text-[10px] font-mono text-muted-foreground">
                         {profile.location_hint && (
                           <span className="flex items-center gap-0.5 bg-foreground/5 px-1 py-0.5 rounded border border-border/20">
                             <Globe className="h-2.5 w-2.5" />
@@ -444,8 +440,7 @@ className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border
                         {breach.breach_name}
                       </div>
                       <span
-                        className={`text-[9px] font-mono font-bold ${getBreachSeverityColor(
-                          breach.severity
+                        className={`text-[10px] font-mono font-bold ${getBreachSeverityColor( breach.severity
                         )}`}
                       >
                         {breach.severity}
@@ -474,7 +469,7 @@ className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border
                       {breach.exposed_data_classes.map((cls, ci) => (
                         <span
                           key={ci}
-className="bg-destructive/10 text-foreground border border-destructive/20 text-[9px] font-mono px-1 rounded"
+className="bg-destructive/10 text-foreground border border-destructive/20 text-[10px] font-mono px-1 rounded"
                         >
                           {cls}
                         </span>
@@ -513,7 +508,7 @@ className="p-3 rounded bg-warn/5 border border-warn/20 text-xs flex flex-col gap
                           {pivot.display_value}
                         </div>
                       </div>
-<span className="text-[9px] font-mono font-bold bg-warn/10 text-warn border border-warn/25 px-1 py-0.5 rounded shrink-0">
+<span className="text-[10px] font-mono font-bold bg-warn/10 text-warn border border-warn/25 px-1 py-0.5 rounded shrink-0">
                         {Math.round(pivot.confidence * 100)}% Confidence
                       </span>
                     </div>

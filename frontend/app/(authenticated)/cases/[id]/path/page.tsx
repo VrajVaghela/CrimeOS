@@ -4,10 +4,12 @@ export const dynamic = "force-dynamic";
 
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
-import { AlertCircle, Crosshair, Gavel, Scale, Sparkles, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, CheckCircle2, Crosshair, Loader2, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { PathStepper } from "@/components/path-stepper";
@@ -177,7 +179,7 @@ export default function PathPage() {
     return (
       <div className="space-y-6">
         <Skeleton className="h-10 w-56" />
-        <Skeleton className="h-64 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-squircle" />
       </div>
     );
   }
@@ -185,28 +187,19 @@ export default function PathPage() {
   // Not Started
   if (status === "not_started") {
     return (
-      <div className="flex flex-col items-center gap-6 rounded-xl bg-card border border-violet/20 p-12 text-center animate-fade-up relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet via-primary to-violet/30" />
-        <div className="rounded-full bg-gradient-to-br from-violet/20 to-primary/20 p-4 border border-violet/20">
-          <Crosshair className="h-8 w-8 text-violet" />
-        </div>
-        <div className="max-w-md space-y-2">
-          <h2 className="font-heading text-xl font-bold text-foreground">
-            {t("path.title")}
-          </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {t("path.subtitle")}
-          </p>
-        </div>
+      <div className="animate-fade-up">
         {error && (
-          <Alert variant="destructive" className="max-w-md">
+          <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <Button onClick={handleGenerate} size="lg" id="btn-generate-path">
-          {t("path.analyze_btn")}
-        </Button>
+        <EmptyState
+          icon={Crosshair}
+          title={t("path.title")}
+          description={t("path.subtitle")}
+          action={{ label: t("path.analyze_btn"), onClick: handleGenerate }}
+        />
       </div>
     );
   }
@@ -214,27 +207,27 @@ export default function PathPage() {
   // Processing
   if (status === "processing") {
     return (
-      <div className="flex flex-col items-center justify-center gap-5 rounded-xl bg-card border border-violet/20 p-12 text-center animate-fade-up relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet via-info to-violet/30" />
-        <div className="relative flex items-center justify-center">
-          <div className="h-14 w-14 rounded-full border-4 border-violet/30 border-t-violet animate-spin" />
-          <Sparkles className="absolute h-6 w-6 text-violet animate-pulse" />
-        </div>
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex animate-fade-up flex-col items-center justify-center gap-5 rounded-squircle border border-info/30 bg-info/[0.04] p-12 text-center"
+      >
+        <Loader2 className="h-8 w-8 animate-spin text-info" />
         <div className="max-w-md space-y-1">
           <h2 className="font-heading text-lg font-semibold text-foreground">
             {t("path.generating")}
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             {t("path.generating_sub")}
           </p>
-          <p className="font-mono text-xs text-accent-strong mt-2">
+          <p className="pt-1 font-mono text-xs tabular-nums text-muted-foreground">
             {t("common.elapsed")}: {elapsedTime}s
           </p>
         </div>
-        <div className="w-full max-w-sm space-y-2 mt-2">
-          <Skeleton className="h-3 w-full" />
-          <Skeleton className="h-3 w-5/6 mx-auto" />
-          <Skeleton className="h-3 w-2/3 mx-auto" />
+        <div className="mt-2 flex w-full max-w-sm flex-col gap-2">
+          <Skeleton className="h-3 w-full rounded-full" />
+          <Skeleton className="mx-auto h-3 w-5/6 rounded-full" />
+          <Skeleton className="mx-auto h-3 w-2/3 rounded-full" />
         </div>
       </div>
     );
@@ -243,22 +236,13 @@ export default function PathPage() {
   // Failed
   if (status === "failed") {
     return (
-      <div className="flex flex-col items-center gap-5 rounded-xl bg-card border border-destructive/20 p-12 text-center animate-fade-up">
-        <div className="rounded-full bg-destructive/10 p-4 border border-destructive/20">
-          <AlertCircle className="h-8 w-8 text-destructive" />
-        </div>
-        <div className="max-w-md space-y-1">
-          <h2 className="font-heading text-lg font-bold text-destructive">
-            {t("path.failed")}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {message || "An unexpected error occurred during path suggestion."}
-          </p>
-        </div>
-        <Button onClick={handleGenerate} variant="secondary" id="btn-retry-path">
-          <RefreshCw className="h-4 w-4" />
-          {t("path.regenerate")}
-        </Button>
+      <div className="animate-fade-up">
+        <EmptyState
+          icon={AlertCircle}
+          title={t("path.failed")}
+          description={message || t("path.failed_sub")}
+          action={{ label: t("path.regenerate"), onClick: handleGenerate, icon: RefreshCw }}
+        />
       </div>
     );
   }
@@ -267,31 +251,30 @@ export default function PathPage() {
   const currentPath = revisions.find((r) => r.id === selectedRevisionId) || path;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start animate-fade-up">
+    <div className="grid animate-fade-up grid-cols-1 items-start gap-6 lg:grid-cols-3">
       {/* Steps panel */}
-      <div className="lg:col-span-2 space-y-6">
-        <div className="flex items-center justify-between border-b border-violet/30 pb-4">
-          <div>
-            <h2 className="font-heading text-xl font-bold flex items-center gap-2">
-              <div className="rounded-lg bg-violet/15 p-1.5">
-                <Crosshair className="h-5 w-5 text-violet" />
-              </div>
-              {t("path.blueprint")}
-            </h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t("path.model_label")} <span className="font-mono text-accent-strong">{currentPath?.model_used || path?.model_used}</span> · Grounded in seeded police SOPs
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleGenerate}
-            id="btn-regenerate"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            {t("path.regenerate")}
-          </Button>
-        </div>
+      <div className="flex flex-col gap-6 lg:col-span-2">
+        <PageHeader
+          level="section"
+          title={t("path.blueprint")}
+          description={
+            <>
+              {t("path.model_label")}{" "}
+              <span className="font-mono text-foreground">
+                {currentPath?.model_used || path?.model_used}
+              </span>
+              <span className="mx-1.5 text-muted-foreground/40">/</span>
+              {t("path.grounded_in_sops")}
+            </>
+          }
+          actions={
+            <Button variant="outline" size="sm" onClick={handleGenerate} id="btn-regenerate">
+              <RefreshCw className="h-3.5 w-3.5" />
+              {t("path.regenerate")}
+            </Button>
+          }
+          className="border-b border-border pb-4"
+        />
 
         {error && (
           <Alert variant="destructive">
@@ -301,15 +284,19 @@ export default function PathPage() {
         )}
 
         {currentPath && (
-          <PathStepper steps={currentPath.steps} caseId={caseId} onStatusChange={handleStatusChange} />
+          <PathStepper
+            steps={currentPath.steps}
+            caseId={caseId}
+            onStatusChange={handleStatusChange}
+          />
         )}
       </div>
 
-      {/* Legal Sections Sidebar */}
-      <div className="space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto pr-1 pb-6">
-        {/* Revision History */}
+      {/* Legal grounding rail. Sticky so an advisor can scroll the steps while
+          keeping the sections they are auditing in view. */}
+      <div className="flex flex-col gap-6 pb-6 pr-1 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto">
         {revisions.length > 0 && (
-          <div className="border border-border/60 bg-card rounded-xl p-4 space-y-3">
+          <div className="rounded-squircle border border-border/80 bg-card p-4">
             <PathRevisionList
               revisions={revisions}
               activeRevisionId={path?.id || null}
@@ -319,21 +306,16 @@ export default function PathPage() {
           </div>
         )}
 
-        <div className="border-b border-violet/30 pb-4">
-          <h2 className="font-heading text-xl font-bold flex items-center gap-2">
-            <div className="rounded-lg bg-violet/15 p-1.5">
-              <Scale className="h-5 w-5 text-violet" />
-            </div>
-            {t("path.legal_grounding")}
-          </h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            {t("path.legal_grounding_sub")}
-          </p>
-        </div>
+        <PageHeader
+          level="section"
+          title={t("path.legal_grounding")}
+          description={t("path.legal_grounding_sub")}
+          className="border-b border-border pb-4"
+        />
 
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {caseSections.length === 0 ? (
-            <div className="text-center p-8 bg-muted/30 rounded-xl border border-dashed border-border/40">
+            <div className="rounded-squircle border border-dashed border-border bg-surface-alt/40 p-8 text-center">
               <p className="text-sm text-muted-foreground">{t("path.no_sections")}</p>
             </div>
           ) : (
@@ -341,40 +323,39 @@ export default function PathPage() {
               const highConfidence = sec.confidence >= 0.85;
               return (
                 <AiContentCard key={sec.id} title={t("common.ai_suggested_section")}>
-                  <div className="space-y-3">
+                  <div className="flex flex-col gap-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <span className="font-heading font-semibold text-sm text-foreground block">
-                          {sec.legal_section.code} Section {sec.legal_section.section_number}
+                        <span className="block font-mono text-sm font-semibold text-foreground">
+                          {sec.legal_section.code} {sec.legal_section.section_number}
                         </span>
-                        <span className="text-xs text-muted-foreground block truncate">
+                        <span className="block text-xs text-muted-foreground">
                           {sec.legal_section.title}
                         </span>
                       </div>
                       <Badge
                         variant={highConfidence ? "success" : "warning"}
-                        className="text-[10px] font-mono font-semibold uppercase shrink-0"
+                        className="shrink-0 font-mono text-[10px] font-semibold"
                       >
-                        {Math.round(sec.confidence * 100)}% Conf
+                        {Math.round(sec.confidence * 100)}% {t("path.conf_short")}
                       </Badge>
                     </div>
 
-                    {/* Section code text */}
-                    <div className="rounded-lg bg-muted p-3 text-[11px] font-mono leading-relaxed text-muted-foreground border border-border/60 max-h-24 overflow-y-auto scrollbar-none">
+                    <div className="max-h-24 overflow-y-auto rounded-squircle-sm border border-border/60 bg-background p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
                       {sec.legal_section.text}
                     </div>
 
-                    {/* AI Reasoning */}
-                    <div className="text-xs text-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
-                      <span className="font-bold text-[10px] text-accent-strong block uppercase tracking-wider mb-1">
+                    <div className="rounded-squircle-sm border border-border/60 bg-background p-3">
+                      <span className="mb-1 block font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-info">
                         {t("path.ai_reasoning")}
                       </span>
-                      <TranslatedTextBlock content={sec.ai_reasoning} />
+                      <div className="text-xs leading-relaxed text-secondary-foreground">
+                        <TranslatedTextBlock content={sec.ai_reasoning} />
+                      </div>
                     </div>
 
-                    {/* Status */}
-                    <div className="flex items-center justify-between border-t border-border/30 pt-3">
-                      <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-wider">
+                    <div className="flex items-center justify-between border-t border-info/20 pt-3">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                         {t("path.review_status")}
                       </span>
                       {sec.status === "approved" && (
@@ -384,19 +365,20 @@ export default function PathPage() {
                         <Badge variant="destructive">{t("path.flagged_inapplicable")}</Badge>
                       )}
                       {sec.status === "pending" && (
-                        <Badge variant="warning" dot pulse>{t("path.awaiting_audit")}</Badge>
+                        <Badge variant="warning" dot pulse>
+                          {t("path.awaiting_audit")}
+                        </Badge>
                       )}
                     </div>
 
-                    {/* Legal Advisor Actions */}
                     {user?.role === "LEGAL" && (
-                      <div className="flex items-center gap-2 border-t border-border/30 pt-3 w-full justify-end">
+                      <div className="flex w-full items-center justify-end gap-2 border-t border-info/20 pt-3">
                         <Button
                           variant="ghost"
                           size="sm"
                           disabled={updatingSectionId === sec.id}
                           onClick={() => void handleSectionStatusChange(sec.id, "rejected")}
-                          className="text-xs h-7 px-2.5 text-destructive hover:bg-destructive/10"
+                          className="text-destructive hover:bg-destructive/10"
                         >
                           {t("path.flag")}
                         </Button>
@@ -406,7 +388,6 @@ export default function PathPage() {
                           onClick={() => void handleSectionStatusChange(sec.id, "approved")}
                           loading={updatingSectionId === sec.id}
                           variant="success"
-                          className="text-xs h-7 px-2.5"
                         >
                           {updatingSectionId !== sec.id && <CheckCircle2 className="h-3 w-3" />}
                           {t("path.verify")}

@@ -33,6 +33,7 @@ const gu: Dictionary = {
 
     // Phase 14B additions
     retry: "ફરી પ્રયાસ કરો",
+    saving: "સાચવવામાં આવી રહ્યું છે…",
     download: "ડાઉનલોડ કરો",
     upload: "અપલોડ કરો",
     uploading: "અપલોડ થઈ રહ્યું છે…",
@@ -111,6 +112,18 @@ const gu: Dictionary = {
     evidence: "પુરાવો",
   },
 
+  tab: {
+    overview: "ઝાંખી",
+    ingestion: "ફરિયાદ",
+    path: "માર્ગ",
+    requests: "વિનંતીઓ",
+    responses: "પ્રતિભાવ",
+    evidence: "પુરાવો",
+    timeline: "સમયરેખા",
+    summary: "સારાંશ અહેવાલ",
+    audit: "ઑડિટ",
+  },
+
   // App frame: sidebar, topbar, breadcrumbs.
   shell: {
     tactical_portal: "રણનીતિક પોર્ટલ",
@@ -122,6 +135,9 @@ const gu: Dictionary = {
     search_placeholder: "કેસ રજિસ્ટ્રી શોધો…",
     workspace: "કાર્યક્ષેત્ર",
     case_crumb: "કેસ",
+    open_nav: "નેવિગેશન ખોલો",
+    close_nav: "નેવિગેશન બંધ કરો",
+    breadcrumb: "બ્રેડક્રમ્બ",
   },
 
   login: {
@@ -181,6 +197,9 @@ const gu: Dictionary = {
       "સ્ટેશન કાનૂની સલાહકાર તરીકે, Crime OS AI દ્વારા ઉત્પન્ન કાનૂની ધારા ભલામણોની ચકાસણી તમારી ભૂમિકા છે. નીચે થાણામાં સૂચિબદ્ધ કેસ છે. ઑડિટ કરવા કેસ પસંદ કરો.",
     new_case: "કેસ",
     loading_pending: "બાકી વિનંતીઓ લોડ થઈ રહી છે…",
+    load_error: "થાણા ડૅશબૉર્ડ લોડ થઈ શક્યું નથી.",
+    queue_error: "મંજૂરી કતાર લોડ થઈ શકી નથી.",
+    approve_error: "વિનંતી મંજૂર થઈ શકી નથી. ફરી પ્રયાસ કરો.",
   },
 
   cases: {
@@ -204,12 +223,19 @@ const gu: Dictionary = {
     legal_request_for: "કેસ ID માટે કાનૂની વિનંતી ડ્રાફ્ટ",
     target: "લક્ષ્ય",
     sync_dialog_title: "કેસને CCTNS / eGujcop પોર્ટલ સાથે સિંક કરો",
+    sync_dialog_subtitle:
+      "રાષ્ટ્રીય પોલીસ રેકોર્ડ પોર્ટલ પર પેલોડ મોકલતાં પહેલાં કેસ વિગતો અને કાનૂની કલમોની પુષ્ટિ કરો.",
+    sync_dialog_effect:
+      "પુષ્ટિ થતાં કેસની સ્થિતિ સિંક થાય છે અને પોર્ટલ રાષ્ટ્રીય FIR નંબર ફાળવે છે.",
     payload_preview: "પેલોડ પૂર્વાવલોકન",
     confirm_sync: "સિંક ખાતરી કરો",
     cctns_synced: "CCTNS સિંક થયું",
-    record_label: "રેકોર્ડ:",
-    evidence_label: "પુરાવો:",
     case_sections: "કેસ કલમો",
+    empty_sub: "તે શોધ સાથે કોઈ કેસ નંબર, શીર્ષક કે ગુના પ્રકાર મેળ ખાતો નથી. ટૂંકો શબ્દ અજમાવો.",
+    search_results: "“{query}” માટે {count} પરિણામ",
+    load_error: "કેસ રજિસ્ટ્રી લોડ થઈ શકી નથી.",
+    create_error: "કેસ બની શક્યો નથી. ફરી પ્રયાસ કરો.",
+    title_required: "આગળ વધવા કેસ શીર્ષક દાખલ કરો.",
   },
 
   command_center: {
@@ -256,6 +282,14 @@ const gu: Dictionary = {
     view_full_insights: "સંપૂર્ણ અંતર્દૃષ્ટિ જુઓ",
     ai_correlation_flags: "AI સહસંબંધ સંકેત",
     no_audit_events: "ઑડિટ ટ્રેઇલમાં કોઈ ઘટના નોંધાયેલ નથી.",
+    workflow_complete: "દરેક કાર્યપ્રવાહ પગલું પૂર્ણ છે અને કેસ સારાંશ તૈયાર થયો છે.",
+    next_action_fallback: "આગળના તપાસ પગલાં સાથે ચાલુ રાખો.",
+    workflow_heading: "કાર્યપ્રવાહ પ્રગતિ",
+    case_facts: "કેસ તથ્યો",
+    system_actor: "સિસ્ટમ",
+    no_requests_sub: "પ્રદાતા ડેટા એકત્ર કરવા શરૂ કરવા કોઈ તપાસ પગલાંમાંથી કાનૂની વિનંતીનો ડ્રાફ્ટ બનાવો.",
+    load_error: "કેસ ઝાંખી લોડ થઈ શકી નથી.",
+    sync_error: "કેસ એકમો સિંક થઈ શક્યાં નથી. ફરી પ્રયાસ કરો.",
   },
 
   ingestion: {
@@ -293,6 +327,10 @@ const gu: Dictionary = {
     gemini_info: "જેમિની AI · મલ્ટિમોડલ વિશ્લેષણ · ગુજરાતી/હિન્દી/અંગ્રેજી",
     ai_generated_via: "Gemini દ્વારા તૈયાર",
     ai_suggested: "AI સૂચન",
+    browse_files: "ફાઇલ પસંદ કરો",
+    start_analysis: "અપલોડ કરી વિશ્લેષણ કરો",
+    file_too_large: "આ ફાઇલ મર્યાદા કરતાં {max} MB મોટી છે. તેને સંકોચો અથવા ટૂંકું રેકોર્ડિંગ અપલોડ કરો.",
+    unsupported_type: "આ ફાઇલ પ્રકારનું વિશ્લેષણ થઈ શકતું નથી. PDF, JPG કે PNG, અથવા MP3, WAV કે M4A વાપરો.",
   },
 
   path: {
@@ -308,10 +346,13 @@ const gu: Dictionary = {
     no_path_sub: "ફરિયાદ ઇન્જેસ્ટ કર્યા પછી માર્ગ તૈયાર કરો.",
     confidence: "વિશ્વસનીયતા",
     ai_reasoning: "AI તર્ક",
+    grounded_in_sops: "બીજિત પોલીસ SOP પર આધારિત",
+    conf_short: "વિશ્વાસ",
     view_citation: "SOP ઉદ્ધરણ જુઓ",
     analyze_btn: "વિશ્લેષણ કરો અને માર્ગ બનાવો",
     generating_sub: "SOPs મેળવી રહ્યા છીએ, એન્ટિટીઝનું વિશ્લેષણ કરી રહ્યા છીએ અને BNS કલમો ગોઠવી રહ્યા છીએ.",
     failed: "પેદાશ નિષ્ફળ ગઈ",
+    failed_sub: "માર્ગ સૂચન પૂર્ણ થઈ શક્યું નથી. ફરી પ્રયાસ કરવા પુનઃ તૈયાર કરો.",
     regenerate: "માર્ગ ફરીથી બનાવો",
     blueprint: "તપાસ બ્લુપ્રિન્ટ",
     legal_grounding: "કાનૂની આધાર",
@@ -350,6 +391,8 @@ const gu: Dictionary = {
     template: "ઉપયોગ કરેલ ટૅમ્પ્લૅટ",
     generate_draft: "{provider} વિનંતી ડ્રાફ્ટ બનાવો",
     provider_name: "નોડલ પ્રદાતા / સંસ્થાનું નામ",
+    provider_name_placeholder: "જેમ કે ભારતી એરટેલ, HDFC બૅન્ક",
+    provider_email_placeholder: "જેમ કે nodal.officer@airtel.com",
     provider_email: "નોડલ અધિકારીનું ઈમેલ સરનામું",
     generate_btn: "ડ્રાફ્ટ બનાવો",
     edit_draft: "ડ્રાફ્ટમાં ફેરફાર કરો",
@@ -360,6 +403,8 @@ const gu: Dictionary = {
     received: "પ્રાપ્ત થયું",
     edit_dialog_title: "કાનૂની વિનંતી ડ્રાફ્ટમાં ફેરફાર કરો",
     view_dialog_title: "મોકલેલ કાનૂની વિનંતી જુઓ",
+    request_to: "{provider} ને વિનંતી",
+    demo_note: "ડેમો મોડમાં દરેક નિકાલ સેન્ડબૉક્સ ઇનબૉક્સમાં જાય છે; લક્ષ્ય પ્રદાતા ઑડિટ લૉગમાં નોંધાય છે.",
     dialog_subtitle: "LERS શૈલી પત્ર સામગ્રી, લક્ષિત પ્રાપ્તકર્તા ઇમેઇલ અને પ્રદાતા સંસ્થા મેટાડેટાનું પૂર્વાવલોકન કરો અને ફેરફાર કરો.",
     load_error: "ડેટા લોડ કરવામાં ભૂલ",
     loading: "કાનૂની વિનંતીઓ લોડ થઈ રહી છે…",
@@ -369,6 +414,9 @@ const gu: Dictionary = {
     save_changes: "ફેરફારો સાચવો",
     template_label: "ટેમ્પલેટ:",
     dispatched_label: "મોકલાયું:",
+    generate_telecom: "ટેલિકૉમ વિનંતી બનાવો",
+    generate_bank: "બૅન્ક વિનંતી બનાવો",
+    generate_platform: "પ્લેટફૉર્મ વિનંતી બનાવો",
   },
 
   responses: {
@@ -389,6 +437,8 @@ const gu: Dictionary = {
     trigger_mock: "મોક રિસ્પોન્સ ટ્રિગર કરો",
     correlation_title: "AI સહસંબંધ અને આધાર",
     correlation_engine: "AI સહસંબંધ એન્જિન",
+    response_label: "પ્રતિભાવ {index}",
+    file_label: "ફાઇલ",
     running_correlation: "સહસંબંધ એન્જિન ચાલી રહ્યું છે…",
     raw_provider_data: "મૂળ પ્રદાતા ડેટા",
     linked_path_step: "જોડાયેલ તપાસ પગલું",
@@ -398,6 +448,13 @@ const gu: Dictionary = {
     no_records: "બતાવવા માટે કોઈ રેકોર્ડ નથી.",
     load_error: "ડેટા લોડ કરવામાં ભૂલ",
     loading: "પ્રદાતા જવાબો લોડ થઈ રહ્યા છે…",
+    load_error_msg: "પ્રદાતા પ્રતિભાવ લોડ થઈ શક્યા નથી.",
+    row_label: "પંક્તિ",
+    entity_match: "એકમ મેળ",
+    promoted_title: "રેકોર્ડ ઉમેરાયો",
+    promoted_desc: "રેકોર્ડ હવે કેસ ડાયરી અને ઑડિટ સમયરેખામાં છે.",
+    promote_failed_title: "ઉમેરવું નિષ્ફળ",
+    promote_failed_desc: "રેકોર્ડ ઉમેરી શકાયો નથી. ફરી પ્રયાસ કરો.",
   },
 
   summary: {
@@ -411,6 +468,10 @@ const gu: Dictionary = {
     no_summary_sub: "તપાસ ચાલ્યા પછી સારાંશ તૈયાર કરો.",
     version_history: "સંસ્કરણ ઇતિહાસ",
     latest: "નવીનતમ",
+    version_label: "સંસ્કરણ {version}",
+    generated_by: "{timestamp} પર તૈયાર",
+    load_error: "કેસ સારાંશ લોડ થઈ શક્યા નથી.",
+    generate_error: "સારાંશ તૈયાર થઈ શક્યો નથી. ફરી પ્રયાસ કરો.",
   },
 
   audit: {
@@ -424,8 +485,23 @@ const gu: Dictionary = {
     detail: "વિગત",
     expand: "વિસ્તૃત કરો",
     case_opened: "કેસ ખોલવામાં આવ્યો",
+    append_only: "ફક્ત-ઉમેરો ઑડિટ લૉગ",
     events_recorded: "{count} ઇવેન્ટ(ઓ) નોંધાઈ · માત્ર-જોડાણ ઓડિટ લોગ",
     loading: "ઑડિટ ઘટનાઓ લોડ થઈ રહી છે…",
+    actions: {
+      case_created: "કેસ બનાવ્યો",
+      complaint_ingested: "ફરિયાદ નોંધાઈ",
+      extraction_complete: "એકમો કાઢવામાં આવ્યાં",
+      path_generated: "તપાસ માર્ગ તૈયાર થયો",
+      step_status_changed: "પગલાં સ્થિતિ અપડેટ",
+      request_created: "કાનૂની વિનંતી બનાવી",
+      request_approved: "વિનંતી મંજૂર",
+      request_dispatched: "વિનંતી મોકલી",
+      response_received: "પ્રદાતા પ્રતિભાવ મળ્યો",
+      insights_regenerated: "અંતર્દૃષ્ટિ ફરી તૈયાર",
+      summary_generated: "કેસ સારાંશ તૈયાર થયો",
+    },
+    load_error: "ઑડિટ ટ્રેઇલ લોડ થઈ શક્યું નથી.",
   },
 
   timeline: {
@@ -479,6 +555,26 @@ const gu: Dictionary = {
 
     osd_timestamp: "OSD સમય-ચિહ્ન",
     persons_detected: "ઓળખાયેલ વ્યક્તિઓ",
+    events_counted: "ઘટનાઓ",
+    cctv_show_detail: "CCTV વિશ્લેષણ બતાવો",
+    cctv_hide_detail: "CCTV વિશ્લેષણ છુપાવો",
+    note_title_label: "નોંધ શીર્ષક",
+    note_desc_label: "વર્ણન",
+    event: {
+      complaint_filed: "ફરિયાદ નોંધાઈ",
+      entity_extracted: "એકમો કાઢવામાં આવ્યાં",
+      path_generated: "માર્ગ તૈયાર",
+      step_completed: "પગલું પૂર્ણ",
+      request_dispatched: "વિનંતી મોકલી",
+      response_received: "પ્રતિભાવ મળ્યો",
+      cctv_frame: "CCTV ફ્રેમ",
+      officer_note: "અધિકારી નોંધ",
+    },
+    locations_counted: "સ્થાનો",
+    cctv_frames_counted: "CCTV ફ્રેમ",
+    cctv_unsupported: "માત્ર JPEG, PNG કે WebP છબીઓનું વિશ્લેષણ થઈ શકે.",
+    cctv_upload_failed: "ફ્રેમ અપલોડ નિષ્ફળ. ફરી પ્રયાસ કરો.",
+    note_save_failed: "નોંધ સાચવી શકાઈ નથી. ફરી પ્રયાસ કરો.",
   },
 
   evidence: {
@@ -495,6 +591,19 @@ const gu: Dictionary = {
     back_to_gallery: "પુરાવા ગેલેરી પર પાછા જાઓ",
     upload_file: "પુરાવા ફાઇલ અપલોડ કરો",
     analyzing_file: "Gemini દ્વારા ફાઇલનું વિશ્લેષણ થઈ રહ્યું છે…",
+    markers_pinned: "{count} પિન કરેલા તથ્ય ચિહ્નો",
+    uploaded_label: "અપલોડ કરેલ",
+    load_error: "આ કેસના પુરાવા લોડ થઈ શક્યા નથી.",
+    upload_error: "પુરાવા અપલોડ નિષ્ફળ. ફરી પ્રયાસ કરો.",
+    confidence_short: "વિશ્વાસ",
+    unsupported_upload: "આ ફાઇલનું વિશ્લેષણ થઈ શકતું નથી. છબી, ઑડિયો, વિડિયો, PDF કે ટેક્સ્ટ ફાઇલ વાપરો.",
+    type: {
+      image: "છબી",
+      audio: "ઑડિયો",
+      video: "વિડિયો",
+      document: "દસ્તાવેજ",
+      media: "મીડિયા",
+    },
   },
 
   copilot: {
@@ -786,6 +895,7 @@ const gu: Dictionary = {
     created_by: "બનાવ્યું",
     no_revisions: "હજુ કોઈ સુધારો નથી — મૂળ માર્ગ જ વર્તમાન છે.",
     initial: "પ્રારંભિક ફરિયાદ માર્ગ સૂચન",
+    active: "વર્તમાન સુધારો",
   },
 
   entity: {
@@ -821,6 +931,9 @@ const gu: Dictionary = {
     no_relationships: "આ માહિતી માટે કોઈ સંબંધ મળ્યો નથી.",
     no_relationships_mapped: "આ માહિતી માટે કોઈ સંબંધ મેપ થયેલ નથી.",
     no_shared_cases: "કોઈ અન્ય કેસ આ માહિતી શેર કરતો નથી.",
+    this_entity: "આ એકમ",
+    canonical: "પ્રમાણભૂત રૂપ",
+    via_match: "{type} {value} સાથે મેળ",
   },
 
   provider: {
@@ -828,6 +941,21 @@ const gu: Dictionary = {
     bank: "બેંક",
     platform: "પ્લેટફોર્મ સેવા",
   },
+  blockers: {
+    missing_complaint:
+      "હજુ કોઈ ફરિયાદ અપલોડ થઈ નથી. શરૂ કરવા PDF, છબી કે ઑડિયો ફાઇલ અપલોડ કરો.",
+    unverified_entities:
+      "એકમો કાઢવામાં આવ્યાં પણ ચકાસાયાં નથી. દરેક મૂલ્ય તપાસો અને સુધારા સાચવો.",
+    missing_path:
+      "ફરિયાદ નોંધાઈ છે પણ કોઈ તપાસ માર્ગ નથી. માર્ગ તૈયાર કરો.",
+    no_requests_dispatched:
+      "માર્ગ પગલાં તૈયાર છે પણ કોઈ કાનૂની વિનંતી બની નથી. કોઈ પગલાંમાંથી ડ્રાફ્ટ બનાવો.",
+    awaiting_provider_response:
+      "વિનંતીઓ મોકલાઈ છે. વિશ્લેષણ પહેલાં પ્રદાતા પ્રતિભાવ જરૂરી છે.",
+    missing_summary:
+      "પ્રતિભાવ વિશ્લેષણ પૂર્ણ છે. કેસ બંધ કરવા અંતિમ સારાંશ તૈયાર કરો.",
+  },
+
 } as const;
 
 export default gu;

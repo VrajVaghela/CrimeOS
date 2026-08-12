@@ -75,7 +75,7 @@ export function DialogContent({
   return (
     <div
       className={cn(
-        "relative mx-auto w-full max-w-lg rounded-squircle border border-border/60 bg-card/90 backdrop-blur-xl p-6 shadow-2xl",
+        "relative mx-auto w-full max-w-lg rounded-squircle border border-border/60 bg-card/90 backdrop-blur-xl p-6 elev-overlay",
         "animate-scale-in",
         className,
       )}
@@ -88,7 +88,7 @@ export function DialogContent({
           const backdrop = dialog?.previousElementSibling;
           backdrop?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
         }}
-        className="absolute right-4 top-4 rounded-lg p-1 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+        className="absolute right-4 top-4 rounded-squircle p-1 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
         aria-label={t("common.close")}
       >
         <X className="h-4 w-4" />

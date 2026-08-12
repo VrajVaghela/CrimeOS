@@ -25,6 +25,7 @@ Developed for the **ERH26 Hackathon (Problem Statement: ERH26_PS_10)**, the plat
 
 ### 1. Ingestion & Entity Extraction
 * **Multilingual intake**: Process unstructured complaint inputs in PDF (Gujarati), audio transcripts (Hindi), and handwritten FIR scans.
+* **Full Tri-lingual UI & Voice Copilot**: Native English, Hindi (हिंदी), and Gujarati (ગુજરાતી) UI rendering with locale-aware dates, numbers, and Copilot voice responses.
 * **Side-by-side translation review**: Displays original complaint text next to the English translation.
 * **Structured extraction**: Automatically extracts complainant, accused, phone numbers, bank accounts, dates, and amounts into a case record.
 * **Confidence warnings**: Highlights low-confidence entities with Warning Amber visual indicators for quick correction.

@@ -40,16 +40,20 @@
 
     /* Type scale and spacing are owned by tailwind.config.ts, not CSS vars. */
 
-    /* Border radius */
-    --radius-lg: 14px;
-    --radius-pill: 9999px;
-    --radius-squircle: 12px;
+    /* Border radius — three steps and a pill, nothing between them.
+       8px for controls, chips, and inner blocks; 12px for cards, panels, and
+       dialogs; 4px only for the smallest data tags. */
     --radius-squircle-sm: 8px;
+    --radius-squircle: 12px;
+    --radius-pill: 9999px;
 
     /* Elevation */
     --elev-flat: none;
     --elev-ring: 0 0 0 1px var(--border);
-    --elev-raised: 0 26px 80px rgba(0, 0, 0, 0.48);
+    /* The one true drop shadow, with a real offset and a soft blur. Reserved for
+       surfaces that genuinely float above the workspace — dialogs, popovers,
+       toasts. A card must never take it. */
+    --elev-overlay: 0 24px 64px -12px rgba(0, 0, 0, 0.6);
     --focus-ring: 0 0 0 4px rgba(220, 0, 0, 0.30);
 
     /* Glass effects */
@@ -110,13 +114,9 @@
     --warn: 49 100% 50%;          /* #ffd200 */
     --warn-foreground: 0 0% 0%;
 
-    /* Compatibility aliases: role and error states stay within the core palette.
-       --violet mirrors --info, --rose mirrors --destructive. Consumed by ~80
-       class usages across 11 case/dashboard surfaces; keep until migrated. */
-    --violet: 214 82% 54%;
-    --violet-foreground: 0 0% 100%;
-    --rose: 3 100% 60%;
-    --rose-foreground: 0 0% 100%;
+    /* The palette is closed: primary, info, success, warn, destructive, and the
+       neutral ramp. There is no sixth or seventh hue. A surface that wants a new
+       colour is asking for a meaning the system does not have yet. */
 
     --surface-alt: 0 0% 6%;
     --surface-elevated: 0 0% 12%;
@@ -166,26 +166,34 @@
     border-radius: var(--radius);
   }
 
-  /* Scrolling stays available without adding visual chrome to every nested panel. */
+  /* Scrollbars are thin and tinted, not absent. Only the shell's own scroll
+     position is suppressed, via `.workspace-scroll` — a nested panel that
+     scrolls must still say so, or officers cannot tell content is cut off. */
   ::-webkit-scrollbar {
-    width: 0;
-    height: 0;
+    width: 10px;
+    height: 10px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--fg) 12%, transparent);
+    background: color-mix(in oklab, var(--fg) 14%, transparent);
+    border: 3px solid transparent;
+    background-clip: content-box;
     border-radius: var(--radius-pill);
-    transition: background 200ms ease;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(0 100% 43% / 0.6);
+    background: color-mix(in oklab, var(--fg) 26%, transparent);
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
-  /* Firefox scrollbar */
+  /* Firefox */
   * {
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--fg) 14%, transparent) transparent;
   }
 
   /* Tap highlight for mobile */
@@ -195,16 +203,9 @@
 }
 
 @layer utilities {
-  .scrollbar-none {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* The app shell owns the only page-level scroll position. */
+  /* The app shell owns the only page-level scroll position; suppressing its
+     scrollbar keeps the chrome from shifting when a route's height changes.
+     Nested panels keep their visible scrollbar. */
   .workspace-scroll {
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -215,44 +216,28 @@
     display: none;
   }
 
-  /* ── Ferrari button transition ── */
-  .btn-ferrari {
-    transition: transform var(--motion-fast) var(--ease-standard),
-                background var(--motion-fast) var(--ease-standard),
-                box-shadow var(--motion-fast) var(--ease-standard);
-  }
-  .btn-ferrari:hover {
-    background: var(--accent-hover);
-  }
-  .btn-ferrari:active {
-    background: var(--accent-active);
+  /* Horizontal rails (tab strips, chip rows) where a scrollbar would sit on top
+     of the controls. Pair with a fade affordance so the cut-off stays legible. */
+  .rail-scroll {
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  /* ── Squircle panel card ── */
-  .panel-card {
-    border-radius: var(--radius-squircle);
-    border: 1px solid var(--border);
-    background: var(--surface);
-    transition: border-color var(--motion-base) var(--ease-standard);
-  }
-  .panel-card:hover {
-    border-color: var(--border);
-  }
-  .panel-card-warm {
-    border-radius: var(--radius-squircle);
-    border: 1px solid var(--border);
-    background: var(--surface-warm);
+  .rail-scroll::-webkit-scrollbar {
+    display: none;
   }
 
-  /* ── SVG timeline chart gradient utilities ── */
-  .chart-line-gradient {
-    stroke: url(#gradient-accent-info-h);
-  }
-  .chart-fill-gradient {
-    fill: url(#gradient-graph-fill);
+  /* ── Overlay elevation ──
+     Only dialogs, popovers, and toasts. Everything in the component layer stays
+     flat and separates by border and tone instead. */
+  .elev-overlay {
+    box-shadow: var(--elev-overlay);
   }
 
-  /* ── Glow utilities ── */
+  /* ── Semantic rings ──
+     Hairline outlines that mark a surface's state. Not shadows, not decoration:
+     if a surface carries one of these, it is active, verified, pending, failed,
+     or machine-authored. */
   .glow-primary {
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent);
   }
@@ -268,67 +253,27 @@
   .glow-info {
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--info) 35%, transparent);
   }
-  .glow-violet {
-    box-shadow: 0 0 0 1px color-mix(in oklab, var(--info) 35%, transparent);
-  }
-  .glow-rose {
-    box-shadow: 0 0 0 1px color-mix(in oklab, var(--danger) 35%, transparent);
-  }
 
-  /* ── Glass utilities ── */
+  /* ── Glass ──
+     One specific effect for one specific job: an overlay that must read as
+     floating above live case content. Never a decorative card treatment. */
   .glass {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
   }
-  .glass-strong {
-    background: color-mix(in oklch, var(--surface) 75%, transparent);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid color-mix(in oklch, var(--accent) 50%, transparent);
-  }
   @supports not (backdrop-filter: blur()) {
     .glass {
       background: #171717;
       border: 1px solid #342a24;
     }
-    .glass-strong {
-      background: #0f0f0f;
-      border: 1px solid #dc0000;
-    }
   }
 
-  /* ── Background patterns ── */
-  .grid-bg {
-    background: var(--surface);
-  }
-  .dot-pattern {
-    background: var(--surface);
-  }
-  .grid-bg-subtle {
-    background: var(--surface);
-  }
-
-  /* ── Animation delay utilities ──
-     Kept short: sections settle within ~250ms so the page never feels like
-     it's waiting on choreography (product register). */
-  .delay-100 { animation-delay: 60ms; }
-  .delay-200 { animation-delay: 120ms; }
-  .delay-300 { animation-delay: 180ms; }
-  .delay-500 { animation-delay: 240ms; }
-  .delay-700 { animation-delay: 300ms; }
-  .delay-1000 { animation-delay: 360ms; }
-
-  /* ── Stagger animation children ── */
-  .stagger-1 { animation-delay: 35ms; }
-  .stagger-2 { animation-delay: 70ms; }
-  .stagger-3 { animation-delay: 105ms; }
-  .stagger-4 { animation-delay: 140ms; }
-  .stagger-5 { animation-delay: 175ms; }
-  .stagger-6 { animation-delay: 210ms; }
-
-  /* ── Keyframes ── */
+  /* ── Keyframes ──
+     Motion here reports state; it never decorates. Entrances run once on arrival,
+     and the only looping animations mark something that is genuinely still
+     happening (a pending status, an in-flight analysis). */
   @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -349,53 +294,6 @@
     from { opacity: 0; transform: translate3d(100%, 0, 0); }
     to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
-  @keyframes slide-in-left {
-    from { opacity: 0; transform: translate3d(-100%, 0, 0); }
-    to { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-  @keyframes pulse-glow {
-    0%, 100% {
-      box-shadow: 0 0 12px -2px hsl(0 100% 43% / 0.4);
-    }
-    50% {
-      box-shadow: 0 0 28px 2px hsl(0 100% 43% / 0.7);
-    }
-  }
-  @keyframes breathe {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-  @keyframes data-flow {
-    0% { background-position: 0 0; }
-    100% { background-position: 40px 0; }
-  }
-  @keyframes glow-pulse {
-    0%, 100% {
-      box-shadow: 0 0 12px -2px hsl(0 100% 43% / 0.4);
-      border-color: hsl(0 100% 43% / 0.5);
-    }
-    50% {
-      box-shadow: 0 0 24px 2px hsl(0 100% 43% / 0.8);
-      border-color: hsl(0 100% 43% / 1);
-    }
-  }
-  @keyframes typing-dot {
-    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-    30% { opacity: 1; transform: translateY(-4px); }
-  }
-  @keyframes border-flow {
-    0% { border-color: hsl(0 100% 43% / 0.3); }
-    50% { border-color: hsl(0 100% 43% / 0.8); }
-    100% { border-color: hsl(0 100% 43% / 0.3); }
-  }
-  @keyframes spin-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
   @keyframes ping-slow {
     0% { transform: scale(1); opacity: 0.8; }
     100% { transform: scale(2); opacity: 0; }
@@ -406,9 +304,9 @@
   }
 
   /* ── Animation classes ──
-     Product-register timing: fast (150–250ms), ease-out so entrances land
-     softly. Kept on transform/opacity only, so they stay on the compositor
-     and never repaint during scroll. */
+     Product-register timing: 200–260ms, exponential ease-out so entrances land
+     softly. Transform and opacity only, so they stay on the compositor and never
+     repaint during scroll. */
   .animate-fade-in {
     animation: fade-in 240ms var(--ease-standard) both;
   }
@@ -424,45 +322,6 @@
   .animate-slide-in-right {
     animation: slide-in-right 260ms var(--ease-standard) both;
   }
-  .animate-slide-in-left {
-    animation: slide-in-left 260ms var(--ease-standard) both;
-  }
-  .animate-shimmer {
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.06) 50%,
-      transparent 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2s ease-in-out infinite;
-  }
-  .animate-pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
-  .animate-breathe {
-    animation: breathe 2s ease-in-out infinite;
-  }
-  .animate-data-flow {
-    background: repeating-linear-gradient(
-      90deg,
-      transparent 0px,
-      transparent 16px,
-      hsl(0 100% 43% / 0.3) 16px,
-      hsl(0 100% 43% / 0.3) 20px
-    );
-    background-size: 40px 100%;
-    animation: data-flow 3s linear infinite;
-  }
-  .animate-glow-pulse {
-    animation: glow-pulse 2s infinite ease-in-out;
-  }
-  .animate-typing-dot {
-    animation: typing-dot 1.4s ease-in-out infinite;
-  }
-  .animate-spin-slow {
-    animation: spin-slow 3s linear infinite;
-  }
   .animate-ping-slow {
     animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
@@ -477,27 +336,6 @@
     animation: skeleton-load 1.5s ease-in-out infinite;
   }
 
-  /* ── Typing indicator ── */
-  .typing-indicator {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .typing-indicator span {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: hsl(0 100% 43%);
-    animation: typing-dot 1.4s ease-in-out infinite;
-  }
-  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
-  /* ── Tap highlight suppression ── */
-  .no-tap-highlight {
-    -webkit-tap-highlight-color: transparent;
-  }
-
   /* ── Reduced Motion ── */
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -509,13 +347,9 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
-    .animate-shimmer,
+    /* Skeletons hold a flat surface rather than freezing mid-sweep. */
     .animate-skeleton {
       background: #171717;
-    }
-    .typing-indicator span {
-      animation: none;
-      opacity: 0.5;
     }
   }
 }

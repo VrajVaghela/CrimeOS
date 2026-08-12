@@ -9,8 +9,8 @@ function Skeleton({ className, variant = "default", ...props }: SkeletonProps) {
     variant === "circle"
       ? "rounded-full"
       : variant === "text"
-        ? "h-4 rounded-md"
-        : "rounded-xl";
+        ? "h-4 rounded-squircle-sm"
+        : "rounded-squircle";
 
   return (
     <div

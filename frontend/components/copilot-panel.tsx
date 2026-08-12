@@ -138,7 +138,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
         if (parts.length > 1) {
           content = parts.map((part, idx) =>
             idx % 2 === 1 ? (
-              <strong key={idx} className="text-white font-semibold">
+              <strong key={idx} className="font-semibold text-foreground">
                 {part}
               </strong>
             ) : (
@@ -148,7 +148,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
         }
       }
       return (
-        <p key={i} className="mb-2 leading-relaxed text-slate-300 text-sm font-sans">
+        <p key={i} className="mb-2 leading-relaxed text-secondary-foreground text-sm font-sans">
           {content}
         </p>
       );
@@ -162,7 +162,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
           <div className="flex items-center gap-2.5 min-w-0">
             <Sparkles className="h-5 w-5 text-info shrink-0 animate-pulse" />
             <div className="min-w-0">
-              <CardTitle className="text-base font-semibold font-heading text-white truncate">
+              <CardTitle className="text-base font-semibold font-heading truncate text-foreground">
                 {t("copilot.title")}
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground truncate">
@@ -186,7 +186,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
           <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-3">
             <HelpCircle className="h-10 w-10 text-muted-foreground/40" />
             <div>
-              <p className="text-sm font-semibold font-heading text-white">{t("copilot.empty_title")}</p>
+              <p className="text-sm font-semibold font-heading text-foreground">{t("copilot.empty_title")}</p>
               <p className="text-xs text-muted-foreground max-w-sm mt-1 leading-relaxed">
                 {t("copilot.empty_sub")}
               </p>
@@ -199,10 +199,9 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
               className={`flex flex-col max-w-[85%] ${msg.role === "user" ? "ml-auto items-end" : "mr-auto items-start"}`}
             >
               <div
-                className={`p-3.5 rounded-xl text-sm border transition-colors duration-200 ${
-                  msg.role === "user"
-                    ? "bg-primary/10 border-primary/30 text-white rounded-tr-none"
-                    : "bg-info/5 border-info/30 text-slate-200 rounded-tl-none relative"
+                className={`p-3.5 rounded-squircle text-sm border transition-colors duration-200 ${ msg.role === "user"
+                    ? "bg-primary/10 border-primary/30 text-foreground rounded-tr-sm"
+                    : "bg-info/5 border-info/30 text-secondary-foreground rounded-tl-sm relative"
                 }`}
               >
                 {formatMessageText(msg.message)}
@@ -240,7 +239,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
 
         {loading && (
           <div className="flex flex-col max-w-[85%] mr-auto items-start">
-            <div className="p-3.5 bg-info/5 border border-info/30 text-slate-300 rounded-xl rounded-tl-none flex items-center gap-3">
+            <div className="p-3.5 bg-info/5 border border-info/30 text-secondary-foreground rounded-squircle rounded-tl-sm flex items-center gap-3">
               <Loader2 className="h-4 w-4 animate-spin text-info" />
               <span className="text-xs font-mono text-muted-foreground">
                 {t("copilot.analyzing").replace("{seconds}", String(elapsedTime))}
@@ -250,7 +249,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
         )}
 
         {error && (
-          <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-xs text-destructive max-w-[85%] mr-auto font-mono">
+          <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-squircle text-xs text-destructive max-w-[85%] mr-auto font-mono">
             <ShieldAlert className="h-4 w-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
@@ -260,7 +259,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
       </CardContent>
 
       {!loading && (
-        <div className="px-4 py-2 border-t border-border/20 bg-secondary/10 flex gap-2 overflow-x-auto scrollbar-none whitespace-nowrap">
+        <div className="px-4 py-2 border-t border-border/20 bg-secondary/10 flex gap-2 overflow-x-auto rail-scroll whitespace-nowrap">
           {quickQuestions.map((qq) => (
             <Button
               key={qq.intent}
@@ -285,7 +284,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
             }
           }}
           placeholder={t("copilot.placeholder")}
-          className="flex-1 bg-input border border-border/40 text-sm focus-visible:ring-primary rounded-squircle-sm text-white"
+          className="flex-1 bg-input border border-border/40 text-sm focus-visible:ring-primary rounded-squircle-sm"
           disabled={loading || loadingHistory}
         />
         <Button
@@ -294,9 +293,9 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
           size="icon"
           aria-label={t("copilot.send")}
           title={t("copilot.send")}
-          className="bg-primary hover:bg-primary/90 h-10 w-10 flex items-center justify-center rounded-squircle-sm transition-colors text-white"
+          className="bg-primary hover:bg-primary/90 h-10 w-10 flex items-center justify-center rounded-squircle-sm transition-colors"
         >
-          <Send className="h-4 w-4 text-white" />
+          <Send className="h-4 w-4" />
         </Button>
       </div>
     </Card>

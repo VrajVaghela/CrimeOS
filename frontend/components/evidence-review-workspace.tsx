@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Toast, useToast } from "@/components/ui/toast";
 import { useLanguage } from "@/lib/language-context";
 import { useFormatters } from "@/lib/format";
 import { useEnumLabel } from "@/lib/i18n/enums";
@@ -42,14 +43,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
   const { t } = useLanguage();
   const { formatDateTime } = useFormatters();
   const { label } = useEnumLabel();
-  const [toastMessage, setToastMessage] = useState<{ title: string; description: string; variant?: string } | null>(null);
-
-  const toast = ({ title, description, variant }: { title: string; description: string; variant?: string }) => {
-    setToastMessage({ title, description, variant });
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 4000);
-  };
+  const { toast: toastMessage, show: toast } = useToast();
 
   const [entities, setEntities] = useState<CaseEntityOut[]>([]);
   const [loadingEntities, setLoadingEntities] = useState(false);
@@ -213,7 +207,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
       {/* Evidence Banner */}
       <div className="flex items-center justify-between border-b border-border/40 pb-4">
         <div className="flex items-center gap-3">
-<div className="rounded-lg bg-surface-alt border border-border/60 p-2">
+<div className="rounded-squircle bg-surface-alt border border-border/60 p-2">
             {getFileIcon(evidence.file_type)}
           </div>
           <div>
@@ -255,7 +249,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
                 <img
                   src={`${API_URL}/${evidence.file_path}`}
                   alt="Evidence"
-                  className="max-w-full max-h-72 object-contain rounded-lg"
+                  className="max-w-full max-h-72 object-contain rounded-squircle"
                 />
               )}
 
@@ -273,7 +267,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
 
               {evidence.file_type === "video" && (
                 <div className="w-full">
-                  <video controls className="w-full max-h-64 rounded-lg" src={`${API_URL}/${evidence.file_path}`} />
+                  <video controls className="w-full max-h-64 rounded-squircle" src={`${API_URL}/${evidence.file_path}`} />
                 </div>
               )}
 
@@ -308,7 +302,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
 <Card className="border border-border/80 bg-surface-alt/40">
             <CardHeader className="pb-3 border-b border-border/20">
 <CardTitle className="text-sm font-bold font-heading text-muted-foreground flex items-center gap-1.5">
-                <Sparkles className="h-4 w-4 text-violet" />
+                <Sparkles className="h-4 w-4 text-info" />
                 {t("evidence_workspace.forensic_profile")}
               </CardTitle>
             </CardHeader>
@@ -336,7 +330,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
               </div>
 
               {evidence.ai_tags?.flagged_features && evidence.ai_tags.flagged_features.length > 0 && (
-                <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 space-y-1">
+                <div className="bg-destructive/5 border border-destructive/20 rounded-squircle p-3 space-y-1">
                   <span className="text-[10px] font-bold text-destructive flex items-center gap-1 uppercase">
                     <AlertTriangle className="h-3.5 w-3.5" /> {t("evidence_workspace.flagged_anomalies")}
                   </span>
@@ -367,7 +361,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                     {t("evidence_workspace.original_transcript")}
                   </span>
-<div className="p-3 rounded-lg border border-border/40 bg-surface-alt/60 max-h-60 overflow-y-auto text-xs font-mono leading-relaxed whitespace-pre-wrap">
+<div className="p-3 rounded-squircle border border-border/40 bg-surface-alt/60 max-h-60 overflow-y-auto text-xs font-mono leading-relaxed whitespace-pre-wrap">
                     {evidence.transcript || t("evidence_workspace.no_transcript")}
                   </div>
                 </div>
@@ -377,7 +371,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                     {t("evidence_workspace.english_translation")}
                   </span>
-<div className="p-3 rounded-lg border border-border/40 bg-surface-alt/60 max-h-60 overflow-y-auto text-xs leading-relaxed whitespace-pre-wrap text-secondary-foreground">
+<div className="p-3 rounded-squircle border border-border/40 bg-surface-alt/60 max-h-60 overflow-y-auto text-xs leading-relaxed whitespace-pre-wrap text-secondary-foreground">
                     {evidence.translation || t("evidence_workspace.no_translation")}
                   </div>
                 </div>
@@ -496,7 +490,7 @@ className="w-full bg-surface-alt border border-border/60 text-xs rounded p-2 foc
                     return (
                       <div
                         key={marker.id}
-className="p-3 rounded-lg border border-border bg-surface-alt/60 text-xs space-y-2 animate-fade-up"
+className="p-3 rounded-squircle border border-border bg-surface-alt/60 text-xs space-y-2 animate-fade-up"
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-mono text-[10px] text-accent-strong uppercase font-bold bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">
@@ -520,7 +514,7 @@ className="p-3 rounded-lg border border-border bg-surface-alt/60 text-xs space-y
 
                         {/* Linked Entities */}
                         <div className="space-y-1">
-                          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                             {t("evidence_workspace.linked_case_entities")}
                           </span>
                           <div className="flex flex-wrap gap-1 items-center">
@@ -528,7 +522,7 @@ className="p-3 rounded-lg border border-border bg-surface-alt/60 text-xs space-y
                               marker.linked_entity_ids.map((entId) => {
                                 const matchedEnt = entities.find((e) => e.id === entId);
                                 return (
-<Badge key={entId} variant="secondary" className="text-[9px] font-mono bg-surface-elevated border border-border">
+<Badge key={entId} variant="secondary" className="text-[10px] font-mono bg-surface-elevated border border-border">
 <Link2 className="h-2 w-2 mr-1 text-muted-foreground" />
                                     {matchedEnt
                                       ? `${label("entity.type", matchedEnt.entity_type)}: ${matchedEnt.display_value}`
@@ -559,7 +553,7 @@ className="bg-background border border-border text-[10px] rounded p-0.5 focus:ou
                         </div>
 
                         {/* Promote Actions */}
-                        <div className="pt-2 border-t border-slate-800/40 flex justify-end">
+                        <div className="pt-2 border-t border-border/60 flex justify-end">
                           {isPromoted ? (
 <span className="text-[10px] text-success font-bold flex items-center gap-1">
                               <CheckCircle className="h-3.5 w-3.5" /> {t("evidence_workspace.added_to_diary")}
@@ -588,15 +582,7 @@ className="bg-background border border-border text-[10px] rounded p-0.5 focus:ou
           </div>
         </div>
       </div>
-      {toastMessage && (
-<div className={`fixed bottom-4 right-4 z-50 p-4 rounded-xl border glass shadow-2xl animate-fade-up flex flex-col gap-1 max-w-sm ${toastMessage.variant === 'destructive' ? 'border-destructive bg-destructive/10' : 'border-success/20 bg-background/90'}`}>
-          <div className="flex items-center gap-2 font-heading font-bold text-sm text-foreground">
-{toastMessage.variant === 'destructive' ? <AlertTriangle className="h-4 w-4 text-destructive" /> : <CheckCircle className="h-4 w-4 text-success" />}
-            {toastMessage.title}
-          </div>
-          <div className="text-xs text-muted-foreground">{toastMessage.description}</div>
-        </div>
-      )}
+      <Toast message={toastMessage} />
     </div>
   );
 }

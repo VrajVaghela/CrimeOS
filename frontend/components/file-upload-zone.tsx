@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Upload, FileText, Music, Image as ImageIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/lib/language-context";
+import { interpolate, useLanguage } from "@/lib/language-context";
 
 const ACCEPT_TYPES = {
   "application/pdf": [".pdf"],
@@ -42,19 +42,25 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useLanguage();
 
-  const validate = useCallback((file: File): string | null => {
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      return `File too large. Maximum size is ${MAX_SIZE_MB} MB.`;
-    }
-    const validTypes = Object.keys(ACCEPT_TYPES);
-    // Also check extension for cases where mime type is wrong
-    const ext = "." + file.name.split(".").pop()?.toLowerCase();
-    const validExts = Object.values(ACCEPT_TYPES).flat();
-    if (!validTypes.includes(file.type) && !validExts.includes(ext)) {
-      return "Unsupported file type. Use PDF, JPG/PNG (image), or MP3/WAV/M4A (audio).";
-    }
-    return null;
-  }, []);
+  const validate = useCallback(
+    (file: File): string | null => {
+      const maxBytes = MAX_SIZE_MB * 1024 * 1024;
+      if (file.size > maxBytes) {
+        const overBy = Math.max(1, Math.ceil((file.size - maxBytes) / (1024 * 1024)));
+        return interpolate(t("ingestion.file_too_large"), { max: overBy });
+      }
+      const validTypes = Object.keys(ACCEPT_TYPES);
+      // Extension is the fallback check: browsers report the wrong mime type for
+      // m4a and for files copied off some scanner utilities.
+      const ext = `.${file.name.split(".").pop()?.toLowerCase()}`;
+      const validExts = Object.values(ACCEPT_TYPES).flat();
+      if (!validTypes.includes(file.type) && !validExts.includes(ext)) {
+        return t("ingestion.unsupported_type");
+      }
+      return null;
+    },
+    [t],
+  );
 
   const handleFile = useCallback(
     (file: File) => {
@@ -116,13 +122,13 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         className={[
-          "relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-10 text-center transition-all duration-200 cursor-pointer",
+          "relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-squircle border border-dashed p-10 text-center transition-colors duration-200",
           dragging
-            ? "border-primary bg-primary/10 glow-primary"
+            ? "border-primary bg-primary/[0.06]"
             : selected
-            ? "border-success bg-success/5"
-            : "border-border bg-muted/50 hover:border-primary/50 hover:bg-primary/5",
-          disabled ? "opacity-50 cursor-not-allowed" : "",
+              ? "border-success/50 bg-success/[0.04]"
+              : "border-border bg-surface-alt/40 hover:border-border/60",
+          disabled ? "cursor-not-allowed opacity-50" : "",
         ].join(" ")}
       >
         <input
@@ -137,60 +143,63 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
 
         {selected ? (
           <>
-            <FileIcon className="h-10 w-10 text-success" />
+            <FileIcon className="h-7 w-7 text-success" />
             <div>
-              <p className="font-semibold text-success font-heading">{selected.name}</p>
-              <p className="text-xs text-muted-foreground font-mono mt-1">{formatSize(selected.size)}</p>
+              <p className="font-heading font-semibold text-foreground">{selected.name}</p>
+              <p className="mt-1 font-mono text-xs text-muted-foreground">
+                {formatSize(selected.size)}
+              </p>
             </div>
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={(e) => {
                 e.stopPropagation();
                 clearFile();
               }}
-              className="absolute top-3 right-3 h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+              className="absolute right-3 top-3 text-muted-foreground hover:text-destructive"
+              aria-label={t("common.remove_file")}
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">{t("common.remove_file")}</span>
             </Button>
           </>
         ) : (
           <>
-            <div className="rounded-full bg-primary/10 p-4">
-              <Upload className="h-8 w-8 text-primary" />
-            </div>
+            <Upload className="h-7 w-7 text-muted-foreground" />
             <div>
-              <p className="font-semibold font-heading text-foreground">
+              <p className="font-heading font-semibold text-foreground">
                 {t("ingestion.upload_hint")}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 {t("ingestion.upload_hint_sub")}
               </p>
             </div>
             <Button type="button" variant="secondary" size="sm" disabled={disabled}>
-              {t("common.save") /* Or a browse files string, wait, let's use common.submit or upload_btn */}
-              {t("ingestion.upload_btn")}
+              {t("ingestion.browse_files")}
             </Button>
           </>
         )}
       </div>
 
       {error ? (
-        <p className="text-xs text-destructive" role="alert">{error}</p>
+        <p className="text-xs text-destructive" role="alert">
+          {error}
+        </p>
       ) : null}
 
+      {/* The submit button names what pressing it does. It previously read
+          "Analyzing complaint…", which describes the state after the press. */}
       {selected ? (
         <Button
           type="button"
           id="upload-submit-btn"
           onClick={() => onUpload(selected)}
           disabled={disabled}
-          className="w-full transition-all duration-200 hover:scale-[1.02] hover:glow-primary"
+          className="w-full"
         >
           <Upload className="h-4 w-4" />
-          {t("ingestion.analyzing")}
+          {t("ingestion.start_analysis")}
         </Button>
       ) : null}
     </div>
