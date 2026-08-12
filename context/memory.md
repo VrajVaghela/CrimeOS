@@ -1,8 +1,21 @@
-# Memory — Phase 14 Full Localization Implemented
+# Memory — Phase 15 UI Modularization & Dataset Tooling Complete
 
-Last updated: 2026-08-08
+Last updated: 2026-08-12
 
-## Latest Update — Phase 14 Full Localization IMPLEMENTED (2026-08-08)
+## Latest Update — Phase 15 UI Modularization & Dataset Tooling (2026-08-12)
+
+What shipped:
+- **Dataset Fetcher & Synthetic Sample Data Script**: Added `data/fetch_datasets.py` to automate downloading and generating synthetic sample complaint text, bank transaction CSVs, telecom CDR CSVs, platform account CSVs, and OSINT targets (`data/06_osint/osint_pivot_targets.json`).
+- **Frontend UI Component Modularization & Refactoring**: Cleaned up monolithic page and component implementations across the Next.js frontend by extracting reusable UI components:
+  - `components/case-row.tsx`: Modular case card row component for the cases list page.
+  - `components/ui/empty-state.tsx`: Standardized empty state indicator with icon, title, text, and action buttons.
+  - `components/ui/metric.tsx`: Standard KPI metric card with animated counting, icons, and trend indicators.
+  - `components/ui/page-header.tsx`: Standard top page header banner with title, description, actions, and badge metadata.
+  - `components/ui/toast.tsx`: Toast provider and toast notification surface.
+- **Tri-lingual UI Localization Finalization**: Finalized full tri-lingual dictionary keys across English (`en.ts`), Hindi (`hi.ts`), and Gujarati (`gu.ts`). Cleaned up CSS duplication in `globals.css` and `tailwind.config.ts`.
+- **Verification**: `npm run i18n:audit` passes, `npx tsc --noEmit` passes clean, `npm run build` compiles clean (14 routes).
+
+## Previous — Phase 14 Full Localization IMPLEMENTED (2026-08-08)
 
 All six work packages (14A–14F) landed. The reported bug is fixed: selecting
 Gujarati now makes the whole UI **and the copilot's answers** Gujarati.
@@ -147,15 +160,13 @@ rule 7 in `ui_rules.md`.
 
 ## Next session starts with
 
-**Implement Phase 14** per `context/i18n_full_localization_plan.md`, in order:
-14A plumbing → 14B dictionaries (`copilot` section first) → 14D copilot localization
-(the user's stated priority) → 14C component sweep → 14E → 14F.
-
-If continuing demo work instead:
-- Run `python -m app.seeds.run` from `backend/` to reset seed
-- Run both servers and rehearse the golden path + intelligence moments per `DEMO_SCRIPT.md`
-- If any Phase 10 component is missing from the UI (unlikely), check `frontend/components/` for `timeline-workspace.tsx`, `osint-enrichment-panel.tsx`, and `video-evidence-workspace.tsx`
+- All phases (Phase 1 through Phase 15) are fully implemented and verified.
+- To run the application for demonstration:
+  1. Reset DB seed: `python -m app.seeds.run` from `backend/`
+  2. Start backend server: `uvicorn app.main:app --reload` from `backend/`
+  3. Start frontend dev server: `npm run dev` from `frontend/`
+- Rehearse the golden path (Case 1 intake → path → request → response → summary) and Phase 10 intelligence features (Case 2 timeline, OSINT enrichment, video evidence) per `DEMO_SCRIPT.md`.
 
 ## Open questions
 
-None. Phase 10D checkpoint has passed.
+None. All phase checkpoints and documentation context sync completed.

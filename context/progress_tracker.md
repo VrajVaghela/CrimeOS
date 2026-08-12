@@ -351,3 +351,26 @@ config (`next lint` prompts for setup) and no pytest suite, so neither could be
 run as a gate. The manual 14-route × 3-language click-through has not been
 performed — the automated audit covers key parity and literal leakage, but a
 human pass is still worth doing before the demo.
+
+## Phase 15 — Dataset Tooling & UI Component Modularization — COMPLETED 2026-08-12
+Completed synthetic dataset automation and clean frontend UI component modularization.
+
+### 15A — Dataset Tooling & Sample Data Scripts
+- [x] Add `data/fetch_datasets.py` for automated fetching/generating of synthetic sample complaints (English Telegram task/job fraud, Gujarati UPI KYC fraud, Hindi digital arrest extortion)
+- [x] Add synthetic provider CSV fixtures for bank transaction responses, platform account responses, and telecom CDR responses
+- [x] Add pre-seeded OSINT pivot target fixtures (`data/06_osint/osint_pivot_targets.json`) and dataset documentation in `data/README.md`
+
+### 15B — UI Component Modularization & Design Polish
+- [x] Extract `CaseRow` (`components/case-row.tsx`) for case list cards
+- [x] Extract `EmptyState` (`components/ui/empty-state.tsx`) for standardized empty views
+- [x] Extract `MetricCard` (`components/ui/metric.tsx`) for KPI metric cards with animated numbers
+- [x] Extract `PageHeader` (`components/ui/page-header.tsx`) for standardized top page headers
+- [x] Extract `Toast` (`components/ui/toast.tsx`) for global toast notifications
+- [x] Consolidate duplicate CSS rules in `globals.css` and `tailwind.config.ts`
+
+### 15C — Verification
+- [x] `npm run i18n:audit` passes with key parity across `en.ts`, `hi.ts`, and `gu.ts`
+- [x] `npx tsc --noEmit` passes cleanly with zero TypeScript errors
+- [x] `npm run build` compiles 14 Next.js App Router routes with zero errors
+- [x] ✅ CHECKPOINT PASSED — Modularized components render cleanly and synthetic data scripts run without issues.
+

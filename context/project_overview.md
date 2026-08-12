@@ -86,9 +86,14 @@ The application features two seeded demo cases:
 * **Immutable Audit Trail**: Append-only transactional event log records all actions with user credentials.
 
 ### 9. Multilingual Support (EN / HI / GU)
-* **Hybrid Two-Tier i18n**: Tier 1 translates static UI chrome via typed dictionaries (`lib/i18n/{en,hi,gu}.ts`) with silent English fallback for missing keys; Tier 2 translates AI-generated case content on demand via a backend `/translate` service (Gemini-backed, in-memory cache, never persisted).
-* **Language Toggle**: Topbar control persists preference to `localStorage`; the DB remains the authoritative English source.
-* **Status**: Implemented (Phase 12, 2026-07-28) — see `context/multilingual_merge_plan.md`. Phase 8–11 UI strings fall back to English until keyed in the dictionaries.
+* **Full Tri-lingual UI & AI Voice**: Tier 1 translates all static UI chrome across English, Hindi (हिंदी), and Gujarati (ગુજરાતી) via 709 key parity dictionaries (`lib/i18n/{en,hi,gu}.ts`); Tier 2 translates AI case content on demand via `/translate/batch`. Copilot speaks directly in the active locale (`X-Lang` header + `message_localized`), with authoritative English retained in the audit database.
+* **Language Toggle**: Topbar control switches locale and sets Indic body typography (`font-noto-devanagari`, `font-noto-gujarati`). Native endonym labels live in `lib/i18n/endonyms.ts`.
+* **Status**: Implemented & Audited (Phase 14, 2026-08-08) — verified by `npm run i18n:audit` with zero missing keys or untranslated values across all 3 languages.
+
+### 10. Dataset Automation & Modular UI Architecture
+* **Synthetic Sample Dataset Generator**: `data/fetch_datasets.py` generates English, Gujarati, and Hindi benchmark complaints, synthetic telecom CDRs, bank transaction responses, platform account CSVs, and OSINT targets (`data/06_osint/osint_pivot_targets.json`).
+* **Modular Component Architecture**: Extracted reusable domain and UI primitives (`CaseRow`, `EmptyState`, `MetricCard`, `PageHeader`, `Toast`) to streamline maintenance and enforce design token consistency across Next.js App Router views.
+* **Status**: Implemented & Verified (Phase 15, 2026-08-12).
 
 ---
 

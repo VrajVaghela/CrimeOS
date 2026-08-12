@@ -235,3 +235,36 @@ These entries define the intended reusable surfaces. Mark them BUILT and add con
 ### Root Layout SVG Defs — ADDED (Phase 9F)
 - Global `<svg>` element with `linearGradient` defs for gradient IDs:
   `#gradient-accent-info-h`, `#gradient-accent-info-v`, `#gradient-graph-fill`
+
+## Phase 15 — Modular UI Components — BUILT (Phase 15)
+
+### CaseRow — BUILT (Phase 15)
+- Path: components/case-row.tsx
+- Purpose: modular case list item row card rendering case status badge, title, case number, confidence indicator, crime type, and localized creation timestamp
+- Props: `caseItem: CaseListItemOut`, `href: string`
+- Used in: `app/(authenticated)/cases/page.tsx`
+
+### EmptyState — BUILT (Phase 15)
+- Path: components/ui/empty-state.tsx
+- Purpose: standardized empty view container displaying an icon, headline, explanatory text, and optional action button
+- Props: `icon?: LucideIcon`, `title: string`, `description: string`, `action?: { label: string; onClick: () => void }`
+- Used in: `app/(authenticated)/cases/page.tsx`, `components/timeline-workspace.tsx`
+
+### MetricCard — BUILT (Phase 15)
+- Path: components/ui/metric.tsx
+- Purpose: command-center KPI metric card with optional icon, animated number counter, label, and trend/subtext indicator
+- Props: `label: string`, `value: number | string`, `subtext?: string`, `icon?: LucideIcon`, `trend?: "up" | "down" | "neutral"`
+- Used in: `app/(authenticated)/dashboard/page.tsx`, `components/case-command-center.tsx`
+
+### PageHeader — BUILT (Phase 15)
+- Path: components/ui/page-header.tsx
+- Purpose: top workspace page header with title, subtitle description, breadcrumb metadata badge, and header action controls
+- Props: `title: string`, `description?: string`, `badge?: string`, `actions?: React.ReactNode`
+- Used in: `app/(authenticated)/dashboard/page.tsx`, `app/(authenticated)/cases/page.tsx`
+
+### Toast — BUILT (Phase 15)
+- Path: components/ui/toast.tsx
+- Purpose: global toast notification system providing accessible toast popups with success, error, info, and warning variants
+- Props: `ToastProvider`, `useToast()`, `toast({ title, description, variant })`
+- Used in: `app/layout.tsx`, `components/copilot-panel.tsx`, `components/evidence-review-workspace.tsx`
+

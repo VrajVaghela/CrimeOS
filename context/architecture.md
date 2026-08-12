@@ -73,7 +73,7 @@ erakshak/
 │   ├── components/            # ui/ (shadcn) + domain components
 │   ├── lib/api.ts             # THE ONLY file that does fetch() to backend
 │   └── lib/types.ts           # mirrors backend schemas
-└── data/                      # sample complaint PDFs/audio/images for demo
+├── data/                      # sample complaint PDFs/audio/images + fetch_datasets.py script
 ```
 
 ## Architectural Rules (strict)
@@ -131,6 +131,12 @@ Rules: UUID PKs. `audit_events` is append-only — never UPDATE/DELETE it. Summa
 Backend routers: `command_center.py`, `entities.py`, `copilot.py`, `evidence.py`.
 Backend services: `command_center_service.py`, `entity_service.py`, `path_revision_service.py`, `evidence_service.py`, `copilot_service.py`, `provenance_service.py`.
 Frontend domain components: `case-command-center.tsx`, `workflow-spine.tsx`, `next-best-action.tsx`, `source-chip.tsx`, `path-revision-list.tsx`, `entity-pivot-panel.tsx`, `evidence-review-workspace.tsx`, `copilot-panel.tsx`, `request-readiness-checklist.tsx`, `response-correlation-panel.tsx`.
+
+## Phase 14 & 15 folder additions
+Dataset tooling: `data/fetch_datasets.py`, `data/06_osint/osint_pivot_targets.json`.
+Frontend i18n & endonyms: `frontend/lib/i18n/endonyms.ts`, `frontend/lib/format.ts`, `frontend/scripts/i18n-audit.mjs`.
+Frontend modular components: `components/case-row.tsx`, `components/ui/empty-state.tsx`, `components/ui/metric.tsx`, `components/ui/page-header.tsx`, `components/ui/toast.tsx`.
+
 
 ## Upstream Feature Integration Constraints (Phase 10)
 
