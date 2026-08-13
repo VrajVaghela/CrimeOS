@@ -372,5 +372,8 @@ Completed synthetic dataset automation and clean frontend UI component modulariz
 - [x] `npm run i18n:audit` passes with key parity across `en.ts`, `hi.ts`, and `gu.ts`
 - [x] `npx tsc --noEmit` passes cleanly with zero TypeScript errors
 - [x] `npm run build` compiles 14 Next.js App Router routes with zero errors
+
+## Post-Phase UI Polish — 2026-08-13
+- [x] Replace the authenticated-shell spinner with a localized structural skeleton, restore the case-search clear control's touch target, and align shared button/input/alert transitions to `--motion-fast`.
 - [x] ✅ CHECKPOINT PASSED — Modularized components render cleanly and synthetic data scripts run without issues.
 

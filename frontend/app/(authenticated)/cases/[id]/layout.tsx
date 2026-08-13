@@ -16,6 +16,7 @@ import {
   Network,
   Search,
   Clock,
+  Radio,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ import { CopilotLauncher } from "@/components/copilot-drawer";
 const TABS = [
   { key: "overview", href: "", icon: Shield, group: "case" },
   { key: "ingestion", href: "ingestion", icon: Search, group: "work" },
+  { key: "osint", href: "osint", icon: Radio, group: "work" },
   { key: "path", href: "path", icon: Crosshair, group: "work" },
   { key: "requests", href: "requests", icon: Mail, group: "work" },
   { key: "responses", href: "responses", icon: Activity, group: "work" },

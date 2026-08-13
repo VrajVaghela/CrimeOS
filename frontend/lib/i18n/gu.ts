@@ -103,6 +103,7 @@ const gu: Dictionary = {
     cases: "કેસ",
     overview: "ઝાંખી",
     ingestion: "ફરિયાદ",
+    osint: "OSINT અને પિવટ",
     path: "તપાસ માર્ગ",
     requests: "કાનૂની વિનંતીઓ",
     responses: "પ્રદાતા પ્રતિભાવ",
@@ -115,6 +116,7 @@ const gu: Dictionary = {
   tab: {
     overview: "ઝાંખી",
     ingestion: "ફરિયાદ",
+    osint: "OSINT",
     path: "માર્ગ",
     requests: "વિનંતીઓ",
     responses: "પ્રતિભાવ",
@@ -290,6 +292,13 @@ const gu: Dictionary = {
     no_requests_sub: "પ્રદાતા ડેટા એકત્ર કરવા શરૂ કરવા કોઈ તપાસ પગલાંમાંથી કાનૂની વિનંતીનો ડ્રાફ્ટ બનાવો.",
     load_error: "કેસ ઝાંખી લોડ થઈ શકી નથી.",
     sync_error: "કેસ એકમો સિંક થઈ શક્યાં નથી. ફરી પ્રયાસ કરો.",
+  },
+
+  osint_page: {
+    title: "OSINT અને ઇન્ટેલિજન્સ પિવટ",
+    subtitle: "એક્સ્ટ્રેક્ટ કરેલી એન્ટિટીઓને સાંકળો, ડિજિટલ ફૂટપ્રિન્ટ્સ શોધો અને OSINT એન્ચિમેન્ટ કરો.",
+    load_error: "OSINT અને પિવટ ડેટા લોડ કરવામાં નિષ્ફળ.",
+    sync_error: "એન્ટિટીઓ અને OSINT ડેટા સિંક કરવામાં નિષ્ફળ.",
   },
 
   ingestion: {

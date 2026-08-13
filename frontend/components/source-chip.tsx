@@ -31,17 +31,18 @@ export function SourceChip({
   };
 
   return (
-    <div className="inline-flex items-center rounded-squircle-sm border border-border bg-secondary px-2 py-1 text-[11px] font-mono text-muted-foreground transition-colors hover:border-info/40 hover:text-foreground">
+    <div className="inline-flex max-w-full items-center rounded-squircle-sm border border-border bg-secondary/80 px-2 py-0.5 text-[11px] font-mono text-muted-foreground transition-colors hover:border-info/40 hover:text-foreground">
       {getIcon()}
-      <span className="truncate max-w-[120px]">{sourceLabel}</span>
-      {locator && <span className="text-muted-foreground/50 ml-1">:{locator}</span>}
+      <span className="truncate max-w-[140px]">{sourceLabel}</span>
+      {locator && <span className="truncate max-w-[100px] text-muted-foreground/60 ml-0.5">:{locator}</span>}
       {confidence !== undefined && (
         <span
-          className={`ml-1.5 font-bold ${ confidence >= 0.85
-            ? "text-success"
-            : confidence >= 0.7
-              ? "text-warn"
-              : "text-destructive"
+          className={`ml-1.5 shrink-0 font-bold ${
+            confidence >= 0.85
+              ? "text-success"
+              : confidence >= 0.7
+                ? "text-warn"
+                : "text-destructive"
           }`}
         >
           {Math.round(confidence * 100)}%

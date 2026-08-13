@@ -108,6 +108,7 @@ const en = {
     cases: "Cases",
     overview: "Overview",
     ingestion: "Ingestion",
+    osint: "OSINT & Intelligence",
     path: "Investigation Path",
     requests: "Legal Requests",
     responses: "Provider Responses",
@@ -122,6 +123,7 @@ const en = {
   tab: {
     overview: "Overview",
     ingestion: "Ingestion",
+    osint: "OSINT",
     path: "Path",
     requests: "Requests",
     responses: "Responses",
@@ -297,6 +299,13 @@ const en = {
     no_requests_sub: "Draft a legal request from an investigation step to start collecting provider data.",
     load_error: "Could not load the case overview.",
     sync_error: "Could not sync case entities. Try again.",
+  },
+
+  osint_page: {
+    title: "OSINT & Intelligence Pivot",
+    subtitle: "Correlate extracted entities, trace digital footprints, discover cross-case matches, and perform OSINT enrichment.",
+    load_error: "Could not load OSINT and entity pivot data.",
+    sync_error: "Failed to sync entities and OSINT data.",
   },
 
   ingestion: {

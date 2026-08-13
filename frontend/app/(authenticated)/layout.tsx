@@ -19,6 +19,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage, type TranslationKey } from "@/lib/language-context";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -48,6 +49,7 @@ const NAV_ITEMS = [
 const NAV_TABS = [
   "overview",
   "ingestion",
+  "osint",
   "path",
   "requests",
   "responses",
@@ -65,9 +67,7 @@ export default function AuthenticatedLayout({
   return (
     <Suspense
       fallback={
-        <div className="flex h-dvh items-center justify-center bg-background">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-        </div>
+        <ShellLoading />
       }
     >
       <AuthenticatedLayoutContent>{children}</AuthenticatedLayoutContent>
@@ -120,11 +120,7 @@ function AuthenticatedLayoutContent({
   }, [mobileNavOpen]);
 
   if (loading) {
-    return (
-      <div className="flex h-dvh items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-      </div>
-    );
+    return <ShellLoading />;
   }
 
   if (!user) {
@@ -393,6 +389,38 @@ function AuthenticatedLayoutContent({
         <div className="workspace-scroll flex min-h-0 flex-1 flex-col">
           {children}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** A structural placeholder preserves the shell's hierarchy while auth resolves. */
+function ShellLoading() {
+  const { t } = useLanguage();
+
+  return (
+    <div
+      role="status"
+      aria-label={t("common.loading")}
+      className="grid h-dvh grid-cols-1 bg-background lg:grid-cols-[15.5rem_minmax(0,1fr)]"
+    >
+      <aside aria-hidden="true" className="hidden border-r border-border/80 bg-sidebar p-4 lg:block">
+        <Skeleton className="h-9 w-36 rounded-squircle-sm" />
+        <div className="mt-10 flex flex-col gap-2">
+          <Skeleton className="h-9 w-full rounded-squircle-sm" />
+          <Skeleton className="h-9 w-4/5 rounded-squircle-sm" />
+        </div>
+      </aside>
+      <div className="min-w-0">
+        <div aria-hidden="true" className="flex h-[68px] items-center border-b border-border/80 px-6">
+          <Skeleton className="h-4 w-44" />
+        </div>
+        <main aria-hidden="true" className="mx-auto flex max-w-7xl flex-col gap-6 p-6 lg:p-8">
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-5 w-[min(100%,42rem)]" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </main>
       </div>
     </div>
   );

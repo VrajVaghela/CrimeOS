@@ -34,12 +34,12 @@ export function CopilotLauncher({ caseId }: CopilotLauncherProps) {
         <>
           <button
             type="button"
-            className="fixed inset-0 z-40 cursor-default bg-background/70"
+            className="fixed inset-0 z-40 cursor-default bg-background/60 backdrop-blur-xs animate-fade-in"
             onClick={() => setOpen(false)}
             aria-label={t("common.close_copilot")}
           />
           <aside
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-md animate-slide-in-right border-l border-border bg-background shadow-none"
+            className="fixed inset-y-3 right-3 z-50 flex flex-col w-[440px] max-w-[calc(100vw-1.5rem)] animate-slide-in-right rounded-squircle border border-border/80 bg-card/95 backdrop-blur-xl elev-overlay overflow-hidden"
             aria-label={t("copilot.title")}
             role="dialog"
             aria-modal="true"

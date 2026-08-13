@@ -208,7 +208,7 @@ export default function CasesPage() {
                   setSearchQuery("");
                   setSearchResults(null);
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-squircle-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
                 aria-label={t("common.dismiss")}
               >
                 <X className="h-3.5 w-3.5" />

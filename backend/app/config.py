@@ -16,10 +16,27 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     DEMO_PROVIDER_INBOX: str = "demo-provider@example.com"
-    FRONTEND_ORIGIN: str = "http://localhost:3000"
+    FRONTEND_ORIGIN: str = "http://localhost:3000,http://127.0.0.1:3000"
     UPLOAD_DIR: str = "uploads"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        origins = [o.strip() for o in self.FRONTEND_ORIGIN.split(",") if o.strip()]
+        defaults = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3001",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ]
+        for d in defaults:
+            if d not in origins:
+                origins.append(d)
+        return origins
 
     model_config = SettingsConfigDict(env_file=(".env", "../.env"), env_file_encoding="utf-8", extra="ignore")
 
 
 settings = Settings()
+

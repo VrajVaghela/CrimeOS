@@ -103,6 +103,7 @@ const hi: Dictionary = {
     cases: "केस",
     overview: "सारांश",
     ingestion: "शिकायत",
+    osint: "OSINT एवं पिवट",
     path: "जांच पथ",
     requests: "कानूनी अनुरोध",
     responses: "प्रदाता प्रतिक्रियाएँ",
@@ -115,6 +116,7 @@ const hi: Dictionary = {
   tab: {
     overview: "सारांश",
     ingestion: "शिकायत",
+    osint: "OSINT",
     path: "पथ",
     requests: "अनुरोध",
     responses: "प्रतिक्रियाएँ",
@@ -290,6 +292,13 @@ const hi: Dictionary = {
     no_requests_sub: "प्रदाता डेटा जुटाना शुरू करने के लिए किसी जांच चरण से कानूनी अनुरोध का ड्राफ्ट बनाएं।",
     load_error: "केस सारांश लोड नहीं हो सका।",
     sync_error: "केस इकाइयाँ सिंक नहीं हो सकीं। फिर कोशिश करें।",
+  },
+
+  osint_page: {
+    title: "OSINT एवं इंटेलिजेंस पिवट",
+    subtitle: "निकाली गई संस्थाओं को सह-संबंधित करें, डिजिटल निशानों का पता लगाएं और OSINT संवर्धन करें।",
+    load_error: "OSINT और पिवट डेटा लोड करने में विफल।",
+    sync_error: "संस्थाओं और OSINT डेटा का समन्वय विफल रहा।",
   },
 
   ingestion: {

@@ -28,6 +28,7 @@ import {
 } from "@/lib/api";
 import type { OsintScanResult, CaseEntityOut } from "@/lib/types";
 import { useLanguage } from "@/lib/language-context";
+import { Button } from "@/components/ui/button";
 
 interface OsintEnrichmentPanelProps {
   caseId: string;
@@ -185,11 +186,11 @@ export function OsintEnrichmentPanel({
   const getRiskColor = (level: string) => {
     switch (level) {
       case "CRITICAL":
-        return "bg-destructive/20 text-destructive border-destructive/40 glow-destructive";
+        return "bg-destructive/10 text-destructive border-destructive/30";
       case "HIGH":
-        return "bg-warn/20 text-warn border-warn/40 glow-warning";
+        return "bg-warn/10 text-warn border-warn/30";
       case "MEDIUM":
-        return "bg-warn/15 text-warn border-warn/30";
+        return "bg-background/80 text-foreground border-border/80";
       default:
         return "bg-success/10 text-success border-success/30";
     }

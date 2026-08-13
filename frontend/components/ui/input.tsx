@@ -24,7 +24,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           "placeholder:text-muted-foreground",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
           "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-muted",
-          "transition-all duration-200",
+          "transition-colors duration-[var(--motion-fast)]",
           stateClass,
           className,
         )}

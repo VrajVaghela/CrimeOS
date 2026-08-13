@@ -129,26 +129,44 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
   ];
 
   const formatMessageText = (text: string) => {
-    return text.split("\n").map((line, i) => {
-      let content: React.ReactNode = line;
-      if (line.trim().startsWith("* ") || line.trim().startsWith("- ")) {
-        content = <li className="ml-4 list-disc">{line.replace(/^[*-\s]+/, "")}</li>;
-      } else {
-        const parts = line.split(/\*\*([^*]+)\*\*/g);
-        if (parts.length > 1) {
-          content = parts.map((part, idx) =>
-            idx % 2 === 1 ? (
-              <strong key={idx} className="font-semibold text-foreground">
-                {part}
-              </strong>
-            ) : (
-              part
-            )
-          );
-        }
+    const lines = text.split("\n");
+    return lines.map((line, i) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        return <div key={i} className="h-1.5" />;
       }
+
+      const isBullet = trimmed.startsWith("* ") || trimmed.startsWith("- ");
+      const rawText = isBullet ? trimmed.replace(/^[*-\s]+/, "") : line;
+
+      const parts = rawText.split(/\*\*([^*]+)\*\*/g);
+      const content = parts.map((part, idx) =>
+        idx % 2 === 1 ? (
+          <strong key={idx} className="font-semibold text-foreground">
+            {part}
+          </strong>
+        ) : (
+          part
+        )
+      );
+
+      if (isBullet) {
+        return (
+          <div
+            key={i}
+            className="flex items-start gap-2 mb-1.5 last:mb-0 text-sm text-secondary-foreground font-sans break-words [overflow-wrap:anywhere]"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-info/70 shrink-0 mt-1.5" />
+            <span className="flex-1 min-w-0">{content}</span>
+          </div>
+        );
+      }
+
       return (
-        <p key={i} className="mb-2 leading-relaxed text-secondary-foreground text-sm font-sans">
+        <p
+          key={i}
+          className="mb-2 last:mb-0 leading-relaxed text-secondary-foreground text-sm font-sans break-words [overflow-wrap:anywhere]"
+        >
           {content}
         </p>
       );
@@ -156,27 +174,26 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
   };
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden rounded-none border-0 bg-card/90 backdrop-blur-md">
-      <CardHeader className="border-b border-border/40 bg-card/60 pb-3.5 pt-4 pl-4 pr-14">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <Sparkles className="h-5 w-5 text-info shrink-0 animate-pulse" />
-            <div className="min-w-0">
-              <CardTitle className="text-base font-semibold font-heading truncate text-foreground">
+    <Card className="flex h-full flex-col overflow-hidden rounded-none border-0 bg-card/95 backdrop-blur-xl">
+      <CardHeader className="border-b border-border/40 bg-card/80 backdrop-blur-md px-4 py-3.5 pr-12 shrink-0">
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="flex h-8 w-8 items-center justify-center rounded-squircle-sm bg-info/10 border border-info/20 shrink-0">
+              <Sparkles className="h-4 w-4 text-info animate-pulse" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-sm font-semibold font-heading truncate text-foreground leading-tight">
                 {t("copilot.title")}
               </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground truncate">
-                {t("copilot.subtitle")}
-              </CardDescription>
             </div>
           </div>
-          <Badge className="shrink-0 whitespace-nowrap bg-secondary/60 text-muted-foreground border border-border/50 text-[10px] px-2.5 py-0.5 rounded-full font-mono uppercase tracking-wider select-none">
+          <Badge className="shrink-0 whitespace-nowrap bg-secondary/80 text-muted-foreground border border-border/60 text-[10px] px-2 py-0.5 rounded-full font-mono uppercase tracking-wider select-none">
             {t("copilot.read_only")}
           </Badge>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 bg-transparent">
+      <CardContent className="flex-1 overflow-y-auto minimal-scroll p-4 space-y-3.5 min-h-0 bg-transparent">
         {loadingHistory ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground space-y-2">
             <Loader2 className="h-6 w-6 animate-spin text-info" />
@@ -196,12 +213,15 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
           messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex flex-col max-w-[85%] ${msg.role === "user" ? "ml-auto items-end" : "mr-auto items-start"}`}
+              className={`flex flex-col max-w-[88%] min-w-0 ${
+                msg.role === "user" ? "ml-auto items-end" : "mr-auto items-start"
+              }`}
             >
               <div
-                className={`p-3.5 rounded-squircle text-sm border transition-colors duration-200 ${ msg.role === "user"
-                    ? "bg-primary/10 border-primary/30 text-foreground rounded-tr-sm"
-                    : "bg-info/5 border-info/30 text-secondary-foreground rounded-tl-sm relative"
+                className={`p-3.5 rounded-squircle text-sm border overflow-hidden transition-colors duration-200 w-full break-words [overflow-wrap:anywhere] ${
+                  msg.role === "user"
+                    ? "bg-primary/10 border-primary/30 text-foreground rounded-tr-xs"
+                    : "bg-info/5 border-info/30 text-secondary-foreground rounded-tl-xs relative"
                 }`}
               >
                 {formatMessageText(msg.message)}
@@ -238,10 +258,10 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
         )}
 
         {loading && (
-          <div className="flex flex-col max-w-[85%] mr-auto items-start">
-            <div className="p-3.5 bg-info/5 border border-info/30 text-secondary-foreground rounded-squircle rounded-tl-sm flex items-center gap-3">
-              <Loader2 className="h-4 w-4 animate-spin text-info" />
-              <span className="text-xs font-mono text-muted-foreground">
+          <div className="flex flex-col max-w-[88%] min-w-0 mr-auto items-start">
+            <div className="p-3.5 bg-info/5 border border-info/30 text-secondary-foreground rounded-squircle rounded-tl-xs flex items-center gap-3 w-full">
+              <Loader2 className="h-4 w-4 animate-spin text-info shrink-0" />
+              <span className="text-xs font-mono text-muted-foreground truncate">
                 {t("copilot.analyzing").replace("{seconds}", String(elapsedTime))}
               </span>
             </div>
@@ -249,9 +269,9 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
         )}
 
         {error && (
-          <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-squircle text-xs text-destructive max-w-[85%] mr-auto font-mono">
+          <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-squircle text-xs text-destructive max-w-[88%] min-w-0 mr-auto font-mono break-words [overflow-wrap:anywhere]">
             <ShieldAlert className="h-4 w-4 flex-shrink-0" />
-            <span>{error}</span>
+            <span className="min-w-0 flex-1 break-words">{error}</span>
           </div>
         )}
 
@@ -259,14 +279,14 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
       </CardContent>
 
       {!loading && (
-        <div className="px-4 py-2 border-t border-border/20 bg-secondary/10 flex gap-2 overflow-x-auto rail-scroll whitespace-nowrap">
+        <div className="px-3.5 py-2 border-t border-border/30 bg-secondary/20 flex gap-1.5 overflow-x-auto rail-scroll whitespace-nowrap shrink-0">
           {quickQuestions.map((qq) => (
             <Button
               key={qq.intent}
               onClick={() => void handleAsk(qq.query, qq.intent)}
               variant="outline"
               size="sm"
-              className="text-xs border-border/30 hover:border-info/40 hover:bg-info/10 hover:text-info rounded-full flex-shrink-0 text-muted-foreground h-7 transition-colors"
+              className="text-[11px] border-border/40 hover:border-info/40 hover:bg-info/10 hover:text-info rounded-full flex-shrink-0 text-muted-foreground h-7 px-3 transition-colors"
             >
               {qq.label}
             </Button>
@@ -274,7 +294,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
         </div>
       )}
 
-      <div className="p-4 border-t border-border/40 bg-card/60 flex items-center gap-2">
+      <div className="p-3.5 border-t border-border/40 bg-card/80 backdrop-blur-md flex items-center gap-2 shrink-0">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -284,7 +304,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
             }
           }}
           placeholder={t("copilot.placeholder")}
-          className="flex-1 bg-input border border-border/40 text-sm focus-visible:ring-primary rounded-squircle-sm"
+          className="flex-1 bg-input border border-border/60 text-sm focus-visible:ring-primary rounded-squircle-sm h-10 px-3.5"
           disabled={loading || loadingHistory}
         />
         <Button
@@ -293,7 +313,7 @@ export function CopilotPanel({ caseId }: CopilotPanelProps) {
           size="icon"
           aria-label={t("copilot.send")}
           title={t("copilot.send")}
-          className="bg-primary hover:bg-primary/90 h-10 w-10 flex items-center justify-center rounded-squircle-sm transition-colors"
+          className="bg-primary hover:bg-primary/90 h-10 w-10 shrink-0 flex items-center justify-center rounded-squircle-sm transition-colors"
         >
           <Send className="h-4 w-4" />
         </Button>

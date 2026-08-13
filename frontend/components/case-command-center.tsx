@@ -2,10 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Activity, AlertCircle, ArrowRight, Mail, Sparkles } from "lucide-react";
+import { Activity, AlertCircle, ArrowRight, Mail, Sparkles, Radio } from "lucide-react";
 
 import { AiContentCard } from "@/components/ai-content-card";
-import { EntityPivotPanel } from "@/components/entity-pivot-panel";
 import { NextBestAction } from "@/components/next-best-action";
 import { StatusBadge } from "@/components/status-badge";
 import { TranslatedTextBlock } from "@/components/translated-text-block";
@@ -259,14 +258,30 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
             </div>
           </AiContentCard>
 
-          {/* The pivot panel owns its own surfaces; wrapping it in a Card would
-              nest a card inside a card and double the inset padding. */}
-          <EntityPivotPanel
-            entities={entities}
-            relationships={relationships}
-            relatedCases={relatedCases}
-            onSync={handleSyncEntities}
-          />
+          <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="rounded-squircle-sm border border-primary/20 bg-primary/10 p-2.5 text-primary">
+                <Radio className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-heading text-sm font-semibold text-foreground">
+                  {t("osint_page.title")}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {t("osint_page.subtitle")}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => router.push(`/cases/${caseId}/osint`)}
+              className="shrink-0 gap-1.5"
+            >
+              <span>{t("tab.osint")}</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </Card>
 
           <Card>
             <CardHeader>
