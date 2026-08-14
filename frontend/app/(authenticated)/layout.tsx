@@ -6,12 +6,16 @@ import Link from "next/link";
 import {
   LayoutDashboard,
   FolderOpen,
+  Map,
+  Bell,
   Menu,
   Shield,
   Search,
   LogOut,
   ChevronRight,
   User,
+  UserCheck,
+  Network,
   PanelLeftClose,
   PanelLeftOpen,
   X,
@@ -37,11 +41,37 @@ const NAV_ITEMS = [
     labelKey: "shell.case_registry",
     match: (pathname: string) => pathname.startsWith("/cases"),
   },
+  {
+    href: "/heatmap",
+    icon: Map,
+    labelKey: "nav.heatmap",
+    match: (pathname: string) => pathname === "/heatmap" || pathname === "/crime-heatmap",
+  },
+  {
+    href: "/alert-center",
+    icon: Bell,
+    labelKey: "nav.alert_center",
+    match: (pathname: string) => pathname === "/alert-center",
+    badge: "!",
+  },
+  {
+    href: "/repeat-offenders",
+    icon: UserCheck,
+    labelKey: "nav.repeat_offenders",
+    match: (pathname: string) => pathname === "/repeat-offenders",
+  },
+  {
+    href: "/criminal-network",
+    icon: Network,
+    labelKey: "nav.criminal_network",
+    match: (pathname: string) => pathname === "/criminal-network",
+  },
 ] as const satisfies ReadonlyArray<{
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   labelKey: TranslationKey;
   match: (pathname: string) => boolean;
+  badge?: string;
 }>;
 
 // Case tab segments that have a matching `nav.*` dictionary entry.
@@ -167,6 +197,14 @@ function AuthenticatedLayoutContent({
           breadcrumbs.push({ label: tabLabel, href: `/cases/${parts[1]}/${parts[2]}` });
         }
       }
+    } else if (parts[0] === "alert-center") {
+      breadcrumbs.push({ label: t("nav.alert_center"), href: "/alert-center" });
+    } else if (parts[0] === "heatmap" || parts[0] === "crime-heatmap") {
+      breadcrumbs.push({ label: t("nav.heatmap"), href: "/heatmap" });
+    } else if (parts[0] === "repeat-offenders") {
+      breadcrumbs.push({ label: t("nav.repeat_offenders"), href: "/repeat-offenders" });
+    } else if (parts[0] === "criminal-network") {
+      breadcrumbs.push({ label: t("nav.criminal_network"), href: "/criminal-network" });
     }
 
     return breadcrumbs;
@@ -270,7 +308,17 @@ function AuthenticatedLayoutContent({
                       className="absolute inset-y-1.5 left-0 w-0.5 rounded-r-sm bg-primary"
                     />
                   ) : null}
-                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="relative shrink-0">
+                    <Icon className="h-4 w-4" />
+                    {"badge" in item && item.badge ? (
+                      <span
+                        aria-hidden="true"
+                        className="absolute -right-1.5 -top-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-danger text-[8px] font-bold text-white"
+                      >
+                        {item.badge}
+                      </span>
+                    ) : null}
+                  </span>
                   {!sidebarCollapsed && <span className="truncate">{t(item.labelKey)}</span>}
                 </Link>
               );

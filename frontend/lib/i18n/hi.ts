@@ -110,6 +110,10 @@ const hi: Dictionary = {
     audit: "ऑडिट ट्रेल",
     timeline: "समयरेखा",
     evidence: "साक्ष्य",
+    heatmap: "अपराध हीटमैप",
+    alert_center: "अलर्ट सेंटर",
+    repeat_offenders: "पुनरावर्ती अपराधी",
+    criminal_network: "आपराधिक नेटवर्क",
   },
 
   tab: {
@@ -955,6 +959,73 @@ const hi: Dictionary = {
     missing_summary:
       "प्रतिक्रिया विश्लेषण पूर्ण है। केस बंद करने के लिए अंतिम सारांश तैयार करें।",
   },
+
+  heatmap: {
+    title: "AI अपराध हीटमैप इंजन",
+    subtitle: "रीयल-टाइम भू-स्थानिक घनत्व मानचित्रण और ज़ोन वर्गीकरण — सूरत शहर, गुजरात",
+    stat_total: "कुल अंक",
+    stat_critical: "गंभीर ज़ोन",
+    stat_high: "उच्च जोखिम ज़ोन",
+    stat_clusters: "सक्रिय क्लस्टर",
+    clusters_title: "सक्रिय अपराध क्लस्टर",
+    zone_breakdown: "ज़ोन विश्लेषण",
+  },
+
+  alert_center: {
+    title: "रियल-टाइम अलर्ट सेंटर",
+    subtitle: "स्वचालित खतरा पहचान, हॉटस्पॉट उद्भव और सामरिक प्रणाली सूचनाएं",
+    filter_all: "सभी गंभीरताएं",
+    stat_active: "सक्रिय अलर्ट",
+    stat_critical: "गंभीर खतरे",
+    stat_unread: "अपठित अलर्ट",
+    stat_channels: "सूचना चैनल",
+    channel_email: "ईमेल",
+    channel_chat: "चैट",
+    channel_telegram: "टेलीग्राम",
+    feed_title: "लाइव अलर्ट फ़ीड",
+    empty: "चयनित गंभीरता फ़िल्टर से कोई अलर्ट मेल नहीं खाता।",
+  },
+
+  repeat_offenders: {
+    title: "पुनरावर्ती अपराधी इंटेलिजेंस",
+    subtitle: "व्यवहारिक जोखिम प्रोफाइलिंग और पुनरावृत्ति ट्रैकिंग (सिंथेटिक डेमो प्रोफाइल)",
+    registry_title: "अपराधी रजिस्ट्री",
+    registry_subtitle: "डेटाबेस में {count} प्रोफ़ाइल",
+    profile_title: "व्यवहारिक प्रोफ़ाइल",
+    filter_all: "सभी जोखिम स्तर",
+    filter_critical: "गंभीर",
+    filter_high: "उच्च",
+    filter_medium: "मध्यम",
+    filter_low: "निम्न",
+    recidivism_score: "पुनरावृत्ति स्कोर",
+    total_cases: "कुल मामले",
+    crime_timeline: "अपराध समयरेखा",
+    no_offenders: "चयनित फ़िल्टर से कोई पुनरावर्ती अपराधी मेल नहीं खाता।",
+  },
+
+  criminal_network: {
+    title: "आपराधिक नेटवर्क इंटेलिजेंस",
+    subtitle: "अपराधियों, गैंग और सहयोगियों के बीच AI-पहचाने गए संबंध",
+    kpi_nodes: "नेटवर्क नोड्स",
+    kpi_connections: "पहचाने गए संबंध",
+    kpi_gangs: "पहचाने गए गैंग नेटवर्क",
+    graph_title: "संबंध नेटवर्क ग्राफ",
+    graph_hint: "नोड्स खींचें · नोड पर क्लिक करें · ज़ूम करें",
+    node_profile: "नोड प्रोफ़ाइल",
+    node_click_hint: "प्रोफ़ाइल देखने के लिए ग्राफ में किसी भी नोड पर क्लिक करें।",
+    influencer_score: "प्रभाव स्कोर",
+    gang: "गैंग",
+    connections: "संबंध",
+    central_influencers: "केंद्रीय प्रभावशाली व्यक्ति",
+    gang_structures: "पहचानी गई गैंग संरचनाएँ",
+    linked_members: "जुड़े सदस्य",
+    legend_title: "ग्राफ लेजेंड",
+    legend_gang: "गैंग लिंक",
+    legend_financial: "वित्तीय लिंक",
+    legend_comms: "संचार / सहयोगी",
+    legend_critical_ring: "स्पंदन रिंग = गंभीर जोखिम",
+  },
+
 
 } as const;
 

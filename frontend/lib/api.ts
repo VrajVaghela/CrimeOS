@@ -641,3 +641,42 @@ export async function translateBatch(
   return res.results;
 }
 
+// ─── Heatmap API ─────────────────────────────────────────────────────────────
+import {
+  generateMockPoints,
+  MOCK_ZONES,
+  MOCK_CLUSTERS,
+  type HeatmapPoint,
+  type RiskZone,
+  type CrimeCluster,
+} from "@/lib/heatmapData";
+
+export async function getHeatmapPoints(
+  days: number = 30,
+  crimeType?: string
+): Promise<HeatmapPoint[]> {
+  try {
+    const q = crimeType ? `?days=${days}&crime_type=${crimeType}` : `?days=${days}`;
+    return await request<HeatmapPoint[]>(`/heatmap/points${q}`);
+  } catch {
+    return generateMockPoints(days, crimeType);
+  }
+}
+
+export async function getHeatmapZones(): Promise<RiskZone[]> {
+  try {
+    return await request<RiskZone[]>("/heatmap/zones");
+  } catch {
+    return MOCK_ZONES;
+  }
+}
+
+export async function getHeatmapClusters(): Promise<CrimeCluster[]> {
+  try {
+    return await request<CrimeCluster[]>("/heatmap/clusters");
+  } catch {
+    return MOCK_CLUSTERS;
+  }
+}
+
+

@@ -110,6 +110,10 @@ const gu: Dictionary = {
     audit: "ઑડિટ ટ્રેઇલ",
     timeline: "સમયરેખા",
     evidence: "પુરાવો",
+    heatmap: "ગુના હીટમેપ",
+    alert_center: "એલર્ટ સેન્ટર",
+    repeat_offenders: "પુનરાવર્તિત અપ્રાધી",
+    criminal_network: "ગુનાહિત નેટવર્ક",
   },
 
   tab: {
@@ -955,6 +959,73 @@ const gu: Dictionary = {
     missing_summary:
       "પ્રતિભાવ વિશ્લેષણ પૂર્ણ છે. કેસ બંધ કરવા અંતિમ સારાંશ તૈયાર કરો.",
   },
+
+  heatmap: {
+    title: "AI ગુનો હીટમેપ એન્જિન",
+    subtitle: "રીયલ-ટાઇમ ભૌગોલિક ઘનતા મેપિંગ અને ઝોન વર્ગીકરણ — સુરત શહેર, ગુજરાત",
+    stat_total: "કુલ પોઇન્ટ",
+    stat_critical: "ગંભીર ઝોન",
+    stat_high: "ઉચ્ચ જોખમ ઝોન",
+    stat_clusters: "સક્રિય ક્લસ્ટર",
+    clusters_title: "સક્રિય ગુના ક્લસ્ટર",
+    zone_breakdown: "ઝોન વિશ્લેષણ",
+  },
+
+  alert_center: {
+    title: "રીઅલ-ટાઇમ એલર્ટ સેન્ટર",
+    subtitle: "સ્વચાલિત જોખમ શોધ, હોટસ્પોટ ઉદભવ અને રણનીતિક સિસ્ટમ સૂચનાઓ",
+    filter_all: "બધી ગંભીરતાઓ",
+    stat_active: "સક્રિય એલર્ટ્સ",
+    stat_critical: "ગંભીર જોખમો",
+    stat_unread: "અવાંચેલ એલર્ટ્સ",
+    stat_channels: "સૂચના ચેનલો",
+    channel_email: "ઇમેઇલ",
+    channel_chat: "ચેટ",
+    channel_telegram: "ટેલિગ્રામ",
+    feed_title: "લાઇવ એલર્ટ ફીડ",
+    empty: "પસંદ કરેલ ગંભીરતા ફિલ્ટર સાથે કોઈ એલર્ટ મેળ ખાતું નથી.",
+  },
+
+  repeat_offenders: {
+    title: "પુનરાવર્તિત અપ્રાધી ઇન્ટેલિજન્સ",
+    subtitle: "વ્યવહારિક જોખમ પ્રોફાઇલિંગ અને પુનરાવર્તન ટ્રેકિંગ (સિન્થેટિક ડેમો પ્રોફાઇલ્સ)",
+    registry_title: "અપ્રાધી રજિસ્ટ્રી",
+    registry_subtitle: "ડેટાબેઝમાં {count} પ્રોફાઇલ્સ",
+    profile_title: "વ્યવહારિક પ્રોફાઇલ",
+    filter_all: "બધા જોખમ સ્તર",
+    filter_critical: "ગંભીર",
+    filter_high: "ઉચ્ચ",
+    filter_medium: "મધ્યમ",
+    filter_low: "નિમ્ન",
+    recidivism_score: "પુનરાવર્તન સ્કોર",
+    total_cases: "કુલ કેસ",
+    crime_timeline: "ગુના સમયરેખા",
+    no_offenders: "પસંદ કરેલ ફિલ્ટર સાથે કોઈ પુનરાવર્તિત અપ્રાધી મેળ ખાતું નથી.",
+  },
+
+  criminal_network: {
+    title: "ગુનાહિત નેટવર્ક ઇન્ટેલિજન્સ",
+    subtitle: "ગુનેગારો, ગેંગ અને સાથીઓ વચ્ચે AI દ્વારા શોધાયેલા સંબંધો",
+    kpi_nodes: "નેટવર્ક નોડ્સ",
+    kpi_connections: "શોધાયેલા સંબંધો",
+    kpi_gangs: "શોધાયેલા ગેંગ નેટવર્ક",
+    graph_title: "સંબંધ નેટવર્ક ગ્રાફ",
+    graph_hint: "નોડ્સ ખેંચો · નોડ પર ક્લિક કરો · ઝૂમ કરો",
+    node_profile: "નોડ પ્રોફાઇલ",
+    node_click_hint: "પ્રોફાઇલ જોવા ગ્રાફમાં કોઈપણ નોડ પર ક્લિક કરો.",
+    influencer_score: "પ્રભાવ સ્કોર",
+    gang: "ગેંગ",
+    connections: "સંબંધો",
+    central_influencers: "કેન્દ્રીય પ્રભાવશાળી વ્યક્તિઓ",
+    gang_structures: "શોધાયેલી ગેંગ સંરચનાઓ",
+    linked_members: "જોડાયેલા સદસ્યો",
+    legend_title: "ગ્રાફ લેજેન્ડ",
+    legend_gang: "ગેંગ લિંક",
+    legend_financial: "આર્થિક લિંક",
+    legend_comms: "સંધારણ / સાથી",
+    legend_critical_ring: "સ્પંદન રિંગ = ગંભીર જોખમ",
+  },
+
 
 } as const;
 

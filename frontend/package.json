@@ -10,13 +10,21 @@
     "verify": "npm run i18n:audit && tsc --noEmit && next build"
   },
   "dependencies": {
+    "@deck.gl/layers": "^9.3.10",
+    "@deck.gl/mapbox": "^9.3.10",
+    "@deck.gl/react": "^9.3.10",
     "@radix-ui/react-slot": "^1.1.1",
+    "@types/d3": "^7.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "d3": "^7.9.0",
+    "d3-delaunay": "^6.0.4",
     "lucide-react": "^0.468.0",
+    "maplibre-gl": "^6.3.0",
     "next": "14.2.23",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-map-gl": "^8.1.2",
     "tailwind-merge": "^2.5.5"
   },
   "devDependencies": {
