@@ -11,61 +11,29 @@ interface ClusterRingProps {
 }
 
 export function ClusterRing({ zone, cx, cy, color }: ClusterRingProps) {
-  const isCritical = zone.level === "CRITICAL";
-
   return (
     <g className="cluster-ring group cursor-pointer transition-all duration-300">
-      {/* Outer blurred halo */}
+      {/* Outer soft blurred glowing halo (no border stroke) */}
       <circle
         cx={cx}
         cy={cy}
         r={55}
         fill={color}
-        fillOpacity={0.06}
-        stroke={color}
-        strokeWidth={1}
-        strokeOpacity={0.3}
+        fillOpacity={0.15}
+        stroke="none"
         filter="url(#blur2)"
       />
 
-      {/* Inner glassmorphic core ring */}
+      {/* Inner glassmorphic core orb (no border stroke) */}
       <circle
         cx={cx}
         cy={cy}
-        r={30}
+        r={32}
         fill={color}
-        fillOpacity={0.12}
-        stroke={color}
-        strokeWidth={1.5}
-        strokeOpacity={0.6}
-        className="transition-all duration-200 group-hover:fill-opacity-25"
+        fillOpacity={0.25}
+        stroke="none"
+        className="transition-all duration-200 group-hover:fill-opacity-40"
       />
-
-      {/* Animated pulse ring for CRITICAL or HIGH risk zones */}
-      {(isCritical || zone.level === "HIGH") && (
-        <circle
-          cx={cx}
-          cy={cy}
-          r={35}
-          fill="none"
-          stroke={color}
-          strokeWidth={1.5}
-          strokeOpacity={0.7}
-        >
-          <animate
-            attributeName="r"
-            values="30;55;30"
-            dur="2.5s"
-            repeatCount="indefinite"
-          />
-          <animate
-            attributeName="opacity"
-            values="0.7;0;0.7"
-            dur="2.5s"
-            repeatCount="indefinite"
-          />
-        </circle>
-      )}
 
       {/* Zone Title Label */}
       <text
@@ -81,7 +49,7 @@ export function ClusterRing({ zone, cx, cy, color }: ClusterRingProps) {
         {zone.name} [{Math.round(zone.risk_score)} {zone.level}]
       </text>
 
-      {/* Risk Score Number inside ring */}
+      {/* Risk Score Number inside orb */}
       <text
         x={cx}
         y={cy + 4}

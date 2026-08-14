@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { Search, MapPin, ShieldAlert, FileText, User, Filter, Activity } from "lucide-react";
 import {
   REPEAT_OFFENDERS_DATA,
-  type OffenderProfile,
   type RiskLevel,
 } from "@/lib/repeatOffendersData";
 import { useLanguage } from "@/lib/language-context";
@@ -34,12 +33,12 @@ export default function RepeatOffendersPage() {
   }, [filteredOffenders, selectedOffenderId]);
 
   return (
-    <div className="flex flex-1 flex-col min-h-0 min-w-0 bg-[#0b0f19] p-4 lg:p-6 text-foreground font-sans">
+    <div className="flex flex-1 flex-col min-h-0 min-w-0 p-4 lg:p-6 text-foreground font-sans animate-fade-in">
       {/* Header Area */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 shrink-0">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-            <ShieldAlert className="h-6 w-6 text-[#ef4444]" />
+            <ShieldAlert className="h-6 w-6 text-primary" />
             <span>{t("repeat_offenders.title")}</span>
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
@@ -53,7 +52,7 @@ export default function RepeatOffendersPage() {
           <select
             value={selectedRiskFilter}
             onChange={(e) => setSelectedRiskFilter(e.target.value)}
-            className="bg-[#0f172a] border border-[#1e293b] text-xs text-foreground rounded-squircle-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#3b82f6] cursor-pointer"
+            className="bg-card border border-border text-xs text-foreground rounded-squircle-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
           >
             <option value="ALL">{t("repeat_offenders.filter_all")}</option>
             <option value="CRITICAL">{t("repeat_offenders.filter_critical")}</option>
@@ -67,9 +66,9 @@ export default function RepeatOffendersPage() {
       {/* Main Workspace: Two-Column Master-Detail Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0 flex-1 overflow-hidden">
         {/* Left Panel / Table Column (~70% width on desktop) */}
-        <div className="lg:col-span-8 flex flex-col min-h-0 border border-[#1e293b] bg-[#0f172a]/90 rounded-squircle overflow-hidden shadow-lg">
+        <div className="lg:col-span-8 flex flex-col min-h-0 border border-border bg-card rounded-squircle overflow-hidden shadow-lg">
           {/* Header Bar */}
-          <div className="flex items-center justify-between border-b border-[#1e293b] px-4 py-3 bg-[#0b0f19]/60 shrink-0">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3 bg-card/60 shrink-0">
             <div className="flex items-center gap-2">
               <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-foreground">
                 {t("repeat_offenders.registry_title")}
@@ -91,7 +90,7 @@ export default function RepeatOffendersPage() {
               </div>
             ) : (
               <table className="w-full text-left border-collapse text-xs">
-                <thead className="sticky top-0 z-10 bg-[#101726] border-b border-[#1e293b] font-mono text-[10px] uppercase text-muted-foreground tracking-wider">
+                <thead className="sticky top-0 z-10 bg-card border-b border-border font-mono text-[10px] uppercase text-muted-foreground tracking-wider">
                   <tr>
                     <th className="px-4 py-3 font-semibold">NAME</th>
                     <th className="px-3 py-3 font-semibold">AGE</th>
@@ -101,7 +100,7 @@ export default function RepeatOffendersPage() {
                     <th className="px-3 py-3 font-semibold text-right">ACTION</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1e293b]">
+                <tbody className="divide-y divide-border/60 font-mono">
                   {filteredOffenders.map((offender) => {
                     const isSelected = activeOffender?.id === offender.id;
                     return (
@@ -110,8 +109,8 @@ export default function RepeatOffendersPage() {
                         onClick={() => setSelectedOffenderId(offender.id)}
                         className={`cursor-pointer transition-colors duration-150 ${
                           isSelected
-                            ? "bg-[#132238] border-l-4 border-l-[#3b82f6]"
-                            : "hover:bg-[#1e293b]/50"
+                            ? "bg-white/[0.04] border-l-4 border-l-primary"
+                            : "hover:bg-white/[0.02]"
                         }`}
                       >
                         {/* NAME Column */}
@@ -134,9 +133,9 @@ export default function RepeatOffendersPage() {
                         {/* RECIDIVISM Column */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2.5">
-                            <div className="h-2 w-28 overflow-hidden rounded-full bg-[#1e293b]">
+                            <div className="h-2 w-28 overflow-hidden rounded-full bg-background border border-border">
                               <div
-                                className="h-full bg-gradient-to-r from-amber-500 to-[#ef4444] rounded-full transition-all duration-300"
+                                className="h-full bg-gradient-to-r from-amber-500 to-destructive rounded-full transition-all duration-300"
                                 style={{
                                   width: `${Math.min(
                                     100,
@@ -171,8 +170,8 @@ export default function RepeatOffendersPage() {
                             }}
                             className={`p-1.5 rounded-squircle-sm transition-colors ${
                               isSelected
-                                ? "bg-[#3b82f6] text-white"
-                                : "text-muted-foreground hover:bg-[#1e293b] hover:text-foreground"
+                                ? "bg-primary text-white"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
                             }`}
                             title="Inspect Profile"
                           >
@@ -189,9 +188,9 @@ export default function RepeatOffendersPage() {
         </div>
 
         {/* Right Panel / Inspector Column (~30% width on desktop) */}
-        <div className="lg:col-span-4 flex flex-col min-h-0 border border-[#1e293b] bg-[#0f172a]/90 rounded-squircle overflow-hidden shadow-lg">
+        <div className="lg:col-span-4 flex flex-col min-h-0 border border-border bg-card rounded-squircle overflow-hidden shadow-lg">
           {/* Header Bar */}
-          <div className="border-b border-[#1e293b] px-4 py-3 bg-[#0b0f19]/60 shrink-0">
+          <div className="border-b border-border px-4 py-3 bg-card/60 shrink-0">
             <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-foreground">
               {t("repeat_offenders.profile_title")}
             </h2>
@@ -200,7 +199,7 @@ export default function RepeatOffendersPage() {
           {activeOffender ? (
             <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar min-h-0">
               {/* Profile Header */}
-              <div className="flex items-start justify-between border-b border-[#1e293b] pb-4">
+              <div className="flex items-start justify-between border-b border-border pb-4">
                 <div>
                   <h3 className="text-lg font-bold text-foreground">
                     {activeOffender.name}
@@ -219,12 +218,12 @@ export default function RepeatOffendersPage() {
               {/* KPI Highlight Cards */}
               <div className="grid grid-cols-2 gap-3">
                 {/* Recidivism Score KPI Card */}
-                <div className="bg-[#0b0f19] border border-[#1e293b] rounded-squircle-sm p-3.5 flex flex-col justify-between">
+                <div className="bg-background border border-border rounded-squircle-sm p-3.5 flex flex-col justify-between">
                   <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
                     RECIDIVISM SCORE
                   </span>
                   <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-2xl font-extrabold font-mono text-[#ef4444]">
+                    <span className="text-2xl font-extrabold font-mono text-destructive">
                       {activeOffender.recidivismScore.toFixed(1)}
                     </span>
                     <span className="text-xs text-muted-foreground font-mono">/ 100</span>
@@ -232,12 +231,12 @@ export default function RepeatOffendersPage() {
                 </div>
 
                 {/* Total Cases KPI Card */}
-                <div className="bg-[#0b0f19] border border-[#1e293b] rounded-squircle-sm p-3.5 flex flex-col justify-between">
+                <div className="bg-background border border-border rounded-squircle-sm p-3.5 flex flex-col justify-between">
                   <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
                     TOTAL CASES
                   </span>
                   <div className="mt-2">
-                    <span className="text-2xl font-extrabold font-mono text-[#00b0ff]">
+                    <span className="text-2xl font-extrabold font-mono text-info">
                       {activeOffender.totalCases}
                     </span>
                   </div>
@@ -245,8 +244,8 @@ export default function RepeatOffendersPage() {
               </div>
 
               {/* Location Subtitle */}
-              <div className="flex items-center gap-2 bg-[#0b0f19]/80 border border-[#1e293b] px-3 py-2.5 rounded-squircle-sm text-xs text-foreground">
-                <MapPin className="h-4 w-4 text-[#ef4444] shrink-0" />
+              <div className="flex items-center gap-2 bg-background border border-border px-3 py-2.5 rounded-squircle-sm text-xs text-foreground">
+                <MapPin className="h-4 w-4 text-destructive shrink-0" />
                 <span className="font-mono text-muted-foreground">Active Sector:</span>
                 <span className="font-semibold text-foreground truncate">
                   {activeOffender.location}
@@ -255,9 +254,9 @@ export default function RepeatOffendersPage() {
 
               {/* CRIME TIMELINE Section */}
               <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between border-b border-[#1e293b] pb-2">
+                <div className="flex items-center justify-between border-b border-border pb-2">
                   <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                    <Activity className="h-3.5 w-3.5 text-[#3b82f6]" />
+                    <Activity className="h-3.5 w-3.5 text-info" />
                     <span>CRIME TIMELINE</span>
                   </h4>
                   <span className="font-mono text-[10px] text-muted-foreground">
@@ -266,14 +265,14 @@ export default function RepeatOffendersPage() {
                 </div>
 
                 {/* Vertical Timeline List */}
-                <div className="relative pl-3 space-y-3 before:absolute before:left-1 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#1e293b]">
+                <div className="relative pl-3 space-y-3 before:absolute before:left-1 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
                   {activeOffender.crimeTimeline.map((item, idx) => (
                     <div
                       key={`${item.offense}-${item.date}-${idx}`}
-                      className="relative flex items-center justify-between bg-[#0b0f19] border border-[#1e293b] rounded-squircle-sm p-2.5 text-xs hover:border-[#3b82f6]/40 transition-colors"
+                      className="relative flex items-center justify-between bg-background border border-border rounded-squircle-sm p-2.5 text-xs hover:border-info/40 transition-colors"
                     >
                       {/* Timeline Node Bullet */}
-                      <span className="absolute -left-[13px] top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-[#ef4444] ring-4 ring-[#0f172a]" />
+                      <span className="absolute -left-[13px] top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-destructive ring-4 ring-card" />
 
                       <span className="font-semibold text-foreground truncate pr-2">
                         {item.offense}
@@ -302,25 +301,25 @@ function RiskBadge({ level }: { level: RiskLevel }) {
   switch (level) {
     case "CRITICAL":
       return (
-        <span className="inline-flex items-center rounded-full bg-[#3f1218] px-2.5 py-0.5 text-[10px] font-bold text-[#ef4444] border border-[#ef4444]/40 font-mono tracking-wider">
+        <span className="inline-flex items-center rounded-full bg-black px-2.5 py-0.5 text-[10px] font-bold text-[#ef4444] border border-[#ef4444]/60 font-mono tracking-wider">
           CRITICAL
         </span>
       );
     case "HIGH":
       return (
-        <span className="inline-flex items-center rounded-full bg-[#3b220b] px-2.5 py-0.5 text-[10px] font-bold text-[#f59e0b] border border-[#f59e0b]/40 font-mono tracking-wider">
+        <span className="inline-flex items-center rounded-full bg-black px-2.5 py-0.5 text-[10px] font-bold text-[#f59e0b] border border-[#f59e0b]/60 font-mono tracking-wider">
           HIGH
         </span>
       );
     case "MEDIUM":
       return (
-        <span className="inline-flex items-center rounded-full bg-[#0e2a4a] px-2.5 py-0.5 text-[10px] font-bold text-[#3b82f6] border border-[#3b82f6]/40 font-mono tracking-wider">
+        <span className="inline-flex items-center rounded-full bg-black px-2.5 py-0.5 text-[10px] font-bold text-[#3b82f6] border border-[#3b82f6]/60 font-mono tracking-wider">
           MEDIUM
         </span>
       );
     case "LOW":
       return (
-        <span className="inline-flex items-center rounded-full bg-[#063326] px-2.5 py-0.5 text-[10px] font-bold text-[#10b981] border border-[#10b981]/40 font-mono tracking-wider">
+        <span className="inline-flex items-center rounded-full bg-black px-2.5 py-0.5 text-[10px] font-bold text-[#10b981] border border-[#10b981]/60 font-mono tracking-wider">
           LOW
         </span>
       );

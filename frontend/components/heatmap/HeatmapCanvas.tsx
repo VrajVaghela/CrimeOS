@@ -256,15 +256,12 @@ export function HeatmapCanvas({ points, zones }: HeatmapCanvasProps) {
             );
           })}
 
-          {/* ── Layer 2: Tapi River S-Curve Channel Ribbon ───────────────────── */}
+          {/* ── Layer 2: Tapi River S-Curve Channel Ribbon (Seamless fill, no border) ─ */}
           <polygon
             points={tapiRiverRibbonStr}
             fill="#032b45"
             fillOpacity={0.9}
-            stroke="#06b6d4"
-            strokeWidth={2}
-            strokeOpacity={0.85}
-            filter="url(#glow-cyan)"
+            stroke="none"
           />
 
           {/* Tapi River Label */}
@@ -282,15 +279,7 @@ export function HeatmapCanvas({ points, zones }: HeatmapCanvasProps) {
             TAPI RIVER S-CURVE
           </text>
 
-          {/* ── Layer 3: Outer SMC Municipal Silhouette Contour ─────────────── */}
-          <polygon
-            points={outerSuratPointsStr}
-            fill="none"
-            stroke="#06b6d4"
-            strokeWidth={2.5}
-            strokeOpacity={0.9}
-            filter="url(#glow-cyan)"
-          />
+
 
           {/* ── Layer 4: Dense Glowing Micro-scatter Crime Points ───────────── */}
           {points.slice(0, 600).map((p, i) => {
@@ -337,18 +326,18 @@ export function HeatmapCanvas({ points, zones }: HeatmapCanvasProps) {
       </svg>
 
       {/* ── Top-Left Floating Pan & Zoom Controls ────────────────────────────── */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5 rounded-[12px] border border-border/80 bg-[#0d1520]/85 p-1.5 backdrop-blur-md shadow-lg">
+      <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5 rounded-squircle border border-border/80 bg-[#0d1520]/85 p-1.5 backdrop-blur-md shadow-lg">
         <button
           onClick={handleZoomIn}
           title="Zoom In (+)"
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors cursor-pointer"
+          className="flex h-8 w-8 items-center justify-center rounded-squircle-sm text-foreground hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors cursor-pointer"
         >
           <Plus className="h-4 w-4" />
         </button>
         <button
           onClick={handleZoomOut}
           title="Zoom Out (-)"
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors cursor-pointer"
+          className="flex h-8 w-8 items-center justify-center rounded-squircle-sm text-foreground hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors cursor-pointer"
         >
           <Minus className="h-4 w-4" />
         </button>
@@ -356,7 +345,7 @@ export function HeatmapCanvas({ points, zones }: HeatmapCanvasProps) {
         <button
           onClick={handleReset}
           title="Reset View"
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors cursor-pointer"
+          className="flex h-8 w-8 items-center justify-center rounded-squircle-sm text-foreground hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors cursor-pointer"
         >
           <RotateCcw className="h-3.5 w-3.5" />
         </button>
@@ -366,7 +355,7 @@ export function HeatmapCanvas({ points, zones }: HeatmapCanvasProps) {
       </div>
 
       {/* ── Top-Right Floating Risk Legend ─────────────────────────────────── */}
-      <div className="absolute top-4 right-4 z-10 rounded-[12px] border border-border/80 bg-[#0d1520]/85 p-3.5 backdrop-blur-md text-xs font-mono space-y-2 shadow-lg pointer-events-auto">
+      <div className="absolute top-4 right-4 z-10 rounded-squircle border border-border/80 bg-[#0d1520]/85 p-3.5 backdrop-blur-md text-xs font-mono space-y-2 shadow-lg pointer-events-auto">
         <div className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase mb-1 flex items-center justify-between gap-4">
           <span>SMC SECTOR MAP</span>
           <span className="flex items-center gap-1 text-[9px] text-cyan-400/80 font-normal lowercase">

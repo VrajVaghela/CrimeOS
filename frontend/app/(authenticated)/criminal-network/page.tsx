@@ -38,8 +38,8 @@ function RiskBadge({ level }: { level: NetworkNode["risk"] }) {
   const s = RISK_STYLES[level] ?? RISK_STYLES.SAFE;
   return (
     <span
-      className="inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest border"
-      style={{ background: s.bg, color: s.text, borderColor: s.border }}
+      className="inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest border bg-black"
+      style={{ color: s.text, borderColor: s.border }}
     >
       {s.label}
     </span>
@@ -246,8 +246,8 @@ export default function CriminalNetworkPage() {
               return (
                 <div
                   key={c.id}
-                  className="rounded-[10px] border p-3 flex flex-col gap-1"
-                  style={{ background: s.bg, borderColor: s.border + "44" }}
+                  className="rounded-[10px] border p-3 flex flex-col gap-1 bg-black"
+                  style={{ borderColor: s.border + "55" }}
                 >
                   <p
                     className="font-mono text-xs font-bold leading-tight"

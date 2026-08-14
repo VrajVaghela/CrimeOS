@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Flame,
   Layers,
@@ -76,19 +76,19 @@ export default function HeatmapPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Flame className="h-6 w-6 text-accent" />
+            <Flame className="h-6 w-6 text-primary" />
             <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
-              {t("nav.heatmap") || "AI Crime Heatmap Engine"}
+              {t("heatmap.title")}
             </h1>
           </div>
           <p className="mt-1 font-sans text-xs text-muted-foreground">
-            Real-time geospatial density mapping and zone classification
+            {t("heatmap.subtitle")}
           </p>
         </div>
 
         {/* Filter Controls */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-[#171717] px-3 py-1.5 text-xs">
+          <div className="flex items-center gap-2 rounded-squircle-sm border border-border bg-card px-3 py-1.5 text-xs shadow-sm">
             <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-muted-foreground font-mono">Time Range:</span>
             <select
@@ -96,13 +96,13 @@ export default function HeatmapPage() {
               onChange={(e) => setTimeRange(Number(e.target.value))}
               className="bg-transparent font-mono text-foreground focus:outline-none cursor-pointer"
             >
-              <option value={7} className="bg-[#171717] text-foreground">Last 7 Days</option>
-              <option value={30} className="bg-[#171717] text-foreground">Last 30 Days</option>
-              <option value={90} className="bg-[#171717] text-foreground">Last 90 Days</option>
+              <option value={7} className="bg-card text-foreground">Last 7 Days</option>
+              <option value={30} className="bg-card text-foreground">Last 30 Days</option>
+              <option value={90} className="bg-card text-foreground">Last 90 Days</option>
             </select>
           </div>
 
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-[#171717] px-3 py-1.5 text-xs">
+          <div className="flex items-center gap-2 rounded-squircle-sm border border-border bg-card px-3 py-1.5 text-xs shadow-sm">
             <Filter className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-muted-foreground font-mono">Crime Type:</span>
             <select
@@ -111,7 +111,7 @@ export default function HeatmapPage() {
               className="bg-transparent font-mono text-foreground focus:outline-none cursor-pointer"
             >
               {crimeTypes.map((type) => (
-                <option key={type} value={type} className="bg-[#171717] text-foreground">
+                <option key={type} value={type} className="bg-card text-foreground">
                   {type}
                 </option>
               ))}
@@ -121,10 +121,10 @@ export default function HeatmapPage() {
           <button
             onClick={loadData}
             disabled={loading}
-            className="flex items-center gap-1.5 rounded-lg border border-border bg-[#171717] px-3 py-1.5 font-mono text-xs font-medium text-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-1.5 rounded-squircle-sm border border-border bg-card px-3 py-1.5 font-mono text-xs font-medium text-foreground transition-all duration-130 hover:border-primary hover:text-primary disabled:opacity-50 cursor-pointer shadow-sm"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin text-accent" : ""}`} />
-            <span>Refresh</span>
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
+            <span>{t("common.refresh")}</span>
           </button>
         </div>
       </div>
@@ -132,14 +132,14 @@ export default function HeatmapPage() {
       {/* ── Top KPI Bar ───────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {/* Total Points Card */}
-        <div className="rounded-[12px] border border-border bg-[#171717] p-4 transition-all hover:border-cyan-500/40">
+        <div className="rounded-squircle border border-border bg-card p-4 transition-all duration-130 hover:border-info/50 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="font-mono text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Total Points
+              {t("heatmap.stat_total")}
             </span>
-            <MapPin className="h-4 w-4 text-cyan-400" />
+            <MapPin className="h-4 w-4 text-info" />
           </div>
-          <div className="mt-2 font-mono text-3xl font-bold text-cyan-400 tabular-nums">
+          <div className="mt-2 font-mono text-3xl font-bold text-info tabular-nums">
             {totalPoints}
           </div>
           <p className="mt-1 font-mono text-[10px] text-muted-foreground">
@@ -148,14 +148,14 @@ export default function HeatmapPage() {
         </div>
 
         {/* Critical Zones Card */}
-        <div className="rounded-[12px] border border-border bg-[#171717] p-4 transition-all hover:border-red-500/40">
+        <div className="rounded-squircle border border-border bg-card p-4 transition-all duration-130 hover:border-destructive/50 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="font-mono text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Critical Zones
+              {t("heatmap.stat_critical")}
             </span>
-            <AlertTriangle className="h-4 w-4 text-red-400" />
+            <AlertTriangle className="h-4 w-4 text-destructive" />
           </div>
-          <div className="mt-2 font-mono text-3xl font-bold text-red-400 tabular-nums">
+          <div className="mt-2 font-mono text-3xl font-bold text-destructive tabular-nums">
             {criticalZones}
           </div>
           <p className="mt-1 font-mono text-[10px] text-muted-foreground">
@@ -164,10 +164,10 @@ export default function HeatmapPage() {
         </div>
 
         {/* High Risk Zones Card */}
-        <div className="rounded-[12px] border border-border bg-[#171717] p-4 transition-all hover:border-amber-500/40">
+        <div className="rounded-squircle border border-border bg-card p-4 transition-all duration-130 hover:border-amber-500/50 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="font-mono text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              High Risk Zones
+              {t("heatmap.stat_high")}
             </span>
             <Activity className="h-4 w-4 text-amber-400" />
           </div>
@@ -180,10 +180,10 @@ export default function HeatmapPage() {
         </div>
 
         {/* Active Clusters Card */}
-        <div className="rounded-[12px] border border-border bg-[#171717] p-4 transition-all hover:border-purple-500/40">
+        <div className="rounded-squircle border border-border bg-card p-4 transition-all duration-130 hover:border-purple-500/50 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="font-mono text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Active Clusters
+              {t("heatmap.stat_clusters")}
             </span>
             <Layers className="h-4 w-4 text-purple-400" />
           </div>
@@ -205,9 +205,9 @@ export default function HeatmapPage() {
       <div className="space-y-4 pt-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-accent" />
+            <Layers className="h-4 w-4 text-primary" />
             <h2 className="font-heading text-base font-semibold text-foreground tracking-tight">
-              Active Crime Clusters
+              {t("heatmap.clusters_title")}
             </h2>
           </div>
           <span className="font-mono text-xs text-muted-foreground">
@@ -226,9 +226,9 @@ export default function HeatmapPage() {
       <div className="space-y-4 pt-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-cyan-400" />
+            <MapPin className="h-4 w-4 text-info" />
             <h2 className="font-heading text-base font-semibold text-foreground tracking-tight">
-              Zone Risk Breakdown
+              {t("heatmap.zone_breakdown")}
             </h2>
           </div>
           <span className="font-mono text-xs text-muted-foreground">
@@ -236,10 +236,10 @@ export default function HeatmapPage() {
           </span>
         </div>
 
-        <div className="overflow-hidden rounded-[12px] border border-border bg-[#171717]">
+        <div className="overflow-hidden rounded-squircle border border-border bg-card shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left font-sans text-xs">
-              <thead className="border-b border-border bg-cyan-950/20 font-mono text-[11px] font-semibold text-cyan-400 uppercase tracking-wider">
+              <thead className="border-b border-border bg-card font-mono text-[11px] font-semibold text-info uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3">District / Zone</th>
                   <th className="px-4 py-3">Risk Score</th>
@@ -251,12 +251,12 @@ export default function HeatmapPage() {
                 {zones.map((zone, idx) => {
                   const badgeColor =
                     zone.level === "CRITICAL"
-                      ? "bg-red-500/10 text-red-400 border-red-500/30"
+                      ? "bg-destructive/10 text-destructive border-destructive/30"
                       : zone.level === "HIGH"
                       ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
                       : zone.level === "MODERATE"
-                      ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
-                      : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+                      ? "bg-info/10 text-info border-info/30"
+                      : "bg-success/10 text-success border-success/30";
 
                   return (
                     <tr key={idx} className="transition-colors hover:bg-white/[0.02]">
@@ -268,7 +268,7 @@ export default function HeatmapPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider ${badgeColor}`}
+                          className={`inline-block rounded-squircle-sm px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider ${badgeColor}`}
                         >
                           {zone.level}
                         </span>
