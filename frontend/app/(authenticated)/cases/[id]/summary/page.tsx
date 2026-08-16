@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { AlertCircle, Clock, History, Loader2, Radar, Sparkles } from "lucide-react";
 
+import { AiContentCard } from "@/components/ai-content-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -110,9 +111,9 @@ export default function SummaryPage() {
       )}
 
       {loading ? (
-        <div className="grid gap-6 lg:grid-cols-4">
-          <Skeleton className="h-40 rounded-squircle lg:col-span-1" />
-          <Skeleton className="h-96 rounded-squircle lg:col-span-3" />
+        <div className="grid gap-6 lg:grid-cols-12">
+          <Skeleton className="h-40 rounded-squircle lg:col-span-4" />
+          <Skeleton className="h-96 rounded-squircle lg:col-span-8" />
         </div>
       ) : summaries.length === 0 ? (
         <EmptyState
@@ -122,9 +123,9 @@ export default function SummaryPage() {
           action={{ label: t("summary.generate"), onClick: handleGenerate, icon: Sparkles }}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           {/* Version rail */}
-          <div className="flex flex-col gap-3 lg:col-span-1">
+          <div className="flex flex-col gap-3 lg:col-span-4">
             <h3 className="flex items-center gap-2 px-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
               <History className="h-3.5 w-3.5" />
               {t("common.version_history")}
@@ -161,31 +162,24 @@ export default function SummaryPage() {
             </ul>
           </div>
 
-          {/* The summary is machine-authored, so it lives in the Info Blue
-              partition like every other AI surface. The warm card and red-to-blue
-              hairline it used to carry claimed a significance a draft document
-              does not have, and put a gradient somewhere that is not a data path. */}
-          <div className="lg:col-span-3">
+          {/* The summary detail pane in canonical AiContentCard */}
+          <div className="lg:col-span-8">
             {selected && (
-              <div className="rounded-squircle border border-info/30 bg-info/[0.04] p-6">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <h3 className="flex flex-wrap items-center gap-2 font-heading text-base font-semibold text-foreground">
-                      <Sparkles className="h-4 w-4 shrink-0 text-info" />
-                      {interpolate(t("summary.version_label"), { version: selected.version })}
-                      {isTranslated && (
-                        <Badge variant="secondary" className="font-mono text-[10px]">
-                          {ENDONYM_SHORT[lang]}
-                        </Badge>
-                      )}
-                    </h3>
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">
-                      {interpolate(t("summary.generated_by"), {
-                        timestamp: formatDateTime(selected.generated_at),
-                      })}
-                    </p>
-                  </div>
-
+              <AiContentCard
+                title={
+                  <span className="flex flex-wrap items-center gap-2">
+                    {interpolate(t("summary.version_label"), { version: selected.version })}
+                    {isTranslated && (
+                      <Badge variant="secondary" className="font-mono text-[10px]">
+                        {ENDONYM_SHORT[lang]}
+                      </Badge>
+                    )}
+                  </span>
+                }
+                subtitle={interpolate(t("summary.generated_by"), {
+                  timestamp: formatDateTime(selected.generated_at),
+                })}
+                headerRight={
                   <div className="flex shrink-0 items-center gap-2">
                     {showTranslateButton && (
                       <Button variant="outline" size="sm" onClick={() => void triggerTranslation()}>
@@ -200,21 +194,19 @@ export default function SummaryPage() {
                       </span>
                     )}
                   </div>
-                </div>
-
+                }
+              >
                 {isFallback && (
-                  <div className="mt-4 flex items-center gap-2 rounded-squircle-sm border border-warn/30 bg-warn/10 px-3 py-2 text-xs text-warn">
+                  <div className="mb-4 flex items-center gap-2 rounded-squircle-sm border border-warn/30 bg-warn/10 px-3 py-2 text-xs text-warn">
                     <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                     {t("common.translation_unavailable")}
                   </div>
                 )}
 
-                <div className="mt-4 rounded-squircle-sm border border-border/60 bg-background p-5">
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                    {displayContent}
-                  </p>
-                </div>
-              </div>
+                <p className="max-w-[70ch] whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                  {displayContent}
+                </p>
+              </AiContentCard>
             )}
           </div>
         </div>

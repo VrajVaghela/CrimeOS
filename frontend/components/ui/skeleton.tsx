@@ -14,6 +14,7 @@ function Skeleton({ className, variant = "default", ...props }: SkeletonProps) {
 
   return (
     <div
+      aria-hidden="true"
       className={cn(
         "animate-skeleton",
         variantClass,

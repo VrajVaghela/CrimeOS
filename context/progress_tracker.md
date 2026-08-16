@@ -587,6 +587,201 @@ human pass is still worth doing before the demo.
 - [x] Register "Criminal Network" link with `Network` icon in global sidebar navigation `layout.tsx`
 - [x] Add breadcrumb entry for `/criminal-network` in layout
 - [x] Add i18n keys to English (`en.ts`), Hindi (`hi.ts`), and Gujarati (`gu.ts`)
+- Route provenance review: ✅ every Phase 10 router uses `get_current_user`, no business logic in HTTP layer
+- Phase 10 seeds added: 6 timeline events + 1 CCTV evidence + 1 video fixture for Case 2
+- DEMO_SCRIPT updated with 10A/10B/10C moments + fresh-seed smoke checklist
+- ui_registry.md: Phase 10 components marked BUILT
+- memory.md written at project root
+
+### 10D Post-review note (2026-07-18)
+- Functional build/import checks passed, but `CODE_REVIEW.md` found security,
+  shared-boundary, API-contract, router-convention, and UI-token debt in the
+  Phase 10 ports. The 10D integration checkbox records feature integration;
+  Phase 11 below is required before calling the code review closed or treating
+  the demo as ship-ready.
+
+## Phase 11 — Code Review Conformance & Demo Hardening
+Planning source: `CODE_REVIEW.md` generated 2026-07-18. No implementation has
+been performed for this phase yet.
+
+### 11A — Security and API contract
+- [x] Authenticate video status and report reads and enforce accessible-case ownership
+- [x] Move video routes to the flat `/video` contract and update typed client paths
+- [x] Replace `celery_state` with provider-neutral processing states across API/UI
+- [x] Make video handlers async and remove router-level exception remapping drift
+- [x] ✅ CHECKPOINT: unauthenticated video reads fail safely and the new contract works
+
+### 11B — Shared AI, audit, and provenance boundaries
+- [x] Route all video Gemini work through `gemini_client.py` with retry/cache/logging
+- [x] Move the video forensic prompt into named `prompts.py` constants
+- [x] Route chain-of-custody audit writes through `audit_service.record(...)` with actor identity
+- [x] Replace MD5 content fingerprints with SHA-256 throughout the video workflow
+- [x] ✅ CHECKPOINT: video fallback, provenance, actor-attributed audit, and chain verification pass
+  - Re-verified in 11D: deterministic fallback validates against `IncidentReport`,
+    provenance recorded in `ai_tags`, audit events carry actor `user_id`, SHA-256
+    chain append/verify passes and detects tampering.
+
+### 11C — Frontend conformance and feedback states
+- [x] Replace raw palette/hex/shadow values in the flagged Phase 10 surfaces with UI tokens
+- [x] Replace `catch (err: any)` with `unknown`-safe error narrowing
+- [x] Replace request/CCTNS browser alerts with toast or `<Alert>` feedback
+- [x] Preserve video loading, failure, responsive, and reduced-motion states under the new contract
+- [x] ✅ CHECKPOINT: targeted UI passes token, strict-TypeScript, and no-browser-alert audits
+  - Verified 2026-07-18: targeted static audit clean; local `tsc --noEmit` clean; `next build` clean.
+
+### 11D — Verification and handoff
+- [x] Run static boundary audits for Gemini imports, audit writes, prompts, auth, async routers, and Celery terminology
+- [x] Run frontend build/type checks and verify all HTTP remains behind `lib/api.ts`
+- [x] Confirm or perform the still-open Phase 6 five-minute fresh-seed rehearsal
+- [x] Rehearse the golden path plus authenticated video upload → report → timeline seek from a fresh seed
+- [x] Verify unauthenticated, inaccessible, Gemini-failure, invalid-file, oversized-file, and UI mutation-failure cases
+- [x] ✅ CHECKPOINT: all `CODE_REVIEW.md` findings are closed or explicitly documented
+  - Verified 2026-07-18. Static audits: only `gemini_client.py` imports google-genai;
+    no `AuditEvent(...)` construction outside the model (`LedgerService` routes through
+    `audit_service.record()` with actor `user_id`); `VIDEO_FORENSIC_ANALYSIS_PROMPT` is a
+    named constant; both video reads require `get_current_user` + `_ensure_case_access`;
+    video routers are `async`; no Celery vocabulary; SHA-256 end to end; flat `/video`
+    prefix. Build: `tsc --noEmit` clean, `next build` clean (14 routes), `import app.main`
+    OK. All frontend HTTP behind `lib/api.ts` (only two `fetch` calls, both in `api.ts`).
+    Negative cases (TestClient, 7/7): unauth status/report → 401, authed-missing → 404,
+    unsupported ext → 415, spoofed .mp4 signature → 415, missing case → 404, malformed
+    case_id → 400. Access guard (unit): cross-owner IO → 403, owner IO / SHO allowed,
+    missing case → 404. Deterministic fallback validates against `IncidentReport`.
+    Chain of custody: time-separated append→verify passes, tamper detected, actor
+    attributed. Also fixed `/api/v1/video` → `/video` doc drift in `DEMO_SCRIPT.md` and
+    `memory.md`. Golden-path + video live rehearsal confirmed by user.
+
+## Phase 12 — Multilingual Support Integration
+Planning source: `context/multilingual_merge_plan.md` (2026-07-28). Ported the
+i18n infrastructure from `origin/manan/multilingual` via cherry-pick (NOT a raw
+merge — the branch predates Phase 8–11 and uses an older flat route structure).
+
+- [x] Extract 9 new i18n files (frontend dictionaries, language context, toggle, translated-text-block, hook; backend translate router + service) from `origin/manan/multilingual`
+- [x] Port 2 missing dependencies the extracted files needed: `TRANSLATION_PROMPT` in `prompts.py`, `translateText()` + `TranslateOut` in `lib/api.ts`
+- [x] Wire `LanguageProvider` into `frontend/app/layout.tsx`
+- [x] Add `<LanguageToggle>` to `frontend/app/(authenticated)/layout.tsx` topbar
+- [x] Register `translate.router` in `backend/app/main.py`
+- [x] ✅ CHECKPOINT: `import app.main` OK (translate wired); `tsc --noEmit` clean; `next build` clean (14 routes)
+  - Verified 2026-07-28. Backend: all routers import incl. translate. Frontend:
+    tsc exit 0, next build exit 0. NOTE: Phase 8–11 UI strings not yet keyed in
+    en/hi/gu dictionaries — they render English via `useT()` fallback until a
+    follow-up pass adds their keys (documented in merge plan as out-of-scope).
+
+## Phase 13 — End-to-End Audit & Remediation (COMPLETED 2026-08-06)
+Planning source: `context/END_TO_END_TESTING_REPORT.md` (2026-08-06). Multi-agent audit and full systemic remediation across 14 frontend routes & 19 FastAPI routers.
+
+- [x] 13.1 Fix hardcoded localhost API URL in `responses/page.tsx` and export `API_URL` constant from `lib/api.ts`
+- [x] 13.2 Fix premature Dispatch button enablement in `requests/page.tsx` by using `!readinessMap[req.id]?.is_ready`
+- [x] 13.3 Refactor ingestion and evidence file upload routers to stream files directly to disk (`shutil.copyfileobj`) to eliminate memory exhaustion (OOM) risks
+- [x] 13.4 Refactor tab sub-route matching in `layout.tsx` to extract sub-route segment using case ID split
+- [x] 13.5 Convert section status update endpoint to RESTful JSON payload body using `SectionStatusUpdateIn` schema
+- [x] 13.6 Add Pydantic `Field(..., min_length=10)` validation constraints to `LegalRequestUpdateIn` schema
+- [x] 13.7 Add `AbortController` cancellation and unmount cleanup to search debouncing in `cases/page.tsx`
+- [x] 13.8 Implement robust numeric FIR suffix extraction in `mock_cctns.py`
+- [x] ✅ CHECKPOINT: Full system verification passed — Next.js build (`next build`) and Python compilation (`python -m compileall app`) pass with zero errors.
+
+## Phase 14 — Full Localization (UI + AI Voice) — COMPLETED 2026-08-08
+Planning source: `context/i18n_full_localization_plan.md`. Closes the gap Phase 12
+left open: the selected language now governs **everything**, including the
+copilot's spoken language.
+
+Root defects (all fixed): copilot had no `lang` input and always answered English;
+hardcoded `"English / हिंदी"` labels leaked Hindi into a Gujarati session (the
+reported bug); 17 components never called `t()`; dictionaries covered only Phase
+1–7 sections; status enums, dates and numbers were unlocalized; Tier-2 AI
+translation was inconsistent.
+
+### 14A — Language plumbing
+- [x] `setActiveLang()` in `lib/api.ts` + `X-Lang` header on the shared `request()` wrapper
+- [x] `LanguageProvider` sets `documentElement.lang` / `data-lang` and warns on missing keys in dev
+- [x] `[data-lang]` Indic body-font rules in `app/globals.css`
+- [x] New `lib/format.ts` (locale-aware date/time/number) and `lib/i18n/enums.ts` (enum → key)
+- [x] `get_lang()` FastAPI dependency in `backend/app/dependencies.py`
+
+### 14B — Dictionary expansion
+- [x] Add `copilot`, `notifications`, `osint`, `video`, `evidence_workspace`, `workflow`, `status`, `roles`, `readiness`, `revisions`, `citations`, `entity`, `shell` sections to `en.ts`
+- [x] Extend `common` and `command_center` with the missing leaves
+- [x] Mirror every new key into `hi.ts` and `gu.ts` — **709 keys × 3 languages, exact parity, zero English leftovers** (only `IMEI`/`URL` intentionally identical)
+
+### 14C — Component sweep
+- [x] Key the components that never called `t()` (`notifications-popover`, `osint-enrichment-panel`, `video-evidence-workspace`, `evidence-review-workspace`, `status-badge`, `workflow-spine`, `citation-dialog`, `request-readiness-checklist`, `entity-review-field`, `ai-content-card`, `processing-card`, `path-revision-list`, `language-toggle`, `ui/dialog`, plus 8 route pages and the app shell)
+- [x] Remove all hardcoded bilingual `"English / हिंदी"` concatenations
+- [x] Replace hardcoded `"en-IN"` locale literals with `lib/format.ts` helpers (11 sites)
+- [x] Localize `aria-label`, `title`, and `placeholder` attributes
+- [x] New `lib/i18n/endonyms.ts` — the single sanctioned home for native language names, so the audit can forbid Indic literals everywhere else
+
+### 14D — Copilot speaks the selected language (headline fix)
+- [x] `lang` + optional canonical `intent` on `CopilotAskIn`; intent-based prompt routing replaces English keyword sniffing
+- [x] `answer_localized` on the Gemini structured schema — one call returns authoritative English + localized display text
+- [x] Output-language instruction + do-not-translate identifier list in `COPILOT_SYSTEM_PROMPT`
+- [x] `COPILOT_FALLBACKS` (6 intents × 3 langs) so Gemini outages still answer in the selected language
+- [x] Alembic migration `c3d4e5f6a7b8`: `copilot_messages.message_localized` (nullable) + `lang` (default `"en"`) — applied to the dev database
+- [x] `copilot-panel.tsx` fully keyed: header, chips (send `intent`), placeholder, loading/error, citation source labels, timestamps
+
+### 14E — Tier-2 auto-translation consistency
+- [x] `TranslatedTextBlock` defaults to `autoTranslate`; manual button retained only for the verbatim raw-complaint pane
+- [x] Auto-translate the missed surfaces (`responses/page.tsx` `ai_insights`, command-center AI summary, summary page)
+- [x] `POST /translate/batch` (25-item cap) + durable `fallback_cache` read/write-through in `translate_service`
+- [x] Per-tick request coalescer in `use-translated-content.ts` — a page of AI blocks makes **one** HTTP call, not N
+
+### 14F — Verification
+- [x] `frontend/scripts/i18n-audit.mjs` (`npm run i18n:audit`) — key parity, no untranslated values, no Indic literals outside `lib/i18n/`, no hardcoded locales. Also added `npm run verify` (audit + tsc + build).
+- [x] `tsc --noEmit` clean; `next build` clean (14 routes); `python -m compileall app` clean; `import app.main` OK; migration applied and `alembic current` at head
+- [x] ✅ CHECKPOINT PASSED — verified live against the running backend with seeded Case 1:
+  - `X-Lang: en` → answer in Latin script, `lang="en"`
+  - `X-Lang: hi` → answer in **Devanagari**, `lang="hi"`
+  - `X-Lang: gu` → answer in **Gujarati script**, `lang="gu"`
+  - `message_en` always carries the authoritative English for the audit trail
+  - Chat history replays each message in the language it was generated for (`langs persisted: ['en','gu','hi']`)
+  - Legal identifiers preserved verbatim through translation: `"Section 94 of BNSS હેઠળ કાનૂની નોટિસ મોકલો."` — BNSS and the IP `103.88.22.14` survive intact
+  - `POST /translate/batch` returns per-item results (`मामले का सारांश`, `कानूनी आधार`)
+
+**Known gaps (pre-existing, not introduced by Phase 14):** the repo has no ESLint
+config (`next lint` prompts for setup) and no pytest suite, so neither could be
+run as a gate. The manual 14-route × 3-language click-through has not been
+performed — the automated audit covers key parity and literal leakage, but a
+human pass is still worth doing before the demo.
+
+## Phase 15: Surat City Heatmap (Bonus) — COMPLETED
+- [x] Create `app/(authenticated)/heatmap/page.tsx` with Custom Canvas implementation
+- [x] Integrate realistic Surat Police Zone risk data (`SURAT_ZONES`)
+- [x] Implement token-compliant Ferrari Command Center UI elements (dark-mode, squircle corners)
+- [x] Add time-range and crime-type filters
+- [x] Add dynamic layout features (Metrics Strip, interactive cluster cards, interactive zone table)
+- [x] Add English (`en.ts`), Hindi (`hi.ts`), and Gujarati (`gu.ts`) i18n keys for heatmap content
+- [x] Register Heatmap link in sidebar navigation `layout.tsx`
+- [x] Update `ui_registry.md` with new `HeatmapPage` and `HeatmapCanvas`
+- [x] Verified build cleanly passes `tsc --noEmit`
+
+## Phase 16: Real-Time Alert Center (Bonus) — COMPLETED
+- [x] Create `app/(authenticated)/alert-center/page.tsx` route & page layout
+- [x] Build Alert Center dashboard with dynamic KPI cards & channel badges
+- [x] Implement `AlertCard` with interactive mark-as-read toggling and dismiss removal transitions
+- [x] Implement severity filtering (ALL, CRITICAL, HIGH, MEDIUM, LOW)
+- [x] Register "Alert Center" link in sidebar layout with `!` red exclamation badge
+- [x] Add i18n keys to English (`en.ts`), Hindi (`hi.ts`), and Gujarati (`gu.ts`)
+- [x] Update `context/ui_registry.md` with `AlertCenterPage`, `AlertCard`, and `KpiCard`
+
+## Phase 17: Repeat Offender Intelligence (Bonus) — COMPLETED
+- [x] Create `app/(authenticated)/repeat-offenders/page.tsx` route & page layout
+- [x] Create `lib/repeatOffendersData.ts` with 15 detailed mock offender profiles, recidivism scores, risk levels, total cases, active locations, and crime timelines
+- [x] Implement Master-Detail layout with "OFFENDER REGISTRY" data table and "BEHAVIORAL PROFILE" inspector panel
+- [x] Implement risk level filter dropdown ("All Risk Levels", "CRITICAL", "HIGH", "MEDIUM", "LOW")
+- [x] Implement row-selection state with blue backdrop highlight and active profile inspector updates
+- [x] Implement risk level status badges/pills with Ferrari design token dark-mode styling
+- [x] Register "Repeat Offenders" link with profile-card icon (`UserCheck`) in global sidebar navigation `layout.tsx`
+- [x] Add i18n keys to English (`en.ts`), Hindi (`hi.ts`), and Gujarati (`gu.ts`)
+- [x] Verified `npm run verify` (`i18n:audit`, `tsc --noEmit`) passes with zero errors
+
+## Phase 18: Criminal Network Intelligence (Bonus) — COMPLETED
+- [x] Installed `d3` and `@types/d3` in main project frontend
+- [x] Create `lib/criminalNetworkData.ts` with 24 nodes, 41 edges, 8 gang communities matching reference KPI values
+- [x] Create `components/criminal-network-graph.tsx` — D3 force-directed graph with drag/zoom/pan, pulsing rings on CRITICAL nodes, click-to-select, color-coded edge types (gang=red, financial=amber, comms=blue)
+- [x] Create `app/(authenticated)/criminal-network/page.tsx` — standalone route with KPI strip, force graph + node profile panel + central influencers, gang structures grid, and graph legend
+- [x] Used Next.js `dynamic()` with `ssr: false` for the D3 graph component (client-only)
+- [x] Register "Criminal Network" link with `Network` icon in global sidebar navigation `layout.tsx`
+- [x] Add breadcrumb entry for `/criminal-network` in layout
+- [x] Add i18n keys to English (`en.ts`), Hindi (`hi.ts`), and Gujarati (`gu.ts`)
 - [x] Verified `tsc --noEmit` passes with zero errors
 
 ## Phase 19: AI Crime Heatmap Engine Porting — COMPLETED
@@ -599,4 +794,66 @@ human pass is still worth doing before the demo.
 - [x] Added `/crime-heatmap` route alias alongside `/heatmap` in `layout.tsx` navigation and breadcrumbs
 - [x] Wired `getHeatmapPoints`, `getHeatmapZones`, `getHeatmapClusters` through `lib/api.ts` with offline fallback
 
+## Phase 20: Crime Heatmap Command Dashboard — COMPLETED
+- [x] Compared the existing Surat SVG heatmap with the supplied map-first command-dashboard reference.
+- [x] Recorded an approval-gated implementation plan in `context/build_plan.md`.
+- [x] Revised the plan to use the existing MapLibre GL JS dependency, a real hosted OpenFreeMap basemap, and a GeoJSON-driven GPU heatmap layer.
+- [x] Recomposed `/heatmap` and `/crime-heatmap` into the map-first command dashboard layout.
+- [x] Implemented `MapLibreHeatmap.tsx` with MapLibre GL JS, hosted OpenFreeMap dark basemap, GPU heatmap layer, zoom-visible point markers, Surat police station pins, and in-map layer controls.
+- [x] Added synchronized hotspot, intensity distribution, crime-type filtering rail, and grounded AI-insight panel citing SOP-GUJ-PATROL-04.
+- [x] Added `RankedHotspotsTable.tsx` with map camera flyTo focus action and `TrendAnalysisChart.tsx` 7-day temporal sparkline graph.
+- [x] Extended all heatmap copy across `en.ts`, `hi.ts`, and `gu.ts` with 100% key parity (903 keys × 3 languages).
+- [x] Registered newly created components in `context/ui_registry.md`.
+- [x] Verified with `npm run verify` (`i18n:audit`, `tsc --noEmit`, and `next build`) with 0 errors.
 
+
+
+## Phase 21: Local Model Integration (Ollama + faster-whisper) — COMPLETED
+- [x] Verified empirically that Ollama's `format` accepts a Pydantic `model_json_schema()` with `$defs`/`$ref` verbatim — no schema inliner needed (tested against `GeminiPathRevisionResponse`, `GeminiCopilotResponse`, `TimelineSynthesisOut`)
+- [x] Added `httpx==0.28.1` and `faster-whisper==1.2.1` to `backend/requirements.txt`
+- [x] Added 22 local-provider settings to `app/config.py` (all with safe defaults; `OLLAMA_NUM_CTX=8192` to prevent silent front-truncation of long prompts)
+- [x] Added `LOCAL_JSON_SCHEMA_INSTRUCTION` to `prompts.py`; reused the previously-unused `GENERIC_JSON_SYSTEM_PROMPT` as the local system message
+- [x] Created `app/ai/ollama_client.py` — TTL-cached liveness probe, `chat_json`, `chat_text`, `embed_texts` with a 768-dim guard
+- [x] Created `app/ai/whisper_client.py` — lazy singleton, mime allowlist, two-pass transcribe/translate, Gujarati escalation
+- [x] Routed `generate_json` (text-only), `generate_text`, `transcribe` (audio) and `embed` to local engines inside `gemini_client.py` by insertion only — **zero service call sites changed**
+- [x] Vision paths (`files=`, PDF/image `transcribe`, `generate_json_from_file`, Files API) remain Gemini-only: `qwen2.5:3b` has no vision
+- [x] Added `last_route()` provenance via `ContextVar`; `path_revision_service` now records the engine that actually ran
+- [x] Created `app/scripts/reembed_sop.py` — re-embedded 12 SOP chunks into nomic-embed-text space and wrote a `_embedding_provider` marker row
+- [x] Added `GET /ai/health` reporting engine reachability and detecting an embedding corpus/config mismatch
+- [x] Updated `.env.example`, `context/architecture.md` (tech stack, boundaries, folder tree, rule 2), `context/library_docs.md` (retired the faster-whisper stub rule), and `README.md`
+- [x] Verified: `python -m compileall app`, `python -c "import app.main"` (passes with and without faster-whisper installed), all five eligibility gates, cheap degradation with Ollama stopped, and RAG fallback to keyword search
+
+## Phase 22: Full Frontend Layout, Padding, Card Sizing & AI-Surface Overhaul — COMPLETED 2026-08-16
+Planning source: `context/ui_improvement_plan.md` (Phase 15).
+- [x] 22.1 Global AI Card & Radius Harmonization (Anti-Slop): eliminated nested square borders inside `AiContentCard`, enforced concentric radii across `path`, `ingestion`, `summary`, `responses`, and `timeline`.
+- [x] 22.2 Case Overview & Command Center Balancing: decoupled `EntityPivotPanel` from hero column, standardized `WorkflowSpine` padding, and tightened case facts list density.
+- [x] 22.3 Legal Path & Requests Page Streamlining: removed nested `max-h-24` scrollboxes in legal grounding rail, compacted request draft cards, and streamlined readiness checklists.
+- [x] 22.4 Standalone Intelligence Pages Design System Alignment: replaced `lg:grid-cols-8` squished gang cards in `criminal-network`, removed hardcoded `bg-black` & hover lifts in `alert-center`, rebalanced `repeat-offenders` 8:4 table/inspector grid, and cleaned `heatmap` filter rails.
+- [x] 22.5 Media, Timeline & Evidence Workspace Refinement: upgraded form elements in `evidence-review-workspace` to standard UI primitives, reduced CCTV dropzone padding in `timeline-workspace`, and structured correlation table cells.
+- [x] ✅ CHECKPOINT: Full frontend verification passed (`npm run verify` = `i18n:audit`, `tsc --noEmit`, `next build`) with 0 errors across all 12 application routes.
+
+## Phase 24: Live Analyzer Card Rules Conformance — COMPLETED 2026-08-16
+Scope: the active-processing state of `components/video-evidence-workspace.tsx` (the card an officer watches while Gemini analyzes a video), plus same-file violations in the completed state. Full detail in `context/ui_registry.md` § Phase 24.
+- [x] 24.1 **Misleading state**: pipeline rows were keyed to invented progress thresholds (0/25/60/85) while the backend commits 0 → 15 → 35 → 55 → 60 → 75 → 100, so the RUNNING chip pointed at work the phase caption contradicted. Re-anchored to the real checkpoints (15/55/75/100) via a single `runningIndex`; `PIPELINE_STEPS` moved to module scope so it is no longer rebuilt on every 2s poll.
+- [x] 24.2 **Dead phases**: dropped `ANALYZING`, `PERSISTING`, `CLEANING_UP` from the phase map — `video_service.analyze_video_task` only ever writes `UPLOADED`, `PROCESSING`, `ACTIVE_ANALYSIS`, `COMPLETED`, `FAILED`. Added a `phase_unknown` fallback.
+- [x] 24.3 **Dropped state surfaced**: `errorDetail` was read from every poll response and never rendered; it now shows as an amber attention note while the run continues.
+- [x] 24.4 **Localization (rule §1.7)**: 21 hardcoded English strings routed through `t()` in en/hi/gu, and the raw enum `ACTIVE_ANALYSIS` stopped rendering verbatim (now `StatusBadge` → `statusLabel()`). Step keys typed as `TranslationKey` so a missing key fails at compile time. Removed `truncate` from step copy, which was clipping the longer Hindi/Gujarati strings.
+- [x] 24.5 **Accessibility**: `role="progressbar"` with clamped `aria-valuenow/min/max`, `aria-live="polite"` phase caption, `role="status"` error note, evidence ID moved out of the `<h2>`, semantic `<ol>`/`<li>` pipeline, `aria-hidden` on decorative icons, and `opacity-60` / `/60` dimming removed from queued rows.
+- [x] 24.6 **Design system drift**: six `text-[11px]` values onto documented steps; `text-xl md:text-2xl` → `text-lg` (Fixed-Scale Rule); deleted the banned "AI FORENSIC ENGINE" eyebrow above the heading; motion cut from four competing loops to one (`StatusBadge` pulse); removed the nested sub-panel around the progress bar; track `bg-background` → `bg-muted`; prose taken out of `font-mono`.
+- [x] 24.7 **Shared component**: `StatusBadge` gained a live in-flight bucket (`running` / `active_analysis` / `uploaded` → Info Blue + pulsing dot) and now owns the "still working" pulse app-wide, which is what let the card's hand-rolled ping pill and its non-button `Loader2` spinner go away. New `status.*` keys: `queued`, `uploaded`, `active_analysis`.
+- [x] 24.8 **Same-file cleanups**: `h-4.5 w-4.5` ×2 → `h-4 w-4` (no such Tailwind step — the class was a no-op); emoji-as-icons `⏱️` ×2 and `📦` → `Clock` / `HardDrive`; removed the `isPlaying` state that was set but never read, its play/pause listeners, and nine unused imports.
+- [x] 24.9 **Documentation**: added `ui_rules.md` §3.7 (progress & live polling surfaces) and §4 (typography & contrast), extended §5 with the one-live-loop, no-`animate-ping`, spinners-only-in-buttons, and no-emoji-icons rules. Updated the `StatusBadge` spec and added the Badge-Owns-The-Pulse rule to `DESIGN.md` (both mirrored copies).
+- [x] ✅ CHECKPOINT: `i18n:audit` (973 keys × 3 languages, no untranslated values, no Indic literals outside `lib/i18n/`), `tsc --noEmit`, and `next build` all pass; design hook reports a clean scan on both edited components.
+- [ ] ⚠️ NOT VERIFIED IN BROWSER: this state only renders while a Gemini analysis is genuinely in flight, which needs a live backend plus an uploaded video mid-run. Layout, contrast, and motion were reasoned from tokens and computed values, not screenshotted. Worth one look during the next demo rehearsal.
+
+
+
+### Phase 21b: Local Model Performance Tuning — COMPLETED
+- [x] Installed `nvidia-cublas-cu12` + `nvidia-cudnn-cu12` and made CTranslate2 find them: the DLLs must go on `os.environ["PATH"]`, because CTranslate2 resolves them from its C++ extension via `LoadLibrary`, which ignores `os.add_dll_directory`
+- [x] Fixed a latent bug where the `os.add_dll_directory` handle was discarded — the handle removes the directory again when garbage-collected
+- [x] **Whisper is now ~8.6x faster: 92.5s → 10.8s** for a 57s Hindi clip. `WHISPER_DEVICE` now defaults to `cuda`/`float16`
+- [x] Added inference-time CUDA fallback: CUDA can load successfully and only fail when inference touches cuBLAS, which the load-time fallback could not catch (would have silently deferred every complaint to Gemini)
+- [x] Replaced the flat `OLLAMA_MAX_PROMPT_CHARS` gate with a script-aware token budget. Measured chars/token on qwen2.5:3b: Latin 3.24, Devanagari 0.86, **Gujarati 0.56** — so the old 24000-char cap overflowed `num_ctx` by 2.8x on Hindi and 4.3x on Gujarati, silently dropping the instructions
+- [x] Calibrated `estimate_tokens()` against real `prompt_eval_count` so every script over-estimates by 4-22% (over-estimating routes to Gemini, which is the safe direction)
+- [x] Re-checked the budget after the JSON schema is appended, since nested schemas add thousands of characters
+- [x] Researched and rejected `large-v3-turbo`: ~8x faster but OpenAI excluded translation from its training data, so `task="translate"` does not work (faster-whisper #1237) and our non-English path needs it

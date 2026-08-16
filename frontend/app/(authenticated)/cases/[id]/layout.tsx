@@ -9,6 +9,7 @@ import {
   Globe,
   CheckCircle2,
   Crosshair,
+  Fingerprint,
   Mail,
   Activity,
   Camera,
@@ -48,6 +49,7 @@ import { CopilotLauncher } from "@/components/copilot-drawer";
 const TABS = [
   { key: "overview", href: "", icon: Shield, group: "case" },
   { key: "ingestion", href: "ingestion", icon: Search, group: "work" },
+  { key: "osint", href: "osint", icon: Fingerprint, group: "work" },
   { key: "path", href: "path", icon: Crosshair, group: "work" },
   { key: "requests", href: "requests", icon: Mail, group: "work" },
   { key: "responses", href: "responses", icon: Activity, group: "work" },
@@ -210,9 +212,9 @@ export default function CaseLayout({ children }: { children: React.ReactNode }) 
           {/* The right-edge mask is the overflow affordance: with the rail's
               scrollbar hidden, a hard cut at the container edge reads as
               "nothing more here" and the Audit tab never gets found. */}
-          <div className="relative -mx-4 sm:-mx-6">
+          <div className="relative">
             <nav
-              className="rail-scroll flex items-stretch gap-1 px-4 sm:px-6"
+              className="rail-scroll flex items-stretch gap-1"
               aria-label={t("cases.case_sections")}
             >
               {TABS.map((tab, index) => {

@@ -128,18 +128,21 @@ The application is structured into a separated Frontend and Backend layer, commu
 ```
 [Next.js Frontend :3000] -- HTTP/JSON --> [FastAPI Backend :8000] --> [PostgreSQL + pgvector :5432]
                                                 |
-                                                +--> Google Gemini API (LLM, Vision, Audio, Embeddings)
+                                                +--> Google Gemini API (Vision, Video, Escalation)
+                                                +--> Ollama :11434 (Local LLM + Embeddings)
+                                                +--> faster-whisper (Local, in-process ASR)
                                                 +--> SMTP Server (Gmail App Password -> Demo mailbox)
                                                 +--> Mock Routers (/mock/provider, /mock/cctns)
 ```
 
 ### Core Architectural Rules
 1. **Frontend Isolation**: The frontend interacts *only* with the FastAPI gateway (`lib/api.ts`). It never reaches the DB or Gemini directly.
-2. **Gateway Pattern**: `gemini_client.py` is the single entry point for all model logic, managing timeouts, JSON mode parsing, and error-handling fallbacks.
+2. **Gateway Pattern**: `gemini_client.py` is the single entry point for all model logic, managing provider routing, timeouts, JSON mode parsing, and error-handling fallbacks. Services call its typed helpers and never choose an engine themselves; `ollama_client.py` and `whisper_client.py` are leaves only the gateway calls.
 3. **No Inline Prompts**: All prompts are defined as named constants in `backend/app/ai/prompts.py`.
 4. **Immutable Audit Trail**: Every AI-driven mutation generates an event written to the append-only `audit_events` table inside the same transaction block.
 5. **No Distributed Queues**: Implements reliable FastAPI asynchronous background tasks to keep local staging free of Celery/Redis/MongoDB bloat.
-6. **Robust Demo Fallbacks**: To handle API throttling, all AI services implement a deterministic fallback path.
+6. **Robust Demo Fallbacks**: To handle API throttling, all AI services implement a deterministic fallback path. Escalation is layered: local model → Gemini → `fallback_cache` last-good response → deterministic template.
+7. **One Vector Space**: Embeddings for the corpus and for queries must come from the same provider. `embed()` therefore selects its provider from config and never crosses over on failure, because a mixed corpus fails silently rather than loudly.
 
 ---
 
@@ -149,8 +152,9 @@ The application is structured into a separated Frontend and Backend layer, commu
 * **Backend**: FastAPI (Python 3.11+), Uvicorn.
 * **Database**: PostgreSQL 16 with the `pgvector` extension for storing relational data and SOP chunk embeddings in one datastore.
 * **ORM & Migrations**: SQLAlchemy 2.0 (typed models) and Alembic.
-* **AI Model Gateway**: Google Gemini API (`gemini-2.5-flash` for extraction & transcription, `gemini-2.5-pro` for grounding and paths).
-* **ASR & OCR**: Gemini audio input and Gemini vision, with Whisper and Tesseract as stubs.
+* **AI Model Gateway**: Hybrid local-first routing through one gateway (`app/ai/gemini_client.py`). Local Ollama `qwen2.5:3b` serves text generation and structured JSON extraction; Google Gemini (`gemini-2.5-flash`, `gemini-2.5-pro`) serves all vision work and acts as escalation when a local call fails.
+* **Embeddings**: Local Ollama `nomic-embed-text` (natively 768-dim, matching the `pgvector` column), switchable to Gemini `text-embedding-004` via `EMBEDDING_PROVIDER`.
+* **ASR & OCR**: Local `faster-whisper-medium` transcribes and translates audio (Gujarati escalates to Gemini, whose quality there is far better). OCR stays on Gemini vision — `qwen2.5:3b` has no vision model. Tesseract remains a stub.
 * **Email dispatch**: Standard SMTP with fallback tracking.
 * **Cryptography**: SHA-256 hashing for verification and evidence chain-of-custody tracking.
 
@@ -224,8 +228,27 @@ The database consists of the following tables:
 * Docker & Docker Compose
 * Node.js 18+ (npm or yarn)
 * Python 3.11+
-* Gemini API Key (obtained from Google AI Studio)
+* Gemini API Key (obtained from Google AI Studio) — still required for image, PDF and video analysis
 * SMTP credentials (such as a Gmail App Password) for request dispatch
+* **Ollama** (optional but recommended) for local text generation and embeddings. Keep the weights off the C: drive:
+  ```bash
+  set OLLAMA_MODELS=E:\models\ollama
+  E:\programs\ollama\ollama.exe serve
+  ollama pull qwen2.5:3b
+  ollama pull nomic-embed-text
+  ```
+  The app degrades to Gemini automatically when Ollama is not running.
+* **faster-whisper model** (optional) for local audio transcription — a CTranslate2 model directory at
+  `WHISPER_MODEL_DIR` (default `E:/models/whisper/faster-whisper-medium`). Runs on CPU int8 by default at
+  roughly 1.2x realtime per pass. For ~8x faster GPU inference:
+  ```bash
+  pip install nvidia-cublas-cu12 nvidia-cudnn-cu12
+  # then set WHISPER_DEVICE=cuda and WHISPER_COMPUTE_TYPE=float16
+  ```
+
+> **After changing `EMBEDDING_PROVIDER`, run `python -m app.scripts.reembed_sop`.**
+> `nomic-embed-text` and `text-embedding-004` are both 768-dimensional, so a mismatch raises no error
+> anywhere — RAG simply returns wrong results silently. `GET /ai/health` reports the mismatch.
 
 ### 1. Database Setup
 Start the PostgreSQL + pgvector container:

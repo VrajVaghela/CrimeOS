@@ -253,9 +253,12 @@ The system's most important component. It wraps every AI suggestion, prediction,
 Maps a raw status string to the semantic palette, set in uppercase mono at `10px`.
 - Emerald: `done`, `responded`, `approved`, `synced`, `secure`
 - Amber + pulsing dot: `processing`, `awaiting`, `awaiting_response`
-- Info Blue + static dot: `dispatched`, `in_progress`
+- Info Blue + **pulsing** dot: `running`, `active_analysis`, `uploaded` — work a background task is doing *right now*
+- Info Blue + **static** dot: `dispatched`, `in_progress` — underway but not observably ticking
 - Alert Red: `failed`, `rejected`, `threat`
-- Neutral: anything unrecognized
+- Neutral: anything unrecognized, including `queued`, `pending`, and `draft`
+
+**The Badge-Owns-The-Pulse Rule.** A polling surface gets its "still alive" signal from this component and nowhere else. A card that renders `StatusBadge` must not also add its own `animate-ping` wrapper, an `animate-pulse` on a decorative icon, or a `Loader2` spinner — those stack into three or four competing loops that report the same single fact. Add a status string to the pulsing bucket above instead of animating the container.
 
 ### Loading & Empty States
 - **Skeletons, not spinners,** for content regions: `animate-skeleton` sweeps a 1.5 s gradient between `#171717` and `#23130f`. Spinners are permitted only inside a button.

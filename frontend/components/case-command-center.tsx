@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Activity, AlertCircle, ArrowRight, Mail, Sparkles } from "lucide-react";
 
 import { AiContentCard } from "@/components/ai-content-card";
-import { EntityPivotPanel } from "@/components/entity-pivot-panel";
 import { NextBestAction } from "@/components/next-best-action";
 import { StatusBadge } from "@/components/status-badge";
 import { TranslatedTextBlock } from "@/components/translated-text-block";
@@ -22,9 +21,6 @@ import {
   getRequests,
   getCaseResponses,
   getCaseEntities,
-  getEntityRelationships,
-  getRelatedCases,
-  syncEntities,
   getCaseSummaries,
 } from "@/lib/api";
 import { useEnumLabel } from "@/lib/i18n/enums";
@@ -36,8 +32,6 @@ import type {
   LegalRequestOut,
   ProviderResponseOut,
   CaseEntityOut,
-  EntityRelationshipOut,
-  RelatedCaseOut,
   CaseSummaryOut,
 } from "@/lib/types";
 
@@ -80,22 +74,18 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
   const [requests, setRequests] = useState<LegalRequestOut[]>([]);
   const [responses, setResponses] = useState<ProviderResponseOut[]>([]);
   const [entities, setEntities] = useState<CaseEntityOut[]>([]);
-  const [relationships, setRelationships] = useState<EntityRelationshipOut[]>([]);
-  const [relatedCases, setRelatedCases] = useState<RelatedCaseOut[]>([]);
   const [summaries, setSummaries] = useState<CaseSummaryOut[]>([]);
 
   const loadData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [cmd, details, reqs, resps, ents, rels, rcases, sums] = await Promise.all([
+      const [cmd, details, reqs, resps, ents, sums] = await Promise.all([
         getCommandCenter(caseId),
         getCase(caseId),
         getRequests(caseId),
         getCaseResponses(caseId),
         getCaseEntities(caseId),
-        getEntityRelationships(caseId),
-        getRelatedCases(caseId),
         getCaseSummaries(caseId).catch(() => []),
       ]);
       setCommandData(cmd);
@@ -103,28 +93,11 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
       setRequests(reqs);
       setResponses(resps);
       setEntities(ents);
-      setRelationships(rels);
-      setRelatedCases(rcases);
       setSummaries(sums);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("command_center.load_error"));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSyncEntities = async () => {
-    try {
-      const updatedEnts = await syncEntities(caseId);
-      setEntities(updatedEnts);
-      const [rels, rcases] = await Promise.all([
-        getEntityRelationships(caseId),
-        getRelatedCases(caseId),
-      ]);
-      setRelationships(rels);
-      setRelatedCases(rcases);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : t("command_center.sync_error"));
     }
   };
 
@@ -215,7 +188,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
         onAction={handleActionExecute}
       />
 
-      <section className="rounded-squircle border border-border/80 bg-card px-5 pb-2 pt-5">
+      <section className="rounded-squircle border border-border/80 bg-card p-5">
         <div className="mb-1 flex items-baseline justify-between gap-4">
           <h2 className="font-heading text-sm font-semibold">
             {t("command_center.workflow_heading")}
@@ -250,7 +223,7 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
           <AiContentCard title={t("command_center.ai_summary")}>
-            <div className="text-sm leading-relaxed text-foreground">
+            <div className="max-w-[70ch] text-sm leading-relaxed text-foreground">
               {summaries.length > 0 ? (
                 <TranslatedTextBlock content={summaries[0].content} />
               ) : (
@@ -258,15 +231,6 @@ export function CaseCommandCenter({ caseId }: CaseCommandCenterProps) {
               )}
             </div>
           </AiContentCard>
-
-          {/* The pivot panel owns its own surfaces; wrapping it in a Card would
-              nest a card inside a card and double the inset padding. */}
-          <EntityPivotPanel
-            entities={entities}
-            relationships={relationships}
-            relatedCases={relatedCases}
-            onSync={handleSyncEntities}
-          />
 
           <Card>
             <CardHeader>

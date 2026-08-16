@@ -48,5 +48,62 @@ How the AI must use each key library. When actual API syntax is uncertain, fetch
 - Request readiness is deterministic validation in a service; Gemini may explain a missing legal basis but may not decide that a required field is valid.
 - Use native HTML media/audio elements and existing shadcn primitives for evidence review before considering any new media library.
 
-## Tesseract / faster-whisper (fallbacks only)
-- Do NOT wire these in Phase 2. Stub interface `fallback_ocr(path)` / `fallback_asr(path)` raising `NotImplementedError` — implement only if Gemini quota becomes a real problem.
+## Ollama (local LLM + embeddings) — `backend/app/ai/ollama_client.py` ONLY
+- External process on `http://localhost:11434`, started outside the app. Models live off the C: drive:
+  `set OLLAMA_MODELS=E:\models\ollama && E:\programs\ollama\ollama.exe serve`
+- Two endpoints are used, both via `httpx`: `POST /api/chat` and `POST /api/embed`.
+- Structured output: `format` accepts a **JSON Schema object** (or the string `"json"`). Pass
+  `schema.model_json_schema()` through verbatim — `$defs`/`$ref` are resolved by llama.cpp's grammar
+  converter, verified against `GeminiPathRevisionResponse`, `GeminiCopilotResponse` and
+  `TimelineSynthesisOut`. Do NOT write a `$ref` inliner; a bad grammar fails worse than a
+  `ValidationError`, which the gateway already escalates on.
+- The grammar conversion **discards `title` and `description`**, so field semantics Gemini receives via
+  `response_schema` are invisible to the local model. Always append `LOCAL_JSON_SCHEMA_INSTRUCTION`.
+  Verified: without it, an `event_type` came back as `"Complaint Filed"` instead of `complaint_filed`.
+- `/api/embed` takes `input` as an array and returns `{"embeddings": [[...]]}`. `nomic-embed-text` is
+  natively 768-dim, matching `Vector(768)`. Empty `input` returns `[]` rather than erroring.
+- `qwen2.5:3b` capabilities are `["completion","tools"]` — **no vision**. Never route image, PDF or
+  video work to it.
+- Set `num_ctx` explicitly (8192). Ollama's 4096 default silently truncates the FRONT of a long prompt,
+  which drops the instructions and yields shape-valid nonsense.
+- **Budget prompts in tokens, not characters.** Measured chars-per-token on `qwen2.5:3b`: Latin 3.24,
+  Devanagari 0.86, **Gujarati 0.56**. So Gujarati costs ~5.8x more tokens per character than English, and
+  a flat character cap silently overflows `num_ctx` on exactly the trilingual content this app handles.
+  `ollama_client.estimate_tokens()` weights each script and is tuned to over-estimate by ~5-20%, because
+  over-estimating routes to Gemini (safe) while under-estimating corrupts the prompt (silent).
+- A missing model tag 404s; `/api/chat` does not auto-pull.
+- `qwen2.5:3b` has no vision. If local OCR is ever wanted, `qwen3-vl:8b` (6.1GB q4) is the strongest open
+  option — an arXiv Devanagari stress-test (2606.29213) found it beats GPT-5.5 on real degraded Devanagari
+  scans and trails only Gemini and Claude. But its OCR language list covers Hindi and **not Gujarati**, and
+  it would not fit alongside `qwen2.5:3b` + Whisper in 8GB VRAM.
+
+## faster-whisper (local ASR) — `backend/app/ai/whisper_client.py` ONLY
+- `WhisperModel("E:/models/whisper/faster-whisper-medium", device=..., compute_type=...)`. Import
+  `faster_whisper` inside the loader function, never at module scope, so `python -c "import app.main"`
+  still passes when the package is absent.
+- CTranslate2, not torch. `ctranslate2.get_cuda_device_count()` reports the **driver** and does not tell
+  you whether cuBLAS/cuDNN are loadable. Worse, CUDA can *load* successfully and only fail once inference
+  touches cuBLAS — so `whisper_client` falls back to CPU both at load AND on the first inference failure.
+- The CUDA DLLs ship in `nvidia-cublas-cu12` / `nvidia-cudnn-cu12` under `site-packages/nvidia/*/bin`.
+  CTranslate2 resolves them from its C++ extension via `LoadLibrary`, which searches **PATH and ignores
+  `os.add_dll_directory`** — so `_register_cuda_dlls()` prepends to `os.environ["PATH"]`. Also note
+  `os.add_dll_directory` returns a handle that *removes* the directory when garbage-collected; keep it.
+- Measured on an RTX 4060 8GB, 57s Hindi clip: **CPU int8 92.5s vs CUDA float16 10.8s (8.6x)**.
+- `model.transcribe()` returns `(segments, info)` where `segments` is a **lazy generator** but `info` is
+  populated eagerly — so `info.language` is readable before paying for decoding.
+- Use `faster_whisper.audio.decode_audio(io.BytesIO(bytes))` once and reuse the array for both the
+  transcribe and translate passes; a `BytesIO` handed to a second pass without `seek(0)` is empty.
+- `task="translate"` uses Whisper's native translate head — better hi→en than round-tripping through
+  `qwen2.5:3b`, and it keeps ASR working when Ollama is down.
+- **Do NOT switch to `large-v3-turbo`.** It is ~8x faster but OpenAI explicitly **excluded translation
+  from its training data**, so `task="translate"` does not work (faster-whisper issue #1237). Our
+  non-English path depends on it. `distil-*` models are English-only for the same reason.
+- Gujarati output is unreliable (often the wrong script), which would also corrupt
+  `_detect_language_from_text`. `WHISPER_ESCALATE_LANGUAGES=gu` defers it to Gemini.
+- Measured: ~68s per pass for 57s of audio on CPU int8, so non-English audio is ~90s end to end.
+
+## Tesseract (OCR fallback)
+- Still unwired. `qwen2.5:3b` has no vision, so image/PDF OCR remains Gemini-only. Implement only if
+  Gemini quota becomes a real problem.
+- (Superseded: the previous rule here also told you to keep `faster-whisper` as a `NotImplementedError`
+  stub. Local ASR is now wired for real — see the faster-whisper section above.)

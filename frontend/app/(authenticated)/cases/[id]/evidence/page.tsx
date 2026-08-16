@@ -105,12 +105,17 @@ export default function EvidencePage() {
       return;
     }
 
+    if (isVideo && file.size > 2000 * 1024 * 1024) {
+      setError(t("evidence.video_size_limit"));
+      return;
+    }
+
     setUploading(true);
     setError(null);
     try {
       if (isVideo) {
-        const res = await uploadVideo(caseId, file);
-        await loadEvidence(res.case_id);
+        const uploadRes = await uploadVideo(caseId, file);
+        await loadEvidence(uploadRes.case_id);
       } else {
         const uploaded = await uploadEvidence(caseId, file);
         setEvidenceList((prev) => [uploaded, ...prev]);
@@ -131,7 +136,7 @@ export default function EvidencePage() {
           variant="ghost"
           size="sm"
           onClick={() => setSelectedEvidence(null)}
-          className="-ml-3 self-start gap-1.5 text-muted-foreground hover:text-foreground"
+          className="-ml-3 self-start gap-1.5 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           <ChevronLeft className="h-4 w-4" />
           {t("evidence.back_to_gallery")}
@@ -173,6 +178,7 @@ export default function EvidencePage() {
               disabled={uploading}
               loading={uploading}
               id="upload-evidence-btn"
+              className="focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               {!uploading && <Upload className="h-4 w-4" />}
               {uploading ? t("evidence.analyzing_file") : t("evidence.upload_file")}
@@ -211,19 +217,30 @@ export default function EvidencePage() {
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {evidenceList.map((ev) => {
-            const highConfidence = ev.ai_tags.confidence >= 0.85;
+            const confidenceVal =
+              typeof ev.ai_tags?.confidence === "number"
+                ? ev.ai_tags.confidence
+                : ev.ai_tags?.video_status === "COMPLETED"
+                ? 0.95
+                : 0.8;
+            const highConfidence = confidenceVal >= 0.85;
             const isImage = ev.file_type === "image";
             const TypeIcon = TYPE_ICON[ev.file_type ?? ""] ?? FileText;
             const tags = ev.ai_tags?.tags ?? [];
+            const descriptionText =
+              ev.ai_tags?.description ||
+              ev.ai_tags?.summary ||
+              ev.ai_tags?.crime_summary ||
+              "";
 
             return (
               <li key={ev.id}>
                 <button
                   type="button"
                   onClick={() => setSelectedEvidence(ev)}
-                  className="flex h-full w-full flex-col overflow-hidden rounded-squircle border border-border/80 bg-card text-left transition-colors duration-200 hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="flex h-full w-full flex-col overflow-hidden rounded-squircle border border-border/80 bg-card text-left transition-colors duration-200 hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <div className="relative flex h-44 w-full shrink-0 items-center justify-center overflow-hidden border-b border-border/60 bg-surface-alt">
+                  <div className="relative flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-t-[10px] border-b border-border/60 bg-surface-alt">
                     {isImage ? (
                       // Alt is the file name, not the AI description: the
                       // description is already rendered as text below, and a
@@ -246,7 +263,7 @@ export default function EvidencePage() {
 
                     <Badge
                       variant="outline"
-                      className="absolute left-3 top-3 gap-1 bg-background/80 font-mono text-[10px] uppercase backdrop-blur-sm"
+                      className="absolute left-3 top-3 gap-1 rounded-squircle-sm bg-background/80 font-mono text-[10px] uppercase backdrop-blur-sm"
                     >
                       <TypeIcon className="h-3 w-3" />
                       {t(typeKey(ev.file_type))}
@@ -254,9 +271,9 @@ export default function EvidencePage() {
 
                     <Badge
                       variant={highConfidence ? "success" : "warning"}
-                      className="absolute right-3 top-3 font-mono text-[10px] font-semibold"
+                      className="absolute right-3 top-3 rounded-squircle-sm font-mono text-[10px] font-semibold"
                     >
-                      {Math.round(ev.ai_tags.confidence * 100)}% {t("evidence.confidence_short")}
+                      {Math.round(confidenceVal * 100)}% {t("evidence.confidence_short")}
                     </Badge>
                   </div>
 
@@ -268,7 +285,7 @@ export default function EvidencePage() {
                       </span>
                     </div>
                     <p className="line-clamp-3 text-sm leading-relaxed text-secondary-foreground">
-                      {ev.ai_tags.description}
+                      {descriptionText}
                     </p>
 
                     {tags.length > 0 && (
@@ -278,7 +295,7 @@ export default function EvidencePage() {
                           <Badge
                             key={tag}
                             variant="secondary"
-                            className="font-mono text-[10px] uppercase"
+                            className="rounded-squircle-sm font-mono text-[10px] uppercase"
                           >
                             {tag}
                           </Badge>

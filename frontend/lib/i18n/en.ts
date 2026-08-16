@@ -115,6 +115,7 @@ const en = {
     audit: "Audit Trail",
     timeline: "Timeline",
     evidence: "Evidence",
+    osint: "OSINT Intelligence",
     heatmap: "Crime Heatmap",
     alert_center: "Alert Center",
     repeat_offenders: "Repeat Offenders",
@@ -126,6 +127,7 @@ const en = {
   tab: {
     overview: "Overview",
     ingestion: "Ingestion",
+    osint: "OSINT",
     path: "Path",
     requests: "Requests",
     responses: "Responses",
@@ -271,10 +273,6 @@ const en = {
     next_action: "Prioritized Next Action",
     upload_complaint: "Upload Complaint",
     upload_complaint_empty: "No complaints have been uploaded for this case yet. Please upload a complaint file (PDF/Audio/Image) to begin.",
-    pivot_panel: "Intelligence Pivot Panel",
-    sync_entities: "Sync Entities",
-    no_synced_entities: "No normalized entities synced yet. Trigger sync to build.",
-    select_entity: "Select an entity to view relationships, transaction links, and possible case matches.",
     insights: "Requests & Response Insights",
     dispatched_requests: "Dispatched Requests",
     no_requests: "No requests drafted or dispatched.",
@@ -380,6 +378,9 @@ const en = {
     flagged_inapplicable: "Flagged / Inapplicable",
     awaiting_audit: "Awaiting Audit",
     model_label: "Model:",
+    statutory_text: "Statutory Provision Text",
+    view_statutory_text: "View Statutory Provision",
+    hide_statutory_text: "Hide Statutory Provision",
   },
 
   requests: {
@@ -428,6 +429,10 @@ const en = {
     generate_telecom: "Draft telecom request",
     generate_bank: "Draft bank request",
     generate_platform: "Draft platform request",
+    view_readiness: "View Readiness Checklist",
+    hide_readiness: "Hide Readiness Checklist",
+    readiness_ready: "Ready",
+    readiness_blocked: "{count} issue(s)",
   },
 
   responses: {
@@ -607,6 +612,7 @@ const en = {
     upload_error: "Evidence upload failed. Try again.",
     confidence_short: "conf.",
     unsupported_upload: "That file cannot be analyzed. Use an image, audio, video, PDF, or text file.",
+    video_size_limit: "Video file exceeds the 2 GB maximum limit supported by Gemini. Please compress or trim the video before uploading.",
     type: {
       image: "Image",
       audio: "Audio",
@@ -688,6 +694,34 @@ const en = {
     ignore: "Ignore",
     none_found_sub: "This entity has not been scanned yet. Run a deterministic OSINT lookup to map its footprints.",
     unknown_error: "Unknown scanner error occurred",
+
+    // Phase 23: OSINT promoted from an overview panel to its own case section.
+    section_title: "OSINT & Entity Intelligence",
+    section_subtitle: "Normalized case identifiers, cross-case matches, and open-source enrichment for every entity.",
+    sync_entities: "Sync entities",
+    entity_index: "Case identifiers",
+    scannable: "Scannable",
+    no_entities: "No identifiers synced yet",
+    no_entities_sub: "Sync case entities to normalize the identifiers extracted from complaints, provider responses, and evidence.",
+    select_entity_title: "Select an identifier",
+    select_entity_sub: "Pick an identifier from the list to see its relationships, cross-case matches, and open-source footprint.",
+    metric_identifiers: "Identifiers",
+    metric_identifiers_hint: "Normalized case entities",
+    metric_scannable_hint: "Supported by OSINT lookup",
+    metric_cross_case: "Cross-case matches",
+    metric_cross_case_hint: "Cases sharing an identifier",
+    first_seen: "First seen",
+    last_seen: "Last seen",
+    load_error: "Could not load case identifiers.",
+    sync_error: "Could not sync case entities. Try again.",
+    unsupported_type: "OSINT lookup is available for email, phone, person, and social handle identifiers only.",
+    unconfirmed_hint: "OSINT lookup runs on confirmed identifiers only — accept this pivot before scanning it.",
+    scanning_detail: "Scanners are running — mapping usernames, emails, breaches, and social handles.",
+    confirm_pivot: "Confirm pivot",
+    followers: "{count} followers",
+    note: "Note",
+    open_profile: "Open this profile in a new tab",
+    open_profile_short: "Profile",
   },
 
   video: {
@@ -719,6 +753,32 @@ const en = {
     forensic_report: "Forensic Report",
     reload_workspace: "Reload Workspace",
     detected_incident: "Detected Premise Incident",
+
+    // Live analyzer card
+    analysis_id: "Analysis ID",
+    pipeline_title: "Live Telemetry Pipeline",
+    ledger_active: "Tamper-evident blockchain ledger active",
+    auto_refreshing: "Auto-refreshing",
+
+    // Phase captions, keyed by the `video_status` values the backend actually
+    // emits (`video_service.analyze_video_task`). Do not add keys for phases no
+    // code path writes — the card silently falls back to `phase_unknown`.
+    phase_uploaded: "Video file received — preparing analyzer…",
+    phase_processing: "Extracting video duration and metadata…",
+    phase_active_analysis: "AI is reviewing video feed…",
+    phase_completed: "Analysis complete",
+    phase_failed: "Analysis failed",
+    phase_unknown: "Processing video…",
+
+    // Telemetry pipeline rows
+    step_ingest: "Video Validation & Gemini Ingestion",
+    step_ingest_detail: "Stream verified and encrypted for AI multimodal review",
+    step_cv: "Computer Vision & Object Tracking",
+    step_cv_detail: "Scanning frames for threat signatures and timestamp anchors",
+    step_legal: "BNS / BNSS Criminal Statute Mapping",
+    step_legal_detail: "Cross-referencing legal codes and drafting the SOP report",
+    step_ledger: "Tamper-Evident Ledger Commit",
+    step_ledger_detail: "Hashing the audit trail to an immutable blockchain record",
   },
 
   evidence_workspace: {
@@ -818,7 +878,10 @@ const en = {
     awaiting: "Awaiting",
     awaiting_response: "Awaiting response",
     running: "Running",
+    queued: "Queued",
     processing: "Processing",
+    uploaded: "Uploaded",
+    active_analysis: "Active analysis",
     completed: "Completed",
     failed: "Failed",
     rejected: "Rejected",
@@ -944,6 +1007,9 @@ const en = {
     this_entity: "This entity",
     canonical: "Canonical",
     via_match: "Matched on {type} {value}",
+    transaction: "Transaction",
+    amount_label: "Amount",
+    call_duration: "Call duration",
   },
 
   provider: {
@@ -968,14 +1034,26 @@ const en = {
   },
 
   heatmap: {
-    title: "AI Crime Heatmap Engine",
-    subtitle: "Real-time geospatial density mapping and zone classification — Surat City, Gujarat",
-    stat_total: "Total Points",
+    title: "AI Crime Heatmap Command Dashboard",
+    subtitle: "Real-time geospatial density mapping, police grid, and zone classification — Surat City, Gujarat",
+    stat_total: "Total Vectors",
     stat_critical: "Critical Zones",
     stat_high: "High Risk Zones",
     stat_clusters: "Active Clusters",
+    stat_stations: "Police Stations",
     clusters_title: "Active Crime Clusters",
     zone_breakdown: "Zone Breakdown",
+    filter_time: "Time Range",
+    filter_district: "District / Zone",
+    filter_crime: "Crime Type",
+    export_report: "Export Report",
+    live_operational: "LIVE OPERATIONAL",
+    ranked_hotspots: "Ranked Hotspot Sectors",
+    temporal_trend: "7-Day Temporal Trend",
+    focus_map: "Focus",
+    intensity_breakdown: "Intensity Breakdown",
+    ai_insight_title: "AI Tactical Insight",
+    reset_view: "Reset View",
   },
 
   alert_center: {
@@ -1022,9 +1100,9 @@ const en = {
   repeat_offenders: {
     title: "Repeat Offender Intelligence",
     subtitle: "Behavioral risk profiling & recidivism tracking (synthetic demo profiles)",
-    registry_title: "OFFENDER REGISTRY",
+    registry_title: "Offender Registry",
     registry_subtitle: "{count} profiles in database",
-    profile_title: "BEHAVIORAL PROFILE",
+    profile_title: "Behavioral Profile",
     filter_all: "All Risk Levels",
     filter_critical: "CRITICAL",
     filter_high: "HIGH",
@@ -1032,8 +1110,22 @@ const en = {
     filter_low: "LOW",
     recidivism_score: "Recidivism Score",
     total_cases: "Total Cases",
-    crime_timeline: "CRIME TIMELINE",
+    crime_timeline: "Crime Timeline",
     no_offenders: "No repeat offenders match the selected filter.",
+    stat_total: "Monitored Profiles",
+    stat_critical: "Critical Risk",
+    stat_high: "High Risk",
+    stat_avg_recidivism: "Avg. Recidivism",
+    search_placeholder: "Search offender, alias, location, or crime…",
+    search_results: "{count} matching profiles",
+    all_profiles: "All {count} profiles",
+    reset_filters: "Reset Filters",
+    active_sector: "Active Sector",
+    demographics: "Demographics",
+    no_results_title: "No offenders match your criteria",
+    no_results_desc: "Try adjusting your search query or risk level filter.",
+    no_selection_title: "No profile selected",
+    no_selection_desc: "Select an offender from the registry to view their behavioral profile and crime timeline.",
   },
 
   criminal_network: {

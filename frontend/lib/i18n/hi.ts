@@ -110,6 +110,7 @@ const hi: Dictionary = {
     audit: "ऑडिट ट्रेल",
     timeline: "समयरेखा",
     evidence: "साक्ष्य",
+    osint: "OSINT इंटेलिजेंस",
     heatmap: "अपराध हीटमैप",
     alert_center: "अलर्ट सेंटर",
     repeat_offenders: "पुनरावर्ती अपराधी",
@@ -119,6 +120,7 @@ const hi: Dictionary = {
   tab: {
     overview: "सारांश",
     ingestion: "शिकायत",
+    osint: "OSINT",
     path: "पथ",
     requests: "अनुरोध",
     responses: "प्रतिक्रियाएँ",
@@ -264,10 +266,6 @@ const hi: Dictionary = {
     next_action: "अगला अनुशंसित कदम",
     upload_complaint: "शिकायत अपलोड करें",
     upload_complaint_empty: "इस केस के लिए अभी कोई शिकायत अपलोड नहीं की गई है। शुरू करने के लिए कृपया शिकायत फ़ाइल (PDF/ऑडियो/छवि) अपलोड करें।",
-    pivot_panel: "इंटेलिजेंस पिवट",
-    sync_entities: "एंटिटीज़ सिंक करें",
-    no_synced_entities: "अभी कोई सामान्यीकृत एंटिटी सिंक नहीं हुई। बनाने के लिए सिंक चलाएँ।",
-    select_entity: "संबंध, लेन-देन लिंक और संभावित केस मिलान देखने के लिए एक एंटिटी चुनें।",
     insights: "कानूनी अनुरोध और अंतर्दृष्टि",
     dispatched_requests: "भेजे गए अनुरोध",
     no_requests: "कोई अनुरोध ड्राफ़्ट या भेजा नहीं गया।",
@@ -373,6 +371,9 @@ const hi: Dictionary = {
     flagged_inapplicable: "चिह्नित / अप्रासंगिक",
     awaiting_audit: "ऑडिट की प्रतीक्षा",
     model_label: "मॉडल:",
+    statutory_text: "वैधानिक प्रावधान पाठ",
+    view_statutory_text: "वैधानिक प्रावधान देखें",
+    hide_statutory_text: "वैधानिक प्रावधान छिपाएँ",
   },
 
   requests: {
@@ -421,6 +422,10 @@ const hi: Dictionary = {
     generate_telecom: "टेलीकॉम अनुरोध बनाएं",
     generate_bank: "बैंक अनुरोध बनाएं",
     generate_platform: "प्लेटफ़ॉर्म अनुरोध बनाएं",
+    view_readiness: "तैयारी चेकलिस्ट देखें",
+    hide_readiness: "तैयारी चेकलिस्ट छिपाएँ",
+    readiness_ready: "तैयार",
+    readiness_blocked: "{count} समस्या(एँ)",
   },
 
   responses: {
@@ -581,6 +586,7 @@ const hi: Dictionary = {
     note_save_failed: "नोट सहेजा नहीं जा सका। फिर कोशिश करें।",
   },
 
+
   evidence: {
     title: "साक्ष्य सामग्री गैलरी",
     subtitle: "जेमिनी विजन के माध्यम से फोरेंसिक सुविधाओं को स्वचालित रूप से टैग करने और उनका विश्लेषण करने के लिए घटना के चित्र और दस्तावेज़ अपलोड करें।",
@@ -601,6 +607,7 @@ const hi: Dictionary = {
     upload_error: "साक्ष्य अपलोड विफल। फिर कोशिश करें।",
     confidence_short: "विश्वास",
     unsupported_upload: "इस फ़ाइल का विश्लेषण नहीं हो सकता। छवि, ऑडियो, वीडियो, PDF या टेक्स्ट फ़ाइल उपयोग करें।",
+    video_size_limit: "वीडियो फ़ाइल जेमिनी द्वारा समर्थित 2 GB की अधिकतम सीमा से अधिक है। कृपया अपलोड करने से पहले वीडियो को कंप्रेस या ट्रिम करें।",
     type: {
       image: "छवि",
       audio: "ऑडियो",
@@ -682,6 +689,34 @@ const hi: Dictionary = {
     ignore: "अनदेखा करें",
     none_found_sub: "इस एंटिटी को अभी स्कैन नहीं किया गया है। इसके फ़ुटप्रिंट मैप करने के लिए OSINT लुकअप चलाएँ।",
     unknown_error: "अज्ञात स्कैनर त्रुटि हुई",
+
+    // Phase 23: OSINT अब केस का अलग सेक्शन है, ओवरव्यू पैनल नहीं।
+    section_title: "OSINT और एंटिटी इंटेलिजेंस",
+    section_subtitle: "सामान्यीकृत केस पहचानकर्ता, अन्य केसों से मिलान और प्रत्येक एंटिटी के लिए खुले स्रोत से संवर्धन।",
+    sync_entities: "एंटिटी सिंक करें",
+    entity_index: "केस पहचानकर्ता",
+    scannable: "स्कैन योग्य",
+    no_entities: "अभी कोई पहचानकर्ता सिंक नहीं हुआ",
+    no_entities_sub: "शिकायतों, प्रदाता प्रतिक्रियाओं और साक्ष्य से निकाले गए पहचानकर्ताओं को सामान्यीकृत करने के लिए केस एंटिटी सिंक करें।",
+    select_entity_title: "एक पहचानकर्ता चुनें",
+    select_entity_sub: "संबंध, अन्य केसों से मिलान और खुले स्रोत का फ़ुटप्रिंट देखने के लिए सूची से पहचानकर्ता चुनें।",
+    metric_identifiers: "पहचानकर्ता",
+    metric_identifiers_hint: "सामान्यीकृत केस एंटिटी",
+    metric_scannable_hint: "OSINT लुकअप द्वारा समर्थित",
+    metric_cross_case: "अन्य केसों से मिलान",
+    metric_cross_case_hint: "समान पहचानकर्ता वाले केस",
+    first_seen: "पहली बार देखा",
+    last_seen: "अंतिम बार देखा",
+    load_error: "केस पहचानकर्ता लोड नहीं हो सके।",
+    sync_error: "केस एंटिटी सिंक नहीं हो सकीं। फिर कोशिश करें।",
+    unsupported_type: "OSINT लुकअप केवल ईमेल, फ़ोन, व्यक्ति और सोशल हैंडल पहचानकर्ताओं के लिए उपलब्ध है।",
+    unconfirmed_hint: "OSINT लुकअप केवल पुष्ट पहचानकर्ताओं पर चलता है — स्कैन करने से पहले इस पिवट को स्वीकार करें।",
+    scanning_detail: "स्कैनर चल रहे हैं — यूज़रनेम, ईमेल, डेटा लीक और सोशल हैंडल मैप किए जा रहे हैं।",
+    confirm_pivot: "पिवट की पुष्टि करें",
+    followers: "{count} फ़ॉलोअर",
+    note: "टिप्पणी",
+    open_profile: "यह प्रोफ़ाइल नए टैब में खोलें",
+    open_profile_short: "प्रोफ़ाइल",
   },
 
   video: {
@@ -713,6 +748,28 @@ const hi: Dictionary = {
     forensic_report: "फोरेंसिक रिपोर्ट",
     reload_workspace: "कार्यक्षेत्र पुनः लोड करें",
     detected_incident: "पहचानी गई घटना",
+
+    // लाइव विश्लेषक कार्ड
+    analysis_id: "विश्लेषण आईडी",
+    pipeline_title: "लाइव टेलीमेट्री पाइपलाइन",
+    ledger_active: "छेड़छाड़-प्रमाणित ब्लॉकचेन लेजर सक्रिय",
+    auto_refreshing: "स्वतः ताज़ा हो रहा है",
+
+    phase_uploaded: "वीडियो फ़ाइल प्राप्त — विश्लेषक तैयार हो रहा है…",
+    phase_processing: "वीडियो की अवधि और मेटाडेटा निकाला जा रहा है…",
+    phase_active_analysis: "AI वीडियो फ़ीड की समीक्षा कर रहा है…",
+    phase_completed: "विश्लेषण पूर्ण",
+    phase_failed: "विश्लेषण विफल",
+    phase_unknown: "वीडियो प्रोसेस हो रहा है…",
+
+    step_ingest: "वीडियो सत्यापन और Gemini अंतर्ग्रहण",
+    step_ingest_detail: "AI मल्टीमॉडल समीक्षा के लिए स्ट्रीम सत्यापित और एन्क्रिप्ट किया गया",
+    step_cv: "कंप्यूटर विज़न और वस्तु ट्रैकिंग",
+    step_cv_detail: "खतरे के संकेतों और समय-चिह्नों के लिए फ़्रेम स्कैन किए जा रहे हैं",
+    step_legal: "BNS / BNSS आपराधिक धारा मैपिंग",
+    step_legal_detail: "कानूनी धाराओं का मिलान और SOP रिपोर्ट का प्रारूपण",
+    step_ledger: "छेड़छाड़-प्रमाणित लेजर प्रविष्टि",
+    step_ledger_detail: "ऑडिट ट्रेल को अपरिवर्तनीय ब्लॉकचेन रिकॉर्ड में हैश किया जा रहा है",
   },
 
   evidence_workspace: {
@@ -812,7 +869,10 @@ const hi: Dictionary = {
     awaiting: "प्रतीक्षारत",
     awaiting_response: "उत्तर की प्रतीक्षा",
     running: "चल रहा है",
+    queued: "कतार में",
     processing: "प्रोसेस हो रहा है",
+    uploaded: "अपलोड हुआ",
+    active_analysis: "विश्लेषण चल रहा है",
     completed: "पूर्ण हुआ",
     failed: "विफल",
     rejected: "अस्वीकृत",
@@ -938,6 +998,9 @@ const hi: Dictionary = {
     this_entity: "यह इकाई",
     canonical: "मानक रूप",
     via_match: "{type} {value} से मेल",
+    transaction: "लेन-देन",
+    amount_label: "राशि",
+    call_duration: "कॉल अवधि",
   },
 
   provider: {
@@ -961,14 +1024,26 @@ const hi: Dictionary = {
   },
 
   heatmap: {
-    title: "AI अपराध हीटमैप इंजन",
-    subtitle: "रीयल-टाइम भू-स्थानिक घनत्व मानचित्रण और ज़ोन वर्गीकरण — सूरत शहर, गुजरात",
-    stat_total: "कुल अंक",
+    title: "AI अपराध हीटमैप कमांड डैशबोर्ड",
+    subtitle: "रीयल-टाइम भू-स्थानिक घनत्व मानचित्रण, पुलिस ग्रिड और ज़ोन वर्गीकरण — सूरत शहर, गुजरात",
+    stat_total: "कुल वेक्टर्स",
     stat_critical: "गंभीर ज़ोन",
     stat_high: "उच्च जोखिम ज़ोन",
     stat_clusters: "सक्रिय क्लस्टर",
+    stat_stations: "पुलिस स्टेशन",
     clusters_title: "सक्रिय अपराध क्लस्टर",
     zone_breakdown: "ज़ोन विश्लेषण",
+    filter_time: "समय सीमा",
+    filter_district: "जिला / ज़ोन",
+    filter_crime: "अपराध प्रकार",
+    export_report: "रिपोर्ट निर्यात करें",
+    live_operational: "लाइव परिचालन",
+    ranked_hotspots: "रैंक किए गए हॉटस्पॉट सेक्टर",
+    temporal_trend: "7-दिवसीय सामयिक प्रवृत्ति",
+    focus_map: "फोकस",
+    intensity_breakdown: "तीव्रता विवरण",
+    ai_insight_title: "AI सामरिक अंतर्दृष्टि",
+    reset_view: "दृश्य रीसेट करें",
   },
 
   alert_center: {
@@ -1014,7 +1089,7 @@ const hi: Dictionary = {
 
   repeat_offenders: {
     title: "पुनरावर्ती अपराधी इंटेलिजेंस",
-    subtitle: "व्यवहारिक जोखिम प्रोफाइलिंग और पुनरावृत्ति ट्रैकिंग (सिंथेटिक डेमो प्रोफाइल)",
+    subtitle: "व्यवहारिक जोखिम प्रोफ़ाइलिंग और पुनरावृत्ति ट्रैकिंग (सिंथेटिक डेमो प्रोफ़ाइल)",
     registry_title: "अपराधी रजिस्ट्री",
     registry_subtitle: "डेटाबेस में {count} प्रोफ़ाइल",
     profile_title: "व्यवहारिक प्रोफ़ाइल",
@@ -1027,6 +1102,20 @@ const hi: Dictionary = {
     total_cases: "कुल मामले",
     crime_timeline: "अपराध समयरेखा",
     no_offenders: "चयनित फ़िल्टर से कोई पुनरावर्ती अपराधी मेल नहीं खाता।",
+    stat_total: "निगरानी प्रोफ़ाइल",
+    stat_critical: "गंभीर जोखिम",
+    stat_high: "उच्च जोखिम",
+    stat_avg_recidivism: "औसत पुनरावृत्ति",
+    search_placeholder: "अपराधी, उपनाम, स्थान या अपराध खोजें…",
+    search_results: "{count} मेल खाती प्रोफ़ाइल",
+    all_profiles: "सभी {count} प्रोफ़ाइल",
+    reset_filters: "फ़िल्टर रीसेट करें",
+    active_sector: "सक्रिय क्षेत्र",
+    demographics: "आयु और लिंग",
+    no_results_title: "कोई अपराधी नहीं मिला",
+    no_results_desc: "अपनी खोज क्वेरी या जोखिम स्तर फ़िल्टर बदलने का प्रयास करें।",
+    no_selection_title: "कोई प्रोफ़ाइल चयनित नहीं है",
+    no_selection_desc: "व्यवहारिक प्रोफ़ाइल और अपराध समयरेखा देखने के लिए रजिस्ट्री से किसी अपराधी का चयन करें।",
   },
 
   criminal_network: {

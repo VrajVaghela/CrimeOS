@@ -5,6 +5,31 @@ and preserve original names, numbers, account IDs, and dates verbatim.
 Return only schema-valid JSON.
 """.strip()
 
+# System message for the local free-text path. Same language and verbatim-identifier rules as
+# GENERIC_JSON_SYSTEM_PROMPT, minus the "return JSON" instruction, which would be actively
+# wrong for prose generation (summaries, translations, analytics narratives).
+LOCAL_TEXT_SYSTEM_PROMPT = """
+You are Crime OS AI, assisting an Indian investigating officer.
+Content may be in Gujarati, Hindi, or English. Produce English output unless the request
+asks otherwise, and preserve original names, numbers, account IDs, and dates verbatim.
+Answer directly with prose. Do not wrap the response in JSON or markdown fences.
+""".strip()
+
+# Appended to the user message on the local (Ollama) structured-output path only.
+# Ollama constrains the response SHAPE via a GBNF grammar compiled from the JSON schema,
+# but that conversion discards `title` and `description` — so field-level semantics that
+# Gemini receives through `response_schema` would otherwise be invisible to the local model
+# (e.g. an `event_type` whose allowed values live only in its description). Restating the
+# schema in the prompt puts those instructions back in front of the model.
+LOCAL_JSON_SCHEMA_INSTRUCTION = """
+Respond with a single JSON object and nothing else. No markdown fences, no prose.
+Every "description" in the schema below is an instruction — follow it exactly.
+When a description lists allowed values, use one of those values verbatim.
+
+JSON Schema:
+{schema_json}
+""".strip()
+
 TRANSCRIPTION_PROMPT = """
 Transcribe or OCR the supplied complaint material. Preserve the original text and provide
 an English translation suitable for police casework.

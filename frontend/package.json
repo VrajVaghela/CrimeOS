@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "postinstall": "node scripts/sync-maplibre-worker.mjs",
+    "predev": "node scripts/sync-maplibre-worker.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/sync-maplibre-worker.mjs",
     "build": "next build",
     "lint": "next lint",
     "i18n:audit": "node scripts/i18n-audit.mjs",
-    "verify": "npm run i18n:audit && tsc --noEmit && next build"
+    "verify": "npm run i18n:audit && tsc --noEmit && npm run build"
   },
   "dependencies": {
     "@deck.gl/layers": "^9.3.10",
@@ -28,6 +31,7 @@
     "tailwind-merge": "^2.5.5"
   },
   "devDependencies": {
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

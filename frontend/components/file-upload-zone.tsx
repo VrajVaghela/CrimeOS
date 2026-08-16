@@ -105,16 +105,6 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
   return (
     <div className="flex flex-col gap-3">
       <div
-        role="button"
-        tabIndex={disabled ? -1 : 0}
-        aria-label={t("common.upload_complaint_file")}
-        onClick={() => !disabled && inputRef.current?.click()}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            !disabled && inputRef.current?.click();
-          }
-        }}
         onDragOver={(e) => {
           e.preventDefault();
           if (!disabled) setDragging(true);
@@ -122,7 +112,7 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         className={[
-          "relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-squircle border border-dashed p-10 text-center transition-colors duration-200",
+          "relative flex flex-col items-center justify-center gap-3 rounded-squircle border border-dashed p-10 text-center transition-colors duration-200",
           dragging
             ? "border-primary bg-primary/[0.06]"
             : selected
@@ -154,10 +144,7 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
               type="button"
               variant="ghost"
               size="icon-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                clearFile();
-              }}
+              onClick={clearFile}
               className="absolute right-3 top-3 text-muted-foreground hover:text-destructive"
               aria-label={t("common.remove_file")}
             >
@@ -175,7 +162,13 @@ export function FileUploadZone({ onUpload, disabled }: FileUploadZoneProps) {
                 {t("ingestion.upload_hint_sub")}
               </p>
             </div>
-            <Button type="button" variant="secondary" size="sm" disabled={disabled}>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={disabled}
+              onClick={() => inputRef.current?.click()}
+            >
               {t("ingestion.browse_files")}
             </Button>
           </>

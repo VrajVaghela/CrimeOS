@@ -392,3 +392,16 @@ For the existing MVP, cut in this order:
 9. CCTNS mock bonus
 10. Editable entity review (make read-only)
 NEVER cut: golden path, SOP citations in UI, audit timeline.
+
+## Phase 20 — Crime Heatmap Command Dashboard (PLANNED — approval required)
+
+Goal: rebuild the `/heatmap` presentation into a map-first operational crime-intelligence dashboard, using the approved reference as the information-architecture and interaction benchmark, a real hosted basemap, and the existing deterministic incident data.
+
+1. Replace the KPI-strip-led composition with an analytics breadcrumb/header, title/subtitle with live state, date/district/filter controls, and one primary export action.
+2. Replace the SVG map renderer with the already-installed MapLibre GL JS client map, using a real hosted OpenFreeMap basemap style and its required attribution. Feed the deterministic Surat incidents to a GeoJSON source and render a GPU heatmap layer plus zoom-visible incident circles; add station markers, navigation controls, scale indicator, north marker, and in-map intensity/layer controls.
+3. Introduce a responsive dashboard grid: dominant map workspace; right intelligence rail for hotspot count/trend, intensity distribution, crime-type toggles, and a cited AI insight; lower panels for ranked hotspots and a seven-day trend chart.
+4. Convert existing mock clusters/zones into dashboard-derived totals, ranked locations, distributions, and trend series. Filters update both the MapLibre GeoJSON source and every dependent panel; loading, empty, map-tile-unavailable, and API-fallback states remain explicit.
+5. Keep the Ferrari command-console system intact: token-driven surfaces, no decorative shadows, sparse Ferrari Red reserved for primary/live/high-signal states, mono for comparable data, accessible focus states, and reduced-motion behavior. The AI insight stays visibly grounded to a deterministic data/SOP source.
+6. Keep the current `maplibre-gl` dependency (no replacement mapping SDK); add any required CSS import, token-compatible map chrome, English/Hindi/Gujarati keys in lockstep, and the new reusable components in `ui_registry.md`. Run the existing frontend verification after implementation.
+
+**Approval checkpoint:** UI implementation starts only after the user approves this planned dashboard direction.

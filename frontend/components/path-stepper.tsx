@@ -75,7 +75,7 @@ export function PathStepper({ steps, caseId, onStatusChange }: PathStepperProps)
             </span>
 
             <div
-              className={`rounded-squircle border p-5 transition-colors duration-200 ${CARD_CLASSES[status]}`}
+              className={`rounded-squircle border p-4 transition-colors duration-200 ${CARD_CLASSES[status]}`}
             >
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                 <div className="min-w-0 space-y-1">

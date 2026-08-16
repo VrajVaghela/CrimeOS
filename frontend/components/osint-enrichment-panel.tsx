@@ -4,19 +4,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   ShieldAlert,
   ShieldCheck,
-  AlertTriangle,
-  Mail,
-  Phone,
-  User,
-  Globe,
   RefreshCw,
   Download,
   Check,
   X,
   ExternalLink,
   Lock,
-  Database,
   Search,
+  AlertTriangle,
+  Globe,
 } from "lucide-react";
 import {
   getEntityOsintResult,
@@ -26,8 +22,36 @@ import {
   ignorePivot,
   ApiError,
 } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { OsintScanResult, CaseEntityOut } from "@/lib/types";
-import { useLanguage } from "@/lib/language-context";
+import { interpolate, useLanguage } from "@/lib/language-context";
+import { useEnumLabel } from "@/lib/i18n/enums";
+
+/**
+ * Open-source enrichment for one case identifier.
+ *
+ * This panel is the body of the OSINT section (`/cases/[id]/osint`), not a
+ * sidebar widget: it lays findings out across the full content pane in two
+ * columns and lets the page scroll. The previous version stacked every group
+ * into a 310px rail behind three `max-h-[220px]` scrollboxes, so a scan with
+ * four social matches and three breaches was read through three separate
+ * peepholes.
+ */
+
+/** Entity types the backend OSINT scanners accept. */
+export const OSINT_SUPPORTED_TYPES = [
+  "email",
+  "phone",
+  "person",
+  "username",
+  "social_handle",
+];
+
+export function isOsintSupported(entityType: string): boolean {
+  return OSINT_SUPPORTED_TYPES.includes(entityType.toLowerCase());
+}
 
 interface OsintEnrichmentPanelProps {
   caseId: string;
@@ -41,6 +65,7 @@ export function OsintEnrichmentPanel({
   onPivotAction,
 }: OsintEnrichmentPanelProps) {
   const { t } = useLanguage();
+  const { statusLabel } = useEnumLabel();
   const [scanResult, setScanResult] = useState<OsintScanResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [triggering, setTriggering] = useState(false);
@@ -178,205 +203,253 @@ export function OsintEnrichmentPanel({
     }
   };
 
-  const isSupportedType = ["email", "phone", "person", "username", "social_handle"].includes(
-    entity.entity_type.toLowerCase()
-  );
+  const supported = isOsintSupported(entity.entity_type);
+  /** The backend refuses scans on pivots the officer has not accepted yet.
+   *  Entities default to `confirmed` server-side, so treat an absent status as
+   *  confirmed rather than locking the panel behind a field that isn't there. */
+  const scannable = supported && (entity.status ?? "confirmed").toLowerCase() === "confirmed";
+  const isRunning =
+    scanResult?.scan.status === "PENDING" || scanResult?.scan.status === "RUNNING";
 
   const getRiskColor = (level: string) => {
     switch (level) {
       case "CRITICAL":
-        return "bg-destructive/20 text-destructive border-destructive/40 glow-destructive";
+        return "border-destructive/40 bg-destructive/15 text-destructive glow-destructive";
       case "HIGH":
-        return "bg-warn/20 text-warn border-warn/40 glow-warning";
+        return "border-warn/40 bg-warn/15 text-warn glow-warning";
       case "MEDIUM":
-        return "bg-warn/15 text-warn border-warn/30";
+        return "border-warn/30 bg-warn/10 text-warn";
       default:
-        return "bg-success/10 text-success border-success/30";
+        return "border-success/30 bg-success/10 text-success";
     }
   };
 
-  const getBreachSeverityColor = (level: string) => {
-    switch (level) {
-      case "CRITICAL":
-        return "text-destructive font-bold";
-      case "HIGH":
-        return "text-warn font-semibold";
-      case "MEDIUM":
-        return "text-warn";
-      default:
-        return "text-success";
-    }
-  };
+  const sectionLabel = (text: string, count?: number) => (
+    <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+      {text}
+      {count !== undefined ? ` · ${count}` : null}
+    </span>
+  );
 
-  if (!isSupportedType) {
+  if (!supported) {
     return (
-      <div className="p-4 bg-secondary/30 rounded border border-border/40 text-center text-xs text-muted-foreground">
-        OSINT scans are only supported for email, phone, or person/username entities.
-      </div>
+      <section className="rounded-squircle border border-border/80 bg-card p-5">
+        <div className="mb-3.5 flex items-center justify-between gap-3">
+          <h3 className="font-heading text-base font-semibold text-foreground">
+            {t("osint.title")}
+          </h3>
+        </div>
+        <p className="rounded-squircle-sm border border-dashed border-border bg-surface-alt/40 px-4 py-6 text-center text-sm text-muted-foreground">
+          {t("osint.unsupported_type")}
+        </p>
+      </section>
     );
   }
 
   return (
-    <div className="space-y-4 animate-fade-up">
-      {/* Header with status */}
-      <div className="flex items-center justify-between pb-2 border-b border-border/40">
-        <span className="text-[11px] font-bold font-mono text-muted-foreground uppercase tracking-wider block">
-          {t("osint.title")}
-        </span>
-        {scanResult && (
-          <span
-            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${ scanResult.scan.status === "COMPLETED"
-                ? "bg-success/10 text-success border-success/30"
-                : scanResult.scan.status === "FAILED"
-                ? "bg-danger/10 text-danger border-danger/30 animate-pulse"
-                : "bg-primary/10 text-accent-strong border-primary/30 animate-pulse"
-            }`}
-          >
-            {scanResult.scan.status}
-          </span>
+    <section className="flex flex-col gap-4 rounded-squircle border border-border/80 bg-card p-5">
+      {/* One header for the whole panel: what it is, whether a scan is live,
+          and the two actions that act on the scan as a whole. The re-run
+          control used to sit as a full-width button at the very bottom, a
+          screen away from the status it re-runs. */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <h3 className="font-heading text-base font-semibold text-foreground">
+            {t("osint.title")}
+          </h3>
+          {scanResult && (
+            <Badge
+              variant={
+                scanResult.scan.status === "COMPLETED"
+                  ? "success"
+                  : scanResult.scan.status === "FAILED"
+                    ? "destructive"
+                    : "info"
+              }
+              dot={isRunning}
+              pulse={isRunning}
+              className="rounded-squircle-sm font-mono text-[10px] font-semibold uppercase"
+            >
+              {statusLabel(scanResult.scan.status)}
+            </Badge>
+          )}
+        </div>
+
+        {scanResult && scannable && (
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              disabled={exporting}
+              loading={exporting}
+              title={t("osint.download_dossier")}
+            >
+              {!exporting && <Download className="h-3.5 w-3.5" />}
+              {t("osint.export_dossier")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleTrigger}
+              disabled={triggering || isRunning}
+              loading={triggering}
+            >
+              {!triggering && <RefreshCw className="h-3.5 w-3.5" />}
+              {t("osint.rerun_scan")}
+            </Button>
+          </div>
         )}
       </div>
 
       {error && (
-<div className="p-3 rounded border border-destructive/20 bg-destructive/10 text-xs text-foreground flex items-center justify-between">
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 rounded-squircle-sm border border-destructive/30 bg-destructive/10 p-3 text-xs text-foreground"
+        >
           <span>{error}</span>
-<button onClick={() => setError(null)} className="text-destructive hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setError(null)}
+            aria-label={t("common.dismiss")}
+            className="h-6 w-6 shrink-0 text-destructive hover:text-foreground"
+          >
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
       )}
 
-      {loading && !scanResult ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center text-xs text-muted-foreground gap-2">
-          <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-          <span>{t("osint.fetching")}</span>
+      {!scannable ? (
+        <p className="flex items-start gap-2 rounded-squircle-sm border border-warn/30 bg-warn/10 px-3.5 py-3 text-xs leading-relaxed text-foreground">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warn" />
+          {t("osint.unconfirmed_hint")}
+        </p>
+      ) : loading && !scanResult ? (
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-16 w-full rounded-squircle-sm" />
+          <Skeleton className="h-28 w-full rounded-squircle-sm" />
         </div>
       ) : !scanResult ? (
-        <div className="p-6 rounded-squircle-sm border border-border bg-surface-alt text-center space-y-4">
-          <Search className="h-10 w-10 mx-auto text-muted-foreground/30 animate-pulse" />
-          <div className="space-y-1">
-            <h5 className="text-sm font-semibold text-foreground">{t("osint.none_found")}</h5>
-            <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+        <div className="flex flex-col items-center gap-4 rounded-squircle-sm border border-dashed border-border bg-surface-alt/40 px-6 py-10 text-center">
+          <Search className="h-7 w-7 text-muted-foreground" />
+          <div className="max-w-[46ch] space-y-1.5">
+            <p className="font-heading text-base font-semibold text-foreground">
+              {t("osint.none_found")}
+            </p>
+            <p className="text-sm leading-relaxed text-muted-foreground">
               {t("osint.none_found_sub")}
             </p>
           </div>
-          <button
-            onClick={handleTrigger}
-            disabled={triggering}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-squircle bg-primary text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all disabled:opacity-50"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${triggering ? "animate-spin" : ""}`} />
+          <Button onClick={handleTrigger} disabled={triggering} loading={triggering} size="sm">
+            {!triggering && <RefreshCw className="h-3.5 w-3.5" />}
             {t("osint.run_lookup")}
-          </button>
+          </Button>
         </div>
       ) : (
-        <div className="space-y-4">
-          {/* Risk Level Banner */}
+        <div className="flex flex-col gap-5">
+          {/* Risk level banner */}
           <div
-            className={`p-4 rounded-squircle border flex items-center justify-between ${getRiskColor( scanResult.risk_summary.overall_risk_level
+            className={`flex items-center gap-3 rounded-squircle-sm border px-4 py-3.5 ${getRiskColor(
+              scanResult.risk_summary.overall_risk_level
             )}`}
           >
-            <div className="flex items-center gap-2.5">
-              {scanResult.risk_summary.overall_risk_level === "CRITICAL" ||
-              scanResult.risk_summary.overall_risk_level === "HIGH" ? (
-                <ShieldAlert className="h-6 w-6 shrink-0 animate-pulse" />
-              ) : (
-                <ShieldCheck className="h-6 w-6 shrink-0" />
-              )}
-              <div className="space-y-0.5">
-                <div className="text-[10px] uppercase font-mono tracking-wider font-semibold opacity-85">
-                  {t("osint.risk_level")}
-                </div>
-                <div className="text-base font-bold font-mono">
-                  {scanResult.risk_summary.overall_risk_level} {t("osint.risk_suffix")}
-                </div>
+            {scanResult.risk_summary.overall_risk_level === "CRITICAL" ||
+            scanResult.risk_summary.overall_risk_level === "HIGH" ? (
+              <ShieldAlert className="h-5 w-5 shrink-0" />
+            ) : (
+              <ShieldCheck className="h-5 w-5 shrink-0" />
+            )}
+            <div className="min-w-0">
+              <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] opacity-85">
+                {t("osint.risk_level")}
+              </div>
+              <div className="font-mono text-base font-bold">
+                {scanResult.risk_summary.overall_risk_level} {t("osint.risk_suffix")}
               </div>
             </div>
-            <button
-              onClick={handleExport}
-              disabled={exporting}
-              title={t("osint.download_dossier")}
-              className="p-2 rounded bg-foreground/5 hover:bg-foreground/15 border border-border text-foreground transition-all disabled:opacity-50 shrink-0"
-            >
-              {exporting ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4" />
-              )}
-            </button>
           </div>
 
-          {/* Running state details */}
-          {(scanResult.scan.status === "PENDING" || scanResult.scan.status === "RUNNING") && (
-            <div className="p-4 rounded-squircle bg-surface-alt border border-border/40 text-center space-y-3">
-              <RefreshCw className="h-5 w-5 animate-spin mx-auto text-primary" />
-              <div className="text-xs text-muted-foreground">
-                OSINT scanners running. Mapping usernames, emails, breaches, and social handles…
-              </div>
-            </div>
+          {isRunning && (
+            <p className="flex items-center justify-center gap-2.5 rounded-squircle-sm border border-border bg-surface-alt px-4 py-4 text-xs text-muted-foreground">
+              <RefreshCw className="h-4 w-4 shrink-0 animate-spin text-info" />
+              {t("osint.scanning_detail")}
+            </p>
           )}
 
           {scanResult.scan.status === "FAILED" && (
-<div className="p-4 rounded-squircle bg-destructive/10 border border-destructive/30 space-y-3">
-<div className="text-xs font-semibold text-destructive">{t("osint.scan_failed")}</div>
-<div className="text-xs text-foreground font-mono break-all bg-destructive/10 p-2 rounded">
+            <div className="flex flex-col gap-3 rounded-squircle-sm border border-destructive/30 bg-destructive/10 p-4">
+              <p className="text-xs font-semibold text-destructive">{t("osint.scan_failed")}</p>
+              <p className="break-all rounded-squircle-sm bg-destructive/10 p-2 font-mono text-xs text-foreground">
                 {scanResult.scan.error_message ?? t("osint.unknown_error")}
-              </div>
-              <button
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleTrigger}
                 disabled={triggering}
-className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border border-destructive/40 text-destructive bg-destructive/5 hover:bg-destructive/10 text-xs font-medium transition-all"
+                loading={triggering}
+                className="self-start border-destructive/40 text-destructive hover:bg-destructive/10"
               >
-                <RefreshCw className={`h-3 w-3 ${triggering ? "animate-spin" : ""}`} />
+                {!triggering && <RefreshCw className="h-3.5 w-3.5" />}
                 {t("osint.retry_lookup")}
-              </button>
+              </Button>
             </div>
           )}
 
-          {/* Social Media profiles matches */}
+          {/* Social matches — two columns on the content pane rather than a
+              220px scrollbox, so a full set of platforms is read at once. */}
           {scanResult.social_profiles.length > 0 && (
-            <div className="space-y-2">
-              <span className="text-[10px] font-bold font-mono text-muted-foreground uppercase tracking-wider block">
-                Social Matches ({scanResult.social_profiles.length})
-              </span>
-              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+            <div className="flex flex-col gap-2">
+              {sectionLabel(t("osint.social_presence"), scanResult.social_profiles.length)}
+              <div className="grid grid-cols-1 gap-2.5 xl:grid-cols-2">
                 {scanResult.social_profiles.map((profile, index) => (
                   <div
-                    key={index}
-                    className="p-3 rounded bg-secondary/50 border border-border/60 space-y-2 text-xs"
+                    key={`${profile.platform}-${profile.username}-${index}`}
+                    className="flex flex-col gap-2 rounded-squircle-sm border border-border bg-surface-alt p-3.5 text-xs"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-0.5">
-                        <div className="font-semibold text-foreground flex items-center gap-1">
-                          {profile.platform}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 space-y-0.5">
+                        <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                          <span className="truncate">{profile.platform}</span>
                           {profile.is_verified && (
-                            <ShieldCheck className="h-3 w-3 text-info shrink-0" />
+                            <ShieldCheck
+                              className="h-3 w-3 shrink-0 text-info"
+                              aria-label={t("common.verified")}
+                            />
                           )}
                         </div>
-                        <div className="text-muted-foreground font-mono text-[11px]">
+                        <div className="truncate font-mono text-[11px] text-muted-foreground">
                           @{profile.username}
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span
-                          className={`text-[10px] font-mono px-1 rounded ${ profile.exists_confidence === "CONFIRMED"
-                              ? "bg-success/15 text-success"
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <Badge
+                          variant={
+                            profile.exists_confidence === "CONFIRMED"
+                              ? "success"
                               : profile.exists_confidence === "LIKELY"
-                              ? "bg-primary/10 text-accent-strong"
-                              : "bg-muted-foreground/10 text-muted-foreground"
-                          }`}
+                                ? "default"
+                                : "outline"
+                          }
+                          className="rounded-squircle-sm font-mono text-[10px] uppercase"
                         >
                           {profile.exists_confidence}
-                        </span>
+                        </Badge>
                         {profile.follower_count !== null && (
-                          <div className="text-[10px] font-mono text-muted-foreground flex items-center gap-1">
-                            <span>{profile.follower_count.toLocaleString()} fans</span>
+                          <div className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
+                            <span>
+                              {interpolate(t("osint.followers"), {
+                                count: profile.follower_count.toLocaleString(),
+                              })}
+                            </span>
                             {profile.follower_count_delta !== null && (
                               <span
-                                className={`text-[10px] ${ profile.follower_count_delta > 0
-                                    ? "text-success font-semibold"
+                                className={
+                                  profile.follower_count_delta > 0
+                                    ? "font-semibold text-success"
                                     : "text-danger"
-                                }`}
+                                }
                               >
                                 ({profile.follower_count_delta > 0 ? "+" : ""}
                                 {profile.follower_count_delta})
@@ -388,98 +461,120 @@ className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border
                     </div>
 
                     {profile.bio && (
-                      <p className="text-muted-foreground text-[11px] leading-relaxed break-words bg-foreground/5 p-1.5 rounded border border-border/20 font-sans">
+                      <p className="break-words rounded-squircle-sm border border-border/40 bg-background p-2 text-[11px] leading-relaxed text-muted-foreground">
                         {profile.bio}
                       </p>
                     )}
 
-                    {(profile.location_hint || profile.timezone_hint) && (
-                      <div className="flex flex-wrap gap-1.5 text-[10px] font-mono text-muted-foreground">
-                        {profile.location_hint && (
-                          <span className="flex items-center gap-0.5 bg-foreground/5 px-1 py-0.5 rounded border border-border/20">
-                            <Globe className="h-2.5 w-2.5" />
-                            {profile.location_hint}
-                            {profile.location_changed && (
-                              <span className="text-warn animate-pulse font-bold ml-0.5">!</span>
-                            )}
-                          </span>
-                        )}
-                        {profile.timezone_hint && (
-                          <span className="flex items-center gap-0.5 bg-foreground/5 px-1 py-0.5 rounded border border-border/20">
-                            TZ: {profile.timezone_hint}
-                          </span>
-                        )}
-                        {profile.bio_changed && (
-                          <span className="bg-warn/15 text-warn px-1 py-0.5 rounded border border-warn/25 animate-pulse">
-                            {t("osint.bio_changed")}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    <div className="mt-auto flex flex-wrap items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
+                      {profile.location_hint && (
+                        <span className="flex items-center gap-1 rounded-sm border border-border/40 bg-background px-1.5 py-0.5">
+                          <Globe className="h-2.5 w-2.5" />
+                          {profile.location_hint}
+                          {profile.location_changed && (
+                            <span className="font-bold text-warn">!</span>
+                          )}
+                        </span>
+                      )}
+                      {profile.timezone_hint && (
+                        <span className="rounded-sm border border-border/40 bg-background px-1.5 py-0.5">
+                          TZ {profile.timezone_hint}
+                        </span>
+                      )}
+                      {profile.bio_changed && (
+                        <Badge variant="warning" className="rounded-sm text-[10px]">
+                          {t("osint.bio_changed")}
+                        </Badge>
+                      )}
+                      {profile.profile_url && (
+                        <a
+                          href={profile.profile_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={t("osint.open_profile")}
+                          className="ml-auto flex items-center gap-1 rounded-sm px-1 py-0.5 text-info transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          {t("osint.open_profile_short")}
+                        </a>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Breach Exposure Table */}
+          {/* Breach exposure */}
           {scanResult.breaches.length > 0 && (
-            <div className="space-y-2">
-              <span className="text-[10px] font-bold font-mono text-muted-foreground uppercase tracking-wider block">
-                Breach Exposure ({scanResult.breaches.length})
-              </span>
-              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+            <div className="flex flex-col gap-2">
+              {sectionLabel(t("osint.breach_exposure"), scanResult.breaches.length)}
+              <div className="grid grid-cols-1 gap-2.5 xl:grid-cols-2">
                 {scanResult.breaches.map((breach, index) => (
                   <div
-                    key={index}
-                    className="p-3 rounded bg-secondary/50 border border-border/60 space-y-1.5 text-xs"
+                    key={`${breach.breach_name}-${index}`}
+                    className="flex flex-col gap-2 rounded-squircle-sm border border-border bg-surface-alt p-3.5 text-xs"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="font-bold text-foreground flex items-center gap-1.5">
-<Lock className="h-3 w-3 text-destructive shrink-0" />
-                        {breach.breach_name}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-1.5 font-semibold text-foreground">
+                        <Lock className="h-3 w-3 shrink-0 text-destructive" />
+                        <span className="truncate">{breach.breach_name}</span>
                       </div>
-                      <span
-                        className={`text-[10px] font-mono font-bold ${getBreachSeverityColor( breach.severity
-                        )}`}
+                      <Badge
+                        variant={
+                          breach.severity === "CRITICAL" || breach.severity === "HIGH"
+                            ? "destructive"
+                            : breach.severity === "MEDIUM"
+                              ? "warning"
+                              : "success"
+                        }
+                        className="rounded-squircle-sm font-mono text-[10px] font-semibold uppercase"
                       >
                         {breach.severity}
-                      </span>
+                      </Badge>
                     </div>
 
-                    <div className="text-[10px] text-muted-foreground font-mono grid grid-cols-2 gap-x-2 gap-y-0.5">
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono text-[10px] text-muted-foreground">
                       {breach.breach_domain && (
-                        <div>
-                          {t("osint.domain")} <span className="text-foreground">{breach.breach_domain}</span>
+                        <div className="truncate">
+                          {t("osint.domain")}{" "}
+                          <span className="text-foreground">{breach.breach_domain}</span>
                         </div>
                       )}
                       {breach.leak_date && (
-                        <div>
-                          {t("osint.date")} <span className="text-foreground">{breach.leak_date}</span>
+                        <div className="truncate">
+                          {t("osint.date")}{" "}
+                          <span className="text-foreground">{breach.leak_date}</span>
                         </div>
                       )}
                       {breach.record_count !== null && (
-                        <div>
-                          {t("osint.records")} <span className="text-foreground">{breach.record_count.toLocaleString()}</span>
+                        <div className="truncate">
+                          {t("osint.records")}{" "}
+                          <span className="text-foreground">
+                            {breach.record_count.toLocaleString()}
+                          </span>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {breach.exposed_data_classes.map((cls, ci) => (
-                        <span
-                          key={ci}
-className="bg-destructive/10 text-foreground border border-destructive/20 text-[10px] font-mono px-1 rounded"
-                        >
-                          {cls}
-                        </span>
-                      ))}
-                    </div>
+                    {breach.exposed_data_classes.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {breach.exposed_data_classes.map((cls) => (
+                          <Badge
+                            key={cls}
+                            variant="destructive"
+                            className="rounded-sm font-mono text-[10px]"
+                          >
+                            {cls}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
 
                     {breach.source_note && (
-                      <div className="text-[10px] italic text-muted-foreground/80 font-mono mt-1 border-t border-border/30 pt-1">
-                        Note: {breach.source_note}
-                      </div>
+                      <p className="mt-auto border-t border-border/40 pt-2 font-mono text-[10px] italic text-muted-foreground">
+                        {t("osint.note")}: {breach.source_note}
+                      </p>
                     )}
                   </div>
                 ))}
@@ -487,79 +582,74 @@ className="bg-destructive/10 text-foreground border border-destructive/20 text-[
             </div>
           )}
 
-          {/* Discovered footprint pivots */}
+          {/* Discovered footprint pivots — the only decision surface here, so it
+              keeps the amber attention tint and sits last, after the evidence
+              an officer needs to read before accepting one. */}
           {scanResult.discovered_footprints.length > 0 && (
-            <div className="space-y-2 pt-2 border-t border-border/40">
-              <span className="text-[10px] font-bold font-mono text-muted-foreground uppercase tracking-wider block">
-                {t("osint.pivots")}
-              </span>
-              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-                {scanResult.discovered_footprints.map((pivot, index) => (
-                  <div
+            <div className="flex flex-col gap-2 border-t border-border/60 pt-4">
+              {sectionLabel(t("osint.pivots"), scanResult.discovered_footprints.length)}
+              <ul className="flex flex-col gap-2.5">
+                {scanResult.discovered_footprints.map((pivot) => (
+                  <li
                     key={pivot.entity_id}
-className="p-3 rounded bg-warn/5 border border-warn/20 text-xs flex flex-col gap-2"
+                    className="flex flex-col gap-2 rounded-squircle-sm border border-warn/30 bg-warn/[0.06] p-3.5 text-xs"
                   >
-                    <div className="flex items-start justify-between min-w-0">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <div className="font-bold text-foreground capitalize">
-                          {pivot.entity_type.replace("_", " ")}
+                        <div className="font-semibold capitalize text-foreground">
+                          {pivot.entity_type.replace(/_/g, " ")}
                         </div>
-                        <div className="text-accent-strong font-mono text-[11px] break-all">
+                        <div className="break-all font-mono text-[11px] text-accent-strong">
                           {pivot.display_value}
                         </div>
                       </div>
-<span className="text-[10px] font-mono font-bold bg-warn/10 text-warn border border-warn/25 px-1 py-0.5 rounded shrink-0">
-                        {Math.round(pivot.confidence * 100)}% Confidence
-                      </span>
+                      <Badge
+                        variant="warning"
+                        className="shrink-0 rounded-squircle-sm font-mono text-[10px] font-semibold"
+                      >
+                        {Math.round(pivot.confidence * 100)}% {t("common.confidence")}
+                      </Badge>
                     </div>
 
                     {pivot.source_snippet && (
-                      <p className="text-muted-foreground text-[10px] italic leading-tight break-words bg-foreground/5 p-1 rounded font-mono">
-                        Source ({pivot.source_field}): "{pivot.source_snippet}"
+                      <p className="break-words rounded-squircle-sm border border-border/40 bg-background p-2 font-mono text-[10px] italic leading-relaxed text-muted-foreground">
+                        {t("osint.source")} ({pivot.source_field}): “{pivot.source_snippet}”
                       </p>
                     )}
 
-                    <div className="flex gap-2 justify-end mt-1 border-t border-border/20 pt-2">
-                <button
+                    <div className="flex justify-end gap-2 border-t border-warn/20 pt-2.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleIgnorePivot(pivot.entity_id)}
                         disabled={pivotLoadingId !== null}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-border hover:bg-foreground/5 text-[10px] font-medium text-muted-foreground transition-all disabled:opacity-50"
+                        className="text-muted-foreground hover:text-foreground"
                       >
                         <X className="h-3 w-3" />
                         {t("osint.ignore")}
-                      </button>
-                      <button
+                      </Button>
+                      {/* Amber, not red: a pivot awaiting a decision is an
+                          attention state, and a scan can surface several at
+                          once — N red buttons would spend the screen's whole
+                          accent budget on one list. */}
+                      <Button
+                        size="sm"
                         onClick={() => handleConfirmPivot(pivot.entity_id)}
                         disabled={pivotLoadingId !== null}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-warn text-warn-foreground hover:bg-warn/90 text-[10px] font-semibold transition-all disabled:opacity-50"
+                        loading={pivotLoadingId === pivot.entity_id}
+                        className="bg-warn text-warn-foreground hover:bg-warn/90 active:bg-warn/80"
                       >
-                        {pivotLoadingId === pivot.entity_id ? (
-                          <RefreshCw className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <Check className="h-3 w-3 font-bold" />
-                        )}
-                        Confirm Pivot
-                      </button>
+                        {pivotLoadingId !== pivot.entity_id && <Check className="h-3 w-3" />}
+                        {t("osint.confirm_pivot")}
+                      </Button>
                     </div>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
-
-          {/* Trigger Scan option */}
-          <div className="pt-2 border-t border-border/40">
-            <button
-              onClick={handleTrigger}
-              disabled={triggering}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border border-border hover:bg-foreground/5 text-xs text-muted-foreground font-medium transition-all"
-            >
-              <RefreshCw className={`h-3 w-3 ${triggering ? "animate-spin" : ""}`} />
-              {t("osint.rerun_scan")}
-            </button>
-          </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

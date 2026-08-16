@@ -8,10 +8,10 @@
 | Backend | **FastAPI (Python 3.11+)** | Native fit for AI pipeline; auto Swagger docs = "integration readiness" points |
 | Database | **PostgreSQL 16 + pgvector** | One DB for relational data AND RAG embeddings — no separate vector store |
 | ORM | **SQLAlchemy 2.0 + Alembic** | Typed models, quick migrations |
-| LLM | **Google Gemini API** (`gemini-2.5-flash` default, `gemini-2.5-pro` for path suggestion) | Free tier, native multimodal (PDF/image/audio in one API), strong Hindi/Gujarati |
-| Embeddings | Gemini `text-embedding-004` | Same API key, 768-dim, free tier |
-| ASR | **Gemini audio input** (primary); `faster-whisper` (fallback if quota dies) | One less moving part |
-| OCR | **Gemini vision** (primary); Tesseract w/ `guj`+`hin` traineddata (fallback) | Gemini handles handwriting far better |
+| LLM | **Ollama `qwen2.5:3b`** (local, primary for text + structured JSON); **Google Gemini API** (`gemini-2.5-flash` default, `gemini-2.5-pro` for path suggestion) for all vision and as escalation | Local = no quota, no data egress. Gemini keeps multimodal (PDF/image/video) and strong Hindi/Gujarati |
+| Embeddings | **Ollama `nomic-embed-text`** (local, 768-dim); Gemini `text-embedding-004` selectable via `EMBEDDING_PROVIDER` | Native 768-dim matches the `Vector(768)` column with no schema change |
+| ASR | **`faster-whisper-medium`** (local, primary for audio); Gemini audio input for Gujarati and on failure | Whisper's native `task="translate"` head handles hi→en; its Gujarati quality is too poor to trust |
+| OCR | **Gemini vision** (primary); Tesseract w/ `guj`+`hin` traineddata (fallback) | Gemini handles handwriting far better; `qwen2.5:3b` has no vision at all |
 | Email | **SMTP via Gmail app-password → demo mailbox** (Mailtrap as backup) | Real dispatch visible in demo |
 | Background jobs | FastAPI `BackgroundTasks` | NO Celery/Redis — needless complexity for a hackathon |
 | Auth | JWT (python-jose) with 3 hardcoded seeded users (io / sho / legal) | Enough for role-based-access bonus points |
@@ -19,7 +19,9 @@
 ## System Boundaries
 ```
 [Next.js :3000] --HTTP/JSON--> [FastAPI :8000] --> [PostgreSQL+pgvector :5432]
-                                    |--> Gemini API (LLM, vision, audio, embeddings)
+                                    |--> Ollama :11434 (local LLM + embeddings)
+                                    |--> faster-whisper (local, in-process ASR)
+                                    |--> Gemini API (vision, video, escalation)
                                     |--> SMTP (legal request dispatch)
                                     |--> /mock-provider (mock telecom/bank response endpoints, same FastAPI app)
                                     |--> /mock-cctns (mock eGujcop/CCTNS API, same FastAPI app)
@@ -61,15 +63,19 @@ erakshak/
 │   │   │   ├── provenance_service.py   # AI output citation ledger
 │   │   │   └── audit_service.py        # audit trail writes
 │   │   ├── ai/
-│   │   │   ├── gemini_client.py        # THE ONLY file that imports google-genai
+│   │   │   ├── gemini_client.py        # THE single AI gateway; only importer of google-genai
+│   │   │   ├── ollama_client.py        # local LLM + embeddings (leaf; no DB, no gateway import)
+│   │   │   ├── whisper_client.py       # local ASR (leaf; no DB, no gateway import)
 │   │   │   └── prompts.py              # ALL prompts as named constants
+│   │   ├── scripts/           # one-off maintenance entry points (re-embed, backfills)
 │   │   └── seeds/             # seed script + SOP/legal datasets + sample complaints
 │   ├── alembic/
 │   └── requirements.txt
 ├── frontend/
 │   ├── app/                   # App Router pages
 │   │   ├── login/  ├── dashboard/  ├── cases/[id]/  (tabs: overview, ingestion,
-│   │   │                            path, requests, responses, summary, audit)
+│   │   │                            osint, path, requests, responses, evidence,
+│   │   │                            timeline, summary, audit)
 │   ├── components/            # ui/ (shadcn) + domain components
 │   ├── lib/api.ts             # THE ONLY file that does fetch() to backend
 │   └── lib/types.ts           # mirrors backend schemas
@@ -78,7 +84,7 @@ erakshak/
 
 ## Architectural Rules (strict)
 1. **Routers are thin.** A router validates input, calls one service function, returns a schema. No Gemini calls, no SQL in routers.
-2. **`gemini_client.py` is the single Gemini gateway.** Retries, timeouts, JSON-mode parsing live there once. Everything else calls its typed helpers (`generate_json()`, `transcribe()`, `embed()`).
+2. **`gemini_client.py` is the single AI gateway.** Retries, timeouts, provider routing and JSON-mode parsing live there once. Everything else calls its typed helpers (`generate_json()`, `transcribe()`, `embed()`) and never picks an engine itself. `ollama_client.py` and `whisper_client.py` are leaves the gateway calls — services must not import them directly.
 3. **All prompts in `prompts.py`** as constants with `{placeholders}`. Never inline prompt strings in services.
 4. **Every AI mutation writes an audit event** via `audit_service` in the same transaction.
 5. **Frontend fetches only through `lib/api.ts`.** No raw `fetch()` in components.

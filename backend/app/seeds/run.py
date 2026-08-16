@@ -701,9 +701,12 @@ Missing dates. Missing target identifiers. Missing legal basis.""",
                     "error_detail": None,
                     "original_sha256": "a1b2c3d4e5f6789012345678abcdef0123456789abcdef0123456789abcdef01",
                     "duration_seconds": 45,
+                    "description": "Footage shows a dark-jacketed individual near the ATM at 14:22 IST on the same date as the harassment incident. Partial face detected; recommend forensic enhancement before court submission.",
                     "summary": "45-second CCTV footage from ATM vicinity on 2026-07-02. One person matching partial suspect description detected at timestamp 00:00:05.",
                     "crime_summary": "Footage shows a dark-jacketed individual near the ATM at 14:22 IST on the same date as the harassment incident. Partial face detected; recommend forensic enhancement before court submission.",
                     "risk_evaluation": "MEDIUM",
+                    "confidence": 0.92,
+                    "tags": ["cctv", "video_evidence", "atm", "suspect_footage", "risk_medium"],
                     "timeline": [
                         {"timestamp_in_video": "00:00:05", "timestamp_seconds": 5.0, "description": "Individual enters ATM vestibule. Dark jacket, obscured face."},
                         {"timestamp_in_video": "00:00:18", "timestamp_seconds": 18.0, "description": "Individual uses ATM keypad. Hand visible but face not captured."},
@@ -713,6 +716,34 @@ Missing dates. Missing target identifiers. Missing legal basis.""",
                 }
             )
             db.add(video_evidence_seed)
+            db.flush()
+
+            # Seed EvidenceMarkers for the video
+            vm1 = EvidenceMarker(
+                evidence_file_id=video_evidence_seed.id,
+                marker_type="video_timestamp",
+                start_ms=5000,
+                end_ms=5000,
+                transcript_text="Individual enters ATM vestibule. Dark jacket, obscured face.",
+                linked_entity_ids=[],
+            )
+            vm2 = EvidenceMarker(
+                evidence_file_id=video_evidence_seed.id,
+                marker_type="video_timestamp",
+                start_ms=18000,
+                end_ms=18000,
+                transcript_text="Individual uses ATM keypad. Hand visible but face not captured.",
+                linked_entity_ids=[],
+            )
+            vm3 = EvidenceMarker(
+                evidence_file_id=video_evidence_seed.id,
+                marker_type="video_timestamp",
+                start_ms=40000,
+                end_ms=40000,
+                transcript_text="Individual exits vestibule and moves off-camera to the south.",
+                linked_entity_ids=[],
+            )
+            db.add_all([vm1, vm2, vm3])
             db.flush()
             record(db, case_id=case2.id, user_id=users["io"].id, action="video.analysis_completed", detail={"evidence_id": str(video_evidence_seed.id), "source": "phase_10c_seed"})
 

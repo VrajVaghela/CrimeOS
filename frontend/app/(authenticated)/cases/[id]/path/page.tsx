@@ -322,37 +322,55 @@ export default function PathPage() {
             caseSections.map((sec) => {
               const highConfidence = sec.confidence >= 0.85;
               return (
-                <AiContentCard key={sec.id} title={t("common.ai_suggested_section")}>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <span className="block font-mono text-sm font-semibold text-foreground">
-                          {sec.legal_section.code} {sec.legal_section.section_number}
-                        </span>
-                        <span className="block text-xs text-muted-foreground">
-                          {sec.legal_section.title}
-                        </span>
-                      </div>
-                      <Badge
-                        variant={highConfidence ? "success" : "warning"}
-                        className="shrink-0 font-mono text-[10px] font-semibold"
-                      >
-                        {Math.round(sec.confidence * 100)}% {t("path.conf_short")}
-                      </Badge>
+                <AiContentCard
+                  key={sec.id}
+                  title={
+                    <div className="flex flex-wrap items-baseline gap-2">
+                      <span className="font-mono text-sm font-semibold text-foreground">
+                        {sec.legal_section.code} {sec.legal_section.section_number}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {sec.legal_section.title}
+                      </span>
                     </div>
-
-                    <div className="max-h-24 overflow-y-auto rounded-squircle-sm border border-border/60 bg-background p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
-                      {sec.legal_section.text}
-                    </div>
-
-                    <div className="rounded-squircle-sm border border-border/60 bg-background p-3">
-                      <span className="mb-1 block font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-info">
+                  }
+                  headerRight={
+                    <Badge
+                      variant={highConfidence ? "success" : "warning"}
+                      className="shrink-0 font-mono text-[10px] font-semibold"
+                    >
+                      {Math.round(sec.confidence * 100)}% {t("path.conf_short")}
+                    </Badge>
+                  }
+                >
+                  <div className="flex flex-col gap-3.5 pt-1">
+                    {/* AI Reasoning - Clean prose directly rendered */}
+                    <div className="space-y-1">
+                      <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-info">
                         {t("path.ai_reasoning")}
                       </span>
-                      <div className="text-xs leading-relaxed text-secondary-foreground">
+                      <div className="max-w-[70ch] text-xs leading-relaxed text-secondary-foreground">
                         <TranslatedTextBlock content={sec.ai_reasoning} />
                       </div>
                     </div>
+
+                    {/* Collapsible Statutory Text - Clean disclosure instead of nested scrollbox */}
+                    {sec.legal_section.text && (
+                      <details className="group rounded-squircle-sm border border-border/60 bg-surface-alt/40 p-3 text-xs">
+                        <summary className="flex cursor-pointer select-none items-center justify-between font-mono text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground">
+                          <span>{t("path.statutory_text")}</span>
+                          <span className="text-[10px] uppercase text-muted-foreground/80 group-open:hidden">
+                            {t("common.expand")}
+                          </span>
+                          <span className="hidden text-[10px] uppercase text-muted-foreground/80 group-open:inline">
+                            {t("common.collapse")}
+                          </span>
+                        </summary>
+                        <div className="mt-2.5 max-w-[70ch] border-t border-border/40 pt-2 font-mono text-[11px] leading-relaxed text-muted-foreground">
+                          {sec.legal_section.text}
+                        </div>
+                      </details>
+                    )}
 
                     <div className="flex items-center justify-between border-t border-info/20 pt-3">
                       <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">

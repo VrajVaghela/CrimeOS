@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import {
   Flame,
   Layers,
@@ -10,13 +11,37 @@ import {
   Filter,
   RefreshCw,
   SlidersHorizontal,
+  Download,
+  Shield,
+  Building2,
+  Calendar,
+  Sparkles,
 } from "lucide-react";
 
 import { useLanguage } from "@/lib/language-context";
 import { getHeatmapPoints, getHeatmapZones, getHeatmapClusters } from "@/lib/api";
 import type { HeatmapPoint, RiskZone, CrimeCluster } from "@/lib/heatmapData";
-import { HeatmapCanvas } from "@/components/heatmap/HeatmapCanvas";
-import { ClusterCard } from "@/components/heatmap/ClusterCard";
+import { SURAT_POLICE_STATIONS, MOCK_HEATMAP_INSIGHT } from "@/lib/heatmapData";
+import { HeatmapIntelligenceRail } from "@/components/heatmap/HeatmapIntelligenceRail";
+import { RankedHotspotsTable } from "@/components/heatmap/RankedHotspotsTable";
+import { TrendAnalysisChart } from "@/components/heatmap/TrendAnalysisChart";
+
+const MapLibreHeatmap = dynamic(
+  () => import("@/components/heatmap/MapLibreHeatmap").then((mod) => mod.MapLibreHeatmap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[520px] lg:h-[600px] w-full rounded-squircle bg-card animate-skeleton border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+        Loading geospatial engine...
+      </div>
+    ),
+  },
+);
+
+import { PageHeader } from "@/components/ui/page-header";
+import { Metric, MetricStrip } from "@/components/ui/metric";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function HeatmapPage() {
   const { t } = useLanguage();
@@ -26,8 +51,13 @@ export default function HeatmapPage() {
   const [clusters, setClusters] = useState<CrimeCluster[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Filters
   const [timeRange, setTimeRange] = useState<number>(30);
+  const [selectedDistrict, setSelectedDistrict] = useState<string>("All");
   const [crimeType, setCrimeType] = useState<string>("All");
+
+  // Camera flyTo target
+  const [flyToCoords, setFlyToCoords] = useState<[number, number] | null>(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -51,239 +81,256 @@ export default function HeatmapPage() {
     loadData();
   }, [timeRange, crimeType]);
 
-  // Derived KPI metrics matching exact prompt specifications
-  const totalPoints = points.length > 0 ? points.length : 359;
+  // Filtered points by district if selected
+  const filteredPoints = useMemo(() => {
+    if (selectedDistrict === "All") return points;
+    const targetZone = zones.find((z) => z.name === selectedDistrict);
+    if (!targetZone) return points;
+
+    // Filter points within proximity of zone center
+    return points.filter((p) => {
+      const dLat = Math.abs(p.lat - targetZone.lat);
+      const dLng = Math.abs(p.lng - targetZone.lng);
+      return dLat < 0.025 && dLng < 0.025;
+    });
+  }, [points, selectedDistrict, zones]);
+
+  // Derived KPI metrics
+  const totalVectors = filteredPoints.length > 0 ? filteredPoints.length : points.length || 359;
   const criticalZones = zones.filter((z) => z.level === "CRITICAL").length;
   const highRiskZones = zones.filter((z) => z.level === "HIGH").length;
   const activeClusters = clusters.length > 0 ? clusters.length : 8;
+  const totalStations = SURAT_POLICE_STATIONS.length;
 
   const crimeTypes = [
     "All",
     "Cyber Fraud",
+    "Robbery",
     "Chain Snatching",
     "Extortion",
     "Vehicle Theft",
     "Assault",
     "Burglary",
     "Drug Offense",
-    "Petty Theft",
-    "Robbery",
   ];
 
+  const handleSelectZoneOnMap = (coords: [number, number]) => {
+    setFlyToCoords(coords);
+    window.scrollTo({ top: 120, behavior: "smooth" });
+  };
+
+  // Export report handler
+  const handleExportReport = () => {
+    const reportData = {
+      jurisdiction: "Surat City Police Commissionerate",
+      timestamp: new Date().toISOString(),
+      timeRangeDays: timeRange,
+      totalVectors,
+      criticalZones,
+      highRiskZones,
+      activeClusters,
+      zones: zones.map((z) => ({
+        name: z.name,
+        risk_score: z.risk_score,
+        level: z.level,
+        coordinates: [z.lat, z.lng],
+      })),
+      aiInsight: MOCK_HEATMAP_INSIGHT,
+    };
+
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Surat_Crime_Heatmap_Intelligence_${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="space-y-6 pb-12 animate-fade-in">
-      {/* ── Header Area ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <Flame className="h-6 w-6 text-primary" />
-            <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
-              {t("heatmap.title")}
-            </h1>
+    <main className="min-w-0 flex-1 bg-background p-6 lg:p-8">
+      <div className="mx-auto flex max-w-7xl animate-fade-up flex-col gap-6">
+        {/* ── Page Header ─────────────────────────────────────────────────────────── */}
+        <PageHeader
+          title={t("heatmap.title")}
+          description={t("heatmap.subtitle")}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadData}
+                disabled={loading}
+                className="gap-1.5 font-mono text-xs"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
+                <span>{t("common.refresh")}</span>
+              </Button>
+
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleExportReport}
+                className="gap-1.5 font-mono text-xs"
+              >
+                <Download className="h-3.5 w-3.5" />
+                <span>{t("heatmap.export_report")}</span>
+              </Button>
+            </div>
+          }
+        />
+
+        {/* ── Filter Toolbar ─────────────────────────────────────────────────────── */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-squircle border border-border bg-card p-3 shadow-sm">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Time Range Selector */}
+            <div className="flex items-center gap-2 rounded-squircle-sm border border-border bg-background px-3 py-1.5 text-xs">
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <span className="font-mono text-[11px] text-muted-foreground whitespace-nowrap">
+                {t("heatmap.filter_time")}:
+              </span>
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(Number(e.target.value))}
+                className="bg-transparent font-mono text-xs font-semibold text-foreground focus:outline-none cursor-pointer"
+              >
+                <option value={7} className="bg-card text-foreground">Last 7 Days</option>
+                <option value={30} className="bg-card text-foreground">Last 30 Days</option>
+                <option value={90} className="bg-card text-foreground">Last 90 Days</option>
+              </select>
+            </div>
+
+            {/* District / Zone Selector */}
+            <div className="flex items-center gap-2 rounded-squircle-sm border border-border bg-background px-3 py-1.5 text-xs">
+              <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <span className="font-mono text-[11px] text-muted-foreground whitespace-nowrap">
+                {t("heatmap.filter_district")}:
+              </span>
+              <select
+                value={selectedDistrict}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSelectedDistrict(val);
+                  if (val !== "All") {
+                    const z = zones.find((item) => item.name === val);
+                    if (z) setFlyToCoords([z.lng, z.lat]);
+                  }
+                }}
+                className="bg-transparent font-mono text-xs font-semibold text-foreground focus:outline-none cursor-pointer max-w-[140px] truncate"
+              >
+                <option value="All" className="bg-card text-foreground">All Districts</option>
+                {zones.map((z) => (
+                  <option key={z.name} value={z.name} className="bg-card text-foreground">
+                    {z.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Crime Type Selector */}
+            <div className="flex items-center gap-2 rounded-squircle-sm border border-border bg-background px-3 py-1.5 text-xs">
+              <Filter className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <span className="font-mono text-[11px] text-muted-foreground whitespace-nowrap">
+                {t("heatmap.filter_crime")}:
+              </span>
+              <select
+                value={crimeType}
+                onChange={(e) => setCrimeType(e.target.value)}
+                className="bg-transparent font-mono text-xs font-semibold text-foreground focus:outline-none cursor-pointer max-w-[130px] truncate"
+              >
+                {crimeTypes.map((type) => (
+                  <option key={type} value={type} className="bg-card text-foreground">
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <p className="mt-1 font-sans text-xs text-muted-foreground">
-            {t("heatmap.subtitle")}
-          </p>
-        </div>
 
-        {/* Filter Controls */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-squircle-sm border border-border bg-card px-3 py-1.5 text-xs shadow-sm">
-            <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-muted-foreground font-mono">Time Range:</span>
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(Number(e.target.value))}
-              className="bg-transparent font-mono text-foreground focus:outline-none cursor-pointer"
-            >
-              <option value={7} className="bg-card text-foreground">Last 7 Days</option>
-              <option value={30} className="bg-card text-foreground">Last 30 Days</option>
-              <option value={90} className="bg-card text-foreground">Last 90 Days</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-squircle-sm border border-border bg-card px-3 py-1.5 text-xs shadow-sm">
-            <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-muted-foreground font-mono">Crime Type:</span>
-            <select
-              value={crimeType}
-              onChange={(e) => setCrimeType(e.target.value)}
-              className="bg-transparent font-mono text-foreground focus:outline-none cursor-pointer"
-            >
-              {crimeTypes.map((type) => (
-                <option key={type} value={type} className="bg-card text-foreground">
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            onClick={loadData}
-            disabled={loading}
-            className="flex items-center gap-1.5 rounded-squircle-sm border border-border bg-card px-3 py-1.5 font-mono text-xs font-medium text-foreground transition-all duration-130 hover:border-primary hover:text-primary disabled:opacity-50 cursor-pointer shadow-sm"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
-            <span>{t("common.refresh")}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* ── Top KPI Bar ───────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {/* Total Points Card */}
-        <div className="rounded-squircle border border-border bg-card p-4 transition-all duration-130 hover:border-info/50 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t("heatmap.stat_total")}
+          {/* Quick Active Filter Indicator */}
+          <div className="hidden sm:flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            <span>
+              {filteredPoints.length} active incidents plotted
             </span>
-            <MapPin className="h-4 w-4 text-info" />
           </div>
-          <div className="mt-2 font-mono text-3xl font-bold text-info tabular-nums">
-            {totalPoints}
-          </div>
-          <p className="mt-1 font-mono text-[10px] text-muted-foreground">
-            Geospatial incident vectors
-          </p>
         </div>
 
-        {/* Critical Zones Card */}
-        <div className="rounded-squircle border border-border bg-card p-4 transition-all duration-130 hover:border-destructive/50 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t("heatmap.stat_critical")}
-            </span>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
+        {/* ── Top 4 KPI Metrics Strip ────────────────────────────────────────────── */}
+        <MetricStrip columns={4}>
+          <Metric
+            label={t("heatmap.stat_total")}
+            value={totalVectors}
+            hint="Georeferenced incidents"
+            tone="default"
+          />
+          <Metric
+            label={t("heatmap.stat_critical")}
+            value={criticalZones}
+            hint="Risk score > 85.0"
+            tone={criticalZones > 0 ? "critical" : "default"}
+          />
+          <Metric
+            label={t("heatmap.stat_clusters")}
+            value={activeClusters}
+            hint="Density macro rings"
+            tone={activeClusters > 0 ? "attention" : "default"}
+          />
+          <Metric
+            label={t("heatmap.stat_stations")}
+            value={totalStations}
+            hint="Commissionerate grid units"
+            tone="success"
+          />
+        </MetricStrip>
+
+        {/* ── Main Command Grid: Map Workspace + Right Intelligence Rail ──────────── */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-stretch">
+          {/* Dominant Map Workspace (8 Cols on LG) */}
+          <div className="lg:col-span-8 flex flex-col">
+            <MapLibreHeatmap
+              points={filteredPoints}
+              zones={zones}
+              selectedLocation={flyToCoords}
+              className="h-full flex-1 flex flex-col"
+            />
           </div>
-          <div className="mt-2 font-mono text-3xl font-bold text-destructive tabular-nums">
-            {criticalZones}
+
+          {/* Right Intelligence Rail (4 Cols on LG) */}
+          <div className="lg:col-span-4 flex flex-col">
+            <HeatmapIntelligenceRail
+              points={filteredPoints}
+              zones={zones}
+              clusters={clusters}
+              selectedCrimeType={crimeType}
+              onSelectCrimeType={(selectedType) => setCrimeType(selectedType)}
+              insight={MOCK_HEATMAP_INSIGHT}
+              className="h-full flex-1 flex flex-col justify-between"
+            />
           </div>
-          <p className="mt-1 font-mono text-[10px] text-muted-foreground">
-            Risk score &gt; 85.0
-          </p>
         </div>
 
-        {/* High Risk Zones Card */}
-        <div className="rounded-squircle border border-border bg-card p-4 transition-all duration-130 hover:border-amber-500/50 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t("heatmap.stat_high")}
-            </span>
-            <Activity className="h-4 w-4 text-amber-400" />
+        {/* ── Lower Operational Grid: Ranked Hotspots Table + 7-Day Trend Analysis ── */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
+          {/* Ranked Hotspots Sectors (7 Cols on LG) */}
+          <div className="lg:col-span-7">
+            <RankedHotspotsTable
+              zones={zones}
+              clusters={clusters}
+              onSelectZone={handleSelectZoneOnMap}
+            />
           </div>
-          <div className="mt-2 font-mono text-3xl font-bold text-amber-400 tabular-nums">
-            {highRiskZones}
-          </div>
-          <p className="mt-1 font-mono text-[10px] text-muted-foreground">
-            Risk score 65.0 - 84.9
-          </p>
-        </div>
 
-        {/* Active Clusters Card */}
-        <div className="rounded-squircle border border-border bg-card p-4 transition-all duration-130 hover:border-purple-500/50 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t("heatmap.stat_clusters")}
-            </span>
-            <Layers className="h-4 w-4 text-purple-400" />
-          </div>
-          <div className="mt-2 font-mono text-3xl font-bold text-purple-400 tabular-nums">
-            {activeClusters}
-          </div>
-          <p className="mt-1 font-mono text-[10px] text-muted-foreground">
-            Density macro rings
-          </p>
-        </div>
-      </div>
-
-      {/* ── Main Heatmap Canvas Viewport ────────────────────────────────────────────── */}
-      <div className="space-y-2">
-        <HeatmapCanvas points={points} zones={zones} />
-      </div>
-
-      {/* ── Bottom Panel: Active Crime Clusters ───────────────────────────────────── */}
-      <div className="space-y-4 pt-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-primary" />
-            <h2 className="font-heading text-base font-semibold text-foreground tracking-tight">
-              {t("heatmap.clusters_title")}
-            </h2>
-          </div>
-          <span className="font-mono text-xs text-muted-foreground">
-            Showing top active density hotspots
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {clusters.slice(0, 4).map((cluster, idx) => (
-            <ClusterCard key={idx} cluster={cluster} />
-          ))}
-        </div>
-      </div>
-
-      {/* ── Zone Risk Classification Table ──────────────────────────────────────────── */}
-      <div className="space-y-4 pt-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-info" />
-            <h2 className="font-heading text-base font-semibold text-foreground tracking-tight">
-              {t("heatmap.zone_breakdown")}
-            </h2>
-          </div>
-          <span className="font-mono text-xs text-muted-foreground">
-            Structured administrative zone classification
-          </span>
-        </div>
-
-        <div className="overflow-hidden rounded-squircle border border-border bg-card shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left font-sans text-xs">
-              <thead className="border-b border-border bg-card font-mono text-[11px] font-semibold text-info uppercase tracking-wider">
-                <tr>
-                  <th className="px-4 py-3">District / Zone</th>
-                  <th className="px-4 py-3">Risk Score</th>
-                  <th className="px-4 py-3">Classification</th>
-                  <th className="px-4 py-3">Center Coordinates</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60 font-mono">
-                {zones.map((zone, idx) => {
-                  const badgeColor =
-                    zone.level === "CRITICAL"
-                      ? "bg-destructive/10 text-destructive border-destructive/30"
-                      : zone.level === "HIGH"
-                      ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                      : zone.level === "MODERATE"
-                      ? "bg-info/10 text-info border-info/30"
-                      : "bg-success/10 text-success border-success/30";
-
-                  return (
-                    <tr key={idx} className="transition-colors hover:bg-white/[0.02]">
-                      <td className="px-4 py-3 font-semibold text-foreground">
-                        {zone.name}
-                      </td>
-                      <td className="px-4 py-3 text-foreground font-bold tabular-nums">
-                        {zone.risk_score.toFixed(1)} / 100
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-block rounded-squircle-sm px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider ${badgeColor}`}
-                        >
-                          {zone.level}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground text-[11px]">
-                        {zone.lat.toFixed(3)}° N, {zone.lng.toFixed(3)}° E
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          {/* 7-Day Temporal Trend Chart (5 Cols on LG) */}
+          <div className="lg:col-span-5">
+            <TrendAnalysisChart clusters={clusters} />
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

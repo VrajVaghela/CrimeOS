@@ -23,6 +23,31 @@ export interface CrimeCluster {
   trend: number[]; // 7-day trend
 }
 
+export interface PoliceStation {
+  id: string;
+  name: string;
+  division: string;
+  lat: number;
+  lng: number;
+  contact: string;
+  activeOfficers: number;
+}
+
+export const SURAT_POLICE_STATIONS: PoliceStation[] = [
+  { id: "PS-01", name: "Surat City Police Commissionerate", division: "HQ Central", lat: 21.1765, lng: 72.8082, contact: "+91 261 240 1000", activeOfficers: 42 },
+  { id: "PS-02", name: "Athwa Police Station", division: "Zone 1", lat: 21.1718, lng: 72.8015, contact: "+91 261 266 5410", activeOfficers: 28 },
+  { id: "PS-03", name: "Chowk Bazaar Police Station", division: "Zone 1", lat: 21.2012, lng: 72.8284, contact: "+91 261 242 3311", activeOfficers: 34 },
+  { id: "PS-04", name: "Varachha Police Station", division: "Zone 2", lat: 21.2185, lng: 72.8682, contact: "+91 261 254 9901", activeOfficers: 31 },
+  { id: "PS-05", name: "Katargam Police Station", division: "Zone 2", lat: 21.2334, lng: 72.8271, contact: "+91 261 248 1120", activeOfficers: 26 },
+  { id: "PS-06", name: "Udhna Police Station", division: "Zone 3", lat: 21.1551, lng: 72.8423, contact: "+91 261 227 4488", activeOfficers: 30 },
+  { id: "PS-07", name: "Rander Police Station", division: "Zone 4", lat: 21.2152, lng: 72.7885, contact: "+91 261 276 0033", activeOfficers: 24 },
+  { id: "PS-08", name: "Adajan Police Station", division: "Zone 4", lat: 21.1963, lng: 72.7841, contact: "+91 261 278 4422", activeOfficers: 29 },
+  { id: "PS-09", name: "Limbayat Police Station", division: "Zone 3", lat: 21.1820, lng: 72.8690, contact: "+91 261 239 8810", activeOfficers: 27 },
+  { id: "PS-10", name: "Pandesara Police Station", division: "Zone 3", lat: 21.1350, lng: 72.8250, contact: "+91 261 289 1200", activeOfficers: 25 },
+  { id: "PS-11", name: "Sachin Police Station", division: "Zone 3", lat: 21.0820, lng: 72.8490, contact: "+91 261 239 5500", activeOfficers: 22 },
+  { id: "PS-12", name: "Sarthana Police Station", division: "Zone 2", lat: 21.2360, lng: 72.9050, contact: "+91 261 257 6622", activeOfficers: 25 },
+];
+
 // ── Official Surat Municipal Corporation (SMC) Outer Boundary Silhouette ──────
 export const SURAT_OUTER_BOUNDARY: Array<[number, number]> = [
   // Top North Extension (Kosad / Katargam North)
@@ -316,3 +341,72 @@ export function generateMockPoints(days: number = 30, crimeTypeFilter: string = 
 
   return points;
 }
+
+export interface GeoJSONFeature<G = { type: "Point"; coordinates: [number, number] }, P = Record<string, any>> {
+  type: "Feature";
+  id?: string | number;
+  geometry: G;
+  properties: P;
+}
+
+export interface GeoJSONFeatureCollection<G = { type: "Point"; coordinates: [number, number] }, P = Record<string, any>> {
+  type: "FeatureCollection";
+  features: GeoJSONFeature<G, P>[];
+}
+
+export function pointsToGeoJSON(points: HeatmapPoint[]): GeoJSONFeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: points.map((p, idx) => ({
+      type: "Feature",
+      id: idx,
+      geometry: {
+        type: "Point",
+        coordinates: [p.lng, p.lat],
+      },
+      properties: {
+        weight: p.weight,
+        type: p.type,
+      },
+    })),
+  };
+}
+
+export function stationsToGeoJSON(stations: PoliceStation[]): GeoJSONFeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: stations.map((s) => ({
+      type: "Feature",
+      id: s.id,
+      geometry: {
+        type: "Point",
+        coordinates: [s.lng, s.lat],
+      },
+      properties: {
+        id: s.id,
+        name: s.name,
+        division: s.division,
+        contact: s.contact,
+        activeOfficers: s.activeOfficers,
+      },
+    })),
+  };
+}
+
+export interface HeatmapAiInsight {
+  title: string;
+  sopCitation: string;
+  legalBasis: string;
+  summary: string;
+  recommendation: string;
+  confidence: number;
+}
+
+export const MOCK_HEATMAP_INSIGHT: HeatmapAiInsight = {
+  title: "Athwa & City Core Density Anomaly",
+  sopCitation: "SOP-GUJ-PATROL-04 (High-Density Night Corridor)",
+  legalBasis: "BNSS Section 173 / BNS Section 111 (Organized Syndicate Crime)",
+  summary: "Spatial kernel clustering indicates a 22.4% surge in financial cyber fraud reports across Vesu-Athwa corridor correlating with evening commercial transactions.",
+  recommendation: "Deploy 2 additional mobile cyber-surveillance units along Athwa-Dumas Road during 18:00–23:00 window and establish instant bank freeze coordination at Chowk Bazaar.",
+  confidence: 94.8,
+};

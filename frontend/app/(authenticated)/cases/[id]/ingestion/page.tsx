@@ -12,6 +12,7 @@ import {
   FileText,
 } from "lucide-react";
 
+import { AiContentCard } from "@/components/ai-content-card";
 import { EntityReviewField } from "@/components/entity-review-field";
 import { FileUploadZone } from "@/components/file-upload-zone";
 import { ProcessingCard } from "@/components/processing-card";
@@ -203,7 +204,9 @@ export default function IngestionPage() {
               </CardHeader>
               <CardContent>
                 {complaint.raw_text ? (
-                  <TranslatedTextBlock content={complaint.raw_text} autoTranslate={false} />
+                  <div className="max-w-[70ch] text-sm leading-relaxed text-foreground">
+                    <TranslatedTextBlock content={complaint.raw_text} autoTranslate={false} />
+                  </div>
                 ) : (
                   <div className="flex flex-col gap-2">
                     {[90, 75, 80, 60, 70].map((w) => (
@@ -214,18 +217,13 @@ export default function IngestionPage() {
               </CardContent>
             </Card>
 
-            <div className="rounded-squircle border border-info/30 bg-info/[0.04] p-5">
-              <div className="mb-4 flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5 shrink-0 text-info" />
-                <h3 className="font-heading text-sm font-semibold text-info">
-                  {t("ingestion.english_translation")}
-                </h3>
-                <Badge variant="info" className="ml-auto text-[10px]">
-                  {t("ingestion.ai_suggested")}
-                </Badge>
-              </div>
+            <AiContentCard
+              title={t("ingestion.english_translation")}
+            >
               {complaint.translated_text ? (
-                <TranslatedTextBlock content={complaint.translated_text} />
+                <div className="max-w-[70ch] text-sm leading-relaxed text-foreground">
+                  <TranslatedTextBlock content={complaint.translated_text} />
+                </div>
               ) : (
                 <div className="flex flex-col gap-2">
                   {[85, 70, 90, 55, 75].map((w) => (
@@ -233,7 +231,7 @@ export default function IngestionPage() {
                   ))}
                 </div>
               )}
-            </div>
+            </AiContentCard>
           </div>
 
           <Separator label={t("ingestion.extracted_entities")} />

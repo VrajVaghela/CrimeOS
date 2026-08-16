@@ -72,7 +72,7 @@ class LedgerService:
                     "ANALYSIS_FAILED"
                 ])
             )
-            .order_by(AuditEvent.created_at.desc())
+            .order_by(AuditEvent.created_at.desc(), AuditEvent.id.desc())
             .limit(1)
         )
         row = db.scalar(stmt)
@@ -131,7 +131,7 @@ class LedgerService:
                     "ANALYSIS_FAILED"
                 ])
             )
-            .order_by(AuditEvent.created_at.asc())
+            .order_by(AuditEvent.created_at.asc(), AuditEvent.id.asc())
         )
         entries = db.scalars(stmt).all()
 
@@ -382,14 +382,26 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str, actor_id: uuid.UUI
             db.add(timeline_event)
 
         # Update EvidenceFile tags with full report
+        summary_text = report_data.get("summary") or "Video forensic analysis complete."
+        crime_summary_text = report_data.get("crime_summary")
+        entities = report_data.get("entities_detected", [])
+        tags = ["cctv", "video_evidence", f"risk_{risk_level.lower()}"]
+        for ent in entities[:4]:
+            tag_clean = ent.lower().replace(" ", "_").replace(":", "_")
+            if tag_clean not in tags:
+                tags.append(tag_clean)
+
         ai_tags = dict(evidence.ai_tags)
         ai_tags.update({
             "video_status": "COMPLETED",
             "progress_percentage": 100,
-            "summary": report_data.get("summary"),
-            "crime_summary": report_data.get("crime_summary"),
+            "description": crime_summary_text or summary_text,
+            "summary": summary_text,
+            "crime_summary": crime_summary_text,
             "risk_evaluation": risk_level,
-            "entities_detected": report_data.get("entities_detected", []),
+            "confidence": 0.95 if not used_fallback else 0.85,
+            "tags": tags,
+            "entities_detected": entities,
             "timeline": report_data.get("timeline"),
             "error_detail": None,
             "provenance": {
@@ -417,11 +429,11 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str, actor_id: uuid.UUI
         )
         db.commit()
 
-        # 4. Cleanup Gemini file and local temp file
+        # 4. Cleanup temporary Gemini Files API upload (keep local evidence file intact for playback)
         if use_gemini and gemini_file_uri:
             try:
                 gemini_client.delete_file(gemini_file_uri)
-                logger.info(f"Deleted Gemini video file: {gemini_file_uri}")
+                logger.info(f"Deleted temporary Gemini video file: {gemini_file_uri}")
                 ledger.append_ledger_event(
                     db=db,
                     case_id=case_id,
@@ -433,14 +445,6 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str, actor_id: uuid.UUI
             except Exception as e:
                 logger.error(f"Failed to delete Gemini file {gemini_file_uri}: {e}")
 
-        # Delete local temp file
-        try:
-            if os.path.exists(filepath):
-                os.remove(filepath)
-                logger.info(f"Deleted local temp file: {filepath}")
-        except Exception as e:
-            logger.error(f"Failed to delete local temp file: {e}")
-
         # Record completion
         ledger.append_ledger_event(
             db=db,
@@ -448,7 +452,7 @@ def analyze_video_task(evidence_id: uuid.UUID, filepath: str, actor_id: uuid.UUI
             event_type="ANALYSIS_COMPLETED",
             payload={
                 "evidence_id": str(evidence_id),
-                "local_file_deleted": not os.path.exists(filepath),
+                "file_persisted": os.path.exists(filepath),
             },
             user_id=actor_id,
         )

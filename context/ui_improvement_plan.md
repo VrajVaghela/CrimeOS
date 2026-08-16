@@ -549,12 +549,122 @@ A 3-step numbered "How it works" block takes significant vertical space in the C
 
 ---
 
-## What NOT to Change
+---
 
-- The color token system (`globals.css` variables) — it's correct and well-structured.
-- The dark-mode-only approach — right for the use case.
-- The Ferrari Red accent rule itself — the problem is violation of it, not the rule.
-- The bilingual label principle for primary actions — keep Hindi/Gujarati on buttons and key CTAs.
-- The `animate-fade-up` entry animations — they're fast (220ms) and appropriate for a product register.
-- The `AnimatedMetric` component itself — just limit its use to one card.
-- The glass/glow utilities — they're well-implemented; the issue is overuse, not the primitives.
+## Phase 15 — Full Frontend Layout, Padding, Card Sizing & AI-Surface Architectural Overhaul Plan
+_Created: 2026-08-16 | Status: COMPLETED & FULLY VERIFIED (2026-08-16)_
+
+### Overview & Core Problems Addressed
+This phase addresses all structural layout defects, padding inconsistencies, disproportionate card dimensions, text clutter, "AI slop" corner/border mismatches, and design system deviations identified across the full application. All 5 steps have been executed and verified with `npm run verify` (`i18n:audit`, `tsc --noEmit`, `next build`).
+
+---
+
+### Step 15.1: Global AI Card & Radius Harmonization (Anti-Slop)
+**Affected Files:**
+- `frontend/components/ai-content-card.tsx`
+- `frontend/app/(authenticated)/cases/[id]/path/page.tsx`
+- `frontend/app/(authenticated)/cases/[id]/ingestion/page.tsx`
+- `frontend/app/(authenticated)/cases/[id]/summary/page.tsx`
+- `frontend/app/(authenticated)/cases/[id]/responses/page.tsx`
+- `frontend/components/timeline-workspace.tsx`
+
+**Identified Issues:**
+1. Outer `AiContentCard` is styled with `rounded-squircle` (12px), but child text blocks inside `path/page.tsx`, `responses/page.tsx`, and `summary/page.tsx` render with `rounded-squircle-sm border border-border/60 bg-background` with hard borders and square inner corners, creating a jarring "round edges with squared border" visual defect.
+2. Inconsistent ad-hoc AI cards in `ingestion/page.tsx:217`, `responses/page.tsx:180`, `summary/page.tsx:171`, and `timeline-workspace.tsx:581` replicate markup instead of consuming the canonical `<AiContentCard>`.
+
+**Target Architecture & Fixes:**
+- Standardize `AiContentCard` to cleanly host child text without nested bordered boxes. Inner blocks inherit the soft `bg-info/[0.04]` surface without harsh solid borders.
+- Enforce the Concentric Radius Rule: `R_inner <= R_outer - padding` across all AI and card containers.
+- Refactor all ad-hoc AI containers across `ingestion`, `summary`, `responses`, and `timeline` to use `<AiContentCard>` consistently.
+
+---
+
+### Step 15.2: Case Overview & Command Center Balancing
+**Affected Files:**
+- `frontend/components/case-command-center.tsx`
+- `frontend/components/entity-pivot-panel.tsx`
+- `frontend/app/(authenticated)/cases/[id]/layout.tsx`
+
+**Identified Issues:**
+1. `EntityPivotPanel` is embedded directly in the left 2-column grid with a large max-height (500px) and a dense 3-column subgrid, stretching the left column to 1800px+ while the right case facts column is only ~600px tall.
+2. The `WorkflowSpine` container has asymmetric padding (`px-5 pb-2 pt-5`) and excessive bottom margin.
+3. Case facts on the right stack with loose vertical margins and redundant line wraps.
+
+**Target Architecture & Fixes:**
+- Rebalance the grid hierarchy: decouple `EntityPivotPanel` into a dedicated full-width collapsible intelligence section or balanced lower grid.
+- Standardize padding on `WorkflowSpine` to uniform `p-5`.
+- Refactor the right-column case facts to a compact key-value data list with `px-4 py-3` row density, matching the `MetricStrip` baseline.
+
+---
+
+### Step 15.3: Legal Path & Requests Page Streamlining
+**Affected Files:**
+- `frontend/app/(authenticated)/cases/[id]/path/page.tsx`
+- `frontend/app/(authenticated)/cases/[id]/requests/page.tsx`
+- `frontend/components/request-readiness-checklist.tsx`
+- `frontend/components/path-stepper.tsx`
+
+**Identified Issues:**
+1. `path/page.tsx`: Legal grounding cards on the right rail embed `max-h-24 overflow-y-auto` scrollboxes inside already vertically stacked cards, forcing tiny inner scrollbars.
+2. `requests/page.tsx`: Every request draft renders a full-height card with complete checklist breakdowns, template inputs, and action buttons, creating 2000px+ of vertical scrolling.
+3. Stepper cards on `path/page.tsx` have `p-5` with loose spacing between titles and bilingual blocks.
+
+**Target Architecture & Fixes:**
+- Remove nested scrollboxes (`max-h-24`) from legal section cards; use clear collapsible accordions or direct readable paragraphs with `max-w-[70ch]`.
+- Convert `requests/page.tsx` draft cards to a compact master-detail or accordion format, reducing vertical page height by over 50%.
+- Streamline `RequestReadinessChecklist` item rows with unified badge pills and compact recommendation callouts.
+
+---
+
+### Step 15.4: Standalone Intelligence Pages Design System Alignment
+**Affected Files:**
+- `frontend/app/(authenticated)/alert-center/page.tsx`
+- `frontend/app/(authenticated)/criminal-network/page.tsx`
+- `frontend/app/(authenticated)/repeat-offenders/page.tsx`
+- `frontend/app/(authenticated)/heatmap/page.tsx`
+- `frontend/components/heatmap/HeatmapIntelligenceRail.tsx`
+- `frontend/components/heatmap/RankedHotspotsTable.tsx`
+- `frontend/components/heatmap/TrendAnalysisChart.tsx`
+
+**Identified Issues:**
+1. `criminal-network/page.tsx`: Gang structures grid is `lg:grid-cols-8` (8 columns), squishing gang cards into ~100px width with truncated labels. Uses hardcoded `bg-black`, custom hex palettes (`#3f1218`, `#ef4444`), non-standard `rounded-[10px]`, and lacks `PageHeader` + `useLanguage`.
+2. `alert-center/page.tsx`: Uses hardcoded `bg-black`, custom hover lifts (`-translate-y-0.5`), custom `KpiCard` instead of `MetricStrip`/`Metric`, and unlocalized strings.
+3. `repeat-offenders/page.tsx`: Table is cramped at `lg:col-span-7` with 6 columns, while the right inspector (`lg:col-span-5`) has dead whitespace.
+4. `heatmap/`: Intelligence rail has cramped 2-column buttons for 9 crime types, and components use non-token drop shadows (`shadow-sm`) and ad-hoc badges.
+
+**Target Architecture & Fixes:**
+- `criminal-network/page.tsx`: Rebalance gang grid to `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4`. Replace custom headers and hardcoded hex colors with `PageHeader` and Ferrari Edition semantic tokens (`bg-card`, `bg-surface-alt`, `border-border`, `text-info`, `text-destructive`). Wire up `useLanguage`.
+- `alert-center/page.tsx`: Replace custom `KpiCard` with `MetricStrip` and `Metric`. Replace `bg-black` with design system tokens. Eliminate hover lifts (Flat-at-Rest compliance).
+- `repeat-offenders/page.tsx`: Rebalance grid to `lg:col-span-8` table vs `lg:col-span-4` profile inspector.
+- `heatmap/`: Clean up `HeatmapIntelligenceRail`, standardize crime filter buttons, and align badges with the design token scale.
+
+---
+
+### Step 15.5: Media, Timeline & Evidence Workspace Refinement
+**Affected Files:**
+- `frontend/components/evidence-review-workspace.tsx`
+- `frontend/components/video-evidence-workspace.tsx`
+- `frontend/components/timeline-workspace.tsx`
+- `frontend/components/response-correlation-panel.tsx`
+
+**Identified Issues:**
+1. `evidence-review-workspace.tsx`: Mixed padding (`p-6`, `p-4`, `p-3`, `p-2`), raw HTML `<select>`/`<input>` tags without standard UI styles, and cluttered fact marker cards.
+2. `video-evidence-workspace.tsx`: Active analysis screen has oversized padding (`p-6 md:p-8 space-y-6`), and completed view has hardcoded `h-[380px]` timeline scrollbox.
+3. `timeline-workspace.tsx`: Right column CCTV dropzone has excessive `py-10` padding, plus inline 3-step guide, creating ~900px of sticky height.
+4. `response-correlation-panel.tsx`: Dense `<dl>` with raw JSON keys and cluttered table cells in correlation reasons.
+
+**Target Architecture & Fixes:**
+- Standardize all workspace form controls to use `@/components/ui/input`, `@/components/ui/select`, and `@/components/ui/textarea` with `rounded-squircle-sm`.
+- Optimize CCTV dropzone padding from `py-10` to `py-5`, and convert 3-step guide to a clean collapsible help popover.
+- Clean correlation table cells: display key attributes in a structured 2-line layout rather than a dense raw JSON dump.
+- Balance video player (7 cols) and forensic report/timeline (5 cols) with auto-fitting flex heights.
+
+---
+
+## What NOT to Change
+- The color token system (`globals.css` variables) — it is mathematically solid.
+- The dark-mode-only architecture (`#0b0b0b` carbon black base).
+- The single-active-language i18n architecture (`useLanguage` and translation dictionaries).
+- Backend API endpoints and type contracts.
+- Core business logic, legal statutory mappings, and OSINT polling workflows.
+

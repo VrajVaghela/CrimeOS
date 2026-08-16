@@ -152,7 +152,7 @@ export function HeatmapCanvas({ points, zones }: HeatmapCanvasProps) {
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden rounded-[12px] border border-border bg-[#0a0f1a] shadow-2xl select-none ${
+      className={`relative overflow-hidden rounded-squircle border border-border bg-[#0a0f1a] shadow-sm select-none ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
       onWheel={handleWheel}
@@ -168,7 +168,7 @@ export function HeatmapCanvas({ points, zones }: HeatmapCanvasProps) {
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
         className="w-full h-auto max-h-[520px]"
-        style={{ minHeight: 480 }}
+        style={{ minHeight: 440 }}
       >
         <defs>
           <filter id="blur2">
@@ -279,8 +279,6 @@ export function HeatmapCanvas({ points, zones }: HeatmapCanvasProps) {
             TAPI RIVER S-CURVE
           </text>
 
-
-
           {/* ── Layer 4: Dense Glowing Micro-scatter Crime Points ───────────── */}
           {points.slice(0, 600).map((p, i) => {
             const cx = toX(p.lng);
@@ -326,39 +324,39 @@ export function HeatmapCanvas({ points, zones }: HeatmapCanvasProps) {
       </svg>
 
       {/* ── Top-Left Floating Pan & Zoom Controls ────────────────────────────── */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5 rounded-squircle border border-border/80 bg-[#0d1520]/85 p-1.5 backdrop-blur-md shadow-lg">
+      <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex flex-col gap-1 rounded-squircle-sm border border-border/80 bg-card/90 p-1.5 backdrop-blur-md shadow-md">
         <button
           onClick={handleZoomIn}
           title="Zoom In (+)"
-          className="flex h-8 w-8 items-center justify-center rounded-squircle-sm text-foreground hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors cursor-pointer"
+          className="flex h-7 w-7 items-center justify-center rounded-squircle-sm text-foreground hover:bg-white/[0.08] hover:text-primary transition-colors cursor-pointer"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-3.5 w-3.5" />
         </button>
         <button
           onClick={handleZoomOut}
           title="Zoom Out (-)"
-          className="flex h-8 w-8 items-center justify-center rounded-squircle-sm text-foreground hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors cursor-pointer"
+          className="flex h-7 w-7 items-center justify-center rounded-squircle-sm text-foreground hover:bg-white/[0.08] hover:text-primary transition-colors cursor-pointer"
         >
-          <Minus className="h-4 w-4" />
+          <Minus className="h-3.5 w-3.5" />
         </button>
         <div className="my-0.5 h-px bg-border/60" />
         <button
           onClick={handleReset}
           title="Reset View"
-          className="flex h-8 w-8 items-center justify-center rounded-squircle-sm text-foreground hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors cursor-pointer"
+          className="flex h-7 w-7 items-center justify-center rounded-squircle-sm text-foreground hover:bg-white/[0.08] hover:text-info transition-colors cursor-pointer"
         >
-          <RotateCcw className="h-3.5 w-3.5" />
+          <RotateCcw className="h-3 w-3" />
         </button>
-        <div className="px-1 py-0.5 text-center font-mono text-[9px] font-bold text-cyan-400">
+        <div className="px-1 py-0.5 text-center font-mono text-[9px] font-bold text-info">
           {Math.round(zoom * 100)}%
         </div>
       </div>
 
       {/* ── Top-Right Floating Risk Legend ─────────────────────────────────── */}
-      <div className="absolute top-4 right-4 z-10 rounded-squircle border border-border/80 bg-[#0d1520]/85 p-3.5 backdrop-blur-md text-xs font-mono space-y-2 shadow-lg pointer-events-auto">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 rounded-squircle-sm border border-border/80 bg-card/90 p-2.5 sm:p-3 backdrop-blur-md text-xs font-mono space-y-1.5 shadow-md pointer-events-auto">
         <div className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase mb-1 flex items-center justify-between gap-4">
           <span>SMC SECTOR MAP</span>
-          <span className="flex items-center gap-1 text-[9px] text-cyan-400/80 font-normal lowercase">
+          <span className="flex items-center gap-1 text-[9px] text-info font-normal lowercase">
             <Move className="h-3 w-3" /> drag &amp; scroll
           </span>
         </div>
@@ -370,13 +368,13 @@ export function HeatmapCanvas({ points, zones }: HeatmapCanvasProps) {
         ].map(([level, color]) => (
           <div key={level} className="flex items-center gap-2">
             <span
-              className="h-2.5 w-2.5 rounded-full"
+              className="h-2 w-2 rounded-full"
               style={{ backgroundColor: color }}
             />
-            <span className="text-foreground text-[11px] font-medium">{level}</span>
+            <span className="text-foreground text-[10px] font-medium">{level}</span>
           </div>
         ))}
-        <div className="border-t border-border/60 pt-2 mt-2 text-muted-foreground text-[10px]">
+        <div className="border-t border-border/60 pt-1.5 mt-1.5 text-muted-foreground text-[9px]">
           {points.length} incidents plotted
         </div>
       </div>

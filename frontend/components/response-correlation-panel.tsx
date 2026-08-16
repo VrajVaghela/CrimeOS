@@ -22,6 +22,50 @@ interface ResponseCorrelationPanelProps {
   onPromote: (rowIndex: number) => Promise<void>;
 }
 
+const PRIORITY_KEYS = [
+  "account_number",
+  "account_no",
+  "account",
+  "phone_number",
+  "phone",
+  "mobile",
+  "subscriber_number",
+  "calling_number",
+  "called_number",
+  "call_duration",
+  "duration",
+  "duration_seconds",
+  "amount",
+  "transaction_amount",
+  "timestamp",
+  "datetime",
+  "date",
+  "time",
+  "ip_address",
+  "ip",
+  "imei",
+  "imsi",
+  "location",
+  "cell_id",
+];
+
+function getPrioritizedAttributes(sourceRow: Record<string, unknown>): [string, unknown][] {
+  const entries = Object.entries(sourceRow || {});
+  if (entries.length <= 3) return entries;
+
+  const sorted = [...entries].sort((a, b) => {
+    const aLower = a[0].toLowerCase();
+    const bLower = b[0].toLowerCase();
+    const aIdx = PRIORITY_KEYS.findIndex((pk) => aLower.includes(pk));
+    const bIdx = PRIORITY_KEYS.findIndex((pk) => bLower.includes(pk));
+    const aScore = aIdx >= 0 ? aIdx : 999;
+    const bScore = bIdx >= 0 ? bIdx : 999;
+    return aScore - bScore;
+  });
+
+  return sorted.slice(0, 3);
+}
+
 export function ResponseCorrelationPanel({
   correlations,
   onPromote,
@@ -61,7 +105,7 @@ export function ResponseCorrelationPanel({
           : t("command_center.low_confidence");
 
     return (
-      <Badge variant={variant} className="font-mono text-[10px] font-semibold">
+      <Badge variant={variant} className="font-mono text-[10px] font-semibold py-0 px-1.5 rounded-sm">
         {percentage}% · {label}
       </Badge>
     );
@@ -80,19 +124,19 @@ export function ResponseCorrelationPanel({
         <Table>
           <TableHeader className="bg-muted/40">
             <TableRow>
-              <TableHead className="w-[10%] font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <TableHead className="w-[8%] font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 {t("responses.row_label")}
               </TableHead>
               <TableHead className="w-[30%] font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 {t("responses.raw_provider_data")}
               </TableHead>
-              <TableHead className="w-[35%] font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <TableHead className="w-[37%] font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 {t("responses.correlation_title")}
               </TableHead>
-              <TableHead className="w-[15%] font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <TableHead className="w-[13%] font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 {t("responses.linked_path_step")}
               </TableHead>
-              <TableHead className="w-[10%] text-right font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <TableHead className="w-[12%] text-right font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 {t("responses.actions")}
               </TableHead>
             </TableRow>
@@ -107,6 +151,9 @@ export function ResponseCorrelationPanel({
             ) : (
               correlations.map((corr, idx) => {
                 const isFlagged = corr.matched_entity_id !== null;
+                const totalEntries = Object.keys(corr.source_row || {}).length;
+                const prioritized = getPrioritizedAttributes(corr.source_row);
+
                 return (
                   <TableRow
                     key={corr.id}
@@ -119,41 +166,52 @@ export function ResponseCorrelationPanel({
                     </TableCell>
 
                     <TableCell>
-                      <dl className="flex max-w-[320px] flex-col gap-1 overflow-hidden">
-                        {Object.entries(corr.source_row).map(([k, v]) => (
+                      <div className="flex max-w-[280px] flex-col gap-1">
+                        {prioritized.map(([k, v]) => (
                           <div
                             key={k}
-                            className="flex justify-between gap-2 font-mono text-[11px] leading-none"
+                            className="flex items-center justify-between gap-2 font-mono text-[11px] leading-tight"
                           >
-                            <dt className="uppercase text-muted-foreground">
-                              {k.replace(/_/g, " ")}
-                            </dt>
-                            <dd className="truncate font-semibold text-foreground">{String(v)}</dd>
+                            <span className="uppercase text-muted-foreground truncate font-medium text-[10px]">
+                              {k.replace(/_/g, " ")}:
+                            </span>
+                            <span className="truncate font-semibold text-foreground max-w-[160px]" title={String(v)}>
+                              {String(v)}
+                            </span>
                           </div>
                         ))}
-                      </dl>
+                        {totalEntries > 3 && (
+                          <span className="font-mono text-[10px] text-muted-foreground/60">
+                            +{totalEntries - 3} {t("responses.records")}
+                          </span>
+                        )}
+                      </div>
                     </TableCell>
 
                     <TableCell className="py-3">
-                      <div className="flex flex-col gap-1.5">
+                      <div className="flex flex-col gap-1.5 min-w-[240px]">
+                        {/* Line 1: Icon + reason description */}
                         <div className="flex items-start gap-1.5">
                           {isFlagged ? (
-                            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" />
                           ) : (
-                            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-info" />
+                            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
                           )}
-                          <div className="min-w-0">
-                            <span className="block text-xs font-semibold leading-normal text-foreground">
-                              {corr.reason}
-                            </span>
-                            {corr.matched_entity_value && (
-                              <span className="mt-1 inline-block rounded bg-secondary px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
-                                {t("responses.entity_match")}: {corr.matched_entity_value}
-                              </span>
-                            )}
-                          </div>
+                          <span className="text-xs font-semibold leading-snug text-foreground">
+                            {corr.reason}
+                          </span>
                         </div>
-                        <div className="pt-0.5">{renderConfidenceBadge(corr.confidence)}</div>
+
+                        {/* Line 2: Entity match tag + confidence badge below */}
+                        <div className="flex items-center gap-2 flex-wrap pl-5">
+                          {corr.matched_entity_value && (
+                            <span className="inline-flex items-center gap-1 rounded-sm bg-secondary px-1.5 py-0.5 font-mono text-[10px] text-secondary-foreground border border-border/50">
+                              <span className="text-muted-foreground">{t("responses.entity_match")}:</span>
+                              <span className="font-semibold text-foreground">{corr.matched_entity_value}</span>
+                            </span>
+                          )}
+                          {renderConfidenceBadge(corr.confidence)}
+                        </div>
                       </div>
                     </TableCell>
 
@@ -174,6 +232,7 @@ export function ResponseCorrelationPanel({
                           disabled={promotingIndex === idx}
                           loading={promotingIndex === idx}
                           onClick={() => handlePromote(idx)}
+                          className="h-7 text-xs"
                         >
                           {promotingIndex !== idx && <Bookmark className="h-3 w-3" />}
                           {t("responses.promote_to_case")}

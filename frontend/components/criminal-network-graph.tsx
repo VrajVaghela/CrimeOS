@@ -16,16 +16,30 @@ export default function CriminalNetworkGraph({
   const ref = useRef<SVGSVGElement>(null);
   const [dims, setDims] = useState({ w: 800, h: 520 });
 
-  // Responsive width tracking
+  // Responsive width tracking via ResizeObserver
   useEffect(() => {
-    const handle = () => {
-      if (ref.current?.parentElement) {
-        setDims({ w: ref.current.parentElement.clientWidth, h: 520 });
-      }
+    const parent = ref.current?.parentElement;
+    if (!parent) return;
+
+    let rAFId: number | null = null;
+    const observer = new ResizeObserver((entries) => {
+      if (rAFId) cancelAnimationFrame(rAFId);
+      rAFId = requestAnimationFrame(() => {
+        const entry = entries[0];
+        if (entry) {
+          const width = entry.contentRect.width || parent.clientWidth;
+          if (width > 0) {
+            setDims({ w: width, h: 520 });
+          }
+        }
+      });
+    });
+
+    observer.observe(parent);
+    return () => {
+      if (rAFId) cancelAnimationFrame(rAFId);
+      observer.disconnect();
     };
-    handle();
-    window.addEventListener("resize", handle);
-    return () => window.removeEventListener("resize", handle);
   }, []);
 
   // Build / rebuild force simulation whenever nodes, edges, or dims change
@@ -56,7 +70,7 @@ export default function CriminalNetworkGraph({
         "link",
         d3
           .forceLink<NetworkNode & d3.SimulationNodeDatum, NetworkEdge & d3.SimulationLinkDatum<NetworkNode & d3.SimulationNodeDatum>>(simEdges)
-          .id((d) => d.id)
+          .id((d: NetworkNode & d3.SimulationNodeDatum) => d.id)
           .distance(90)
           .strength(0.3)
       )
@@ -70,9 +84,9 @@ export default function CriminalNetworkGraph({
       .selectAll<SVGLineElement, typeof simEdges[0]>("line")
       .data(simEdges)
       .join("line")
-      .attr("stroke", (d) => (d.type === "gang_link" ? "#ef4444" : d.type === "financial" ? "#f59e0b" : "#1e3a5f"))
-      .attr("stroke-width", (d) => (d.type === "gang_link" ? 1.5 : 0.8))
-      .attr("stroke-opacity", (d) => (d.type === "gang_link" ? 0.5 : d.type === "financial" ? 0.4 : 0.2));
+      .attr("stroke", (d: typeof simEdges[0]) => (d.type === "gang_link" ? "#ef4444" : d.type === "financial" ? "#f59e0b" : "#1e3a5f"))
+      .attr("stroke-width", (d: typeof simEdges[0]) => (d.type === "gang_link" ? 1.5 : 0.8))
+      .attr("stroke-opacity", (d: typeof simEdges[0]) => (d.type === "gang_link" ? 0.5 : d.type === "financial" ? 0.4 : 0.2));
 
     // ── Nodes ──
     const node = g
@@ -139,8 +153,8 @@ export default function CriminalNetworkGraph({
       .attr("text-anchor", "middle")
       .attr("dy", (d: any) => d.size + 13)
       .attr("font-size", 9)
-      .attr("font-family", "'JetBrains Mono', 'Space Mono', monospace")
-      .attr("fill", "#94a3b8")
+      .attr("font-family", "var(--font-mono), monospace")
+      .attr("fill", "#a89f91")
       .attr("pointer-events", "none");
 
     // Simulation tick
@@ -164,7 +178,7 @@ export default function CriminalNetworkGraph({
       viewBox={`0 0 ${dims.w} ${dims.h}`}
       width="100%"
       height={dims.h}
-      className="rounded-squircle border border-border bg-[#0c0c0c]"
+      className="rounded-squircle border border-border bg-surface-alt"
       aria-label="Criminal network force-directed relationship graph"
     />
   );

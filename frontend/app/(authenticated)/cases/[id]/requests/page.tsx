@@ -7,11 +7,15 @@ import {
   Mail,
   Send,
   CheckCircle,
+  CheckCircle2,
   FileText,
   AlertCircle,
   Sparkles,
   ArrowRight,
   UserCheck,
+  ChevronDown,
+  ChevronUp,
+  ShieldAlert,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -90,6 +94,11 @@ export default function RequestsPage() {
   const [savingEdit, setSavingEdit] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [readinessMap, setReadinessMap] = useState<Record<string, RequestReadinessOut>>({});
+  const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (reqId: string) => {
+    setExpandedMap((prev) => ({ ...prev, [reqId]: !prev[reqId] }));
+  };
 
   useEffect(() => {
     if (caseId) void loadRequests();
@@ -322,9 +331,13 @@ export default function RequestsPage() {
             }
           />
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-3">
             {requests.map((req) => {
               const isLoading = actionLoading === req.id;
+              const isExpanded = expandedMap[req.id] ?? (requests.length === 1 || req.status === "draft");
+              const readiness = readinessMap[req.id];
+              const failedCount = readiness?.items.filter((it) => it.status === "failed").length ?? 0;
+
               return (
                 <Card
                   key={req.id}
@@ -336,130 +349,170 @@ export default function RequestsPage() {
                         : undefined
                   }
                 >
-
-                  <CardHeader>
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                        {/* Provider type is a fact, not a status: one neutral
-                            treatment for all three, so the StatusBadge beside it
-                            is the only coloured thing in the row. */}
-                        <Badge variant="outline" className="font-mono text-[10px] uppercase">
-                          {enumLabel("provider", req.provider_type)}
-                        </Badge>
-                        <StatusBadge status={req.status} />
-                      </div>
-                      <CardTitle className="text-base">
-                        {interpolate(t("requests.request_to"), { provider: req.provider_name })}
-                      </CardTitle>
-                      <CardDescription className="mt-1 flex items-center gap-1.5 font-mono text-xs">
-                        <Mail className="h-3 w-3 shrink-0" />
-                        {req.recipient_email}
-                      </CardDescription>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="flex flex-col gap-4">
-                    {/* A compact pair list, not a full-width justify-between row:
-                        stretching "Template: lers_bank_v3" across the whole card
-                        read as a broken table. */}
-                    <dl className="flex flex-wrap gap-x-6 gap-y-1.5 rounded-squircle-sm border border-border/60 bg-surface-alt px-3 py-2.5 font-mono text-xs">
-                      <div className="flex items-baseline gap-2">
-                        <dt className="text-muted-foreground">{t("requests.template_label")}</dt>
-                        <dd className="text-foreground">{req.template_used}</dd>
-                      </div>
-                      {req.dispatched_at && (
-                        <div className="flex items-baseline gap-2">
-                          <dt className="text-muted-foreground">
-                            {t("requests.dispatched_label")}
-                          </dt>
-                          <dd className="text-foreground">{formatDateTime(req.dispatched_at)}</dd>
+                  <CardHeader className="p-3.5 sm:p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="font-mono text-[10px] uppercase">
+                            {enumLabel("provider", req.provider_type)}
+                          </Badge>
+                          <StatusBadge status={req.status} />
+                          {readiness && (
+                            readiness.is_ready ? (
+                              <span className="flex items-center gap-1 rounded-full border border-success/30 bg-success/15 px-2 py-0.5 font-mono text-[10px] font-medium text-success">
+                                <CheckCircle2 className="h-3 w-3" />
+                                {t("requests.readiness_ready")}
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 rounded-full border border-destructive/30 bg-destructive/15 px-2 py-0.5 font-mono text-[10px] font-medium text-destructive">
+                                <ShieldAlert className="h-3 w-3" />
+                                {interpolate(t("requests.readiness_blocked"), { count: failedCount })}
+                              </span>
+                            )
+                          )}
                         </div>
-                      )}
-                    </dl>
+                        <div className="flex flex-wrap items-baseline gap-2">
+                          <CardTitle className="text-sm font-semibold">
+                            {interpolate(t("requests.request_to"), { provider: req.provider_name })}
+                          </CardTitle>
+                          <CardDescription className="flex items-center gap-1 font-mono text-xs">
+                            <Mail className="h-3 w-3 shrink-0" />
+                            {req.recipient_email}
+                          </CardDescription>
+                        </div>
+                      </div>
 
-                    {readinessMap[req.id] && (
-                      <RequestReadinessChecklist
-                        readiness={readinessMap[req.id]}
-                        onEditClick={() => openEditDialog(req)}
-                        onRoleApprovalClick={() => void handleApprove(req.id)}
-                      />
-                    )}
-                  </CardContent>
+                      <div className="flex shrink-0 items-center gap-2 self-start sm:self-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleExpand(req.id)}
+                          className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+                          aria-expanded={isExpanded}
+                          id={`toggle-expand-${req.id}`}
+                        >
+                          {isExpanded ? (
+                            <>
+                              <ChevronUp className="h-3.5 w-3.5" />
+                              <span className="hidden sm:inline">{t("common.collapse")}</span>
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="h-3.5 w-3.5" />
+                              <span className="hidden sm:inline">{t("requests.view_readiness")}</span>
+                            </>
+                          )}
+                        </Button>
 
-                  <CardFooter>
-                    <Button variant="outline" size="sm" onClick={() => openEditDialog(req)}>
-                      <FileText className="h-3.5 w-3.5" />
-                      {req.status === "draft" && user?.role === "IO"
-                        ? t("requests.edit_draft")
-                        : req.status === "draft"
-                          ? t("requests.view_draft")
-                          : t("requests.view_template")}
-                    </Button>
-
-                    <div className="flex items-center gap-2">
-                      {req.status === "draft" &&
-                        (user?.role === "SHO" ? (
+                        {/* Quick action controls */}
+                        {req.status === "draft" && user?.role === "IO" && (
+                          <Button variant="outline" size="sm" onClick={() => openEditDialog(req)} className="h-8 text-xs">
+                            <FileText className="h-3.5 w-3.5" />
+                            {t("requests.edit_draft")}
+                          </Button>
+                        )}
+                        {req.status === "draft" && user?.role === "SHO" && (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => void handleApprove(req.id)}
                             disabled={
                               isLoading ||
-                              (readinessMap[req.id] &&
-                                readinessMap[req.id].items.some(
+                              (readiness &&
+                                readiness.items.some(
                                   (it) => it.key !== "approval" && it.status === "failed",
                                 ))
                             }
                             loading={isLoading}
+                            className="h-8 text-xs"
                           >
                             {!isLoading && <UserCheck className="h-3.5 w-3.5" />}
                             {t("requests.approve")}
                           </Button>
-                        ) : (
-                          <span className="rounded-squircle-sm border border-warn/30 bg-warn/10 px-2.5 py-1 font-mono text-xs font-medium text-warn">
+                        )}
+                        {req.status === "approved" && (
+                          <Button
+                            size="sm"
+                            onClick={() => void handleDispatch(req.id)}
+                            disabled={isLoading || !readiness?.is_ready}
+                            loading={isLoading}
+                            className="h-8 text-xs"
+                          >
+                            {!isLoading && <Send className="h-3.5 w-3.5" />}
+                            {t("requests.dispatch")}
+                          </Button>
+                        )}
+                        {req.status === "dispatched" && (
+                          <Button
+                            size="sm"
+                            variant="success"
+                            onClick={() => void handleTriggerMockResponse(req.id)}
+                            disabled={isLoading}
+                            loading={isLoading}
+                            className="h-8 text-xs"
+                          >
+                            {!isLoading && <Sparkles className="h-3.5 w-3.5" />}
+                            {t("requests.trigger_mock")}
+                          </Button>
+                        )}
+                        {req.status === "responded" && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => router.push(`/cases/${caseId}/responses`)}
+                            className="h-8 text-xs text-success hover:bg-success/10 hover:text-success"
+                          >
+                            <CheckCircle className="h-3.5 w-3.5" />
+                            {t("requests.received")}
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  {isExpanded && (
+                    <>
+                      <CardContent className="flex flex-col gap-3 px-3.5 pb-3.5 sm:px-4 sm:pb-4">
+                        <dl className="flex flex-wrap gap-x-6 gap-y-1.5 rounded-squircle-sm border border-border/60 bg-surface-alt px-3 py-2 font-mono text-xs">
+                          <div className="flex items-baseline gap-2">
+                            <dt className="text-muted-foreground">{t("requests.template_label")}</dt>
+                            <dd className="text-foreground">{req.template_used}</dd>
+                          </div>
+                          {req.dispatched_at && (
+                            <div className="flex items-baseline gap-2">
+                              <dt className="text-muted-foreground">{t("requests.dispatched_label")}</dt>
+                              <dd className="text-foreground">{formatDateTime(req.dispatched_at)}</dd>
+                            </div>
+                          )}
+                        </dl>
+
+                        {readiness && (
+                          <RequestReadinessChecklist
+                            readiness={readiness}
+                            onEditClick={() => openEditDialog(req)}
+                            onRoleApprovalClick={() => void handleApprove(req.id)}
+                          />
+                        )}
+                      </CardContent>
+
+                      <CardFooter className="flex items-center justify-between border-t border-border/60 px-3.5 py-2.5 sm:px-4">
+                        <Button variant="ghost" size="sm" onClick={() => openEditDialog(req)} className="h-7 text-xs">
+                          <FileText className="h-3 w-3" />
+                          {req.status === "draft" && user?.role === "IO"
+                            ? t("requests.edit_draft")
+                            : req.status === "draft"
+                              ? t("requests.view_draft")
+                              : t("requests.view_template")}
+                        </Button>
+                        {req.status === "draft" && user?.role !== "SHO" && (
+                          <span className="rounded-squircle-sm border border-warn/30 bg-warn/10 px-2 py-0.5 font-mono text-[11px] font-medium text-warn">
                             {t("requests.awaiting_sho")}
                           </span>
-                        ))}
-
-                      {req.status === "approved" && (
-                        <Button
-                          size="sm"
-                          onClick={() => void handleDispatch(req.id)}
-                          disabled={isLoading || !readinessMap[req.id]?.is_ready}
-                          loading={isLoading}
-                        >
-                          {!isLoading && <Send className="h-3.5 w-3.5" />}
-                          {t("requests.dispatch")}
-                        </Button>
-                      )}
-
-                      {req.status === "dispatched" && (
-                        <Button
-                          size="sm"
-                          variant="success"
-                          onClick={() => void handleTriggerMockResponse(req.id)}
-                          disabled={isLoading}
-                          loading={isLoading}
-                        >
-                          {!isLoading && <Sparkles className="h-3.5 w-3.5" />}
-                          {t("requests.trigger_mock")}
-                        </Button>
-                      )}
-
-                      {req.status === "responded" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => router.push(`/cases/${caseId}/responses`)}
-                          className="text-success hover:bg-success/10 hover:text-success"
-                        >
-                          <CheckCircle className="h-3.5 w-3.5" />
-                          {t("requests.received")}
-                          <ArrowRight className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                    </div>
-                  </CardFooter>
+                        )}
+                      </CardFooter>
+                    </>
+                  )}
                 </Card>
               );
             })}

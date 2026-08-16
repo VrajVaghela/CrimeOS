@@ -78,6 +78,7 @@ const NAV_ITEMS = [
 const NAV_TABS = [
   "overview",
   "ingestion",
+  "osint",
   "path",
   "requests",
   "responses",
@@ -226,9 +227,12 @@ function AuthenticatedLayoutContent({
 
       <aside
         className={`z-50 flex h-dvh shrink-0 select-none flex-col overflow-hidden border-r border-border bg-sidebar transition-transform duration-200 ease-out max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:w-[268px] lg:static lg:translate-x-0 lg:transition-[width] ${
-          mobileNavOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
+          mobileNavOpen
+            ? "max-lg:translate-x-0 max-lg:visible"
+            : "max-lg:-translate-x-full max-lg:invisible max-lg:pointer-events-none lg:visible"
         } ${sidebarCollapsed ? "lg:w-16" : "lg:w-[248px]"}`}
         aria-label={t("shell.primary_nav")}
+        aria-hidden={!mobileNavOpen ? "true" : undefined}
       >
         <div className="min-h-0 flex-1">
           {/* Brand lockup and rail control */}
@@ -368,11 +372,11 @@ function AuthenticatedLayoutContent({
               setSidebarCollapsed(false);
               setMobileNavOpen(true);
             }}
-            className="-ml-2 h-9 w-9 shrink-0 rounded-squircle-sm text-muted-foreground hover:bg-secondary hover:text-foreground lg:hidden"
+            className="-ml-2 h-11 w-11 shrink-0 rounded-squircle-sm text-muted-foreground hover:bg-secondary hover:text-foreground lg:hidden"
             aria-label={t("shell.open_nav")}
             aria-expanded={mobileNavOpen}
           >
-            <Menu className="h-4 w-4" />
+            <Menu className="h-5 w-5" />
           </Button>
 
           {/* Breadcrumbs. Keyed by position, not href: on /dashboard the trail is
@@ -421,6 +425,7 @@ function AuthenticatedLayoutContent({
               <Input
                 type="text"
                 placeholder={t("shell.search_placeholder")}
+                aria-label={t("shell.search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-background border-border text-xs pl-8 pr-3 h-9 rounded-squircle-sm focus-visible:ring-accent focus-visible:border-accent/40"

@@ -165,7 +165,7 @@ export function NotificationsPopover() {
         variant="outline"
         size="icon"
         onClick={() => setOpen((prev) => !prev)}
-        className={`h-9 w-9 rounded-squircle-sm border-border bg-background transition-colors text-muted-foreground relative ${ open ? "bg-secondary text-foreground border-primary/50" : "hover:bg-secondary hover:text-foreground"
+        className={`h-9 w-9 rounded-squircle-sm border-border bg-background transition-colors text-muted-foreground relative focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none ${ open ? "bg-secondary text-foreground border-primary/50" : "hover:bg-secondary hover:text-foreground"
         }`}
         aria-label={t("notifications.bell_label")}
         title={t("notifications.title")}
@@ -181,15 +181,15 @@ export function NotificationsPopover() {
 
       {/* Popover Dropdown Panel */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-squircle border border-border bg-card elev-overlay z-50 overflow-hidden animate-scale-in">
+        <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-96 rounded-squircle border border-border bg-card elev-overlay z-50 overflow-hidden animate-scale-in">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-sidebar">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/80">
             <div className="flex items-center gap-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground font-heading">
                 {t("notifications.title")}
               </h3>
               {unreadCount > 0 && (
-                <span className="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-primary/20 text-primary border border-primary/30">
+                <span className="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-warn/15 text-warn border border-warn/30">
                   {interpolate(t("notifications.new_badge"), { count: unreadCount })}
                 </span>
               )}
@@ -202,7 +202,7 @@ export function NotificationsPopover() {
                   variant="ghost"
                   size="sm"
                   onClick={markAllAsRead}
-                  className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground hover:bg-secondary gap-1"
+                  className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground hover:bg-secondary gap-1 rounded-squircle-sm focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none"
                   title={t("notifications.mark_all_read")}
                 >
                   <CheckCheck className="h-3.5 w-3.5" />
@@ -214,7 +214,7 @@ export function NotificationsPopover() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setOpen(false)}
-                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                className="h-7 w-7 text-muted-foreground hover:text-foreground rounded-squircle-sm focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none"
                 aria-label={t("notifications.close")}
               >
                 <X className="h-3.5 w-3.5" />
@@ -223,13 +223,14 @@ export function NotificationsPopover() {
           </div>
 
           {/* Filter Bar */}
-          <div className="flex items-center gap-1 px-3 py-2 border-b border-border/60 bg-background/50 text-xs">
+          <div className="flex items-center gap-1 px-3 py-2 border-b border-border bg-surface-alt/60 text-xs">
             <button
               type="button"
               onClick={() => setFilter("all")}
-              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors ${ filter === "all"
-                  ? "bg-primary/15 text-accent-strong border border-primary/30"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none ${
+                filter === "all"
+                  ? "bg-secondary text-foreground border border-border/80 font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
               }`}
             >
               {t("notifications.filter_all")} ({notifications.length})
@@ -237,9 +238,10 @@ export function NotificationsPopover() {
             <button
               type="button"
               onClick={() => setFilter("unread")}
-              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors ${ filter === "unread"
-                  ? "bg-primary/15 text-accent-strong border border-primary/30"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none ${
+                filter === "unread"
+                  ? "bg-secondary text-foreground border border-border/80 font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
               }`}
             >
               {t("notifications.filter_unread")} ({unreadCount})
@@ -247,9 +249,10 @@ export function NotificationsPopover() {
             <button
               type="button"
               onClick={() => setFilter("alert")}
-              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors ${ filter === "alert"
-                  ? "bg-primary/15 text-accent-strong border border-primary/30"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              className={`px-2.5 py-1 rounded-squircle-sm text-[11px] font-medium transition-colors focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none ${
+                filter === "alert"
+                  ? "bg-secondary text-foreground border border-border/80 font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
               }`}
             >
               {t("notifications.filter_alerts")} (
@@ -258,7 +261,7 @@ export function NotificationsPopover() {
           </div>
 
           {/* Notifications List */}
-          <div className="max-h-[340px] overflow-y-auto divide-y divide-border/50 workspace-scroll">
+          <div className="max-h-[340px] overflow-y-auto divide-y divide-border/60 custom-scrollbar">
             {filteredNotifications.length === 0 ? (
               <div className="p-8 text-center">
                 <Bell className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
@@ -270,10 +273,8 @@ export function NotificationsPopover() {
               filteredNotifications.map((notif) => (
                 <div
                   key={notif.id}
-                  onClick={() => handleNotificationClick(notif)}
-                  className={`p-3 transition-colors cursor-pointer group flex items-start gap-3 relative ${ !notif.read
-                      ? "bg-primary/5 hover:bg-primary/10"
-                      : "hover:bg-secondary/60"
+                  className={`p-3 transition-colors group flex items-start gap-3 relative ${
+                    !notif.read ? "bg-primary/[0.04] hover:bg-primary/[0.08]" : "hover:bg-secondary/60"
                   }`}
                 >
                   {/* Status dot / indicator */}
@@ -281,10 +282,16 @@ export function NotificationsPopover() {
                     {getIcon(notif.type)}
                   </div>
 
-                  <div className="flex-1 min-w-0">
+                  {/* Clickable Notification Content */}
+                  <button
+                    type="button"
+                    onClick={() => handleNotificationClick(notif)}
+                    className="flex-1 min-w-0 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-sm"
+                  >
                     <div className="flex items-center justify-between gap-2 mb-0.5">
                       <p
-                        className={`text-xs font-semibold truncate ${ !notif.read ? "text-foreground" : "text-muted-foreground"
+                        className={`text-xs font-semibold truncate ${
+                          !notif.read ? "text-foreground" : "text-muted-foreground"
                         }`}
                       >
                         {t(`notifications.seed.${notif.titleKey}` as TranslationKey)}
@@ -297,20 +304,21 @@ export function NotificationsPopover() {
                     <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
                       {t(`notifications.seed.${notif.descKey}` as TranslationKey)}
                     </p>
-                  </div>
+                  </button>
 
-                  {/* Single action dismiss button on hover */}
+                  {/* Single action dismiss button on hover / focus */}
                   <button
                     type="button"
                     onClick={(e) => removeNotification(notif.id, e)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-danger rounded"
+                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-danger rounded-squircle-sm focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none shrink-0"
                     title={t("common.dismiss")}
+                    aria-label={t("common.dismiss")}
                   >
                     <Trash2 className="h-3 w-3" />
                   </button>
 
                   {!notif.read && (
-                    <span className="absolute left-1 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full bg-primary" />
+                    <span className="absolute left-1 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full bg-warn" />
                   )}
                 </div>
               ))
@@ -319,14 +327,14 @@ export function NotificationsPopover() {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-border bg-sidebar flex items-center justify-between text-xs">
+            <div className="px-4 py-2 border-t border-border bg-card/80 flex items-center justify-between text-xs">
               <span className="text-[10px] font-mono text-muted-foreground">
                 {t("notifications.footer")}
               </span>
               <button
                 type="button"
                 onClick={clearAll}
-                className="text-[11px] text-muted-foreground hover:text-danger transition-colors font-medium"
+                className="text-[11px] text-muted-foreground hover:text-danger transition-colors font-medium rounded-squircle-sm px-1.5 py-0.5 focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none"
               >
                 {t("notifications.clear_all")}
               </button>

@@ -71,7 +71,7 @@ async def upload_video(
         )
 
     # 3. Stream to disk and compute SHA-256
-    max_upload_size_mb = getattr(settings, "MAX_UPLOAD_SIZE_MB", 500)
+    max_upload_size_mb = getattr(settings, "MAX_UPLOAD_SIZE_MB", 2000)
     max_bytes = max_upload_size_mb * 1024 * 1024
     
     # Save in standard uploads directory
@@ -140,9 +140,12 @@ async def upload_video(
             "progress_percentage": 0,
             "error_detail": None,
             "original_sha256": original_sha256,
+            "description": f"Video evidence: {filename} (awaiting AI analysis)",
             "summary": None,
             "crime_summary": None,
             "risk_evaluation": None,
+            "confidence": 0.0,
+            "tags": ["video", "cctv"],
             "timeline": []
         }
     )
@@ -257,19 +260,44 @@ async def get_report(
     ).all()
 
     timeline = []
-    for idx, m in enumerate(markers):
-        timestamp_seconds = (m.start_ms or 0) / 1000.0
-        minutes = int(timestamp_seconds // 60)
-        seconds = int(timestamp_seconds % 60)
-        timestamp_str = f"{minutes:02d}:{seconds:02d}"
-        timeline.append(TimelineEntryResponse(
-            timestamp_in_video=timestamp_str,
-            timestamp_seconds=timestamp_seconds,
-            description=m.transcript_text or "",
-            entities_detected=ai_tags.get("entities_detected", []) if idx == 0 else [],
-            risk_level=ai_tags.get("risk_evaluation", "MEDIUM"),
-            sequence_order=idx
-        ))
+    if markers:
+        for idx, m in enumerate(markers):
+            timestamp_seconds = (m.start_ms or 0) / 1000.0
+            minutes = int(timestamp_seconds // 60)
+            seconds = int(timestamp_seconds % 60)
+            timestamp_str = f"{minutes:02d}:{seconds:02d}"
+            timeline.append(TimelineEntryResponse(
+                timestamp_in_video=timestamp_str,
+                timestamp_seconds=timestamp_seconds,
+                description=m.transcript_text or "",
+                entities_detected=ai_tags.get("entities_detected", []) if idx == 0 else [],
+                risk_level=ai_tags.get("risk_evaluation", "MEDIUM"),
+                sequence_order=idx
+            ))
+    elif "timeline" in ai_tags and isinstance(ai_tags["timeline"], list):
+        for idx, entry in enumerate(ai_tags["timeline"]):
+            if isinstance(entry, dict):
+                t_str = entry.get("timestamp_in_video") or entry.get("timestamp") or "00:00"
+                t_sec = entry.get("timestamp_seconds")
+                if t_sec is None:
+                    try:
+                        parts = t_str.split(":")
+                        if len(parts) == 2:
+                            t_sec = float(int(parts[0]) * 60 + int(parts[1]))
+                        elif len(parts) == 3:
+                            t_sec = float(int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2]))
+                        else:
+                            t_sec = 0.0
+                    except Exception:
+                        t_sec = 0.0
+                timeline.append(TimelineEntryResponse(
+                    timestamp_in_video=t_str,
+                    timestamp_seconds=float(t_sec),
+                    description=entry.get("description", ""),
+                    entities_detected=ai_tags.get("entities_detected", []) if idx == 0 else [],
+                    risk_level=ai_tags.get("risk_evaluation", "MEDIUM"),
+                    sequence_order=idx
+                ))
 
     # Verify chain of custody
     ledger = LedgerService()

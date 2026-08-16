@@ -184,6 +184,8 @@ def generate_path_revision(
             schema=GeminiPathRevisionResponse,
             model=settings.GEMINI_PRO_MODEL
         )
+        # The gateway may have served this locally, so record the engine that actually ran.
+        model_used = gemini_client.last_route()
     except Exception as exc:
         logger.warning("Path revision generation with Pro failed: %s. Trying Flash...", exc)
         model_used = settings.GEMINI_FLASH_MODEL
@@ -195,6 +197,7 @@ def generate_path_revision(
                 schema=GeminiPathRevisionResponse,
                 model=settings.GEMINI_FLASH_MODEL
             )
+            model_used = gemini_client.last_route()
         except Exception as flash_exc:
             logger.error("Path revision with Flash failed: %s. Using deterministic fallback.", flash_exc)
             model_used = "deterministic-fallback"

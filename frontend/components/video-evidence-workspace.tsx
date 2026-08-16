@@ -2,35 +2,32 @@
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
-  Play,
-  Pause,
   AlertCircle,
-  Loader2,
   Sparkles,
-  Tag,
   ShieldAlert,
-  Calendar,
   Lock,
   Unlock,
-  CheckCircle2,
   FileVideo,
+  HardDrive,
   Clock,
-  ExternalLink,
   Copy,
   Check,
   Cpu,
   ShieldCheck,
-  RefreshCw,
   Activity,
   FileText,
+  ChevronDown,
+  type LucideIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StatusBadge } from "@/components/status-badge";
 import { getVideoReport, pollVideoStatus } from "@/lib/api";
-import { useLanguage } from "@/lib/language-context";
+import { useLanguage, type TranslationKey } from "@/lib/language-context";
+import { cn } from "@/lib/utils";
 import type { EvidenceOut, VideoReportResponse, VideoTimelineEntry } from "@/lib/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -40,16 +37,44 @@ interface VideoEvidenceWorkspaceProps {
   onRefresh: () => void;
 }
 
-const PHASE_LABELS: Record<string, string> = {
-  UPLOADED: "Video file received, preparing analyzer...",
-  PROCESSING: "Extracting video duration and metadata...",
-  ACTIVE_ANALYSIS: "AI is reviewing video feed...",
-  ANALYZING: "Generating incident report...",
-  PERSISTING: "Saving timeline database records...",
-  CLEANING_UP: "Finalizing tamper-evident audit logs...",
-  COMPLETED: "Analysis complete!",
-  FAILED: "Analysis failed",
+/**
+ * Live phase captions, keyed by the `video_status` values the backend actually
+ * writes in `video_service.analyze_video_task`: UPLOADED → PROCESSING →
+ * ACTIVE_ANALYSIS → COMPLETED | FAILED. An earlier version of this map also
+ * carried ANALYZING, PERSISTING and CLEANING_UP, which no code path ever emits.
+ * Anything unrecognized falls back to `phase_unknown` rather than going blank.
+ */
+const PHASE_CAPTION_KEYS: Record<string, TranslationKey> = {
+  UPLOADED: "video.phase_uploaded",
+  PROCESSING: "video.phase_processing",
+  ACTIVE_ANALYSIS: "video.phase_active_analysis",
+  COMPLETED: "video.phase_completed",
+  FAILED: "video.phase_failed",
 };
+
+/**
+ * Telemetry rows, anchored to the real `progress_percentage` checkpoints the
+ * background task commits (0 → 15 → 35 → 55 → 60 → 75 → 100). Each row owns the
+ * band that ends at its `doneAt`, so exactly one row can be running and it is
+ * always the work the phase caption is describing. Thresholds invented
+ * independently of the backend put the RUNNING chip on the wrong row.
+ */
+const PIPELINE_STEPS: ReadonlyArray<{
+  id: string;
+  labelKey: TranslationKey;
+  detailKey: TranslationKey;
+  icon: LucideIcon;
+  doneAt: number;
+}> = [
+  // Duration and metadata read, ledger ANALYSIS_STARTED appended.
+  { id: "ingest", labelKey: "video.step_ingest", detailKey: "video.step_ingest_detail", icon: Cpu, doneAt: 15 },
+  // Gemini upload, then wait_for_file until the stream is ACTIVE.
+  { id: "cv", labelKey: "video.step_cv", detailKey: "video.step_cv_detail", icon: Sparkles, doneAt: 55 },
+  // The forensic analysis call: frame review and statute mapping in one pass.
+  { id: "legal", labelKey: "video.step_legal", detailKey: "video.step_legal_detail", icon: FileText, doneAt: 75 },
+  // Markers and timeline events persisted, report sealed.
+  { id: "ledger", labelKey: "video.step_ledger", detailKey: "video.step_ledger_detail", icon: ShieldCheck, doneAt: 100 },
+];
 
 export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWorkspaceProps) {
   const { t } = useLanguage();
@@ -58,7 +83,6 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
   const [error, setError] = useState<string | null>(null);
   const [activeRowIndex, setActiveRowIndex] = useState<number>(-1);
   const [copied, setCopied] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   // Polling states for active analysis progress
   const [progress, setProgress] = useState<number>(0);
@@ -171,22 +195,15 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
     }
   }, [report, activeRowIndex]);
 
-  // Sync play/pause button state with HTML5 controls
+  // Keep the timeline highlight in step with playback. The native <video>
+  // controls own play/pause, so there is nothing else to mirror here.
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-
     video.addEventListener("timeupdate", handleTimeUpdate);
-    video.addEventListener("play", onPlay);
-    video.addEventListener("pause", onPause);
-
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
-      video.removeEventListener("play", onPlay);
-      video.removeEventListener("pause", onPause);
     };
   }, [handleTimeUpdate]);
 
@@ -232,9 +249,16 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
   // State: Loading report
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] py-16 gap-3">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">{t("video.retrieving_report")}</p>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <Skeleton className="lg:col-span-7 h-[420px] w-full" />
+          <Skeleton className="lg:col-span-5 h-[420px] w-full" />
+        </div>
       </div>
     );
   }
@@ -266,176 +290,139 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
 
   // State: Active background processing
   if (isStillProcessing) {
-    const label = PHASE_LABELS[status] || "Processing video...";
-
-    const steps = [
-      {
-        id: "ingest",
-        label: "Video Validation & Gemini Ingestion",
-        detail: "Stream verified & encrypted for AI multimodal review",
-        icon: Cpu,
-        activeAt: 0,
-        doneAt: 25,
-      },
-      {
-        id: "cv",
-        label: "Computer Vision & Object Tracking",
-        detail: "Scanning frames for threat signatures & timestamp anchors",
-        icon: Sparkles,
-        activeAt: 25,
-        doneAt: 60,
-      },
-      {
-        id: "legal",
-        label: "BNS / BNSS Criminal Statute Mapping",
-        detail: "Cross-referencing legal codes and drafting SOP report",
-        icon: FileText,
-        activeAt: 60,
-        doneAt: 85,
-      },
-      {
-        id: "ledger",
-        label: "Tamper-Evident Ledger Commit",
-        detail: "Hashing audit trail to immutable blockchain record",
-        icon: ShieldCheck,
-        activeAt: 85,
-        doneAt: 100,
-      },
-    ];
+    const captionKey = PHASE_CAPTION_KEYS[status] ?? "video.phase_unknown";
+    // The backend can only ever report 0–100, but a clamp keeps a bad payload
+    // from painting a bar past its track or reading a negative aria value.
+    const percent = Math.min(100, Math.max(0, Math.round(progress)));
+    // The first row whose band has not closed yet. -1 once every band is done.
+    const runningIndex = PIPELINE_STEPS.findIndex((step) => percent < step.doneAt);
 
     return (
-      <Card className="max-w-2xl mx-auto my-8 border-info/30 bg-info/[0.04] rounded-squircle p-6 md:p-8 space-y-6">
-        {/* Top Header Badge Row */}
-        <div className="flex items-center justify-between gap-3 border-b border-border/40 pb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-squircle-sm bg-info/10 border border-info/20 text-info">
-              <Sparkles className="h-4 w-4 animate-pulse" />
+      <Card className="animate-fade-up mx-auto mt-8 max-w-2xl border-info/30 bg-info/[0.04]">
+        {/* Heading, live phase, and the analysis identifier */}
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 border-b border-border/40 pb-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 shrink-0 text-info" aria-hidden="true" />
+              <h2 className="font-heading text-lg font-semibold tracking-tight text-foreground">
+                {t("video.analyzer_title")}
+              </h2>
             </div>
-            <Badge
-              variant="secondary"
-              className="bg-info/10 text-info border-info/20 text-[11px] font-mono font-medium tracking-wide uppercase px-2.5 py-0.5 rounded-squircle-sm"
-            >
-              AI Forensic Engine
-            </Badge>
+            {/* Polling swaps this caption without a reload, so it has to announce
+                itself — otherwise a screen reader sees one frozen sentence. */}
+            <p className="mt-1 flex items-start gap-2 text-sm text-info" aria-live="polite">
+              <Activity className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{t(captionKey)}</span>
+            </p>
           </div>
-
-          <div className="inline-flex items-center gap-2 text-xs font-mono text-info bg-info/10 border border-info/25 px-3 py-1 rounded-full">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-info opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-info"></span>
-            </span>
-            <span className="uppercase tracking-wider text-[11px] font-semibold">
-              {status}
+          <div className="flex shrink-0 flex-col items-start gap-1.5 sm:items-end">
+            <StatusBadge status={status} />
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {t("video.analysis_id")} {evidence.id.slice(0, 8)}
             </span>
           </div>
         </div>
 
-        {/* Title & Current Phase */}
-        <div className="space-y-1">
-          <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground tracking-tight flex items-center justify-between">
-            <span>{t("video.analyzer_title")}</span>
-            <span className="text-xs font-mono text-muted-foreground font-normal">
-              ID: {evidence.id.slice(0, 8)}
-            </span>
-          </h2>
-          <p className="text-xs font-mono text-info flex items-center gap-2 pt-0.5">
-            <Activity className="h-3.5 w-3.5 text-info animate-pulse shrink-0" />
-            <span>{label}</span>
-          </p>
-        </div>
+        {/* A soft failure the poll reported while the run is still going. Amber,
+            not red: the pipeline has not given up, but the officer should know. */}
+        {errorDetail && (
+          <div
+            role="status"
+            className="mt-4 flex items-start gap-2 rounded-squircle-sm border border-warn/30 bg-warn/[0.06] p-3 text-xs text-secondary-foreground"
+          >
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-warn" aria-hidden="true" />
+            <span>{errorDetail}</span>
+          </div>
+        )}
 
-        {/* High-Precision Progress Meter */}
-        <div className="space-y-2 bg-border-soft/50 p-4 rounded-squircle border border-border/40">
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-secondary font-medium uppercase tracking-wider text-[11px]">
+        {/* Progress */}
+        <div className="mt-5">
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-secondary-foreground">
               {t("video.analysis_progress")}
             </span>
-            <span className="font-mono font-bold text-info text-sm bg-info/10 border border-info/20 px-2.5 py-0.5 rounded-squircle-sm">
-              {progress}%
+            <span className="rounded-sm border border-info/20 bg-info/10 px-2 py-0.5 font-mono text-xs font-semibold tabular-nums text-info">
+              {percent}%
             </span>
           </div>
-
-          <div className="w-full bg-background rounded-full h-2.5 p-0.5 border border-border/60 relative overflow-hidden">
+          <div
+            role="progressbar"
+            aria-label={t("video.analysis_progress")}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percent}
+            className="mt-2.5 h-2 overflow-hidden rounded-full bg-muted"
+          >
             <div
-              className="bg-info h-full rounded-full transition-[width] duration-500 ease-out"
-              style={{ width: `${progress}%` }}
+              className="h-full rounded-full bg-info transition-[width] duration-[220ms] ease-out"
+              style={{ width: `${percent}%` }}
             />
           </div>
         </div>
 
-        {/* Live Step Checklist Matrix */}
-        <div className="space-y-2.5">
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground font-semibold px-0.5">
-            Live Telemetry Pipeline
+        {/* Telemetry pipeline */}
+        <div className="mt-5">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {t("video.pipeline_title")}
           </p>
-          <div className="grid grid-cols-1 gap-2">
-            {steps.map((step) => {
-              const isDone = progress >= step.doneAt;
-              const isActive = progress >= step.activeAt && !isDone;
+          <ol className="mt-2.5 space-y-2">
+            {PIPELINE_STEPS.map((step, index) => {
+              const isDone = runningIndex === -1 || index < runningIndex;
+              const isRunning = index === runningIndex;
               const StepIcon = step.icon;
 
               return (
-                <div
+                <li
                   key={step.id}
-                  className={`p-3 rounded-squircle border text-xs transition-all duration-300 flex items-center justify-between gap-3 ${ isDone
-                      ? "bg-success/[0.04] border-success/30 text-foreground"
-                      : isActive
-                      ? "bg-info/[0.08] border-info/40 text-foreground"
-                      : "bg-border-soft/30 border-border/20 text-muted-foreground opacity-60"
-                  }`}
+                  className={cn(
+                    "flex items-start justify-between gap-3 rounded-squircle-sm border p-3 transition-colors duration-[130ms]",
+                    isDone && "border-success/30 bg-success/[0.04]",
+                    isRunning && "border-info/40 bg-info/[0.08]",
+                    // A queued row is quieted by tone and its badge, never by
+                    // opacity — dimmed body text below the muted floor is unreadable.
+                    !isDone && !isRunning && "border-border/40 bg-surface-alt/40",
+                  )}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={`p-2 rounded-squircle-sm shrink-0 border ${ isDone
-                          ? "bg-success/15 border-success/30 text-success"
-                          : isActive
-                          ? "bg-info/15 border-info/30 text-info"
-                          : "bg-muted/10 border-border/20 text-muted-foreground"
-                      }`}
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-squircle-sm border p-2",
+                        isDone && "border-success/30 bg-success/15 text-success",
+                        isRunning && "border-info/30 bg-info/15 text-info",
+                        !isDone && !isRunning && "border-border/40 bg-muted text-muted-foreground",
+                      )}
                     >
-                      <StepIcon className="h-4 w-4" />
-                    </div>
+                      <StepIcon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    {/* No truncation: Hindi and Gujarati run appreciably longer
+                        than the English source, and a clipped step is a step the
+                        officer cannot read. */}
                     <div className="min-w-0">
-                      <p className="font-heading font-medium truncate text-foreground text-xs">
-                        {step.label}
+                      <p className="font-heading text-sm font-medium text-foreground">
+                        {t(step.labelKey)}
                       </p>
-                      <p className="text-[11px] text-muted-foreground truncate font-mono mt-0.5">
-                        {step.detail}
+                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                        {t(step.detailKey)}
                       </p>
                     </div>
                   </div>
-
-                  <div className="shrink-0 font-mono text-[10px]">
-                    {isDone ? (
-                      <span className="inline-flex items-center gap-1 text-success font-semibold bg-success/10 border border-success/20 px-2 py-0.5 rounded">
-                        <CheckCircle2 className="h-3 w-3" /> DONE
-                      </span>
-                    ) : isActive ? (
-                      <span className="inline-flex items-center gap-1 text-info font-semibold bg-info/10 border border-info/20 px-2 py-0.5 rounded">
-                        <Loader2 className="h-3 w-3 animate-spin" /> RUNNING
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground/60 px-2 py-0.5">
-                        QUEUED
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  <StatusBadge status={isDone ? "done" : isRunning ? "running" : "queued"} />
+                </li>
               );
             })}
-          </div>
+          </ol>
         </div>
 
-        {/* Immutable Audit & Auto-Refresh Footer */}
-        <div className="pt-2 flex items-center justify-between text-[11px] font-mono text-muted-foreground border-t border-border/30">
-          <div className="flex items-center gap-1.5 text-secondary">
-            <Lock className="h-3.5 w-3.5 text-info shrink-0" />
-            <span>Tamper-evident blockchain ledger active</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Clock className="h-3.5 w-3.5 shrink-0" />
-            <span>Auto-refreshing</span>
-          </div>
+        {/* Custody and refresh assurances */}
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border/40 pt-3.5 text-xs">
+          <span className="flex items-center gap-1.5 text-secondary-foreground">
+            <Lock className="h-3.5 w-3.5 shrink-0 text-info" aria-hidden="true" />
+            {t("video.ledger_active")}
+          </span>
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            {t("video.auto_refreshing")}
+          </span>
         </div>
       </Card>
     );
@@ -446,11 +433,11 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
   const riskColors = getRiskColors(report.risk_evaluation);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fade-up">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch animate-fade-up">
       {/* LEFT COLUMN: Player (60% width on large screens) */}
-      <div className="lg:col-span-7 space-y-4">
-        <Card className="overflow-hidden border-border/60 bg-background">
-          <div className="relative aspect-video bg-background flex items-center justify-center group">
+      <div className="lg:col-span-7 flex flex-col space-y-4">
+        <Card className="overflow-hidden border-border/60 bg-background flex-1 flex flex-col">
+          <div className="relative aspect-video bg-background flex items-center justify-center group shrink-0">
             <video
               ref={videoRef}
               src={`${API_URL}/${evidence.file_path}`}
@@ -458,11 +445,11 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
               className="w-full h-full object-contain"
             />
           </div>
-          <CardContent className="p-4 space-y-3 bg-card/40">
+          <CardContent className="p-4 space-y-3 bg-card/40 flex-1 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="min-w-0">
                 <h3 className="text-sm font-bold truncate text-info flex items-center gap-1.5">
-                  <FileVideo className="h-4.5 w-4.5 text-info shrink-0" />
+                  <FileVideo className="h-4 w-4 text-info shrink-0" />
                   {report.filename}
                 </h3>
                 <p className="text-[10px] text-muted-foreground mt-0.5 font-mono truncate max-w-[320px]">
@@ -470,49 +457,73 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-[10px] font-mono">
-                  ⏱️ {report.duration_seconds ? `${Math.floor(report.duration_seconds / 60)}:${String(Math.floor(report.duration_seconds % 60)).padStart(2, "0")}` : "N/A"}
+                <Badge variant="secondary" className="gap-1 text-[10px] font-mono">
+                  <Clock className="h-3 w-3 shrink-0" aria-hidden="true" />
+                  {report.duration_seconds ? `${Math.floor(report.duration_seconds / 60)}:${String(Math.floor(report.duration_seconds % 60)).padStart(2, "0")}` : "N/A"}
                 </Badge>
-                <Badge variant="secondary" className="text-[10px] font-mono">
-                  📦 {(report.file_size_bytes / (1024 * 1024)).toFixed(1)} MB
+                <Badge variant="secondary" className="gap-1 text-[10px] font-mono">
+                  <HardDrive className="h-3 w-3 shrink-0" aria-hidden="true" />
+                  {(report.file_size_bytes / (1024 * 1024)).toFixed(1)} MB
                 </Badge>
               </div>
             </div>
-            <Separator className="bg-border/30" />
-            <div className="flex items-center justify-between gap-4 bg-black/40 p-2.5 rounded-squircle border border-border/40 text-xs">
-              <span className="font-mono text-muted-foreground select-none">SHA-256 Hash:</span>
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="font-mono truncate max-w-[200px] text-foreground/80">{report.original_sha256}</span>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground shrink-0"
-                  onClick={copyChecksum}
-                >
-                  {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
-                </Button>
+            <details className="group rounded-squircle-sm border border-border/40 bg-surface-alt/40 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between p-2.5 text-xs font-mono font-medium text-muted-foreground hover:text-foreground select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-squircle-sm">
+                <div className="flex items-center gap-2">
+                  <Lock className="h-3.5 w-3.5 text-info shrink-0" />
+                  <span className="font-heading font-semibold uppercase tracking-wide text-[10px] text-foreground">
+                    {t("video.chain_of_custody")} & SHA-256
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={report.chain_valid ? "success" : "destructive"}
+                    className="text-[10px] font-mono py-0.5 px-2 rounded-squircle-sm"
+                  >
+                    {report.chain_valid ? <Lock className="w-3 h-3 mr-1" /> : <Unlock className="w-3 h-3 mr-1" />}
+                    {report.chain_valid ? "Chain Verified" : "Verification Failed"}
+                  </Badge>
+                  <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-open:rotate-180 text-muted-foreground" />
+                </div>
+              </summary>
+              <div className="border-t border-border/30 p-2.5 space-y-2 text-xs">
+                <div className="flex items-center justify-between gap-3 bg-black/40 p-2.5 rounded-squircle-sm border border-border/40">
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-mono text-[10px] text-muted-foreground uppercase">{t("video.file_hash")}</span>
+                    <span className="font-mono text-xs text-foreground/90 truncate select-all">{report.original_sha256}</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground shrink-0 focus-visible:ring-2 focus-visible:ring-primary"
+                    onClick={copyChecksum}
+                    title="Copy SHA-256 Checksum"
+                  >
+                    {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+                  </Button>
+                </div>
               </div>
-            </div>
+            </details>
           </CardContent>
         </Card>
       </div>
 
       {/* RIGHT COLUMN: Report & Timeline (40% width on large screens) */}
-      <div className="lg:col-span-5 space-y-4">
+      <div className="lg:col-span-5 flex flex-col space-y-4 min-h-0">
         {/* Overview card */}
-        <Card className="border-border/60 bg-card overflow-hidden">
+        <Card className="border-border/60 bg-card overflow-hidden shrink-0">
           <CardHeader className="pb-3 pt-4 px-4 bg-surface-alt/40 border-b border-border/40">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 text-info">
-                <Sparkles className="h-4.5 w-4.5" />
+                <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span className="font-heading text-xs font-bold uppercase tracking-wider">{t("video.forensic_report")}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Badge className={`text-[10px] font-bold py-0.5 px-2 border ${riskColors.bg}`}>
+                <Badge className={`text-[10px] font-bold py-0.5 px-2 border rounded-squircle-sm ${riskColors.bg}`}>
                   <span className={`w-1.5 h-1.5 rounded-full mr-1.5 shrink-0 ${riskColors.dot}`} />
                   {report.risk_evaluation} RISK
                 </Badge>
-                <Badge className={`text-[10px] font-bold py-0.5 px-2 border ${report.chain_valid ? "bg-success/10 border-success/20 text-success" : "bg-destructive/10 border-destructive/20 text-destructive"}`}>
+                <Badge className={`text-[10px] font-bold py-0.5 px-2 border rounded-squircle-sm ${report.chain_valid ? "bg-success/10 border-success/20 text-success" : "bg-destructive/10 border-destructive/20 text-destructive"}`}>
                   {report.chain_valid ? <Lock className="w-3 h-3 mr-1" /> : <Unlock className="w-3 h-3 mr-1" />}
                   {report.chain_valid ? "Chain Verified" : "Verification Failed"}
                 </Badge>
@@ -526,7 +537,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
 
             {/* Crime Summary callout */}
             {report.crime_summary && (
-              <div className="bg-destructive/10 border border-destructive/20 p-3 rounded-squircle animate-pulse">
+              <div className="bg-destructive/10 border border-destructive/20 p-3 rounded-squircle-sm">
                 <div className="flex items-center gap-1.5 text-destructive text-xs font-bold uppercase">
                   <ShieldAlert className="h-4 w-4" />
                   {t("video.detected_incident")}
@@ -540,14 +551,14 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
         </Card>
 
         {/* Timeline card */}
-        <Card className="border-border/60 bg-card flex flex-col h-[380px] overflow-hidden">
+        <Card className="border-border/60 bg-card flex flex-col flex-1 min-h-[260px] overflow-hidden">
           <CardHeader className="pb-2 pt-3 px-4 bg-surface-alt/40 border-b border-border/40 shrink-0">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <Clock className="h-4 w-4 text-info" />
               Incident Timeline ({report.timeline.length} logs)
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0 overflow-y-auto flex-1" ref={timelineRef}>
+          <CardContent className="p-0 overflow-y-auto flex-1 max-h-[360px] lg:max-h-none" ref={timelineRef}>
             {report.timeline.map((entry, index) => {
               const isActive = index === activeRowIndex;
               const entryRisk = getRiskColors(entry.risk_level);
@@ -556,17 +567,27 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
                 <div
                   key={`${entry.sequence_order}-${entry.timestamp_seconds}`}
                   data-timeline-row
+                  role="button"
+                  tabIndex={0}
                   onClick={() => handleRowClick(entry, index)}
-                  className={`px-4 py-3 border-b border-border/30 cursor-pointer transition-all duration-200 ${ isActive
-                      ? "bg-info/10 border-l-2 border-l-info"
-                      : "hover:bg-surface-alt/20 border-l-2 border-l-transparent"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleRowClick(entry, index);
+                    }
+                  }}
+                  className={`p-3.5 border-b border-border/30 cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset ${
+                    isActive
+                      ? "bg-info/[0.08] text-foreground border-border/60"
+                      : "hover:bg-surface-alt/40 text-muted-foreground"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-4 mb-1">
-                    <span className={`font-mono text-xs font-bold ${isActive ? "text-info" : "text-foreground"}`}>
-                      ⏱️ {entry.timestamp_in_video}
+                    <span className={`flex items-center gap-1.5 font-mono text-xs font-bold ${isActive ? "text-info" : "text-foreground"}`}>
+                      <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      {entry.timestamp_in_video}
                     </span>
-                    <Badge className={`text-[10px] uppercase font-mono px-1.5 ${entryRisk.bg}`}>
+                    <Badge className={`text-[10px] uppercase font-mono px-1.5 rounded-squircle-sm ${entryRisk.bg}`}>
                       {entry.risk_level}
                     </Badge>
                   </div>
@@ -578,7 +599,7 @@ export function VideoEvidenceWorkspace({ evidence, onRefresh }: VideoEvidenceWor
                   {entry.entities_detected && entry.entities_detected.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {entry.entities_detected.map((ent, entIdx) => (
-                        <Badge key={entIdx} variant="secondary" className="text-[10px] font-mono text-[10px] py-0 px-1 border border-border/50 uppercase">
+                        <Badge key={entIdx} variant="secondary" className="text-[10px] font-mono py-0 px-1 border border-border/50 uppercase rounded-squircle-sm">
                           {ent}
                         </Badge>
                       ))}

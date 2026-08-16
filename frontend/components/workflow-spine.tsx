@@ -69,10 +69,11 @@ export function WorkflowSpine({ stages, currentStage, onStageSelect }: WorkflowS
                 disabled={!interactive}
                 onClick={() => onStageSelect?.(stage.stage)}
                 aria-current={isActive ? "step" : undefined}
+                aria-label={label("workflow.stage", stage.stage)}
                 className={cn(
                   "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200",
                   nodeClass,
-                  interactive ? "cursor-pointer" : "cursor-default",
+                  interactive ? "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" : "cursor-default",
                 )}
               >
                 {icon}

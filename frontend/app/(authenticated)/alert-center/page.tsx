@@ -12,8 +12,11 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
+import { Metric, MetricStrip } from "@/components/ui/metric";
 import { useLanguage } from "@/lib/language-context";
+import { cn } from "@/lib/utils";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -145,37 +148,25 @@ const INITIAL_ALERTS: AlertItem[] = [
   },
 ];
 
-// ─── Severity Styling ────────────────────────────────────────────────────────
+// ─── Severity Badge Component ────────────────────────────────────────────────
 
-const SEVERITY_CONFIG: Record<
-  AlertSeverity,
-  {
-    color: string;
-    borderColor: string;
-    badgeText: string;
-  }
-> = {
-  CRITICAL: {
-    color: "#ef4444",
-    borderColor: "rgba(239, 68, 68, 0.40)",
-    badgeText: "#ef4444",
-  },
-  HIGH: {
-    color: "#f59e0b",
-    borderColor: "rgba(245, 158, 11, 0.35)",
-    badgeText: "#f59e0b",
-  },
-  MEDIUM: {
-    color: "#3b82f6",
-    borderColor: "rgba(59, 130, 246, 0.30)",
-    badgeText: "#3b82f6",
-  },
-  LOW: {
-    color: "#0f9d58",
-    borderColor: "rgba(15, 157, 88, 0.25)",
-    badgeText: "#0f9d58",
-  },
-};
+function SeverityBadge({ severity }: { severity: AlertSeverity }) {
+  const variantMap: Record<AlertSeverity, "destructive" | "warning" | "info" | "success"> = {
+    CRITICAL: "destructive",
+    HIGH: "warning",
+    MEDIUM: "info",
+    LOW: "success",
+  };
+
+  return (
+    <Badge
+      variant={variantMap[severity] ?? "default"}
+      className="font-mono text-[10px] uppercase font-bold tracking-wider"
+    >
+      {severity}
+    </Badge>
+  );
+}
 
 const SEVERITY_OPTIONS: Array<{ label: string; value: AlertSeverity | "ALL" }> =
   [
@@ -197,7 +188,6 @@ function AlertCard({
   onMarkRead: (id: string) => void;
   onDismiss: (id: string) => void;
 }) {
-  const config = SEVERITY_CONFIG[alert.severity];
   const [dismissing, setDismissing] = useState(false);
 
   const handleDismiss = useCallback(() => {
@@ -208,31 +198,32 @@ function AlertCard({
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-squircle border border-border bg-black transition-all duration-[220ms] ease-out ${
+      className={cn(
+        "group relative overflow-hidden rounded-squircle transition-all duration-[220ms] ease-out",
         dismissing
           ? "max-h-0 opacity-0 scale-95 mb-0 py-0 border-0"
-          : "max-h-[400px] opacity-100 scale-100"
-      } ${alert.isRead ? "opacity-70" : ""}`}
+          : "max-h-[400px] opacity-100 scale-100",
+        alert.isRead
+          ? "border border-border/40 bg-card/60"
+          : "border border-border bg-card shadow-xs"
+      )}
     >
-      <div className="flex items-start gap-4 px-5 py-4">
+      <div className="flex items-start gap-4 p-4 lg:p-5">
         {/* Left: Title, Severity Badge, Location */}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
             <h3
-              className="font-heading text-sm font-semibold text-foreground truncate"
-              style={{ maxWidth: "260px" }}
+              className={cn(
+                "font-heading text-sm max-w-xs md:max-w-md truncate",
+                alert.isRead
+                  ? "font-normal text-muted-foreground"
+                  : "font-semibold text-foreground"
+              )}
             >
               {alert.title}
             </h3>
-            <span
-              className="inline-flex items-center rounded-full bg-black px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider border border-border"
-              style={{
-                color: config.badgeText,
-              }}
-            >
-              {alert.severity}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-black px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+            <SeverityBadge severity={alert.severity} />
+            <span className="inline-flex items-center gap-1 rounded-squircle-sm border border-border bg-surface-alt px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
               {alert.location}
             </span>
           </div>
@@ -250,11 +241,12 @@ function AlertCard({
             variant="ghost"
             size="icon"
             onClick={() => onMarkRead(alert.id)}
-            className={`h-8 w-8 rounded-squircle-sm transition-colors duration-[130ms] ${
+            className={cn(
+              "h-8 w-8 rounded-squircle-sm transition-colors duration-[130ms] focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none",
               alert.isRead
                 ? "bg-success/15 text-success hover:bg-success/25"
-                : "text-muted-foreground hover:bg-card hover:text-foreground"
-            }`}
+                : "text-muted-foreground hover:bg-surface-alt hover:text-foreground"
+            )}
             title={alert.isRead ? "Already read" : "Mark as read"}
             aria-label={alert.isRead ? "Already read" : "Mark as read"}
           >
@@ -264,7 +256,7 @@ function AlertCard({
             variant="ghost"
             size="icon"
             onClick={handleDismiss}
-            className="h-8 w-8 rounded-squircle-sm text-muted-foreground hover:bg-danger/10 hover:text-danger transition-colors duration-[130ms]"
+            className="h-8 w-8 rounded-squircle-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors duration-[130ms] focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none"
             title="Dismiss alert"
             aria-label="Dismiss alert"
           >
@@ -272,38 +264,6 @@ function AlertCard({
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-// ─── KPI Card Component ──────────────────────────────────────────────────────
-
-function KpiCard({
-  label,
-  value,
-  accentColor,
-  children,
-}: {
-  label: string;
-  value?: number;
-  accentColor?: string;
-  children?: React.ReactNode;
-}) {
-  return (
-    <div className="relative overflow-hidden rounded-squircle border border-border bg-card px-5 py-4 transition-all duration-[130ms] hover:-translate-y-0.5">
-      <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
-        {label}
-      </p>
-      {value !== undefined ? (
-        <p
-          className="font-mono text-3xl font-bold tabular-nums leading-none tracking-[-0.02em]"
-          style={{ color: accentColor || "var(--fg)" }}
-        >
-          {value}
-        </p>
-      ) : (
-        children
-      )}
     </div>
   );
 }
@@ -380,7 +340,7 @@ export default function AlertCenterPage() {
                   e.stopPropagation();
                   setShowDropdown((v) => !v);
                 }}
-                className="gap-1.5 font-mono text-xs border border-border bg-card text-foreground hover:bg-white/[0.04]"
+                className="gap-1.5 font-mono text-xs border border-border bg-card text-foreground hover:bg-surface-alt"
               >
                 {severityFilter === "ALL"
                   ? t("alert_center.filter_all")
@@ -388,7 +348,7 @@ export default function AlertCenterPage() {
                 <ChevronDown className="h-3 w-3" />
               </Button>
               {showDropdown && (
-                <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] overflow-hidden rounded-squircle-sm border border-border bg-card elev-overlay">
+                <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] overflow-hidden rounded-squircle-sm border border-border bg-card shadow-lg">
                   {SEVERITY_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
@@ -397,7 +357,7 @@ export default function AlertCenterPage() {
                         setSeverityFilter(opt.value);
                         setShowDropdown(false);
                       }}
-                      className={`block w-full px-3 py-2 text-left text-xs transition-colors hover:bg-secondary ${
+                      className={`block w-full px-3 py-2 text-left text-xs transition-colors hover:bg-surface-alt ${
                         opt.value === severityFilter
                           ? "font-semibold text-foreground"
                           : "text-muted-foreground"
@@ -412,62 +372,64 @@ export default function AlertCenterPage() {
           }
         />
 
-        {/* KPI Summary Row */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <KpiCard
+        {/* KPI Summary Strip */}
+        <MetricStrip columns={4}>
+          <Metric
             label={t("alert_center.stat_active")}
             value={stats.active}
+            tone="default"
+            hint="Live unhandled signals"
           />
-          <KpiCard
+          <Metric
             label={t("alert_center.stat_critical")}
             value={stats.critical}
+            tone={stats.critical > 0 ? "critical" : "default"}
+            hint="Urgent response needed"
           />
-          <KpiCard
+          <Metric
             label={t("alert_center.stat_unread")}
             value={stats.unread}
+            tone={stats.unread > 0 ? "attention" : "default"}
+            hint="Awaiting officer review"
           />
-          <KpiCard label={t("alert_center.stat_channels")}>
-            <div className="flex items-center gap-3 mt-1">
-              <div className="flex items-center gap-1.5 rounded-squircle-sm bg-black px-2.5 py-1.5 border border-border">
-                <Mail className="h-4 w-4 text-foreground" />
-                <span className="font-mono text-[10px] font-semibold text-foreground uppercase">
+          <Metric
+            label={t("alert_center.stat_channels")}
+            value={3}
+            hint={
+              <span className="flex items-center gap-2 font-mono text-[10px]">
+                <span className="flex items-center gap-1">
+                  <Mail className="h-3 w-3 text-foreground" />
                   {t("alert_center.channel_email")}
                 </span>
-              </div>
-              <div className="flex items-center gap-1.5 rounded-squircle-sm bg-black px-2.5 py-1.5 border border-border">
-                <MessageSquare className="h-4 w-4 text-foreground" />
-                <span className="font-mono text-[10px] font-semibold text-foreground uppercase">
+                <span className="text-muted-foreground/40">·</span>
+                <span className="flex items-center gap-1">
+                  <MessageSquare className="h-3 w-3 text-foreground" />
                   {t("alert_center.channel_chat")}
                 </span>
-              </div>
-              <div className="flex items-center gap-1.5 rounded-squircle-sm bg-black px-2.5 py-1.5 border border-border">
-                <Send className="h-4 w-4 text-foreground" />
-                <span className="font-mono text-[10px] font-semibold text-foreground uppercase">
+                <span className="text-muted-foreground/40">·</span>
+                <span className="flex items-center gap-1">
+                  <Send className="h-3 w-3 text-foreground" />
                   {t("alert_center.channel_telegram")}
                 </span>
-              </div>
-            </div>
-          </KpiCard>
-        </div>
+              </span>
+            }
+          />
+        </MetricStrip>
 
         {/* Live Alert Feed */}
         <section className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <span
-              aria-hidden="true"
-              className="h-5 w-0.5 rounded-sm bg-primary"
-            />
             <h2 className="font-heading text-sm font-bold uppercase tracking-[0.08em] text-foreground">
               {t("alert_center.feed_title")}
             </h2>
             <span className="relative ml-1 flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="absolute inline-flex h-full w-full animate-ping-slow rounded-full bg-primary opacity-75" />
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
             </span>
           </div>
 
           {filteredAlerts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-3 rounded-squircle border border-border bg-card py-16 px-6">
+            <div className="flex flex-col items-center justify-center gap-3 rounded-squircle border border-border bg-card py-12 px-6">
               <Bell className="h-10 w-10 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">
                 {t("alert_center.empty")}

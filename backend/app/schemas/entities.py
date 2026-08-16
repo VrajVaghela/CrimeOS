@@ -11,6 +11,10 @@ class CaseEntityOut(BaseModel):
     canonical_value: str
     display_value: str
     confidence: float
+    # confirmed / unconfirmed / ignored. The OSINT section reads this to decide
+    # whether a scan can run at all: the trigger endpoint rejects any entity the
+    # officer has not confirmed, so the UI has to know before offering the button.
+    status: str
     first_seen_at: datetime
     last_seen_at: datetime
 

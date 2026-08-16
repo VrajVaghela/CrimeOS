@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Activity, AlertCircle, Clock, Download, FileText, Loader2, RefreshCw } from "lucide-react";
 
+import { AiContentCard } from "@/components/ai-content-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -93,9 +94,9 @@ export default function ResponsesPage() {
 
   if (loading) {
     return (
-      <div className="grid animate-fade-up gap-6 lg:grid-cols-4">
-        <Skeleton className="h-48 rounded-squircle lg:col-span-1" />
-        <div className="flex flex-col gap-6 lg:col-span-3">
+      <div className="grid animate-fade-up gap-6 lg:grid-cols-12">
+        <Skeleton className="h-48 rounded-squircle lg:col-span-4" />
+        <div className="flex flex-col gap-6 lg:col-span-8">
           <Skeleton className="h-40 rounded-squircle" />
           <Skeleton className="h-72 rounded-squircle" />
         </div>
@@ -129,9 +130,9 @@ export default function ResponsesPage() {
   }
 
   return (
-    <div className="grid animate-fade-up grid-cols-1 gap-6 lg:grid-cols-4">
+    <div className="grid animate-fade-up grid-cols-1 gap-6 lg:grid-cols-12">
       {/* Response rail */}
-      <div className="flex flex-col gap-3 lg:col-span-1">
+      <div className="flex flex-col gap-3 lg:col-span-4">
         <h3 className="flex items-center gap-2 px-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
           <FileText className="h-3.5 w-3.5" />
           {t("responses.title")}
@@ -172,21 +173,14 @@ export default function ResponsesPage() {
       </div>
 
       {/* Detail */}
-      <div className="flex flex-col gap-6 lg:col-span-3">
+      <div className="flex flex-col gap-6 lg:col-span-8">
         {selectedResponse && (
           <>
-            {/* AI insight, in the Info Blue partition every machine-authored
-                surface in this app shares. */}
-            <div className="rounded-squircle border border-info/30 bg-info/[0.04] p-5">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <h2 className="font-heading text-base font-semibold text-foreground">
-                    {t("responses.subtitle")}
-                  </h2>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {t("responses.subtitle_desc")}
-                  </p>
-                </div>
+            {/* AI insight in canonical AiContentCard */}
+            <AiContentCard
+              title={t("responses.subtitle")}
+              subtitle={t("responses.subtitle_desc")}
+              headerRight={
                 <Button
                   variant="outline"
                   size="sm"
@@ -197,12 +191,12 @@ export default function ResponsesPage() {
                   {!regenerating && <RefreshCw className="h-3.5 w-3.5" />}
                   {t("common.regenerate")}
                 </Button>
-              </div>
-
-              <div className="mt-4 rounded-squircle-sm border border-border/60 bg-background p-4 text-sm leading-relaxed text-foreground">
+              }
+            >
+              <div className="max-w-[70ch] text-sm leading-relaxed text-foreground">
                 <TranslatedTextBlock content={selectedResponse.ai_insights} />
               </div>
-            </div>
+            </AiContentCard>
 
             <Card>
               <CardHeader>

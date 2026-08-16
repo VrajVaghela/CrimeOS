@@ -27,6 +27,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Toast, useToast } from "@/components/ui/toast";
 import { useLanguage } from "@/lib/language-context";
 import { useFormatters } from "@/lib/format";
@@ -80,15 +84,15 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
   const getFileIcon = (type: string | null) => {
     switch (type) {
       case "image":
-        return <ImageIcon className="h-5 w-5 text-info" />;
+        return <ImageIcon className="h-5 w-5 text-muted-foreground" />;
       case "audio":
-        return <Volume2 className="h-5 w-5 text-success" />;
+        return <Volume2 className="h-5 w-5 text-muted-foreground" />;
       case "video":
-        return <Video className="h-5 w-5 text-info" />;
+        return <Video className="h-5 w-5 text-muted-foreground" />;
       case "document":
-        return <FileText className="h-5 w-5 text-info" />;
+        return <FileText className="h-5 w-5 text-muted-foreground" />;
       default:
-        return <FileText className="h-5 w-5 text-warn" />;
+        return <FileText className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
@@ -207,7 +211,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
       {/* Evidence Banner */}
       <div className="flex items-center justify-between border-b border-border/40 pb-4">
         <div className="flex items-center gap-3">
-<div className="rounded-squircle bg-surface-alt border border-border/60 p-2">
+          <div className="rounded-squircle-sm bg-surface-alt border border-border/60 p-2">
             {getFileIcon(evidence.file_type)}
           </div>
           <div>
@@ -228,7 +232,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
 
         <Badge
           variant={highConfidence ? "success" : "warning"}
-          className="text-xs font-mono py-1 px-2 uppercase font-semibold"
+          className="text-xs font-mono py-1 px-2 uppercase font-semibold rounded-squircle-sm"
         >
           {Math.round((evidence.ai_tags?.confidence || 0) * 100)}% {t("evidence_workspace.analysis_conf")}
         </Badge>
@@ -238,25 +242,25 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Media & Forensic Profile */}
         <div className="lg:col-span-5 space-y-6">
-<Card className="overflow-hidden border border-border/80 bg-background">
-            <CardHeader className="pb-3 border-b border-border/20">
-<CardTitle className="text-sm font-bold font-heading text-muted-foreground flex items-center gap-1.5">
+          <Card className="overflow-hidden border border-border/80 bg-background">
+            <CardHeader className="p-4 pb-3 border-b border-border/20">
+              <CardTitle className="text-sm font-bold font-heading text-muted-foreground flex items-center gap-1.5">
                 {t("evidence_workspace.original_media")}
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4 flex flex-col items-center justify-center min-h-[220px] bg-black/30">
+            <CardContent className="p-4 flex flex-col items-center justify-center min-h-[220px] bg-black/30">
               {evidence.file_type === "image" && (
                 <img
                   src={`${API_URL}/${evidence.file_path}`}
                   alt="Evidence"
-                  className="max-w-full max-h-72 object-contain rounded-squircle"
+                  className="max-w-full max-h-72 object-contain rounded-squircle-sm"
                 />
               )}
 
               {evidence.file_type === "audio" && (
                 <div className="w-full p-4 space-y-4 text-center">
-<div className="mx-auto rounded-full bg-success/10 border border-success/20 p-4 w-14 h-14 flex items-center justify-center">
-<Volume2 className="h-6 w-6 text-success animate-pulse" />
+                  <div className="mx-auto rounded-full bg-success/10 border border-success/20 p-4 w-14 h-14 flex items-center justify-center">
+                    <Volume2 className="h-6 w-6 text-success animate-pulse" />
                   </div>
                   <audio controls className="w-full" src={`${API_URL}/${evidence.file_path}`} />
                   <p className="text-[11px] text-muted-foreground font-mono">
@@ -267,19 +271,19 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
 
               {evidence.file_type === "video" && (
                 <div className="w-full">
-                  <video controls className="w-full max-h-64 rounded-squircle" src={`${API_URL}/${evidence.file_path}`} />
+                  <video controls className="w-full max-h-64 rounded-squircle-sm" src={`${API_URL}/${evidence.file_path}`} />
                 </div>
               )}
 
               {evidence.file_type === "document" && (
-                <div className="w-full p-6 text-center space-y-3">
-<FileText className="h-12 w-12 text-info mx-auto" />
+                <div className="w-full p-4 text-center space-y-3">
+                  <FileText className="h-12 w-12 text-muted-foreground mx-auto" />
                   <p className="text-sm font-semibold text-foreground">{t("evidence_workspace.document_file")}</p>
                   <a
                     href={`${API_URL}/${evidence.file_path}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-accent-strong hover:underline font-mono"
+                    className="inline-flex items-center gap-1 text-xs text-accent-strong hover:underline font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
                   >
                     {t("evidence_workspace.open_new_tab")} <ExternalLink className="h-3 w-3" />
                   </a>
@@ -287,9 +291,9 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
               )}
 
               {!evidence.file_type && (
-                <div className="text-center p-6 space-y-2">
-<AlertTriangle className="h-10 w-10 text-warn mx-auto" />
-<p className="text-xs text-warn font-bold uppercase">{t("evidence_workspace.fallback_mode")}</p>
+                <div className="text-center p-4 space-y-2">
+                  <AlertTriangle className="h-10 w-10 text-warn mx-auto" />
+                  <p className="text-xs text-warn font-bold uppercase">{t("evidence_workspace.fallback_mode")}</p>
                   <p className="text-xs text-muted-foreground">
                     {t("evidence_workspace.fallback_desc")}
                   </p>
@@ -299,14 +303,14 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
           </Card>
 
           {/* Forensic Tag Profile */}
-<Card className="border border-border/80 bg-surface-alt/40">
-            <CardHeader className="pb-3 border-b border-border/20">
-<CardTitle className="text-sm font-bold font-heading text-muted-foreground flex items-center gap-1.5">
+          <Card className="border border-border/80 bg-surface-alt/40">
+            <CardHeader className="p-4 pb-3 border-b border-border/20">
+              <CardTitle className="text-sm font-bold font-heading text-muted-foreground flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-info" />
                 {t("evidence_workspace.forensic_profile")}
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4 space-y-4">
+            <CardContent className="p-4 space-y-4">
               <div className="space-y-1">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                   {t("evidence_workspace.description")}
@@ -322,7 +326,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {evidence.ai_tags?.tags?.map((tag) => (
-<Badge key={tag} variant="secondary" className="text-[10px] uppercase font-mono bg-surface-elevated">
+                    <Badge key={tag} variant="secondary" className="text-[10px] uppercase font-mono bg-surface-elevated rounded-squircle-sm">
                       {tag}
                     </Badge>
                   ))}
@@ -330,7 +334,7 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
               </div>
 
               {evidence.ai_tags?.flagged_features && evidence.ai_tags.flagged_features.length > 0 && (
-                <div className="bg-destructive/5 border border-destructive/20 rounded-squircle p-3 space-y-1">
+                <div className="bg-destructive/5 border border-destructive/20 rounded-squircle-sm p-3 space-y-1">
                   <span className="text-[10px] font-bold text-destructive flex items-center gap-1 uppercase">
                     <AlertTriangle className="h-3.5 w-3.5" /> {t("evidence_workspace.flagged_anomalies")}
                   </span>
@@ -349,29 +353,29 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
         <div className="lg:col-span-7 space-y-6">
           {/* Transcript / Original Document Text Display */}
           {(evidence.transcript || evidence.translation) && (
-<Card className="border border-border bg-background/40">
-              <CardHeader className="pb-3 border-b border-border/20">
-<CardTitle className="text-sm font-bold font-heading text-muted-foreground">
+            <Card className="border border-border bg-background/40">
+              <CardHeader className="p-4 pb-3 border-b border-border/20">
+                <CardTitle className="text-sm font-bold font-heading text-muted-foreground">
                   {t("evidence_workspace.content_review")}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Original Transcript column */}
                 <div className="space-y-2">
-<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                     {t("evidence_workspace.original_transcript")}
                   </span>
-<div className="p-3 rounded-squircle border border-border/40 bg-surface-alt/60 max-h-60 overflow-y-auto text-xs font-mono leading-relaxed whitespace-pre-wrap">
+                  <div className="p-3 rounded-squircle-sm border border-border/40 bg-surface-alt/60 max-h-60 overflow-y-auto text-xs font-mono leading-relaxed whitespace-pre-wrap">
                     {evidence.transcript || t("evidence_workspace.no_transcript")}
                   </div>
                 </div>
 
                 {/* Translation column */}
                 <div className="space-y-2 border-t md:border-t-0 md:border-l border-border/30 pt-3 md:pt-0 md:pl-4">
-<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                     {t("evidence_workspace.english_translation")}
                   </span>
-<div className="p-3 rounded-squircle border border-border/40 bg-surface-alt/60 max-h-60 overflow-y-auto text-xs leading-relaxed whitespace-pre-wrap text-secondary-foreground">
+                  <div className="p-3 rounded-squircle-sm border border-border/40 bg-surface-alt/60 max-h-60 overflow-y-auto text-xs leading-relaxed whitespace-pre-wrap text-secondary-foreground">
                     {evidence.translation || t("evidence_workspace.no_translation")}
                   </div>
                 </div>
@@ -382,80 +386,80 @@ export function EvidenceReviewWorkspace({ evidence, onRefresh }: EvidenceReviewW
           {/* Markers / Add segment markers form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Create Marker form */}
-<Card className="border border-border/60 bg-background/30">
-              <CardHeader className="pb-2 border-b border-border/20">
-<CardTitle className="text-xs font-bold font-heading text-muted-foreground flex items-center gap-1">
+            <Card className="border border-border/60 bg-background/30">
+              <CardHeader className="p-4 pb-3 border-b border-border/20">
+                <CardTitle className="text-xs font-bold font-heading text-muted-foreground flex items-center gap-1">
                   <PlusCircle className="h-4 w-4 text-primary" /> {t("evidence_workspace.create_marker")}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-4">
+              <CardContent className="p-4">
                 <form onSubmit={handleCreateMarker} className="space-y-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase">
+                    <Label className="text-[10px] font-bold font-mono text-muted-foreground uppercase">
                       {t("evidence_workspace.marker_type_label")}
-                    </label>
-                    <select
+                    </Label>
+                    <Select
                       value={markerType}
                       onChange={(e) => setMarkerType(e.target.value)}
-className="w-full bg-surface-alt border border-border/60 text-xs rounded p-2 focus:outline-none focus:border-primary"
+                      className="h-9 text-xs focus-visible:ring-primary"
                     >
                       <option value="transcript_segment">{t("evidence_workspace.marker_transcript_segment")}</option>
                       <option value="audio_timestamp">{t("evidence_workspace.marker_audio_timestamp")}</option>
                       <option value="video_timestamp">{t("evidence_workspace.marker_video_timestamp")}</option>
                       <option value="visual_bounding_box">{t("evidence_workspace.marker_visual_bbox")}</option>
-                    </select>
+                    </Select>
                   </div>
 
                   {(markerType === "audio_timestamp" || markerType === "video_timestamp") && (
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase">
+                        <Label className="text-[10px] font-bold font-mono text-muted-foreground uppercase">
                           {t("evidence_workspace.start_ms")}
-                        </label>
-                        <input
+                        </Label>
+                        <Input
                           type="number"
                           placeholder="5000"
                           value={startMs}
                           onChange={(e) => setStartMs(e.target.value)}
-className="w-full bg-surface-alt border border-border/60 text-xs rounded p-2 text-foreground"
+                          className="h-9 text-xs font-mono focus-visible:ring-primary"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase">
+                        <Label className="text-[10px] font-bold font-mono text-muted-foreground uppercase">
                           {t("evidence_workspace.end_ms")}
-                        </label>
-                        <input
+                        </Label>
+                        <Input
                           type="number"
                           placeholder="15000"
                           value={endMs}
                           onChange={(e) => setEndMs(e.target.value)}
-className="w-full bg-surface-alt border border-border/60 text-xs rounded p-2 text-foreground"
+                          className="h-9 text-xs font-mono focus-visible:ring-primary"
                         />
                       </div>
                     </div>
                   )}
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase">
+                    <Label className="text-[10px] font-bold font-mono text-muted-foreground uppercase">
                       {t("evidence_workspace.highlighted_text")}
-                    </label>
-                    <textarea
+                    </Label>
+                    <Textarea
                       placeholder={t("evidence_workspace.text_placeholder")}
                       rows={3}
                       value={transcriptText}
                       onChange={(e) => setTranscriptText(e.target.value)}
-className="w-full bg-surface-alt border border-border/60 text-xs rounded p-2 text-foreground focus:outline-none focus:border-primary"
+                      className="min-h-[72px] text-xs resize-none focus-visible:ring-primary"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase">
+                    <Label className="text-[10px] font-bold font-mono text-muted-foreground uppercase">
                       {t("evidence_workspace.link_entity_optional")} ({t("common.optional")})
-                    </label>
-                    <select
+                    </Label>
+                    <Select
                       value={selectedEntityId}
                       onChange={(e) => setSelectedEntityId(e.target.value)}
-className="w-full bg-surface-alt border border-border/60 text-xs rounded p-2 focus:outline-none focus:border-primary text-foreground"
+                      className="h-9 text-xs focus-visible:ring-primary"
                     >
                       <option value="">{t("evidence_workspace.do_not_link")}</option>
                       {entities.map((ent) => (
@@ -463,10 +467,10 @@ className="w-full bg-surface-alt border border-border/60 text-xs rounded p-2 foc
                           {label("entity.type", ent.entity_type)}: {ent.display_value}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
 
-                  <Button type="submit" disabled={creatingMarker} className="w-full text-xs h-9">
+                  <Button type="submit" disabled={creatingMarker} className="w-full text-xs h-9 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
                     {creatingMarker
                       ? t("evidence_workspace.adding_marker")
                       : t("evidence_workspace.pin_segment")}
@@ -476,54 +480,59 @@ className="w-full bg-surface-alt border border-border/60 text-xs rounded p-2 foc
             </Card>
 
             {/* List of Markers */}
-<Card className="border border-border/60 bg-background/30">
-              <CardHeader className="pb-2 border-b border-border/20">
-<CardTitle className="text-xs font-bold font-heading text-muted-foreground flex items-center gap-1.5">
-<Bookmark className="h-4 w-4 text-success" /> {t("evidence_workspace.fact_markers")} ({markers.length})
+            <Card className="border border-border/60 bg-background/30">
+              <CardHeader className="p-4 pb-3 border-b border-border/20">
+                <CardTitle className="text-xs font-bold font-heading text-muted-foreground flex items-center gap-1.5">
+                  <Bookmark className="h-4 w-4 text-success" /> {t("evidence_workspace.fact_markers")} ({markers.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-4 max-h-[350px] overflow-y-auto pr-1">
-                <div className="space-y-3">
+              <CardContent className="p-4 max-h-[380px] overflow-y-auto pr-1">
+                <div className="space-y-2.5">
                   {markers.map((marker) => {
                     const isPromoted = promotedMarkers[marker.id];
 
                     return (
                       <div
                         key={marker.id}
-className="p-3 rounded-squircle border border-border bg-surface-alt/60 text-xs space-y-2 animate-fade-up"
+                        className="p-3.5 rounded-squircle-sm border border-border/60 bg-surface-alt/50 text-xs space-y-2.5 animate-fade-up"
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-[10px] text-accent-strong uppercase font-bold bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">
+                        {/* Line 1: Type badge + timestamp + quote */}
+                        <div className="flex items-center gap-2 flex-wrap min-w-0">
+                          <span className="font-mono text-[10px] text-accent-strong uppercase font-bold bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-squircle-sm shrink-0">
                             {markerTypeLabel(marker.marker_type)}
                           </span>
 
                           {(marker.start_ms !== null || marker.end_ms !== null) && (
-                            <span className="font-mono text-[10px] text-muted-foreground flex items-center gap-1">
+                            <span className="font-mono text-[10px] text-muted-foreground flex items-center gap-1 shrink-0">
                               <Clock className="h-3 w-3" />
                               {marker.start_ms !== null ? `${Math.round(marker.start_ms / 1000)}s` : "0s"} -{" "}
                               {marker.end_ms !== null ? `${Math.round(marker.end_ms / 1000)}s` : "end"}
                             </span>
                           )}
+
+                          {marker.transcript_text && (
+                            <span
+                              className="text-xs text-secondary-foreground italic truncate font-mono flex-1 min-w-[120px]"
+                              title={marker.transcript_text}
+                            >
+                              "{marker.transcript_text}"
+                            </span>
+                          )}
                         </div>
 
-                        {marker.transcript_text && (
-<blockquote className="border-l-2 border-border pl-2 italic text-secondary-foreground font-mono text-[11px] leading-relaxed break-words">
-                            "{marker.transcript_text}"
-                          </blockquote>
-                        )}
-
-                        {/* Linked Entities */}
-                        <div className="space-y-1">
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-                            {t("evidence_workspace.linked_case_entities")}
-                          </span>
-                          <div className="flex flex-wrap gap-1 items-center">
+                        {/* Line 2: Linked entities + promote button */}
+                        <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-border/40">
+                          <div className="flex flex-wrap gap-1 items-center min-w-0 flex-1">
                             {marker.linked_entity_ids.length > 0 ? (
                               marker.linked_entity_ids.map((entId) => {
                                 const matchedEnt = entities.find((e) => e.id === entId);
                                 return (
-<Badge key={entId} variant="secondary" className="text-[10px] font-mono bg-surface-elevated border border-border">
-<Link2 className="h-2 w-2 mr-1 text-muted-foreground" />
+                                  <Badge
+                                    key={entId}
+                                    variant="secondary"
+                                    className="text-[10px] font-mono bg-surface-elevated border border-border rounded-squircle-sm"
+                                  >
+                                    <Link2 className="h-2.5 w-2.5 mr-1 text-muted-foreground" />
                                     {matchedEnt
                                       ? `${label("entity.type", matchedEnt.entity_type)}: ${matchedEnt.display_value}`
                                       : t("evidence_workspace.entity_id_ref")}
@@ -531,41 +540,45 @@ className="p-3 rounded-squircle border border-border bg-surface-alt/60 text-xs s
                                 );
                               })
                             ) : (
-                              <div className="flex items-center gap-1.5 w-full">
-                                <span className="text-[10px] text-muted-foreground italic">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-[10px] text-muted-foreground italic truncate">
                                   {t("evidence_workspace.no_entities_linked")}
                                 </span>
-                                <select
+                                <Select
+                                  value=""
                                   onChange={(e) => handleLinkMarker(marker.id, e.target.value)}
-                                  defaultValue=""
-className="bg-background border border-border text-[10px] rounded p-0.5 focus:outline-none"
+                                  className="h-6 py-0 px-1.5 text-[10px] w-auto bg-background rounded-squircle-sm border border-border focus-visible:ring-2 focus-visible:ring-primary"
                                 >
-                                  <option value="" disabled>{t("evidence_workspace.link_short")}</option>
+                                  <option value="" disabled>
+                                    {t("evidence_workspace.link_short")}
+                                  </option>
                                   {entities.map((e) => (
                                     <option key={e.id} value={e.id}>
                                       {e.display_value}
                                     </option>
                                   ))}
-                                </select>
+                                </Select>
                               </div>
                             )}
                           </div>
-                        </div>
 
-                        {/* Promote Actions */}
-                        <div className="pt-2 border-t border-border/60 flex justify-end">
-                          {isPromoted ? (
-<span className="text-[10px] text-success font-bold flex items-center gap-1">
-                              <CheckCircle className="h-3.5 w-3.5" /> {t("evidence_workspace.added_to_diary")}
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() => handlePromoteMarker(marker.id, marker.transcript_text)}
-                              className="text-[10px] font-bold text-accent-strong hover:text-primary-foreground hover:bg-primary/20 border border-primary/30 rounded px-2 py-0.5 transition-all flex items-center gap-1"
-                            >
-                              <FolderPlus className="h-3 w-3" /> {t("evidence_workspace.add_to_diary")}
-                            </button>
-                          )}
+                          <div className="shrink-0">
+                            {isPromoted ? (
+                              <span className="text-[10px] text-success font-bold flex items-center gap-1">
+                                <CheckCircle className="h-3.5 w-3.5" /> {t("evidence_workspace.added_to_diary")}
+                              </span>
+                            ) : (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handlePromoteMarker(marker.id, marker.transcript_text)}
+                                className="h-6 px-2 text-[10px] font-bold rounded-squircle-sm flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                              >
+                                <FolderPlus className="h-3 w-3 text-primary" /> {t("evidence_workspace.add_to_diary")}
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );

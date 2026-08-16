@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  Network,
   Crosshair,
   ShieldAlert,
   Users,
@@ -12,6 +11,11 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
+import { PageHeader } from "@/components/ui/page-header";
+import { Metric, MetricStrip } from "@/components/ui/metric";
+import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/lib/language-context";
+import { cn } from "@/lib/utils";
 import {
   NETWORK_NODES,
   NETWORK_EDGES,
@@ -22,59 +26,41 @@ import {
 // D3 graph must be client-side only (no SSR)
 const CriminalNetworkGraph = dynamic(
   () => import("@/components/criminal-network-graph"),
-  { ssr: false, loading: () => <div className="h-[520px] rounded-squircle border border-border bg-[#0c0c0c] flex items-center justify-center"><span className="text-xs font-mono text-muted-foreground">Initialising graph engine…</span></div> }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[520px] items-center justify-center rounded-squircle border border-border bg-surface-alt">
+        <span className="font-mono text-xs text-muted-foreground">
+          Initialising graph engine…
+        </span>
+      </div>
+    ),
+  }
 );
 
 // ─── Risk badge ────────────────────────────────────────────────────────────────
 
-const RISK_STYLES: Record<NetworkNode["risk"], { bg: string; text: string; border: string; label: string }> = {
-  CRITICAL: { bg: "#3f1218", text: "#ef4444", border: "#ef4444", label: "CRITICAL" },
-  HIGH:     { bg: "#3b220b", text: "#f59e0b", border: "#f59e0b", label: "HIGH"     },
-  MODERATE: { bg: "#0e2a4a", text: "#3b82f6", border: "#3b82f6", label: "MODERATE" },
-  SAFE:     { bg: "#063326", text: "#10b981", border: "#10b981", label: "SAFE"     },
-};
-
 function RiskBadge({ level }: { level: NetworkNode["risk"] }) {
-  const s = RISK_STYLES[level] ?? RISK_STYLES.SAFE;
+  const variantMap: Record<NetworkNode["risk"], "destructive" | "warning" | "info" | "success"> = {
+    CRITICAL: "destructive",
+    HIGH: "warning",
+    MODERATE: "info",
+    SAFE: "success",
+  };
   return (
-    <span
-      className="inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest border bg-black"
-      style={{ color: s.text, borderColor: s.border }}
+    <Badge
+      variant={variantMap[level] ?? "default"}
+      className="font-mono text-[10px] uppercase font-bold tracking-wider"
     >
-      {s.label}
-    </span>
-  );
-}
-
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
-
-function KpiCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number | string;
-  color: string;
-}) {
-  return (
-    <div className="rounded-squircle border border-border bg-card p-4 flex flex-col gap-1">
-      <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-        {label}
-      </span>
-      <span
-        className="font-mono text-2xl font-bold tabular-nums"
-        style={{ color }}
-      >
-        {value}
-      </span>
-    </div>
+      {level}
+    </Badge>
   );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CriminalNetworkPage() {
+  const { t } = useLanguage();
   const [selected, setSelected] = useState<NetworkNode | null>(null);
 
   // Top 5 influencers by recidivism score
@@ -83,90 +69,102 @@ export default function CriminalNetworkPage() {
     .slice(0, 5);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col animate-fade-up">
-      {/* ── Page Header ──────────────────────────────────────────────── */}
-      <div className="border-b border-border bg-toolbar px-6 py-5">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-squircle-sm border border-border bg-surface-alt">
-            <Network className="h-4 w-4 text-primary" />
-          </div>
-          <div>
-            <h1 className="font-heading text-base font-bold tracking-wide text-foreground">
-              Criminal Network Intelligence
-            </h1>
-            <p className="font-mono text-[11px] text-muted-foreground">
-              AI-detected relationships between offenders, gangs &amp; associates · synthetic demo data
-            </p>
-          </div>
-        </div>
-      </div>
+    <main className="min-w-0 flex-1 bg-background p-6 lg:p-8">
+      <div className="mx-auto flex max-w-7xl animate-fade-up flex-col gap-6">
+        {/* ── Page Header ──────────────────────────────────────────────── */}
+        <PageHeader
+          title={t("criminal_network.title")}
+          description={t("criminal_network.subtitle")}
+        />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-5 p-6">
         {/* ── KPI Strip ────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-3 gap-3">
-          <KpiCard label="Network Nodes"           value={NETWORK_NODES.length}      color="#22d3ee" />
-          <KpiCard label="Detected Connections"    value={NETWORK_EDGES.length}      color="#f59e0b" />
-          <KpiCard label="Identified Gang Networks" value={GANG_COMMUNITIES.length}  color="#ef4444" />
-        </div>
+        <MetricStrip columns={3}>
+          <Metric
+            label={t("criminal_network.kpi_nodes")}
+            value={NETWORK_NODES.length}
+            tone="default"
+          />
+          <Metric
+            label={t("criminal_network.kpi_connections")}
+            value={NETWORK_EDGES.length}
+            tone="attention"
+          />
+          <Metric
+            label={t("criminal_network.kpi_gangs")}
+            value={GANG_COMMUNITIES.length}
+            tone="critical"
+          />
+        </MetricStrip>
 
         {/* ── Main Graph + Side Panel ───────────────────────────────────── */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-          {/* Force Graph — col-span 3 */}
-          <div className="lg:col-span-3 rounded-squircle border border-border bg-card p-4">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          {/* Force Graph — lg:col-span-8 */}
+          <div className="lg:col-span-8 rounded-squircle border border-border bg-card p-5 flex flex-col">
             <div className="mb-3">
               <h2 className="font-heading text-sm font-semibold text-foreground">
-                Relationship Network Graph
+                {t("criminal_network.graph_title")}
               </h2>
               <p className="font-mono text-[10px] text-muted-foreground">
-                Drag nodes to explore · click a node for profile · scroll to zoom
+                {t("criminal_network.graph_hint")}
               </p>
             </div>
-            <CriminalNetworkGraph
-              nodes={NETWORK_NODES}
-              edges={NETWORK_EDGES}
-              onSelect={setSelected}
-            />
+            <div className="flex-1 min-h-0">
+              <CriminalNetworkGraph
+                nodes={NETWORK_NODES}
+                edges={NETWORK_EDGES}
+                onSelect={setSelected}
+              />
+            </div>
           </div>
 
-          {/* Right column */}
-          <div className="flex flex-col gap-4">
+          {/* Right column — lg:col-span-4 */}
+          <div className="lg:col-span-4 flex flex-col gap-4">
             {/* Node Profile Panel */}
-            <div className="rounded-squircle border border-accent/30 bg-accent/5 p-4">
-              <h2 className="mb-3 flex items-center gap-1.5 font-heading text-xs font-semibold uppercase tracking-widest text-accent">
-                <Crosshair className="h-3.5 w-3.5" />
-                Node Profile
-              </h2>
+            <div className="rounded-squircle border border-border bg-card p-4">
+              <div className="mb-3 flex items-center justify-between border-b border-border pb-2.5">
+                <h2 className="flex items-center gap-1.5 font-heading text-xs font-semibold uppercase tracking-wider text-foreground">
+                  <Crosshair className="h-3.5 w-3.5 text-primary" />
+                  {t("criminal_network.node_profile")}
+                </h2>
+                {selected ? (
+                  <span className="font-mono text-[10px] text-muted-foreground uppercase">
+                    ID: {selected.id}
+                  </span>
+                ) : null}
+              </div>
               {selected ? (
-                <div className="space-y-2.5">
-                  <p className="font-mono text-sm font-bold text-foreground">
-                    {selected.label}
-                  </p>
-                  <RiskBadge level={selected.risk} />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-heading text-base font-bold text-foreground truncate">
+                      {selected.label}
+                    </p>
+                    <RiskBadge level={selected.risk} />
+                  </div>
 
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <div className="rounded-[8px] border border-border bg-card p-2">
+                  <div className="grid grid-cols-2 gap-2 pt-0.5">
+                    <div className="rounded-squircle-sm border border-border bg-surface-alt p-2.5">
                       <p className="font-mono text-[10px] text-muted-foreground mb-0.5">
-                        Influencer Score
+                        {t("criminal_network.influencer_score")}
                       </p>
-                      <p className="font-mono text-xl font-bold text-primary">
+                      <p className="font-mono text-xl font-bold text-foreground">
                         {selected.recidivism}
                       </p>
                     </div>
-                    <div className="rounded-[8px] border border-border bg-card p-2">
+                    <div className="rounded-squircle-sm border border-border bg-surface-alt p-2.5">
                       <p className="font-mono text-[10px] text-muted-foreground mb-0.5">
-                        Gang
+                        {t("criminal_network.gang")}
                       </p>
-                      <p className="font-mono text-[11px] font-semibold text-warn truncate">
+                      <p className="font-mono text-xs font-semibold text-warn truncate">
                         {selected.gang ?? "—"}
                       </p>
                     </div>
                   </div>
 
                   <div className="pt-1">
-                    <p className="font-mono text-[10px] text-muted-foreground mb-1">
-                      Connections
+                    <p className="font-mono text-[10px] text-muted-foreground mb-1.5">
+                      {t("criminal_network.connections")}
                     </p>
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       {NETWORK_EDGES.filter(
                         (e) => e.source === selected.id || e.target === selected.id
                       )
@@ -175,16 +173,19 @@ export default function CriminalNetworkPage() {
                           const peerId =
                             e.source === selected.id ? e.target : e.source;
                           const peer = NETWORK_NODES.find((n) => n.id === peerId);
+                          const linkColor =
+                            e.type === "gang_link"
+                              ? "text-destructive"
+                              : e.type === "financial"
+                                ? "text-warn"
+                                : "text-info";
                           return (
                             <div
                               key={i}
-                              className="flex items-center gap-1.5 rounded-[6px] border border-border bg-card px-2 py-1"
+                              className="flex items-center gap-2 rounded-squircle-sm border border-border bg-surface-alt px-2.5 py-1.5"
                             >
-                              <Link2
-                                className="h-3 w-3 shrink-0"
-                                style={{ color: e.type === "gang_link" ? "#ef4444" : e.type === "financial" ? "#f59e0b" : "#3b82f6" }}
-                              />
-                              <span className="font-mono text-[10px] text-foreground truncate">
+                              <Link2 className={`h-3 w-3 shrink-0 ${linkColor}`} />
+                              <span className="font-mono text-[11px] text-foreground truncate">
                                 {peer?.label ?? peerId}
                               </span>
                             </div>
@@ -194,74 +195,94 @@ export default function CriminalNetworkPage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground">
-                  Click any node in the graph to view its profile.
+                <p className="text-xs text-muted-foreground py-2">
+                  {t("criminal_network.node_click_hint")}
                 </p>
               )}
             </div>
 
             {/* Central Influencers */}
             <div className="rounded-squircle border border-border bg-card p-4">
-              <h2 className="mb-3 flex items-center gap-1.5 font-heading text-xs font-semibold uppercase tracking-widest text-foreground">
+              <h2 className="mb-3 flex items-center gap-1.5 font-heading text-xs font-semibold uppercase tracking-wider text-foreground">
                 <ShieldAlert className="h-3.5 w-3.5 text-primary" />
-                Central Influencers
+                {t("criminal_network.central_influencers")}
               </h2>
               <div className="space-y-2">
-                {centralInfluencers.map((k, i) => (
-                  <button
-                    key={k.id}
-                    onClick={() => setSelected(k)}
-                    className="flex w-full items-center justify-between rounded-[8px] border border-border bg-surface-alt px-2.5 py-1.5 text-left transition-colors duration-[130ms] hover:bg-secondary hover:text-foreground"
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] text-muted-foreground">
-                        #{i + 1}
-                      </span>
-                      <span className="font-mono text-xs text-foreground truncate max-w-[100px]">
-                        {k.label}
-                      </span>
-                    </span>
-                    <span
-                      className="font-mono text-sm font-bold"
-                      style={{ color: k.color }}
+                {centralInfluencers.map((k, i) => {
+                  const scoreColor =
+                    k.recidivism >= 85
+                      ? "text-destructive"
+                      : k.recidivism >= 70
+                        ? "text-warn"
+                        : "text-info";
+                  return (
+                    <button
+                      key={k.id}
+                      onClick={() => setSelected(k)}
+                      className="flex w-full items-center justify-between rounded-squircle-sm border border-border bg-surface-alt px-3 py-2 text-left transition-colors duration-150 hover:bg-surface-elevated hover:text-foreground focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none"
                     >
-                      {k.recidivism}
-                    </span>
-                  </button>
-                ))}
+                      <span className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                          #{i + 1}
+                        </span>
+                        <span className="font-mono text-xs text-foreground truncate max-w-[120px]">
+                          {k.label}
+                        </span>
+                      </span>
+                      <span className={`font-mono text-sm font-bold ${scoreColor}`}>
+                        {k.recidivism}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
         </div>
 
         {/* ── Detected Gang Structures ──────────────────────────────────── */}
-        <div className="rounded-squircle border border-border bg-card p-4">
+        <div className="rounded-squircle border border-border bg-card p-5">
           <h2 className="mb-4 flex items-center gap-1.5 font-heading text-sm font-semibold text-foreground">
             <Users className="h-4 w-4 text-primary" />
-            Detected Gang Structures
+            {t("criminal_network.gang_structures")}
           </h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {GANG_COMMUNITIES.map((c) => {
-              const s = RISK_STYLES[c.risk] ?? RISK_STYLES.SAFE;
+              const isCritical = c.risk === "CRITICAL";
+              const isHigh = c.risk === "HIGH";
+              const isMod = c.risk === "MODERATE";
+              const borderClass = isCritical
+                ? "border-destructive/40"
+                : isHigh
+                  ? "border-warn/40"
+                  : isMod
+                    ? "border-info/40"
+                    : "border-success/40";
+              const textClass = isCritical
+                ? "text-destructive"
+                : isHigh
+                  ? "text-warn"
+                  : isMod
+                    ? "text-info"
+                    : "text-success";
+
               return (
                 <div
                   key={c.id}
-                  className="rounded-[10px] border p-3 flex flex-col gap-1 bg-black"
-                  style={{ borderColor: s.border + "55" }}
+                  className={`rounded-squircle-sm border p-3.5 flex flex-col gap-1.5 bg-surface-alt ${borderClass}`}
                 >
-                  <p
-                    className="font-mono text-xs font-bold leading-tight"
-                    style={{ color: s.text }}
-                  >
-                    {c.name}
-                  </p>
+                  <div className="flex items-center justify-between gap-1">
+                    <p className={`font-mono text-xs font-bold leading-tight truncate ${textClass}`}>
+                      {c.name}
+                    </p>
+                    <RiskBadge level={c.risk} />
+                  </div>
                   <p className="font-mono text-2xl font-bold text-foreground">
                     {c.size}
                   </p>
-                  <p className="font-mono text-[9px] text-muted-foreground">
-                    linked members
+                  <p className="font-mono text-[10px] text-muted-foreground">
+                    {t("criminal_network.linked_members")}
                   </p>
-                  <RiskBadge level={c.risk} />
                 </div>
               );
             })}
@@ -272,30 +293,45 @@ export default function CriminalNetworkPage() {
         <div className="rounded-squircle border border-border bg-card p-4">
           <h2 className="mb-3 font-heading text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
             <Activity className="h-3.5 w-3.5" />
-            Graph Legend
+            {t("criminal_network.legend_title")}
           </h2>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <div className="flex items-center gap-2">
-              <div className="h-2.5 w-8 rounded-full" style={{ background: "#ef4444", opacity: 0.7 }} />
-              <span className="font-mono text-[11px] text-muted-foreground">Gang Link</span>
+              <div className="h-2.5 w-8 rounded-full bg-destructive/70" />
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {t("criminal_network.legend_gang")}
+              </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-2.5 w-8 rounded-full" style={{ background: "#f59e0b", opacity: 0.7 }} />
-              <span className="font-mono text-[11px] text-muted-foreground">Financial Link</span>
+              <div className="h-2.5 w-8 rounded-full bg-warn/70" />
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {t("criminal_network.legend_financial")}
+              </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-2.5 w-8 rounded-full" style={{ background: "#1e3a5f", opacity: 0.8 }} />
-              <span className="font-mono text-[11px] text-muted-foreground">Communication / Associate</span>
+              <div className="h-2.5 w-8 rounded-full bg-info/70" />
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {t("criminal_network.legend_comms")}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-3.5 w-3.5 text-primary" />
-              <span className="font-mono text-[11px] text-muted-foreground">Pulsing ring = CRITICAL risk</span>
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {t("criminal_network.legend_critical_ring")}
+              </span>
             </div>
             {(["CRITICAL", "HIGH", "MODERATE", "SAFE"] as const).map((r) => (
               <div key={r} className="flex items-center gap-2">
                 <span
-                  className="inline-block h-3 w-3 rounded-full"
-                  style={{ background: RISK_STYLES[r].text }}
+                  className={`inline-block h-2.5 w-2.5 rounded-full ${
+                    r === "CRITICAL"
+                      ? "bg-destructive"
+                      : r === "HIGH"
+                        ? "bg-warn"
+                        : r === "MODERATE"
+                          ? "bg-info"
+                          : "bg-success"
+                  }`}
                 />
                 <span className="font-mono text-[11px] text-muted-foreground">{r}</span>
               </div>
@@ -303,6 +339,6 @@ export default function CriminalNetworkPage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

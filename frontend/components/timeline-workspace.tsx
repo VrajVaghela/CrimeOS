@@ -146,56 +146,56 @@ function TimelineNode({ event }: { event: TimelineEventOut }) {
               type="button"
               onClick={() => setExpanded((v) => !v)}
               aria-expanded={expanded}
-              className="flex items-center gap-1 text-xs text-info transition-colors hover:text-info/80"
+              className="flex items-center gap-1 text-xs text-info transition-colors hover:text-info/80 font-medium"
             >
               {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
               {expanded ? t("timeline.cctv_hide_detail") : t("timeline.cctv_show_detail")}
             </button>
             {expanded && (
-              <div className="mt-3 flex flex-col gap-2 rounded-squircle-sm border border-border/60 bg-surface-alt p-3">
-                <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="mt-3 flex flex-col gap-3 rounded-squircle-sm border border-border/60 bg-surface-alt/50 p-4">
+                <div className="grid grid-cols-2 gap-3 rounded-squircle-sm border border-border/40 bg-background/50 p-2.5 text-xs">
                   <div>
-                    <p className="text-muted-foreground mb-0.5">{t("timeline.osd_timestamp")}</p>
+                    <p className="text-muted-foreground mb-0.5 text-[11px]">{t("timeline.osd_timestamp")}</p>
                     <p className="font-mono text-foreground">{cctv.detected_timestamp}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground mb-0.5">{t("timeline.confidence")}</p>
+                    <p className="text-muted-foreground mb-0.5 text-[11px]">{t("timeline.confidence")}</p>
                     <ConfidenceBadge value={cctv.confidence} />
                   </div>
                 </div>
                 {cctv.persons_detected.length > 0 && (
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">
+                  <div className="rounded-squircle-sm border border-border/30 bg-background/30 p-2.5">
+                    <p className="text-[11px] font-medium text-muted-foreground mb-1">
                       <User className="h-3 w-3 inline mr-1" />
                       {t("timeline.persons_detected")}
                     </p>
-                    <ul className="space-y-0.5">
+                    <ul className="space-y-0.5 pl-1">
                       {cctv.persons_detected.map((p, i) => (
-                        <li key={i} className="text-xs text-foreground">• {p}</li>
+                        <li key={i} className="text-xs text-foreground font-mono">• {p}</li>
                       ))}
                     </ul>
                   </div>
                 )}
                 {cctv.vehicles_detected.length > 0 && (
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">{t("timeline.vehicles")}</p>
-                    <ul className="space-y-0.5">
+                  <div className="rounded-squircle-sm border border-border/30 bg-background/30 p-2.5">
+                    <p className="text-[11px] font-medium text-muted-foreground mb-1">{t("timeline.vehicles")}</p>
+                    <ul className="space-y-0.5 pl-1">
                       {cctv.vehicles_detected.map((v, i) => (
-                        <li key={i} className="text-xs text-foreground">• {v}</li>
+                        <li key={i} className="text-xs text-foreground font-mono">• {v}</li>
                       ))}
                     </ul>
                   </div>
                 )}
                 {cctv.forensic_flags.length > 0 && (
-                  <div>
-                    <p className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
+                  <div className="rounded-squircle-sm border border-warn/25 bg-warn/5 p-2.5">
+                    <p className="mb-1 flex items-center gap-1 text-[11px] font-semibold text-warn">
                       <AlertTriangle className="h-3 w-3 text-warn" />
                       {t("timeline.forensic_flags")}
                     </p>
-                    <ul className="flex flex-col gap-0.5">
+                    <ul className="flex flex-col gap-0.5 pl-1">
                       {cctv.forensic_flags.map((f) => (
-                        <li key={f} className="text-xs text-warn">
-                          {f}
+                        <li key={f} className="text-xs text-warn font-mono">
+                          • {f}
                         </li>
                       ))}
                     </ul>
@@ -278,7 +278,7 @@ function CctvPanel({
             inputRef.current?.click();
           }
         }}
-        className={`relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-squircle border border-dashed px-6 py-10 text-center transition-colors duration-200 ${
+        className={`relative flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-squircle border border-dashed px-6 py-5 text-center transition-colors duration-200 ${
           dragging
             ? "border-primary bg-primary/[0.06]"
             : "border-border bg-surface-alt/40 hover:border-border/60"
@@ -328,22 +328,25 @@ function CctvPanel({
             <CheckCircle2 className="h-4 w-4" />
             {t("timeline.pin_success")}
           </div>
-          <div className="grid grid-cols-2 gap-3 text-xs">
+          <div className="grid grid-cols-2 gap-3 rounded-squircle-sm border border-border/30 bg-background/40 p-2.5 text-xs">
             <div>
-              <p className="mb-0.5 text-muted-foreground">{t("timeline.osd_timestamp")}</p>
+              <p className="mb-0.5 text-muted-foreground text-[11px]">{t("timeline.osd_timestamp")}</p>
               <p className="font-mono">{lastResult.analysis.detected_timestamp}</p>
             </div>
             <div>
-              <p className="mb-0.5 text-muted-foreground">{t("timeline.location")}</p>
+              <p className="mb-0.5 text-muted-foreground text-[11px]">{t("timeline.location")}</p>
               <p className="leading-snug">{lastResult.analysis.location_description}</p>
             </div>
           </div>
           {lastResult.analysis.forensic_flags.length > 0 && (
-            <div>
-              <p className="mb-1 text-xs text-muted-foreground">{t("timeline.forensic_flags")}</p>
+            <div className="rounded-squircle-sm border border-warn/25 bg-warn/5 p-2.5">
+              <p className="mb-1 text-[11px] font-semibold text-warn flex items-center gap-1">
+                <AlertTriangle className="h-3 w-3 text-warn" />
+                {t("timeline.forensic_flags")}
+              </p>
               {lastResult.analysis.forensic_flags.map((f) => (
-                <p key={f} className="text-xs text-warn">
-                  {f}
+                <p key={f} className="text-xs text-warn font-mono">
+                  • {f}
                 </p>
               ))}
             </div>
@@ -638,12 +641,20 @@ export function TimelineWorkspace({
               <p className="text-xs text-muted-foreground">{t("timeline.cctv_subtitle")}</p>
             </div>
             <CctvPanel caseId={caseId} onPinned={onPinned} />
-            <ol className="flex flex-col gap-1.5 rounded-squircle-sm border border-border/60 bg-surface-alt p-3 text-xs leading-relaxed text-muted-foreground">
-              <li className="font-medium text-foreground">{t("timeline.how_it_works")}</li>
-              <li>{t("timeline.cctv_step1")}</li>
-              <li>{t("timeline.cctv_step2")}</li>
-              <li>{t("timeline.cctv_step3")}</li>
-            </ol>
+            <details className="group rounded-squircle-sm border border-border/60 bg-surface-alt/40 text-xs transition-colors">
+              <summary className="flex cursor-pointer list-none items-center justify-between p-3 font-medium text-foreground hover:text-info">
+                <span className="flex items-center gap-1.5 font-heading text-xs font-semibold">
+                  <Sparkles className="h-3.5 w-3.5 text-info" />
+                  {t("timeline.how_it_works")}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
+              </summary>
+              <ol className="flex flex-col gap-1.5 border-t border-border/40 px-3 py-2.5 leading-relaxed text-muted-foreground">
+                <li>{t("timeline.cctv_step1")}</li>
+                <li>{t("timeline.cctv_step2")}</li>
+                <li>{t("timeline.cctv_step3")}</li>
+              </ol>
+            </details>
           </Card>
 
           <Card className="flex flex-col gap-4">
