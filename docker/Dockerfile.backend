@@ -1,0 +1,34 @@
+# Backend Dockerfile for Crime OS AI
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies needed for compiling psycopg / build tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy python dependencies
+COPY backend/requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy backend application code
+COPY backend/ .
+
+# Create uploads directory and grant permissions
+RUN mkdir -p /app/uploads
+
+# Expose port
+EXPOSE 8000
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+# Command to run uvicorn server
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

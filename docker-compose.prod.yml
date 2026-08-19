@@ -1,0 +1,70 @@
+services:
+  db:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: crimeos_db
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-crime_os_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-crime_os}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crime_os_user} -d ${POSTGRES_DB:-crime_os}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: crimeos_backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Overrides the .env DATABASE_URL, which points at localhost for host-run
+      # tooling (alembic, seeds). Inside this container localhost is the backend
+      # itself, so the connection must target the `db` service by name.
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-crime_os_user}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-crime_os}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads_data:/app/uploads
+    command: >
+      sh -c "alembic upgrade head &&
+             python -m app.seeds.run &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    container_name: crimeos_frontend
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
+  uploads_data:
