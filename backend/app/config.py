@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql+psycopg://crime_os_user:changeme@localhost:5432/crime_os"
+    DATABASE_URL: str = "postgresql://crime_os_user:rTzAn2CxPsmJ8sQDvf6GE0CFBPnH42Nd@dpg-da2huv6gekts73b0k5q0-a/crime_os"
     
     @field_validator("DATABASE_URL", mode="after")
     @classmethod
