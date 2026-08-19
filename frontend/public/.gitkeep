@@ -1,0 +1,3 @@
+# Keeps frontend/public/ in version control.
+# docker/Dockerfile.frontend copies this directory into the runner stage;
+# the image build fails if the directory does not exist.

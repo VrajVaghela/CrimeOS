@@ -11,7 +11,7 @@ class User(UuidPkMixin, Base):
 
     username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole, values_callable=lambda obj: [e.value for e in obj]), nullable=False)
     full_name: Mapped[str] = mapped_column(String(160), nullable=False)
 
     cases = relationship("Case", back_populates="creator")

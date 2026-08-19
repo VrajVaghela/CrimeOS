@@ -18,6 +18,7 @@ Developed for the **ERH26 Hackathon (Problem Statement: ERH26_PS_10)**, the plat
 9. [Installation & Setup](#-installation--setup)
 10. [Running the Application](#-running-the-application)
 11. [Verification & Seeding](#-verification--seeding)
+12. [Production Deployment Guide](DEPLOYMENT.md)
 
 ---
 
@@ -219,6 +220,9 @@ The database consists of the following tables:
 ---
 
 ## 🛠️ Installation & Setup
+
+> [!NOTE]
+> For comprehensive production, cloud (AWS/GCP), or containerized server deployment instructions, see the dedicated [Production Deployment Guide](DEPLOYMENT.md).
 
 ### Prerequisites
 * Docker & Docker Compose

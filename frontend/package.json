@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "start": "next start",
     "lint": "next lint",
     "i18n:audit": "node scripts/i18n-audit.mjs",
     "verify": "npm run i18n:audit && tsc --noEmit && next build"

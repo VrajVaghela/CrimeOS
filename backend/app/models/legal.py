@@ -11,7 +11,7 @@ from app.models.enums import LegalCode
 class LegalSection(UuidPkMixin, Base):
     __tablename__ = "legal_sections"
 
-    code: Mapped[LegalCode] = mapped_column(Enum(LegalCode), nullable=False)
+    code: Mapped[LegalCode] = mapped_column(Enum(LegalCode, values_callable=lambda obj: [e.value for e in obj]), nullable=False)
     section_number: Mapped[str] = mapped_column(String(32), nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)

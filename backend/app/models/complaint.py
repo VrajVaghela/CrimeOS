@@ -13,7 +13,7 @@ class Complaint(UuidPkMixin, Base):
     __tablename__ = "complaints"
 
     case_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("cases.id"), nullable=False)
-    source_type: Mapped[SourceType] = mapped_column(Enum(SourceType), nullable=False)
+    source_type: Mapped[SourceType] = mapped_column(Enum(SourceType, values_callable=lambda obj: [e.value for e in obj]), nullable=False)
     original_file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
     detected_language: Mapped[str | None] = mapped_column(String(64), nullable=True)
     raw_text: Mapped[str | None] = mapped_column(Text, nullable=True)

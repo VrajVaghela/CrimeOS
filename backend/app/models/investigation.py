@@ -33,7 +33,7 @@ class PathStep(UuidPkMixin, Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     sop_citation: Mapped[str] = mapped_column(Text, nullable=False)
-    status: Mapped[StepStatus] = mapped_column(Enum(StepStatus), default=StepStatus.PENDING, nullable=False)
+    status: Mapped[StepStatus] = mapped_column(Enum(StepStatus, values_callable=lambda obj: [e.value for e in obj]), default=StepStatus.PENDING, nullable=False)
     suggested_action_type: Mapped[str | None] = mapped_column(String(80), nullable=True)
 
     path = relationship("InvestigationPath", back_populates="steps")

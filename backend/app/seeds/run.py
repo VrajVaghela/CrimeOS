@@ -1,4 +1,6 @@
 import hashlib
+import os
+import sys
 from collections.abc import Iterable
 
 from sqlalchemy import select
@@ -94,7 +96,14 @@ def seed_users() -> dict[str, User]:
 
 
 def main() -> None:
-    Base.metadata.drop_all(bind=engine)
+    # Dropping every table is a local dev convenience, never a deploy-time default:
+    # docker-compose.prod.yml runs this script on every backend container start, so an
+    # unconditional drop_all() would wipe the database on each restart. Opt in with
+    # `SEED_RESET=1` or `python -m app.seeds.run --reset`.
+    reset = "--reset" in sys.argv or os.getenv("SEED_RESET", "").strip().lower() in {"1", "true", "yes"}
+    if reset:
+        print("SEED_RESET enabled — dropping all tables before reseeding.")
+        Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     with SessionLocal() as db:
         if not db.scalar(select(User).where(User.username == "io")):
@@ -884,6 +893,8 @@ Missing dates. Missing target identifiers. Missing legal basis.""",
             db.flush()
             cit_3.output_id = assistant_msg_3.id
             db.flush()
+        else:
+            print("Seed data already present — skipping (use SEED_RESET=1 to rebuild).")
 
         db.commit()
 
