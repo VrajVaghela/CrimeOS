@@ -1,4 +1,6 @@
+# pyrefly: ignore [missing-import]
 from pydantic import Field, field_validator
+# pyrefly: ignore [missing-import]
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -49,4 +51,6 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+host_info = settings.DATABASE_URL.split('@')[-1] if '@' in settings.DATABASE_URL else settings.DATABASE_URL
+print(f"[CONFIG] Target Database Host/URL: {host_info}")
 
