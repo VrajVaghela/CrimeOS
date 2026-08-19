@@ -1,9 +1,20 @@
 from logging.config import fileConfig
+import os
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-
 from sqlalchemy.engine.url import make_url
+
+# 1. Print raw unmodified DATABASE_URL from os.environ (mask password) at top of env.py
+raw_env_url = os.environ.get("DATABASE_URL")
+if raw_env_url:
+    try:
+        _raw_parsed = make_url(raw_env_url)
+        print(f"[ALEMBIC RAW ENV] os.environ['DATABASE_URL'] = {_raw_parsed.render_as_string(hide_password=True)}")
+    except Exception as _e:
+        print(f"[ALEMBIC RAW ENV] os.environ['DATABASE_URL'] is set but parse error: {_e}")
+else:
+    print("[ALEMBIC RAW ENV] os.environ['DATABASE_URL'] is NOT set in OS environment!")
 
 from app.config import settings
 from app.database import Base

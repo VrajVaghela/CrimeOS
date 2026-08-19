@@ -1,7 +1,37 @@
-# pyrefly: ignore [missing-import]
+import os
 from pydantic import Field, field_validator
 # pyrefly: ignore [missing-import]
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine.url import make_url
+
+
+def normalize_db_url(raw_url: str) -> str:
+    if not raw_url:
+        return raw_url
+    try:
+        url = make_url(raw_url)
+        driver = url.drivername
+        if driver in ("postgres", "postgresql", "postgresql+psycopg2"):
+            driver = "postgresql+psycopg"
+        
+        database = url.database
+        if not database:
+            database = (
+                os.environ.get("POSTGRES_DB")
+                or os.environ.get("PGDATABASE")
+                or os.environ.get("DB_NAME")
+                or "crime_os"
+            )
+        
+        url = url.set(drivername=driver, database=database)
+        return url.render_as_string(hide_password=False)
+    except Exception as e:
+        print(f"[CONFIG WARNING] Failed to parse URL with make_url: {e}")
+        if raw_url.startswith("postgres://"):
+            return raw_url.replace("postgres://", "postgresql+psycopg://", 1)
+        if raw_url.startswith("postgresql://"):
+            return raw_url.replace("postgresql://", "postgresql+psycopg://", 1)
+        return raw_url
 
 
 class Settings(BaseSettings):
@@ -10,11 +40,7 @@ class Settings(BaseSettings):
     @field_validator("DATABASE_URL", mode="after")
     @classmethod
     def fix_database_url(cls, v: str) -> str:
-        if v and v.startswith("postgres://"):
-            return v.replace("postgres://", "postgresql+psycopg://", 1)
-        if v and v.startswith("postgresql://"):
-            return v.replace("postgresql://", "postgresql+psycopg://", 1)
-        return v
+        return normalize_db_url(v)
         
     GEMINI_API_KEY: str = ""
     GEMINI_FLASH_MODEL: str = "gemini-2.5-flash"
@@ -49,8 +75,6 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=(".env", "../.env"), env_file_encoding="utf-8", extra="ignore")
 
-
-from sqlalchemy.engine.url import make_url
 
 settings = Settings()
 try:
