@@ -50,7 +50,12 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=(".env", "../.env"), env_file_encoding="utf-8", extra="ignore")
 
 
+from sqlalchemy.engine.url import make_url
+
 settings = Settings()
-host_info = settings.DATABASE_URL.split('@')[-1] if '@' in settings.DATABASE_URL else settings.DATABASE_URL
-print(f"[CONFIG] Target Database Host/URL: {host_info}")
+try:
+    _url = make_url(settings.DATABASE_URL)
+    print(f"[CONFIG] Database Driver: {_url.drivername} | Host: {_url.host} | Database: {_url.database}")
+except Exception as _e:
+    print(f"[CONFIG] Could not parse DATABASE_URL: {_e}")
 

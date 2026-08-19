@@ -3,6 +3,8 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from sqlalchemy.engine.url import make_url
+
 from app.config import settings
 from app.database import Base
 from app.models import *  # noqa: F401,F403
@@ -33,6 +35,8 @@ def run_migrations_online() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+    db_url = make_url(settings.DATABASE_URL)
+    print(f"[ALEMBIC DEBUG] Connecting to DB URL: {db_url.render_as_string(hide_password=True)}")
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():
