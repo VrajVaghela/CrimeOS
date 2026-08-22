@@ -34,16 +34,18 @@ Instead of running PostgreSQL in a container, it is highly recommended to use Re
    - **Language / Environment**: `Docker`
    - **Dockerfile Path**: `docker/Dockerfile.backend`
    - **Context Directory**: `.` (the repository root)
-4. Set the **Start Command** to run migrations, seed data, and start the app (this mimics the docker-compose command):
-   ```bash
-   sh -c "alembic upgrade head && python -m app.seeds.run && uvicorn app.main:app --host 0.0.0.0 --port 10000"
-   ```
-   *(Render dynamically assigns a `PORT` environment variable, usually 10000, so binding to that or `$PORT` is good practice.)*
+4. **Start Command**: 
+   - **Leave BLANK / Default**: The `Dockerfile.backend` already defines the complete startup command (`alembic upgrade head && python -m app.seeds.run && uvicorn ...`). Leaving this field empty in Render ensures Docker's `CMD` runs natively without shell parsing issues.
+   - *If overriding in Render UI, do **NOT** wrap the command in quotes `"..."`. Use raw command:*
+     ```bash
+     alembic upgrade head && python -m app.seeds.run && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+     ```
 5. Add the following **Environment Variables**:
    - `DATABASE_URL`: Paste the **Internal Database URL** you copied from step 1.
    - Any other variables present in your `.env` file (e.g., JWT secrets, API keys).
 6. Click **Create Web Service**.
 7. Wait for the build and deployment to finish. Once done, copy the public URL (e.g., `https://crimeos-backend.onrender.com`).
+
 
 ---
 
@@ -72,6 +74,26 @@ Instead of running PostgreSQL in a container, it is highly recommended to use Re
 ### Frontend
 - `NEXT_PUBLIC_API_URL` (Required: Public URL of the backend web service)
 
-## Notes
-- **Uploads/Volumes**: Render web services have ephemeral filesystems unless you attach a persistent disk. If your backend saves files (e.g., `uploads_data` volume in docker-compose), you will need to add a **Disk** to the backend service mapped to `/app/uploads` via the Render dashboard, or switch to object storage (like AWS S3).
-- **Cold Starts**: On Render's free tier, web services will spin down after inactivity, causing a delay (cold start) on the next request. Upgrade to a paid plan if you require constant uptime.
+## Troubleshooting
+
+### 1. `sh: python -m app.seeds.run: not found` (Exit Status 127)
+**Root Cause**: This occurs when surrounding double quotes (e.g. `"python -m app.seeds.run"`) are pasted into Render's **Start Command** field in the dashboard, or when `sh -c "..."` is passed improperly. The container shell interprets the whole string `"python -m app.seeds.run"` as a single executable filename instead of a command with arguments.
+**Fix**: 
+- In Render Dashboard -> Service Settings -> **Start Command**:
+  - **Option A (Recommended for Docker)**: Clear the Start Command input box completely (leave it empty). Render will use the default `CMD` from `docker/Dockerfile.backend`.
+  - **Option B (Manual Override)**: Remove all quotes and set the command to:
+    ```bash
+    alembic upgrade head && python -m app.seeds.run && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    ```
+
+### 2. Local PowerShell: `uvicorn : The term 'uvicorn' is not recognized`
+**Root Cause**: Powershell cannot locate `uvicorn` because the Python virtual environment (`.venv`) is not activated, or `uvicorn` was installed into a specific virtual environment.
+**Fix**:
+From `backend/` directory in PowerShell:
+```powershell
+# Activate virtual environment
+..\.venv\Scripts\activate
+# Or run via python module
+python -m uvicorn app.main:app --reload
+```
+
