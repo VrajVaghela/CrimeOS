@@ -10,6 +10,13 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class RegisterRequest(BaseModel):
+    username: str
+    password: str
+    full_name: str
+    role: UserRole = UserRole.IO
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

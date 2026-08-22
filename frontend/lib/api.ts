@@ -25,8 +25,9 @@ import type {
 } from "@/lib/types";
 
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/+$/, "");
 const TOKEN_KEY = "crime_os_token";
+
 
 // ---------------------------------------------------------------------------
 // Active language (Phase 14A)
@@ -108,6 +109,18 @@ export async function login(username: string, password: string): Promise<TokenRe
   return request<TokenResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ username, password }),
+  });
+}
+
+export async function register(
+  username: string,
+  password: string,
+  full_name: string,
+  role: string = "IO"
+): Promise<UserOut> {
+  return request<UserOut>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ username, password, full_name, role }),
   });
 }
 
