@@ -1,10 +1,12 @@
+import logging
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.config import settings
+from app.config import sanitize_url, settings
 from app.exceptions import register_exception_handlers
 from app.routers import (
     auth,
@@ -28,7 +30,29 @@ from app.routers import (
 )
 from app.schemas.common import MessageOut
 
-app = FastAPI(title="Crime OS AI API", version="0.1.0")
+logger = logging.getLogger("crimeos.api")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    from app.database import check_db_connection
+
+    logger.info("Starting Crime OS AI API...")
+    logger.info("Active database endpoint: %s", sanitize_url(settings.DATABASE_URL))
+    healthy, detail = check_db_connection()
+    if healthy:
+        logger.info("Database connectivity verified.")
+    else:
+        logger.warning(
+            "Database connectivity check failed on startup (%s). "
+            "Server will continue running; please verify DATABASE_URL in environment.",
+            detail,
+        )
+    yield
+    logger.info("Shutting down Crime OS AI API...")
+
+
+app = FastAPI(title="Crime OS AI API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,7 +87,29 @@ app.include_router(video.router)
 app.include_router(translate.router)
 
 
+@app.get("/", tags=["system"])
+async def root() -> dict[str, str]:
+    return {
+        "service": "Crime OS AI API",
+        "status": "online",
+        "docs": "/docs",
+        "health": "/health",
+    }
+
 
 @app.get("/health", response_model=MessageOut, tags=["system"])
 async def health() -> MessageOut:
     return MessageOut(message="ok")
+
+
+@app.get("/health/db", tags=["system"])
+async def health_db() -> dict[str, str]:
+    from app.database import check_db_connection
+
+    healthy, detail = check_db_connection()
+    return {
+        "status": "healthy" if healthy else "unhealthy",
+        "database": "connected" if healthy else "disconnected",
+        "detail": detail,
+    }
+

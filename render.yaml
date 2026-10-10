@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: crimeos-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: ./render-start.sh
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: crimeos-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: FRONTEND_ORIGIN
+        value: http://localhost:3000,http://127.0.0.1:3000
+      - key: SEED_ON_START
+        value: "true"
+
+databases:
+  - name: crimeos-db
+    databaseName: crime_os
+    user: crime_os_user
+    plan: free
+    postgresMajorVersion: 16

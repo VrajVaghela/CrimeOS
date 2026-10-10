@@ -1,5 +1,9 @@
+import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import OperationalError, SQLAlchemyError
+
+logger = logging.getLogger("crimeos.exceptions")
 
 
 class AppError(Exception):
@@ -38,3 +42,31 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=exc.status_code,
             content={"error": {"code": exc.code, "message": exc.message}},
         )
+
+    @app.exception_handler(OperationalError)
+    async def handle_db_operational_error(_: Request, exc: OperationalError) -> JSONResponse:
+        logger.error("Database operational error: %s", exc)
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": {
+                    "code": "database_unavailable",
+                    "message": "Database is currently unreachable. Please check DATABASE_URL and ensure your database service is running.",
+                    "detail": str(exc.orig) if hasattr(exc, "orig") else str(exc),
+                }
+            },
+        )
+
+    @app.exception_handler(SQLAlchemyError)
+    async def handle_sqlalchemy_error(_: Request, exc: SQLAlchemyError) -> JSONResponse:
+        logger.error("Database error: %s", exc)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": {
+                    "code": "database_error",
+                    "message": "A database error occurred while processing the request.",
+                }
+            },
+        )
+

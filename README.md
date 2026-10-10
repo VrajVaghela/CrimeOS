@@ -280,6 +280,31 @@ docker-compose up -d
    ```
    The backend API will run at `http://localhost:8000`. You can view the automatically generated Swagger API documentation at `http://localhost:8000/docs`.
 
+### Deploying to Render
+
+You can deploy Crime OS AI to [Render](https://render.com) using the included `render.yaml` Blueprint or as a manual Web Service:
+
+#### Option A: Using Blueprint (`render.yaml`)
+1. Create a new **Blueprint** on Render and point it to your GitHub repository.
+2. Render will automatically configure:
+   * **PostgreSQL 16 Database** (`crimeos-db`)
+   * **FastAPI Web Service** (`crimeos-backend`) with connected `DATABASE_URL` and `./render-start.sh`
+3. Enter your `GEMINI_API_KEY` in the Render dashboard.
+
+#### Option B: Manual Web Service
+1. **Create PostgreSQL Database**: Create a Postgres database on Render. Note its **Region** (e.g., Oregon).
+2. **Create Web Service**:
+   * **Root Directory**: `backend`
+   * **Region**: Must match the database region (e.g. Oregon) if using Render's private internal network.
+   * **Build Command**: `pip install -r requirements.txt`
+   * **Start Command**: `./render-start.sh` (or `uvicorn app.main:app --host 0.0.0.0 --port $PORT`)
+3. **Set Environment Variables**:
+   * `DATABASE_URL`: Your Render PostgreSQL connection string. (Render's `postgres://` format is automatically normalized to `postgresql+psycopg://`).
+     > **Note**: If your Web Service and Database are in different regions, or if you encounter `[Errno -2] Name or service not known`, use Render's **External Database URL** (e.g., ending in `.render.com`).
+   * `GEMINI_API_KEY`: Your Gemini API key.
+   * `JWT_SECRET`: Random secret token.
+   * `SEED_ON_START`: Set to `true` to auto-populate SOPs, legal codes, and demo cases on initial start.
+
 ### Start the Frontend
 1. Go to the `frontend` folder and start the Next.js dev server:
    ```bash

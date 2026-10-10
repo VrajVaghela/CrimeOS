@@ -1,11 +1,7 @@
 import hashlib
-from collections.abc import Iterable
-
-from sqlalchemy import select
-
-from app.ai.gemini_client import embed
-from app.database import Base, SessionLocal, engine
+import os
 import uuid
+from collections.abc import Iterable
 from datetime import datetime
 from app.models import (
     Case, LegalCode, LegalSection, SopChunk, SopDocument, User, UserRole,
@@ -94,8 +90,15 @@ def seed_users() -> dict[str, User]:
 
 
 def main() -> None:
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    try:
+        if os.environ.get("RESET_DB", "").lower() in ("true", "1", "yes"):
+            print("RESET_DB set: Dropping existing tables...")
+            Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+    except Exception as exc:
+        print(f"[SEED WARNING] Database connection error during table verification: {exc}")
+        print("Skipping seed population until database is reachable.")
+        return
     with SessionLocal() as db:
         if not db.scalar(select(User).where(User.username == "io")):
             users = seed_users()
