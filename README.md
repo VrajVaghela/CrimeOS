@@ -298,3 +298,9 @@ The seed script (`app.seeds.run`) populates the database with:
 4. **Pre-baked Cases**:
    * **Case 1 (UPI Fraud)**: Ready for complaint intake upload and entity extraction.
    * **Case 2 (Social Media Harassment)**: Fully populated with pre-seeded timeline events, CCTV evidence, video records, OSINT matches, path revisions, and draft requests to demonstrate Phase 8–11 features out of the box.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
